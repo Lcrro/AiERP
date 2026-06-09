@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nexterp-agent"
+version = "0.1.0"
+description = "ERPNext adapter foundation for employee assistant agents"
+requires-python = ">=3.10"
+dependencies = [
+    "psycopg[binary]>=3.2.0",
+    "python-dotenv>=1.0.1",
+    "PyYAML>=6.0.0",
+    "requests>=2.32.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "integration: tests that require a running ERPNext sandbox and NEXTERP_LOCAL_* credentials",
+]

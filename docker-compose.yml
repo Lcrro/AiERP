@@ -1,0 +1,21 @@
+services:
+  material-catalog-postgres:
+    image: postgres:16-alpine
+    container_name: nexterp-agent-material-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nexterp_agent
+      POSTGRES_USER: nexterp_agent
+      POSTGRES_PASSWORD: nexterp_agent_dev
+    ports:
+      - "55433:5432"
+    volumes:
+      - material_catalog_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexterp_agent -d nexterp_agent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  material_catalog_pgdata:

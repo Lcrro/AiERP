@@ -1,0 +1,258 @@
+version: 0.1
+
+custom_fields:
+  specification:
+    label: 规格型号
+    fieldtype: Data
+  material:
+    label: 材质
+    fieldtype: Data
+  drawing_no:
+    label: 图号
+    fieldtype: Data
+  standard:
+    label: 执行标准
+    fieldtype: Data
+  brand:
+    label: 品牌
+    fieldtype: Data
+  model:
+    label: 型号
+    fieldtype: Data
+  package_spec:
+    label: 包装规格
+    fieldtype: Data
+  raw_name:
+    label: 原始叫法
+    fieldtype: Data
+  alias_names:
+    label: 别名
+    fieldtype: Small Text
+
+groups:
+  raw_metal_sheet:
+    label: 原材料 / 金属材料 / 板材
+    erpnext_item_group: 原材料
+    code_prefix: RM-MET-SHT
+    default_uom: Kg
+    batch_policy: required
+    serial_policy: none
+    defaults:
+      is_stock_item: 1
+      is_purchase_item: 1
+      is_sales_item: 0
+      include_item_in_manufacturing: 1
+      has_batch_no: 1
+      create_new_batch: 1
+      has_serial_no: 0
+    required_specs:
+      - material
+      - thickness
+      - width
+      - form
+      - standard
+    aliases:
+      - 冷板
+      - 冷轧板
+      - 冷轧钢板
+      - 冷轧钢卷
+      - 钢板
+      - 薄板
+      - 铁板
+
+  raw_plastic_granule:
+    label: 原材料 / 塑料橡胶 / 颗粒
+    erpnext_item_group: 原材料
+    code_prefix: RM-PLA-GRN
+    default_uom: Kg
+    batch_policy: required
+    serial_policy: none
+    defaults:
+      is_stock_item: 1
+      is_purchase_item: 1
+      is_sales_item: 0
+      include_item_in_manufacturing: 1
+      has_batch_no: 1
+      create_new_batch: 1
+      has_serial_no: 0
+    required_specs:
+      - material
+      - grade
+      - color
+      - melt_index
+      - package_spec
+    aliases:
+      - 胶粒
+      - 塑料粒子
+      - 塑胶粒
+      - 原料粒
+
+  electronic_component:
+    label: 原材料 / 电子元器件
+    erpnext_item_group: 原材料
+    code_prefix: RM-ELE-CMP
+    default_uom: Nos
+    batch_policy: optional
+    serial_policy: optional
+    defaults:
+      is_stock_item: 1
+      is_purchase_item: 1
+      is_sales_item: 0
+      include_item_in_manufacturing: 1
+      has_batch_no: 0
+      create_new_batch: 0
+      has_serial_no: 0
+    required_specs:
+      - model
+      - brand
+      - package
+      - key_parameter
+    aliases:
+      - 电子料
+      - 元件
+      - 芯片
+      - 电阻
+      - 电容
+
+  packaging_material:
+    label: 包装材料
+    erpnext_item_group: 包装材料
+    code_prefix: PKG
+    default_uom: Nos
+    batch_policy: optional
+    serial_policy: none
+    defaults:
+      is_stock_item: 1
+      is_purchase_item: 1
+      is_sales_item: 0
+      include_item_in_manufacturing: 1
+      has_batch_no: 0
+      create_new_batch: 0
+      has_serial_no: 0
+    required_specs:
+      - material
+      - size
+      - package_spec
+    aliases:
+      - 包材
+      - 纸箱
+      - 胶袋
+      - 标签
+
+  consumable:
+    label: 辅料耗材
+    erpnext_item_group: 耗材
+    code_prefix: CNS
+    default_uom: Nos
+    batch_policy: none
+    serial_policy: none
+    defaults:
+      is_stock_item: 1
+      is_purchase_item: 1
+      is_sales_item: 0
+      include_item_in_manufacturing: 0
+      has_batch_no: 0
+      create_new_batch: 0
+      has_serial_no: 0
+    required_specs:
+      - specification
+      - brand
+    aliases:
+      - 耗材
+      - 辅料
+      - 低值易耗
+
+  spare_part:
+    label: 备品备件
+    erpnext_item_group: 备品备件
+    code_prefix: SP
+    default_uom: Nos
+    batch_policy: none
+    serial_policy: optional
+    defaults:
+      is_stock_item: 1
+      is_purchase_item: 1
+      is_sales_item: 0
+      include_item_in_manufacturing: 0
+      has_batch_no: 0
+      create_new_batch: 0
+      has_serial_no: 0
+    required_specs:
+      - model
+      - brand
+      - equipment
+    aliases:
+      - 备件
+      - 配件
+      - 维修件
+
+  semi_finished_good:
+    label: 半成品
+    erpnext_item_group: 半成品
+    code_prefix: SF
+    default_uom: Nos
+    batch_policy: optional
+    serial_policy: optional
+    defaults:
+      is_stock_item: 1
+      is_purchase_item: 0
+      is_sales_item: 0
+      include_item_in_manufacturing: 1
+      has_batch_no: 0
+      create_new_batch: 0
+      has_serial_no: 0
+    required_specs:
+      - model
+      - version
+      - process_stage
+    aliases:
+      - 半成品
+      - 中间品
+      - 在制品
+
+  finished_good:
+    label: 成品
+    erpnext_item_group: 产品展示
+    code_prefix: FG
+    default_uom: Nos
+    batch_policy: optional
+    serial_policy: optional
+    defaults:
+      is_stock_item: 1
+      is_purchase_item: 0
+      is_sales_item: 1
+      include_item_in_manufacturing: 0
+      has_batch_no: 0
+      create_new_batch: 0
+      has_serial_no: 0
+    required_specs:
+      - model
+      - version
+      - package_spec
+    aliases:
+      - 成品
+      - 产品
+      - 整机
+
+  service_item:
+    label: 服务
+    erpnext_item_group: 服务
+    code_prefix: SV
+    default_uom: Nos
+    batch_policy: none
+    serial_policy: none
+    defaults:
+      is_stock_item: 0
+      is_purchase_item: 1
+      is_sales_item: 1
+      include_item_in_manufacturing: 0
+      has_batch_no: 0
+      create_new_batch: 0
+      has_serial_no: 0
+    required_specs:
+      - service_scope
+      - billing_unit
+    aliases:
+      - 服务
+      - 维修服务
+      - 安装服务

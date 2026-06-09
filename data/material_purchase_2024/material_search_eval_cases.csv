@@ -1,0 +1,41 @@
+query,specs_json,expected_status,expected_top_item_name,expected_canonical_group,expected_review_mode,notes
+铜鼻子300A,"{""model"": ""300A""}",ready,铜鼻子,电气与自动化/电线电缆与敷设/电线电缆,exact_alias,采购土名省略“开口”，应命中 300A 铜鼻子候选。
+镀锌内丝直接2寸,"{""model"": ""2寸""}",ready,镀锌内丝直接,管道管件/金属管件/镀锌管件,exact_alias,指定精确别名样例。
+帆布手套,{},ready,帆布手套,劳保用品/手部防护/手套,exact_alias,指定精确别名样例。
+割咀G01-100型2号,"{""model"": ""G01-100"", ""package_spec"": ""2号""}",ready,割嘴,焊接焊割/焊割耗材/割嘴焊嘴,typo,咀/嘴错字已进入可建档 catalog。
+高压清洗机喷咀0度,"{""model"": ""0度""}",ready,高压清洗机喷嘴,行政办公与清洁/其他/清洗机配件,typo,咀/嘴错字已进入可建档 catalog。
+除绣灵450mL,"{""brand"": ""淘喜"", ""package_spec"": ""450mL""}",needs_confirmation|needs_clarification,除锈剂,化工辅料/除锈剂,typo,只在人工复核队列中，当前 catalog 可能无法召回。
+淘喜除绣灵450mL,"{""brand"": ""淘喜"", ""package_spec"": ""450mL""}",needs_confirmation|needs_clarification,除锈剂,化工辅料/除锈剂,typo,除绣疑似除锈，SDS/型号缺失。
+一端丝芽一端焊接焊管,{},needs_confirmation|needs_clarification,一端丝牙一端焊接焊管,管件/焊接管件,typo,丝芽疑似丝牙，管径/材质缺失。
+比塔铜头2寸,"{""model"": ""2寸"", ""material"": ""铜""}",needs_confirmation|needs_clarification,比塔铜接头,液压气动/液压管路/高压胶管,typo,比塔含义/连接形式需确认。
+混泥土隔离剂2.7KG,"{""package_spec"": ""2.7KG""}",needs_confirmation|needs_clarification,混凝土隔离剂,建材/混凝土外加剂,typo,混泥土疑似混凝土，品牌/SDS缺失。
+3M电工胶带兰色,"{""brand"": ""3M"", ""color"": ""蓝色""}",needs_confirmation|needs_clarification,电工胶带,电气耗材/绝缘胶带,typo,兰色疑似蓝色，宽度/长度缺失。
+轴承,{},needs_clarification,轴承,设备备件与加工件/传动轴承/传动轴承,generic_guardrail,泛称不可自动 ready，应追问型号/品牌。
+砂纸,{},needs_clarification,砂纸,工具器具/工具耗材/切磨耗材,generic_guardrail,泛称不可自动 ready，应追问目数。
+接头,{},needs_clarification,不锈钢卡扣接头,液压气动/液压管路/高压胶管,generic_guardrail,泛称不可自动 ready，应追问连接形式/口径。
+阀门,{},needs_clarification,PPR阀门,工程建材/水暖建材/水暖五金,generic_guardrail,泛称不可自动 ready，应追问阀型/口径/材质。
+手套,{},needs_clarification,帆布手套,劳保用品/手部防护/手套,generic_guardrail,泛称不可自动 ready，应追问材质/用途。
+吊带,"{""model"": ""5T*6m""}",needs_confirmation|needs_clarification,吊带,吊装索具/吊带索具/吊带,high_risk_guardrail,吊装类高风险，即使有规格也应确认载荷/长度/标准。
+吊带5T*6m,"{""model"": ""5T*6m""}",needs_confirmation|needs_clarification,吊带,吊装索具/吊带索具/吊带,high_risk_guardrail,高风险采购品，不应无人工确认自动 ready。
+卸扣,"{""model"": ""8T""}",needs_confirmation|needs_clarification,卸扣,吊装索具/吊装连接件/卸扣吊钩,high_risk_guardrail,吊装连接件需确认额定载荷和型式。
+8T卸扣,"{""model"": ""8T""}",needs_confirmation|needs_clarification,卸扣,吊装索具/吊装连接件/卸扣吊钩,high_risk_guardrail,高风险采购品，不应无人工确认自动 ready。
+灭火器,"{""model"": ""2KG""}",needs_confirmation|needs_clarification,灭火器,消防器材/灭火器与水带/灭火器,high_risk_guardrail,消防器材需确认类型/年检/标准。
+2KG灭火器,"{""model"": ""2KG""}",needs_confirmation|needs_clarification,灭火器,消防器材/灭火器与水带/灭火器,high_risk_guardrail,高风险采购品，不应无人工确认自动 ready。
+安全绳,"{""model"": ""Φ12""}",needs_confirmation|needs_clarification,安全绳,安全防护/高处与水域防护/高处防护,high_risk_guardrail,高处防护类需确认直径/长度/认证。
+消防水带,"{""model"": ""80""}",needs_confirmation|needs_clarification,消防水带,消防器材/灭火器与水带/消防水带,high_risk_guardrail,消防水带需确认口径/压力/接扣。
+防爆消防水带Φ80,"{""model"": ""Φ80""}",needs_confirmation|needs_clarification,消防水带,消防器材/灭火器与水带/消防水带,high_risk_guardrail,高风险采购品，不应无人工确认自动 ready。
+8.8级M16*70镀锌螺丝带平弹垫,"{""model"": ""M16*70"", ""standard"": ""8.8级""}",ready,镀锌螺丝套件,紧固件/螺纹紧固件/螺丝螺栓,spec_match,规格类样例。
+M16*70螺丝,"{""model"": ""M16*70""}",ready,螺丝组件,紧固件/螺纹紧固件/螺丝螺栓,spec_match,规格类样例。
+304不锈钢单向阀DN50,"{""model"": ""DN50"", ""material"": ""304不锈钢""}",ready,单向阀,阀门/其他/单向阀,spec_match,规格类样例。
+埃美柯304两片式球阀DN50,"{""brand"": ""埃美柯"", ""model"": ""DN50"", ""material"": ""304""}",ready,不锈钢球阀,阀门/通用阀门/球阀,spec_match,DN50 阀门应落到球阀。
+起帆电缆线3*16+1*10,"{""brand"": ""起帆"", ""model"": ""3*16+1*10""}",ready,电缆,电气与自动化/电线电缆与敷设/电线电缆,spec_match,规格类样例。
+博世方柄钻头Φ12*260,"{""brand"": ""博世"", ""model"": ""Φ12*260""}",ready,方柄钻头,工具器具/工具耗材/钻头,spec_match,规格类样例。
+安全绳Φ12,"{""model"": ""Φ12""}",needs_confirmation|needs_clarification,安全绳,安全防护/高处与水域防护/高处防护,high_risk_guardrail,同为规格类但属于高处防护，应确认。
+海螺42.5水泥,"{""brand"": ""海螺"", ""model"": ""42.5""}",ready,普通硅酸盐水泥,工程建材/水泥砂石/水泥砂石,spec_match,规格类样例。
+散装42.5水泥,"{""model"": ""42.5"", ""package_spec"": ""散装""}",ready,散装水泥,工程建材/水泥砂石/水泥砂石,spec_match,规格类样例。
+WD40除锈剂350ML,"{""brand"": ""WD40"", ""package_spec"": ""350ML""}",ready,除锈剂,化工油漆胶粘/油品化学品/清洗化学品,exact_alias,同义/包装规格命中。
+公元25PPR阀门,"{""brand"": ""公元"", ""model"": ""25"", ""material"": ""PPR""}",ready,PPR阀门,工程建材/水暖建材/水暖五金,spec_match,品牌+规格命中。
+DN50厚铜头,"{""model"": ""DN50"", ""material"": ""铜""}",needs_confirmation|ready,加厚铜接头,液压气动/液压管路/高压胶管,spec_match,液压接头类名称不完整，ready 可接受但需观察相近候选。
+65加厚比塔抱箍,"{""model"": ""65""}",needs_confirmation|needs_clarification,加厚抱箍,工程材料/管道紧固,typo,比塔含义缺失，原始在人工复核队列。
+红兰色喷漆,"{""color"": ""红蓝色""}",needs_confirmation|needs_clarification,红蓝色喷漆,化工耗材/涂料,typo,颜色错字且容量缺失。
+600砂纸,"{""model"": ""600""}",ready,砂纸,工具器具/其他/磨切耗材,spec_match,带目数后可明确。
