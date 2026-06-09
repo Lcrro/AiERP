@@ -1,0 +1,1 @@
+"""ERPNext adapter mixin modules."""
