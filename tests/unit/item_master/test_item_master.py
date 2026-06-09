@@ -75,7 +75,7 @@ def test_generate_next_item_code_increments_existing_prefix() -> None:
 
 class FixtureSearchClient:
     def __init__(self, *, failing_fields: set[str] | None = None) -> None:
-        fixture_path = Path(__file__).parent / "fixtures" / "material_search_items.json"
+        fixture_path = Path(__file__).resolve().parents[2] / "fixtures" / "material_search_items.json"
         self.rows = json.loads(fixture_path.read_text(encoding="utf-8"))
         self.failing_fields = failing_fields or set()
 

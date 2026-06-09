@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 SCRIPT_PATH = REPO_ROOT / "scripts" / "run_material_search_eval.py"
 SPEC = importlib.util.spec_from_file_location("run_material_search_eval", SCRIPT_PATH)
 assert SPEC and SPEC.loader

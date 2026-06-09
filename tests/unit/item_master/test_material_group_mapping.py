@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 
-SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "export_material_group_mapping.py"
+SCRIPT_PATH = Path(__file__).resolve().parents[3] / "scripts" / "export_material_group_mapping.py"
 SPEC = importlib.util.spec_from_file_location("export_material_group_mapping", SCRIPT_PATH)
 assert SPEC and SPEC.loader
 module = importlib.util.module_from_spec(SPEC)
