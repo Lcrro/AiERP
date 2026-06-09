@@ -15,6 +15,7 @@ The goal is to keep each document responsible for one kind of question.
 ## Start Here
 
 - [Project README](../README.md): short project entrypoint.
+- [Project Status](project-status.md): current branch, coverage counts, test status, and next queue.
 - [Architecture Roadmap](architecture/roadmap.md): staged architecture goals.
 - [Tool Layer v0.1 Checklist](planning/tool-layer-v0.1.md): current backend tool-layer work queue.
 - [Item Master Search v0.1 Plan](planning/item-master-search-v0.1.md): material master and search work queue.
