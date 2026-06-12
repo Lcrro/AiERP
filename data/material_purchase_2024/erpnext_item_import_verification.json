@@ -1,0 +1,44 @@
+{
+  "profile": "local",
+  "input": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_purchase_2024\\standard_item_master_draft.tsv",
+  "erpnext_item_count": 2345,
+  "draft_rows": 2328,
+  "draft_unique_codes": 2328,
+  "draft_codes_found": 2328,
+  "draft_codes_missing": 0,
+  "missing_sample": [],
+  "sample_items": [
+    {
+      "item_code": "HW-LOCK-000001",
+      "ok": true,
+      "item_name": "门锁",
+      "item_group": "五金备件/门锁锁具",
+      "stock_uom": "个",
+      "specification": "用途：办公室门"
+    },
+    {
+      "item_code": "ELEC-000001",
+      "ok": true,
+      "item_name": "漏电断路器",
+      "item_group": "电气材料/低压电器",
+      "stock_uom": "个",
+      "specification": "品牌：施耐德；极数：4P；电流：250A；类型：漏电二合一"
+    },
+    {
+      "item_code": "FAST-000035",
+      "ok": true,
+      "item_name": "螺丝组件",
+      "item_group": "紧固件/螺丝",
+      "stock_uom": "套",
+      "specification": "规格：M4*15；成套：是"
+    },
+    {
+      "item_code": "MAT-CEM-000018",
+      "ok": true,
+      "item_name": "水泥",
+      "item_group": "建材/水泥",
+      "stock_uom": "吨",
+      "specification": "包装：散装；强度等级：42.5"
+    }
+  ]
+}

@@ -1,0 +1,589 @@
+﻿draft_sku_id	draft_item_code	import_status	放行等级	标准名称	必填规格	辅助规格	标准分组	标准单位	别名/土名	candidate_count	source_candidate_rows	confirmation_required	confirmation_reason
+SKU-DRAFT-000002	ELEC-000001	ready_to_import	A	漏电断路器	品牌：施耐德；极数：4P；电流：250A；类型：漏电二合一		电气材料/低压电器	个	4P*250A施耐德漏电二合一	1	2	否	
+SKU-DRAFT-000003	ELEC-000002	ready_to_import	A	热缩管	规格：3cm		电气材料/绝缘材料	米	3CM热缩管	1	3	否	
+SKU-DRAFT-000004	ELEC-000003	ready_to_import	A	热缩管	规格：2cm		电气材料/绝缘材料	米	2CM热缩管	1	4	否	
+SKU-DRAFT-000005	ELEC-000004	ready_to_import	A	热缩管	规格：1.5cm		电气材料/绝缘材料	米	1.5CM热缩管	1	5	否	
+SKU-DRAFT-000006	ELEC-000005	ready_to_import	A	电工胶布	品牌：3M；颜色：透明		电气材料/绝缘材料	个	3M透明电胶布	1	6	否	
+SKU-DRAFT-000009	ELEC-000007	confirm_then_import	B	USB插座	品牌：公牛；USB电流：2.1A		电气材料/插座开关	个	2.1AUSB公牛插座；2.1ASUB公牛插座	1	9	是	输入别名疑似将USB写作SUB，按名称和规格归一为USB
+SKU-DRAFT-000011	ELEC-000009	confirm_then_import	B	电箱	型号/规格：P230		电气材料/配电箱	个	P230电箱	1	11	是	P230语义未明，按原型号/规格保留
+SKU-DRAFT-000020	TOOL-000001	ready_to_import	A	紧线器	额定载荷：1T		工具器具/电力工具	套	1T紧线器	1	20	否	
+SKU-DRAFT-000021	CONST-000001	confirm_then_import	B	木方	规格：4*9		建筑材料/模板木方	米	4*9木方	1	21	是	输入规格单位未确认，按原4*9保留
+SKU-DRAFT-000022	CONST-000002	confirm_then_import	B	木方	规格：4*4		建筑材料/模板木方	米	4*4木方	1	22	是	输入规格单位未确认，按原4*4保留
+SKU-DRAFT-000023	SPARE-000001	ready_to_import	A	铁钉	长度：2寸		五金备件/紧固件	斤	2寸铁钉	1	23	否	
+SKU-DRAFT-000024	METAL-000001	ready_to_import	A	不锈钢合页	材质：不锈钢；规格：4寸		五金备件/门窗五金	套	4寸不锈钢合页	1	24	否	
+SKU-DRAFT-000028	PIPE-000002	ready_to_import	A	PPR直通	品牌：公元；规格：25；类型：直通		工程材料/PPR管件	个	公元25PPR直通	1	28	否	
+SKU-DRAFT-000031	PIPE-000005	ready_to_import	A	PPR管剪刀	品牌：公元；用途：PPR管剪切		工具器具/管道工具	个	公元PPR剪刀	1	31	否	
+SKU-DRAFT-000032	MAT-CEM-000001	ready_to_import	A	石子	粒径：4-6mm		建筑材料/水泥砂石	斤	4-6MM石子	1	32	否	
+SKU-DRAFT-000040	ELEC-000021	ready_to_import	A	钢钉线卡	规格：20		电气材料/电气辅材	个	20钢钉线卡	1	40	否	
+SKU-DRAFT-000042	PIPE-000007	ready_to_import	A	PPR三通	品牌：公元；规格：25；类型：三通		工程材料/PPR管件	个	公元PPR25三通	1	42	否	
+SKU-DRAFT-000043	PIPE-000008	confirm_then_import	B	PPR内牙三通	品牌：公元；规格：25；连接：内牙；类型：三通		工程材料/PPR管件	个	公元PPR25内牙三通	1	43	是	内牙口径未说明，按原25规格低精度建候选
+SKU-DRAFT-000044	PIPE-000009	ready_to_import	A	PPR内牙直通	品牌：公元；规格：PPR25*4分；连接：内牙；类型：直通		工程材料/PPR管件	个	公元PPR25*4内牙直通	1	44	否	
+SKU-DRAFT-000045	PIPE-000010	confirm_then_import	B	PPR内牙弯头	品牌：公元；规格：25；连接：内牙；类型：弯头		工程材料/PPR管件	个	公元PPR25内牙弯头	1	45	是	内牙口径未说明，按原25规格低精度建候选
+SKU-DRAFT-000046	MAT-000003	confirm_then_import	B	洗衣机龙头	用途：洗衣机		工程材料/水暖五金	个	洗衣机龙头	1	46	是	材质缺失，洗衣机龙头低精度建候选
+SKU-DRAFT-000049	PIPE-000013	confirm_then_import	B	水管钩	规格：25		工程材料/管道辅材	个	25水管钩	1	49	是	材质缺失，水管钩低精度建候选
+SKU-DRAFT-000050	ELEC-000022	ready_to_import	A	镀锌电线架	材质：镀锌；位数：4位		电气材料/电气辅材	个	4位镀锌电线架	1	50	否	
+SKU-DRAFT-000051	HW-LOCK-000002	ready_to_import	A	挂锁	材质：不锈钢；规格：50		五金备件/锁具	个	50不锈钢挂锁	1	51	否	
+SKU-DRAFT-000057	SPARE-000005	ready_to_import	A	合页	材质：不锈钢；规格：4寸；特征：加厚		五金备件/门窗五金	付	4寸不锈钢加厚合页	1	57	否	
+SKU-DRAFT-000058	HW-LOCK-000003	ready_to_import	A	抽锁	材质：不锈钢；规格：5寸		五金备件/锁具	个	5寸不锈钢抽锁	1	58	否	
+SKU-DRAFT-000064	ADMIN-000003	ready_to_import	A	水壶	材质：不锈钢；容量：6.5升		办公生活用品/小电器	个	6.5升不锈钢水壶	1	64	否	
+SKU-DRAFT-000071	ELEC-000023	confirm_then_import	B	空调插座	品牌：公牛；电流：16A；用途：空调		电气材料/插头插座	个	公牛16A空调插座；16A公牛空调插座	1	71	是	明装/暗装未说明，需后续确认；输入提示称与其他行同物料，未在本批合并
+SKU-DRAFT-000072	ELEC-000024	ready_to_import	A	插排	品牌：公牛；线长：3米；孔位：8孔		电气材料/插头插座	个	公牛插座3米*8孔	1	72	否	
+SKU-DRAFT-000075	ELEC-000027	ready_to_import	A	排气扇	规格：50*50		电气材料/通风设备	台	50*50排气扇	1	75	否	
+SKU-DRAFT-000076	ELEC-000028	ready_to_import	A	漏电保护器	品牌：施耐德；极数：2P；电流：63A		电气材料/低压电器	个	2P*63A施耐德漏电保护器	1	76	否	
+SKU-DRAFT-000077	ELEC-000029	ready_to_import	A	空气开关	品牌：施耐德；极数：3P；电流：63A		电气材料/低压电器	个	3P*63A施耐德空气开关	1	77	否	
+SKU-DRAFT-000078	METAL-000002	ready_to_import	A	洗脸盆	材质：不锈钢；长度：2米；特征：加厚		工程材料/洁具	台	2米加厚不锈钢洗脸盆	1	78	否	
+SKU-DRAFT-000080	PIPE-000014	confirm_then_import	B	洗脸盆下水管	用途：洗脸盆；类型：下水管		工程材料/洁具配件	套	洗脸盆下水管	1	80	是	材质、接口规格未注明，需后续确认；输入提示称与其他行同物料，未在本批合并
+SKU-DRAFT-000083	SAFE-000001	ready_to_import	A	帆布手套	类型：双重/双层帆布		劳保耗材/手套	双	双重帆布手套	1	83	否	
+SKU-DRAFT-000087	MAT-000008	confirm_then_import	B	水龙头	规格：4分；类型：冷热		工程材料/水暖五金	个	4分冷热水龙头	1	88	是	材质缺失，需后续确认；输入提示称与其他行同物料，未在本批合并
+SKU-DRAFT-000088	PIPE-000015	ready_to_import	A	PPR过桥弯	品牌：公元；规格：25；类型：过桥弯		工程材料/PPR管件	个	公元25PPR过桥弯	1	89	否	
+SKU-DRAFT-000089	PIPE-000016	ready_to_import	A	PPR异径直接	规格：32*25；类型：大小头/异径		工程材料/PPR管件	个	PPR32*25大小头	1	90	否	
+SKU-DRAFT-000094	SAFE-000002	ready_to_import	A	防护眼镜	用途：打磨		劳保耗材/眼面防护	个	打磨眼镜	1	95	否	
+SKU-DRAFT-000095	PIPE-000017	confirm_then_import	B	PPR三通	规格：25；类型：三通		工程材料/PPR管件	个	25PPR三通	1	96	是	品牌缺失，需后续确认
+SKU-DRAFT-000096	PIPE-000018	ready_to_import	A	PPR内牙弯头	规格：PPR25*4分；连接：内牙；类型：弯头		工程材料/PPR管件	个	PPR25*4内牙弯头	1	97	否	
+SKU-DRAFT-000100	PIPE-000020	confirm_then_import	B	排水异径补心	品牌：公元；规格：75*50；类型：补心/异径		工程材料/排水管件	个	公元75*50补心	1	101	是	材质需按同批胶管确认
+SKU-DRAFT-000101	PIPE-000021	confirm_then_import	B	排水弯头	品牌：公元；规格：75；类型：弯头		工程材料/排水管件	个	公元75弯头	1	102	是	材质需按同批胶管确认
+SKU-DRAFT-000102	PIPE-000022	confirm_then_import	B	排水三通	品牌：公元；规格：50；类型：三通		工程材料/排水管件	个	公元50三通	1	103	是	材质需按同批胶管确认
+SKU-DRAFT-000103	PIPE-000023	confirm_then_import	B	排水弯头	品牌：公元；规格：50；类型：弯头		工程材料/排水管件	个	公元50弯头	1	104	是	材质需按同批胶管确认
+SKU-DRAFT-000104	PIPE-000024	confirm_then_import	B	排水异径三通	品牌：公元；规格：75*50；类型：三通		工程材料/排水管件	个	公元75*50三通	1	105	是	材质需按同批胶管确认
+SKU-DRAFT-000108	PIPE-000027	ready_to_import	A	PPR阀门	品牌：公元；规格：25；类型：阀门		工程材料/PPR管件	个	公元25PPR阀门	1	109	否	
+SKU-DRAFT-000110	PIPE-000028	confirm_then_import	B	PPR弯头	规格：25；类型：弯头		工程材料/PPR管件	个	25PPR弯头	1	111	是	原始未提供品牌；需复核是否与同类 PPR 弯头合并
+SKU-DRAFT-000112	TOOL-000012	ready_to_import	A	冲击钻头	规格：6厘		工具器具/工具配件	支	6厘冲击钻头	1	113	否	
+SKU-DRAFT-000113	TOOL-000013	ready_to_import	A	冲击钻头	规格：20厘		工具器具/工具配件	支	20厘冲击钻头	1	114	否	
+SKU-DRAFT-000115	TOOL-000015	ready_to_import	A	玻璃刮	类型：玻璃刮		清洁用品/清洁工具	支	玻璃刮	1	116	否	
+SKU-DRAFT-000116	FAST-000001	ready_to_import	A	膨胀螺丝	规格：14*120		五金备件/紧固件	支	14*120膨胀螺丝	1	117	否	
+SKU-DRAFT-000117	METAL-000004	ready_to_import	A	不锈钢洗脸盆	材质：不锈钢；规格：120*80；特征：加厚		工程材料/洁具	套	不锈钢120*80加厚洗脸盆	1	118	否	
+SKU-DRAFT-000119	ELEC-000034	confirm_then_import	B	BV电线	型号：BV；截面积：2.5平方		电气材料/电线电缆	米	BV2.5平方电线	1	120	是	原始未提供品牌；需复核是否与同类 BV 电线合并
+SKU-DRAFT-000120	PIPE-000029	confirm_then_import	B	PPR给水管	规格：32；用途：给水		工程材料/PPR管件	米	32PPR给水管	1	121	是	品牌缺失
+SKU-DRAFT-000121	PIPE-000030	ready_to_import	A	铜止回阀	品牌：埃美柯；材质：铜；规格：32；类型：止回阀		工程材料/阀门	个	32埃美柯铜止回阀	1	122	否	
+SKU-DRAFT-000126	TOOL-000016	ready_to_import	A	玻璃胶枪	用途：打玻璃胶		工具器具/涂装工具	个	玻璃胶枪	1	127	否	
+SKU-DRAFT-000128	ADMIN-000007	ready_to_import	A	重油污清洗剂	品牌：宝雅；用途：重油污		清洁用品/清洁剂	KG	宝雅重油污清洗剂	1	129	否	
+SKU-DRAFT-000129	METAL-000005	ready_to_import	A	不锈钢角阀	材质：不锈钢；规格：4分		工程材料/阀门	个	4分不锈钢角阀	1	130	否	
+SKU-DRAFT-000130	PIPE-000031	ready_to_import	A	不锈钢内接	材质：不锈钢；规格：4分；连接：内接		工程材料/水暖管件	个	4分不锈钢内接	1	131	否	
+SKU-DRAFT-000131	PIPE-000032	ready_to_import	A	不锈钢外接	材质：不锈钢；规格：4分；连接：外接		工程材料/水暖管件	个	4分不锈钢外接	1	132	否	
+SKU-DRAFT-000132	PIPE-000033	ready_to_import	A	不锈钢三通	材质：不锈钢；规格：4分；类型：三通		工程材料/水暖管件	个	4分不锈钢三通	1	133	否	
+SKU-DRAFT-000137	PIPE-000034	ready_to_import	A	镀锌钢管	规格：DN25；标准：国标；表面：镀锌		金属材料/管材	米	DN25国标镀锌钢管	1	138	否	
+SKU-DRAFT-000139	PIPE-000036	ready_to_import	A	铜止回阀	品牌：埃美柯；材质：铜；规格：25；类型：止回阀		工程材料/阀门	个	25埃美柯铜止回阀	1	140	否	
+SKU-DRAFT-000141	PIPE-000037	ready_to_import	A	重型管卡	规格：135；类型：重型		工程材料/管道辅材	个	135重型管卡	1	142	否	
+SKU-DRAFT-000145	MAT-000015	confirm_then_import	B	冷热水龙头	规格：4分；类型：冷热		工程材料/水暖五金	套	4分冷热龙头	1	146	是	与其他批次同类物料单位待统一
+SKU-DRAFT-000146	PIPE-000038	confirm_then_import	B	金属软管	规格：4分；长度：60		工程材料/水暖五金	根	4分*60金属软管	1	147	是	长度 60 未注明单位，疑似 cm，需确认
+SKU-DRAFT-000147	METAL-000008	ready_to_import	A	不锈钢合页	材质：不锈钢；规格：6寸		五金备件/门窗五金	付	6寸不锈钢合页	1	148	否	
+SKU-DRAFT-000148	METAL-000009	ready_to_import	A	不锈钢合页	材质：不锈钢；规格：5寸		五金备件/门窗五金	付	5寸不锈钢合页	1	149	否	
+SKU-DRAFT-000150	PIPE-000039	ready_to_import	A	高压铜球阀	规格：DN20；压力：350kg；材质：铜；类型：球阀		工程材料/阀门	个	DN20*350kg高压铜球阀	1	151	否	
+SKU-DRAFT-000152	TOOL-000018	ready_to_import	A	垃圾夹	类型：垃圾夹		清洁用品/清洁工具	个	垃圾夹	1	153	否	
+SKU-DRAFT-000155	ELEC-000037	ready_to_import	A	线槽	规格：30*15		电气材料/电气辅材	米	30*15线槽	1	156	否	
+SKU-DRAFT-000156	PIPE-000040	confirm_then_import	B	高压油管	规格：DN51；等级：4SH		液压/高压管路	米	DN51*4SH高压油管	1	157	是	接头形式缺失；按米计量暂按油管本体候选
+SKU-DRAFT-000157	PIPE-000041	confirm_then_import	B	高压油管	规格：DN32；等级：4SH		液压/高压管路	米	DN32*4SH高压油管	1	158	是	接头形式缺失；按米计量暂按油管本体候选
+SKU-DRAFT-000158	MAT-000016	ready_to_import	A	吊带	载荷：2T；长度：1.5米		吊装索具/吊带	付	2T*1.5米吊带	1	159	否	
+SKU-DRAFT-000161	WELD-000002	ready_to_import	A	电焊快速接头	规格：35-50		焊接耗材/焊机配件	套	35-50电焊快速接头	1	162	否	
+SKU-DRAFT-000162	SPARE-000012	ready_to_import	A	加厚铁合页	材质：铁；规格：4寸；特征：加厚		五金备件/门窗五金	付	4寸加厚铁合页	1	163	否	
+SKU-DRAFT-000163	SPARE-000013	ready_to_import	A	加厚铁合页	材质：铁；规格：5寸；特征：加厚		五金备件/门窗五金	付	5寸加厚铁合页	1	164	否	
+SKU-DRAFT-000164	TOOL-000020	ready_to_import	A	卷尺	品牌：得力；长度：3米		工具器具/测量工具	个	得力3米卷尺	1	165	否	
+SKU-DRAFT-000165	TOOL-000021	ready_to_import	A	卷尺	品牌：得力；长度：5米		工具器具/测量工具	个	得力5米卷尺	1	166	否	
+SKU-DRAFT-000166	TOOL-000022	ready_to_import	A	卷尺	品牌：得力；长度：10米		工具器具/测量工具	个	得力10米卷尺	1	167	否	
+SKU-DRAFT-000167	CHEM-000004	ready_to_import	A	除胶剂	品牌：得力；容量：500ML		化工耗材/清洗剂	支	得力500ML除胶剂	1	168	否	
+SKU-DRAFT-000168	ADMIN-000008	ready_to_import	A	垃圾袋	规格：120*140；特征：厚		清洁用品/垃圾袋	个	120*140厚垃圾袋	1	169	否	
+SKU-DRAFT-000169	ELEC-000038	ready_to_import	A	变压USB插座	品牌：公牛；输入：220V；输出：36V；功能：USB		电气材料/插头插座	套	公牛220V转36VUSB插座	1	170	否	
+SKU-DRAFT-000171	TOOL-000024	ready_to_import	A	钢丝刷	类型：刀型		工具器具/打磨工具	支	刀型钢丝刷	1	172	否	
+SKU-DRAFT-000173	TOOL-000026	ready_to_import	A	锂电池电钻	品牌：大艺；电压：21V；动力：锂电池		工具器具/电动工具	台	21V大艺锂电池电钻	1	174	否	
+SKU-DRAFT-000175	ELEC-000039	ready_to_import	A	电池	电压：9V		电气材料/电池	个	9V电池	1	176	否	
+SKU-DRAFT-000180	MAT-000019	ready_to_import	A	弓形卸扣	载荷：6.5吨；标准：国标；形状：弓形		吊装索具/卸扣	个	6.5吨国标弓形卸扣	1	181	否	
+SKU-DRAFT-000182	ELEC-000041	ready_to_import	A	排风扇	规格：50*50		电气材料/通风设备	个	50*50排风扇；排气扇	1	183	否	
+SKU-DRAFT-000183	ADMIN-000009	ready_to_import	A	塑料方凳	材质：塑料；规格：50CM；特征：加厚		办公生活用品/家具	个	加厚50CM塑料方凳	1	184	否	
+SKU-DRAFT-000186	ADMIN-000010	confirm_then_import	B	重油污清洗剂	用途：去重油污		清洁用品/清洁剂	公斤	去重油污清洗剂	1	187	是	品牌未提供，按用途候选
+SKU-DRAFT-000187	ELEC-000042	ready_to_import	A	电池	规格：5号		电气材料/电池	个	5号电池	1	188	否	
+SKU-DRAFT-000189	TOOL-000028	ready_to_import	A	内六角扳手	规格：19		工具器具/手动工具	支	19内六角扳手	1	190	否	
+SKU-DRAFT-000190	WELD-000003	ready_to_import	A	等离子割嘴	型号：P80；类型：割嘴		焊接耗材/等离子切割配件	个	P80等离子割嘴	1	191	否	
+SKU-DRAFT-000194	TOOL-000029	ready_to_import	A	砖刀	用途：砌砖/切砖		工具器具/施工工具	个	砖刀	1	195	否	
+SKU-DRAFT-000195	TOOL-000030	ready_to_import	A	灰刀	用途：抹灰		工具器具/施工工具	个	灰刀	1	196	否	
+SKU-DRAFT-000196	ELEC-000043	ready_to_import	A	防水网线接头	功能：防水；用途：网线连接		电气材料/弱电材料	个	防水网线接头连接	1	197	否	
+SKU-DRAFT-000197	CHEM-000006	confirm_then_import	B	防锈润滑剂	品牌/型号：WD-40；容量：500		化工耗材/润滑防锈	支	WD-40500防锈润滑剂	1	198	是	容量单位缺失，原始仅写500
+SKU-DRAFT-000201	WELD-000004	confirm_then_import	B	焊条	型号：507；直径：3.2		焊接耗材/焊条	件	507*3.2焊条	1	202	是	包装重量缺失；直径单位按原始规格保留
+SKU-DRAFT-000203	METAL-000012	ready_to_import	A	不锈钢球阀	品牌：埃美柯；规格：DN65；材质：不锈钢；特征：加厚		工程材料/阀门	个	DN65埃美柯加厚不锈钢球阀	1	204	否	
+SKU-DRAFT-000204	METAL-000013	ready_to_import	A	不锈钢球阀	品牌：埃美柯；规格：40；材质：不锈钢；特征：加厚		工程材料/阀门	个	40埃美柯加厚不锈钢球阀	1	205	否	
+SKU-DRAFT-000206	MAT-000021	ready_to_import	A	彩条布	规格：12*30米		工程材料/篷布油布	平方	12*30米彩条布	1	207	否	
+SKU-DRAFT-000207	ELEC-000045	ready_to_import	A	漏电保护器	品牌：德力西；电流：400A；极数：4P		电气材料/低压电器	个	400A4P德力西漏电保护器	1	208	否	
+SKU-DRAFT-000208	ELEC-000046	ready_to_import	A	漏电保护器	品牌：德力西；电流：250A；极数：4P		电气材料/低压电器	个	250A4P德力西漏电保护器	1	209	否	
+SKU-DRAFT-000210	METAL-000014	ready_to_import	A	不锈钢名牌	定制：是；材质：不锈钢；规格：120*60		定制件/标识铭牌	个	定做不锈钢名牌120*60	1	211	否	
+SKU-DRAFT-000211	METAL-000015	ready_to_import	A	不锈钢名牌	定制：是；材质：不锈钢；规格：100*80		定制件/标识铭牌	个	定做不锈钢名牌100*80	1	212	否	
+SKU-DRAFT-000212	METAL-000016	ready_to_import	A	不锈钢名牌	定制：是；材质：不锈钢；规格：30*60		定制件/标识铭牌	个	定做不锈钢名牌30*60	1	213	否	
+SKU-DRAFT-000217	TOOL-000031	ready_to_import	A	扫把	材质：高粱；规格：小		清洁用品/清洁工具	个	高粱小扫把	1	219	否	
+SKU-DRAFT-000222	HW-LOCK-000006	confirm_then_import	B	挂锁	材质：不锈钢；规格：40；品质：好		五金备件/锁具	个	40好不锈钢挂锁	1	224	是	“好”为原始品质描述，具体质量等级需确认
+SKU-DRAFT-000223	HW-LOCK-000007	confirm_then_import	B	挂锁	材质：不锈钢；规格：40；品质：好；类型：通用		五金备件/锁具	个	40好不锈钢通用挂锁	1	225	是	“好”为原始品质描述；与同规格不锈钢挂锁是否合并需确认
+SKU-DRAFT-000227	SAFE-000006	ready_to_import	A	乳胶手套	材质：乳胶；特征：加厚		劳保耗材/手套	双	加厚乳胶手套	1	229	否	
+SKU-DRAFT-000228	SAFE-000007	ready_to_import	A	牛筋手套	材质/类型：牛筋；特征：加厚		劳保耗材/手套	双	牛筋加厚手套	1	230	否	
+SKU-DRAFT-000229	SAFE-000008	ready_to_import	A	防护眼镜	颜色：透明		劳保耗材/眼面防护	付	透明防护眼镜	1	231	否	
+SKU-DRAFT-000234	SAFE-000009	ready_to_import	A	碘伏	容量：500ml		劳保耗材/急救用品	瓶	碘伏500ml	1	236	否	
+SKU-DRAFT-000244	METAL-000017	confirm_then_import	B	不锈钢卡扣接头	规格：DN6*6；材质：不锈钢		气动/高压管路	个	DN6*6不锈钢卡扣接头	1	246	是	压力等级缺失，需后续确认
+SKU-DRAFT-000245	METAL-000018	confirm_then_import	B	不锈钢卡扣接头	规格：DN6*10；材质：不锈钢		气动/高压管路	个	DN6*10不锈钢卡扣接头	1	247	是	压力等级缺失，需后续确认
+SKU-DRAFT-000248	WELD-000005	confirm_then_import	B	割枪	规格：30号		焊接耗材/焊割工具	支	30号割枪	1	250	是	气体类型/品牌缺失，需后续确认
+SKU-DRAFT-000250	ELEC-000049	ready_to_import	A	三脚插头	品牌：公牛；电流：10A；类型：三插		电气材料/插头插座	个	10A公牛三插	1	252	否	
+SKU-DRAFT-000251	TOOL-000038	ready_to_import	A	毛刷	规格：4寸		工具器具/涂装工具	支	4寸毛刷	1	253	否	
+SKU-DRAFT-000252	METAL-000019	confirm_then_import	B	不锈钢加长接头	规格：8*6；材质：不锈钢；特征：加长		气动/高压管路	个	8*6不锈钢加长接头	1	254	是	连接形式/压力等级缺失
+SKU-DRAFT-000253	PIPE-000045	confirm_then_import	B	不锈钢加长弯头	规格：8*6；材质：不锈钢；特征：加长；类型：弯头		气动/高压管路	个	8*6不锈钢加长弯头	1	255	是	连接形式/压力等级缺失
+SKU-DRAFT-000255	WELD-000007	confirm_then_import	B	碳棒	直径：6mm		焊接耗材/气刨耗材	支	碳棒6MM	1	257	是	包装规格缺失
+SKU-DRAFT-000260	METAL-000020	confirm_then_import	B	不锈钢卡套接头	规格：6*8；材质：不锈钢		气动/高压管路	个	卡6*8不锈钢接头	1	262	是	“卡”按卡套接头整理，压力等级缺失
+SKU-DRAFT-000261	METAL-000021	confirm_then_import	B	不锈钢卡套接头	规格：6*12；材质：不锈钢		气动/高压管路	个	卡6*12不锈钢接头	1	263	是	“卡”按卡套接头整理，压力等级缺失
+SKU-DRAFT-000271	ELEC-000050	confirm_then_import	B	电焊线	品牌：起帆；截面积：35平方		电气材料/电线电缆	米	35平方起帆电焊线	1	273	是	芯数/材质缺失
+SKU-DRAFT-000272	ELEC-000051	confirm_then_import	B	电焊线	品牌：起帆；截面积：50平方		电气材料/电线电缆	米	50平方起帆电焊线	1	274	是	芯数/材质缺失
+SKU-DRAFT-000284	PIPE-000050	confirm_then_import	B	不锈钢卡套三通	规格：6*12；材质：不锈钢；类型：三通		气动/高压管路	个	卡6*12不锈钢三通	1	286	是	连接形式/压力等级缺失
+SKU-DRAFT-000285	CHEM-000016	confirm_then_import	B	重油污清洗剂	用途：重油污清洗		化工耗材/清洗剂	KG	重油污清洗剂	1	287	是	品牌/浓度/包装缺失
+SKU-DRAFT-000286	MAT-000025	ready_to_import	A	自封袋	规格：10#		包装材料/自封袋	个	10#自封袋	1	288	否	
+SKU-DRAFT-000287	TOOL-000043	confirm_then_import	B	毛刷	规格：2寸		工具器具/涂装工具	个	2寸毛刷	1	289	是	材质缺失；同类毛刷单位需复核
+SKU-DRAFT-000288	ELEC-000052	confirm_then_import	B	电缆防水接头	规格：M50		电气材料/电缆附件	个	M50电缆防水接头	1	290	是	材质/IP等级缺失
+SKU-DRAFT-000289	ELEC-000053	confirm_then_import	B	电缆防水接头	规格：M40		电气材料/电缆附件	个	M40电缆防水接头	1	291	是	材质/IP等级缺失
+SKU-DRAFT-000290	ELEC-000054	confirm_then_import	B	电缆防水接头	规格：M32		电气材料/电缆附件	个	M32电缆防水接头	1	292	是	材质/IP等级缺失
+SKU-DRAFT-000313	CHEM-000026	confirm_then_import	B	588密封胶	型号：588		化工耗材/胶粘剂	支	588胶	1	315	是	品牌/颜色/容量缺失，按588密封胶型号候选
+SKU-DRAFT-000320	SAFE-000015	confirm_then_import	B	五点式安全带	类型：五点式；款式：欧式		劳保耗材/坠落防护	套	五点式欧式安全带	1	322	是	执行标准/承载等级缺失，按欧式五点安全带候选
+SKU-DRAFT-000330	PIPE-000061	confirm_then_import	B	无缝管	规格：325；壁厚：14		原材料/钢管	米	325无缝管&14	1	332	是	材质/执行标准缺失，按规格和壁厚候选；原别名符号已保留
+SKU-DRAFT-000332	PIPE-000063	confirm_then_import	B	抱箍钢卡	规格：325；特征：加厚；材质：钢		工程材料/管道紧固	个	加厚325抱箍钢卡	1	334	是	表面处理/标准缺失，按325加厚钢抱箍候选
+SKU-DRAFT-000334	METAL-000030	confirm_then_import	B	花纹钢板	厚度：3mm；类型：花纹钢板		原材料/钢板	平方	3MM花纹钢板	1	336	是	材质缺失；按平方米计量时长宽可作为采购裁切信息复核
+SKU-DRAFT-000335	METAL-000031	confirm_then_import	B	槽钢	规格：100#；标准：国标		原材料/型钢	米	100#国标槽钢	1	337	是	材质牌号缺失，按100#国标槽钢候选
+SKU-DRAFT-000340	ELEC-000059	confirm_then_import	B	五孔插座面板	类型：五孔面板		电气材料/插头插座	个	五孔面板	1	342	是	品牌/明暗装/电流缺失，按五孔面板候选
+SKU-DRAFT-000342	SAFE-000016	confirm_then_import	B	挂胶手套	特征：厚；类型：挂胶		劳保耗材/手套	双	厚挂胶手套	1	344	是	材质/尺码缺失，按厚挂胶手套候选
+SKU-DRAFT-000343	CONST-000005	confirm_then_import	B	亚克力板	尺寸：81*81*5		原材料/塑料板材	块	81×81×5亚克力板	1	345	是	尺寸单位未注明，需确认是否mm
+SKU-DRAFT-000346	SAFE-000018	confirm_then_import	B	平光防护眼镜	类型：平镜/平光		劳保耗材/眼面防护	副	平镜眼镜	1	348	是	防护标准缺失，按平光防护眼镜候选
+SKU-DRAFT-000354	SAFE-000020	ready_to_import	A	布手套	特征：加厚、双层		劳保耗材/手套	双	加厚双层布手套	1	356	否	
+SKU-DRAFT-000355	SPARE-000038	confirm_then_import	B	铁丝	规格：12#		五金备件/金属丝材	KG	12#铁丝	1	357	是	材质/是否镀锌未说明，按12#铁丝候选
+SKU-DRAFT-000356	SPARE-000039	confirm_then_import	B	铁丝	规格：14#		五金备件/金属丝材	KG	14#铁丝	1	358	是	材质/是否镀锌未说明，按14#铁丝候选
+SKU-DRAFT-000358	TOOL-000047	confirm_then_import	B	台式砂轮机	功率：1.1kW；类型：台式砂轮机		工具器具/电动工具	台	1.1千W台式沙轮机	1	360	是	别名“沙轮机”规范为砂轮机；砂轮规格/电压缺失
+SKU-DRAFT-000359	TOOL-000048	ready_to_import	A	钨钢钻头	材质：钨钢；直径：8mm		工具器具/工具配件	支	钨钢钻头8厘	1	361	否	
+SKU-DRAFT-000360	TOOL-000049	ready_to_import	A	钨钢钻头	材质：钨钢；直径：10mm		工具器具/工具配件	支	钨钢钻头10厘	1	362	否	
+SKU-DRAFT-000361	TOOL-000050	ready_to_import	A	钨钢钻头	材质：钨钢；直径：12mm		工具器具/工具配件	支	钨钢钻头12厘	1	363	否	
+SKU-DRAFT-000362	TOOL-000051	ready_to_import	A	钨钢钻头	材质：钨钢；直径：16mm		工具器具/工具配件	支	钨钢钻头16厘	1	364	否	
+SKU-DRAFT-000364	ELEC-000061	confirm_then_import	B	导轨五孔插座	安装：导轨；类型：五孔插座		电气材料/插头插座	个	导轨5孔插座	1	366	是	额定电流/品牌缺失，按导轨五孔插座候选
+SKU-DRAFT-000369	PIPE-000067	ready_to_import	A	PVC直通	品牌：公元；规格：75；材质：PVC		工程材料/PVC管件	个	公元75pvc直通；公元75直通	2	371;383	否	
+SKU-DRAFT-000370	SAFE-000021	confirm_then_import	B	草帽	类型：草帽		劳保耗材/防晒用品	个	草帽	1	372	是	尺寸/款式缺失，按普通草帽候选
+SKU-DRAFT-000371	MAT-000031	confirm_then_import	B	尼龙绳	直径：14mm；材质：尼龙		吊装索具/绳索	米	∅14尼龙绳	1	373	是	承载/编织结构缺失，按直径和材质候选
+SKU-DRAFT-000373	ELEC-TIE-000001	confirm_then_import	B	扎带	规格：10*400		电气材料/扎带	包	10*400扎带	1	375	是	材质/每包数量缺失，按规格候选
+SKU-DRAFT-000374	ELEC-TIE-000002	confirm_then_import	B	扎带	规格：10*500		电气材料/扎带	包	10*500扎带	1	376	是	材质/每包数量缺失，按规格候选
+SKU-DRAFT-000375	SAFE-000022	confirm_then_import	B	焊工手套	用途：电焊防护		劳保耗材/手套	双	电焊手套	1	377	是	材质/长度缺失，按焊工手套候选
+SKU-DRAFT-000377	SAFE-000023	confirm_then_import	B	路锥	高度：1米		安全设施/交通标识	个	路锥1米	1	379	是	材质/反光等级缺失，按高度候选
+SKU-DRAFT-000379	CONST-000006	confirm_then_import	B	黑模板	尺寸：1.22*2.44；厚度：3.0；颜色：黑		建筑材料/模板木方	张	1.22*2.44*3.0黑模板	1	381	是	尺寸/厚度单位未明，按原规格保留
+SKU-DRAFT-000381	ELEC-000063	confirm_then_import	B	漏电断路器	品牌：施耐德；极数：2P；电流：C40A		电气材料/低压电器	个	施耐德2PC40A漏电	1	384	是	型号/漏电动作电流缺失，按品牌极数和电流候选
+SKU-DRAFT-000383	MAT-000033	confirm_then_import	B	蒸饭柜	品牌：荣事达；层数：8层；功能：智能		设备/厨房设备	台	8层荣事达智能蒸饭柜	1	386	是	输入单位“个”规范为“台”；功率/电压/容量缺失
+SKU-DRAFT-000384	MAT-000034	ready_to_import	A	吊带	载荷：5T；长度：6米		吊装索具/吊带	付	5T*6米吊带	1	387	否	
+SKU-DRAFT-000385	MAT-000035	ready_to_import	A	吊带	载荷：5T；长度：3米		吊装索具/吊带	付	5T*3米吊带	1	388	否	
+SKU-DRAFT-000386	MAT-000036	ready_to_import	A	吊带	载荷：3T；长度：3米		吊装索具/吊带	付	3T*3米吊带	1	389	否	
+SKU-DRAFT-000388	TOOL-000052	ready_to_import	A	合金钻头	材质：合金；直径：6mm		工具器具/工具配件	个	合金钻头6厘	1	391	否	
+SKU-DRAFT-000389	TOOL-000053	ready_to_import	A	合金钻头	材质：合金；直径：8mm		工具器具/工具配件	个	合金钻头8厘	1	392	否	
+SKU-DRAFT-000390	TOOL-000054	ready_to_import	A	合金钻头	材质：合金；直径：10mm		工具器具/工具配件	个	合金钻头10厘	1	393	否	
+SKU-DRAFT-000391	TOOL-000055	ready_to_import	A	合金钻头	材质：合金；直径：12mm		工具器具/工具配件	个	合金钻头12厘	1	394	否	
+SKU-DRAFT-000392	TOOL-000056	ready_to_import	A	合金钻头	材质：合金；直径：14mm		工具器具/工具配件	个	合金钻头14厘	1	395	否	
+SKU-DRAFT-000393	TOOL-000057	ready_to_import	A	合金钻头	材质：合金；直径：16mm		工具器具/工具配件	个	合金钻头16厘	1	396	否	
+SKU-DRAFT-000398	TOOL-000058	confirm_then_import	B	滚筒刷	规格：150		工具器具/涂装工具	支	150滚筒	1	401	是	原规格未明确单位，按原规格保留；材质缺失
+SKU-DRAFT-000399	TOOL-000059	confirm_then_import	B	滚筒刷	规格：250		工具器具/涂装工具	支	250滚筒	1	402	是	原规格未明确单位，按原规格保留；材质缺失
+SKU-DRAFT-000402	CHEM-000031	confirm_then_import	B	美纹纸	颜色：黄色；宽度：5cm		化工耗材/胶粘带	米	黄色美纹纸5CM	1	405	是	按米计量保留宽度和颜色；品牌/厚度未说明
+SKU-DRAFT-000406	CHEM-000033	confirm_then_import	B	地坪漆底漆	品牌/系列：好地坪漆；类型：底漆；包装：20KG		化工耗材/涂料	桶	好地坪漆底漆20KG	1	409	是	颜色/配套体系需确认，按品牌系列、底漆和包装候选
+SKU-DRAFT-000411	PIPE-000068	ready_to_import	A	UPVC给水管	品牌：公元；规格：32；材质：UPVC；用途：给水		工程材料/UPVC管件	米	公元32UPVC给水管	1	414	否	
+SKU-DRAFT-000412	PIPE-000069	ready_to_import	A	UPVC三通	品牌：公元；规格：32；材质：UPVC；类型：三通		工程材料/UPVC管件	个	公元三通32	1	415	否	
+SKU-DRAFT-000413	PIPE-000070	confirm_then_import	B	UPVC直通	规格：32；材质：UPVC；类型：直通		工程材料/UPVC管件	个	32直通	1	416	是	品牌未说明，按UPVC直通规格候选
+SKU-DRAFT-000414	PIPE-000071	confirm_then_import	B	UPVC斜三通	规格：32；材质：UPVC；类型：斜三通		工程材料/UPVC管件	个	32斜三通	1	417	是	品牌未说明，按UPVC斜三通规格候选
+SKU-DRAFT-000416	PIPE-000073	ready_to_import	A	UPVC异径接头	规格：32*25；材质：UPVC；类型：大小头/异径		工程材料/UPVC管件	个	32*25大小头	1	419	否	
+SKU-DRAFT-000418	PIPE-000075	ready_to_import	A	UPVC45度弯头	规格：32；材质：UPVC；角度：45度		工程材料/UPVC管件	个	32*45弯头	1	421	否	
+SKU-DRAFT-000420	PIPE-000076	ready_to_import	A	PPR阀门	品牌：公元；规格：90；材质：PPR；类型：阀门		工程材料/PPR管件	个	公元90PPR阀门	1	423	否	
+SKU-DRAFT-000429	TOOL-000063	confirm_then_import	B	冲击钻头	品牌：方大同；规格：18*800		工具器具/工具配件	支	方大同18*800冲击钻头	1	432	是	柄型缺失，按品牌和规格候选
+SKU-DRAFT-000431	MAT-000042	ready_to_import	A	吊带	载荷：5T；长度：8米		吊装索具/吊带	付	5T*8米吊带	1	434	否	
+SKU-DRAFT-000434	ELEC-000065	confirm_then_import	B	地线	品牌：起帆；截面积：6平方；用途：地线		电气材料/电线电缆	米	6平方起帆地线	1	437	是	颜色/线型缺失，按品牌、截面积和用途候选
+SKU-DRAFT-000435	PIPE-000080	confirm_then_import	B	洗衣机进水管	长度：2米；用途：洗衣机		工程材料/水暖五金	条	2米洗衣机管	1	438	是	接口规格缺失，按洗衣机进水管长度候选
+SKU-DRAFT-000436	TOOL-000064	ready_to_import	A	五坑钻头	品牌：方大同；规格：40*1200；柄型：五坑		工具器具/工具配件	个	方大同40*1200五孔钻头	1	439	否	
+SKU-DRAFT-000440	PIPE-000083	confirm_then_import	B	PPR内牙三通	品牌：公元；规格：25；材质：PPR；连接：内牙；类型：三通		工程材料/PPR管件	个	公元25PPR内牙三通	1	443	是	内牙规格缺失，按原25规格低精度建候选
+SKU-DRAFT-000441	PIPE-000084	confirm_then_import	B	PPR外牙直通	品牌：公元；规格：25；材质：PPR；连接：外牙；类型：直通		工程材料/PPR管件	个	公元25PPR外牙直通	1	444	是	外牙规格缺失，按原25规格低精度建候选
+SKU-DRAFT-000447	ELEC-000068	confirm_then_import	B	排风扇	规格：10寸		电气材料/通风设备	个	10寸排风扇	1	450	是	功率/电压/安装方式缺失，按10寸排风扇候选
+SKU-DRAFT-000450	MAT-CEM-000004	confirm_then_import	B	普通硅酸盐水泥	标号：PO42.5		建筑材料/水泥砂石	包	PO42.5水泥	1	453	是	每包重量、品牌缺失
+SKU-DRAFT-000451	ELEC-000070	ready_to_import	A	对讲机	品牌：长城；型号：A99；特征：高功率		电气材料/通讯设备	个	A99长城高功率对讲机	1	454	否	
+SKU-DRAFT-000456	FAST-000003	confirm_then_import	B	平垫片	规格：14		五金备件/紧固件	个	14垫片	1	459	是	是否M14、材质缺失
+SKU-DRAFT-000457	SPARE-000050	confirm_then_import	B	弹簧垫片	规格：14		五金备件/紧固件	个	14弹簧垫片	1	460	是	是否M14、材质缺失
+SKU-DRAFT-000459	MAT-000044	confirm_then_import	B	吨袋	承重/容量：1.5吨		包装材料/吨袋	个	1.5吨袋	1	462	是	尺寸、吊带形式缺失
+SKU-DRAFT-000461	TOOL-000067	confirm_then_import	B	风镐	型号：G150		工具器具/气动工具	台	G150风镐	1	464	是	品牌、适配气压缺失
+SKU-DRAFT-000466	MAT-000045	confirm_then_import	B	混凝土圆斗	容量：3立方；用途：混凝土		工程器具/料斗	个	3立方混凝土圆斗	1	469	是	材质、吊装方式缺失
+SKU-DRAFT-000468	FAST-000004	confirm_then_import	B	膨胀螺丝	规格：M12*80		五金备件/紧固件	个	M12*80膨胀螺丝	1	471	是	材质、表面处理缺失
+SKU-DRAFT-000471	FAST-000005	confirm_then_import	B	花篮螺丝	规格：M20；类型：花篮		吊装索具/拉紧器	个	M20花篮	1	474	是	材质、载荷缺失
+SKU-DRAFT-000474	MAT-000047	confirm_then_import	B	卸扣	载荷：8.5T		吊装索具/卸扣	个	8.5T卸扣	1	477	是	卸扣形式、执行标准缺失
+SKU-DRAFT-000477	TOOL-000070	confirm_then_import	B	汽油桶	容量：20L；用途：汽油		工具器具/容器	个	20L汽油桶	1	480	是	材质、防爆要求缺失
+SKU-DRAFT-000478	CHEM-000037	confirm_then_import	B	齿轮油	型号：HL-20		化工耗材/润滑油	升	HL-20齿轮油	1	481	是	品牌、包装缺失
+SKU-DRAFT-000482	SPARE-000053	confirm_then_import	B	铁钉	规格：3寸		五金备件/紧固件	KG	3寸铁钉	1	485	是	材质、表面处理缺失
+SKU-DRAFT-000486	TOOL-000071	ready_to_import	A	海绵拖把	特征：加长；材质：海绵		劳保耗材/清洁工具	把	加长海绵拖把	1	489	否	
+SKU-DRAFT-000489	ELEC-TIE-000003	confirm_then_import	B	扎带	规格：10*50；包装：200根/包		电气材料/扎带	包	10*50扎带200根	1	492	是	材质缺失
+SKU-DRAFT-000490	CONST-000008	confirm_then_import	B	顶托	规格：30*500；特征：厚		建筑材料/脚手架配件	支	30*500厚顶托	1	493	是	材质、表面处理缺失
+SKU-DRAFT-000498	SAFE-000030	confirm_then_import	B	彩条布	宽度：4米		建筑材料/防护覆盖	平方	4米彩条布	1	501	是	克重/材质缺失，需确认是否影响同宽度SKU
+SKU-DRAFT-000499	MAT-000049	confirm_then_import	B	止水蝴蝶扣	规格：16*600		建筑材料/止水紧固	套	16*600止水蝴蝶扣	1	502	是	材质/配套螺杆信息缺失
+SKU-DRAFT-000501	TOOL-000072	confirm_then_import	B	加长套筒	规格：18*200；特征：加长		工具器具/手动工具	个	18*200加长套筒	1	504	是	驱动方孔规格缺失
+SKU-DRAFT-000502	CONST-000009	confirm_then_import	B	顶托	规格：38*600；特征：厚		建筑材料/脚手架配件	套	38*600厚顶托	1	505	是	材质/表面处理缺失
+SKU-DRAFT-000507	ELEC-000075	confirm_then_import	B	LED浴室灯	功率：50W；类型：浴室灯		电气材料/照明	个	50WLED浴室灯	1	510	是	防水等级/色温缺失
+SKU-DRAFT-000512	CHEM-000041	confirm_then_import	B	聚氨酯堵漏剂	材质：聚氨酯；类型：油性		化工耗材/堵漏材料	KG	油性聚氨酯堵漏剂	1	515	是	品牌/包装缺失，需确认是否影响SKU
+SKU-DRAFT-000513	CHEM-000042	confirm_then_import	B	聚氨酯堵漏剂	材质：聚氨酯；类型：水性		化工耗材/堵漏材料	KG	水性聚氨酯堵漏剂	1	516	是	品牌/包装缺失，需确认是否影响SKU
+SKU-DRAFT-000514	SPARE-000057	confirm_then_import	B	长螺杆	规格：14*200；类型：长螺杆		五金备件/紧固件	套	14*200长螺杆	1	517	是	原规格未明确是否为M14，材质缺失
+SKU-DRAFT-000517	METAL-000037	confirm_then_import	B	钢丝绳夹头	规格：M10		吊装索具/钢丝绳配件	个	M10钢丝绳夹头	1	520	是	适配钢丝绳直径/材质缺失
+SKU-DRAFT-000522	ELEC-000077	confirm_then_import	B	太阳能LED灯	品牌：公牛；功率：80W；供电：太阳能		电气材料/照明	套	公牛80w太阳能LED灯	1	525	是	电池容量/防水等级缺失
+SKU-DRAFT-000523	SAFE-000033	confirm_then_import	B	安全帽一字带	适用：安全帽；类型：一字带		劳保耗材/头部防护配件	只	安全帽一字带	1	526	是	适配型号缺失
+SKU-DRAFT-000525	ELEC-000079	confirm_then_import	B	开关电源	输出电压：36V；功率：400W		电气材料/电源电器	个	36V 400w电源	1	528	是	输入电压/IP等级缺失
+SKU-DRAFT-000527	TOOL-000075	confirm_then_import	B	五坑钻头	品牌：方大同；规格：35*500；柄型：五坑		工具器具/工具配件	支	方大同35*500五坑钻头	1	530	是	材质缺失
+SKU-DRAFT-000528	TOOL-000076	confirm_then_import	B	冲击钻头	品牌：方大同；规格：18*400		工具器具/工具配件	支	方大同18x400冲击钻头	1	531	是	柄型/材质缺失
+SKU-DRAFT-000529	TOOL-000077	confirm_then_import	B	冲击钻头	品牌：方大同；规格：30*400		工具器具/工具配件	支	方大同30x400冲击钻头	1	532	是	柄型/材质缺失
+SKU-DRAFT-000535	TOOL-000078	confirm_then_import	B	五坑钻头	规格：28*800；柄型：五坑		工具器具/工具配件	支	28*800五孔钻头	1	538	是	品牌/材质缺失
+SKU-DRAFT-000541	TOOL-000080	confirm_then_import	B	五坑钻头	品牌：方大同；规格：14*400；柄型：五坑		工具器具/工具配件	支	方大同14*400五孔钻头	1	544	是	材质缺失
+SKU-DRAFT-000542	TOOL-000081	confirm_then_import	B	五坑钻头	品牌：方大同；规格：14*600；柄型：五坑		工具器具/工具配件	支	方大同14*600五孔钻头	1	545	是	材质缺失
+SKU-DRAFT-000543	TOOL-000082	confirm_then_import	B	五坑钻头	品牌：方大同；规格：16*280；柄型：五坑		工具器具/工具配件	支	方大同16*280五孔钻头	1	546	是	材质缺失
+SKU-DRAFT-000550	PIPE-000090	confirm_then_import	B	不锈钢球阀	规格：25；材质：不锈钢；类型：球阀		工程材料/阀门	个	25不锈钢球阀	1	554	是	压力等级/连接形式缺失，按规格和材质先建候选
+SKU-DRAFT-000562	TOOL-000086	ready_to_import	A	羊毛刷	规格：2寸；材质：羊毛		工具器具/涂装工具	支	2寸羊毛刷	1	566	否	
+SKU-DRAFT-000568	CONST-000013	confirm_then_import	B	人工草皮	规格：3.0；颜色：绿色		装饰/地面材料	平方	3.0绿草皮	1	572	是	规格3.0单位/含义未说明，按原规格和颜色先建候选；输入提示与其他记录可合并
+SKU-DRAFT-000570	TOOL-000089	confirm_then_import	B	测电笔	类型：多功能电笔		工具器具/电工工具	支	多功能电笔	1	574	是	电压范围缺失，按多功能电笔先建候选
+SKU-DRAFT-000571	SPARE-000062	confirm_then_import	B	定向轮	规格：4寸；类型：定向轮		五金备件/脚轮	个	4寸定向轮	1	575	是	承重/材质缺失，按4寸定向轮先建候选
+SKU-DRAFT-000572	SPARE-000063	confirm_then_import	B	定向轮	规格：4寸；特征：带刹车		五金备件/脚轮	个	4寸定向轮刹	1	576	是	承重/材质缺失，按4寸带刹车定向轮先建候选
+SKU-DRAFT-000573	TOOL-000090	confirm_then_import	B	手推车	载荷：300kg；特征：加厚		工具器具/搬运工具	台	300kg手推车加厚	1	577	是	尺寸/轮型缺失，按300kg加厚手推车先建候选
+SKU-DRAFT-000574	SAFE-000038	confirm_then_import	B	路锥	高度：90cm		安全设施/交通标识	个	90cm路锥	1	578	是	材质/反光等级缺失，按高度先建候选
+SKU-DRAFT-000577	ELEC-000088	confirm_then_import	B	漏电断路器	品牌：施耐德；电流：400A		电气材料/低压电器	个	施耐德400A漏电开关	1	581	是	极数/型号/漏电动作电流缺失，按品牌和电流先建候选
+SKU-DRAFT-000581	TOOL-000091	confirm_then_import	B	测电笔	类型：测电笔		工具器具/电工工具	个	测电笔	1	585	是	电压范围缺失，且与同类测电笔存在单位支/个差异需统一
+SKU-DRAFT-000583	SAFE-000042	confirm_then_import	B	防尘网	规格：10针		安全设施/防护网	平方	10针防尘网	1	587	是	材质/颜色/克重缺失，按10针防尘网先建候选
+SKU-DRAFT-000584	SPARE-000064	confirm_then_import	B	污水泵	功率：1.5kW；口径：2寸		设备/泵类设备	台	1.5千瓦2寸污水泵	1	588	是	扬程/流量/电压缺失，按功率和口径先建候选
+SKU-DRAFT-000588	TOOL-000093	confirm_then_import	B	绝缘摇表	量程/电压：2500		工具器具/检测仪器	个	2500绝缘摇表	1	592	是	2500单位未说明，按原始量程/电压保留；精度/品牌缺失
+SKU-DRAFT-000593	MAT-000062	confirm_then_import	B	缠绕膜	颜色：透明；宽度：50cm；重量：5KG		包装材料/缠绕膜	个	透明缠绕膜50cm*5KG	1	597	是	材质/芯径缺失，按颜色/宽度/重量先建候选
+SKU-DRAFT-000595	TOOL-000095	confirm_then_import	B	胶带切割器	适用：透明胶带		包装材料/包装工具	个	透明胶带切割器	1	599	是	适配宽度缺失，按透明胶带切割器先建候选
+SKU-DRAFT-000601	TOOL-000097	ready_to_import	A	厕所刷	用途：厕所清洁		劳保耗材/清洁工具	把	厕所刷子	1	605	否	
+SKU-DRAFT-000605	ELEC-000091	confirm_then_import	B	铜鼻子	电流：300A；材质：铜		电气材料/电缆附件	个	300A铜鼻子	1	609	是	线径/孔径缺失，按电流和材质先建候选
+SKU-DRAFT-000607	PIPE-000091	confirm_then_import	B	PVC给水管	品牌：公元；规格：40；材质：PVC；用途：给水		工程材料/PVC管件	米	公元40pvc给水管	1	611	是	压力等级缺失，按品牌/规格/材质/用途先建候选
+SKU-DRAFT-000608	PIPE-000092	confirm_then_import	B	异径三通	品牌：公元；规格：40*32；类型：三通		工程材料/PVC管件	个	公元三通40×32	1	612	是	材质未明，按PVC管件分组候选需确认
+SKU-DRAFT-000609	PIPE-000093	confirm_then_import	B	异径三通	品牌：公元；规格：40*25；类型：三通		工程材料/PVC管件	个	公元三通40×25	1	613	是	材质未明，按PVC管件分组候选需确认
+SKU-DRAFT-000610	PIPE-000094	ready_to_import	A	PVC管卡	品牌：公元；材质：PVC；规格：40		工程材料/管道紧固	个	公元pvc40管卡	1	614	否	
+SKU-DRAFT-000611	PIPE-000095	confirm_then_import	B	PVC45度弯头	品牌：公元；规格：40；角度：45度		工程材料/PVC管件	个	公元40×45°弯头	1	615	是	材质未明，按PVC管件名称候选需确认
+SKU-DRAFT-000612	PIPE-000096	confirm_then_import	B	异径接头	品牌：公元；规格：40*32；类型：异径接头		工程材料/PVC管件	个	公元40×32大接头	1	616	是	材质未明，按PVC管件分组候选需确认；大接头归一为异径接头
+SKU-DRAFT-000616	ELEC-000093	confirm_then_import	B	一位开关	品牌：公牛；位数：1位		电气材料/开关	套	公牛一位开关	1	620	是	电流/安装方式缺失，按品牌和位数先建候选
+SKU-DRAFT-000620	MAT-000066	confirm_then_import	B	吊带	载荷：5吨；长度：6m		吊装索具/吊带	条	吊带5吨×6m	1	624	是	输入提示与其他记录同物料，单位付/条需统一
+SKU-DRAFT-000621	PIPE-000097	confirm_then_import	B	直通	品牌：公元；规格：110；类型：直通		工程材料/PVC管件	个	公元110直通	1	625	是	材质未明，按PVC管件分组候选需确认
+SKU-DRAFT-000622	PIPE-000098	confirm_then_import	B	管卡	品牌：公元；规格：110		工程材料/管道紧固	个	公元110管卡	1	626	是	材质/适配管材缺失，按品牌和规格先建候选
+SKU-DRAFT-000623	PIPE-000099	confirm_then_import	B	方形集水斗	品牌：公元；规格：110；形状：方形		工程材料/排水管件	个	公元110方形集水斗	1	627	是	材质/安装方式缺失，按品牌/规格/形状先建候选
+SKU-DRAFT-000630	TOOL-000100	confirm_then_import	B	滚筒刷	规格：8寸		工具器具/涂装工具	支	8寸滚筒	1	635	是	材质缺失，按规格先建候选
+SKU-DRAFT-000632	TOOL-000102	confirm_then_import	B	小滚筒刷	规格：4寸；类型：小滚筒		工具器具/涂装工具	支	4寸小滚筒	1	637	是	材质缺失，按规格和类型先建候选
+SKU-DRAFT-000640	FAST-000006	confirm_then_import	B	平垫片	规格：M30		五金备件/紧固件	个	M30平垫	1	645	是	材质缺失，按规格先建候选
+SKU-DRAFT-000641	SPARE-000067	confirm_then_import	B	弹簧垫片	规格：M30		五金备件/紧固件	个	M30弹垫	1	646	是	材质缺失，按规格先建候选
+SKU-DRAFT-000644	FAST-000007	confirm_then_import	B	平垫片	规格：M27		五金备件/紧固件	个	M27平垫	1	649	是	材质缺失，按规格先建候选；输入提示与其他记录同类
+SKU-DRAFT-000645	SPARE-000070	confirm_then_import	B	弹簧垫片	规格：M27		五金备件/紧固件	个	M27弹垫	1	650	是	材质缺失，按规格先建候选
+SKU-DRAFT-000650	ELEC-000099	ready_to_import	A	电池	规格：7号		电气材料/电池	个	7号电池	1	655	否	
+SKU-DRAFT-000651	ELEC-000100	confirm_then_import	B	漏电断路器	品牌：施耐德；极数：2P；电流：63A		电气材料/低压电器	个	施耐德2P63A漏保；施耐德2P63a漏电保护开关	1	656	是	型号/漏电动作电流缺失，按品牌、极数和电流先建候选
+SKU-DRAFT-000661	METAL-000045	ready_to_import	A	不锈钢球阀	品牌：埃美柯；规格：80；材质：不锈钢；特征：加厚		工程材料/阀门	个	埃美柯80加厚不锈钢球阀	1	666	否	
+SKU-DRAFT-000673	MAT-000067	confirm_then_import	B	吊带	载荷：20T；长度：6米	原名含“好”	吊装索具/吊带	条	20T*6米吊带好	1	678	是	“好”是否为等级描述需确认；执行标准缺失
+SKU-DRAFT-000681	TOOL-000104	confirm_then_import	B	玛氏漏斗粘度计	材质：不锈钢；类型：玛氏漏斗粘度计		工具器具/检测仪器	个	不锈钢玛氏漏斗粘度计	1	686	是	量程/执行标准缺失，按不锈钢玛氏漏斗粘度计候选
+SKU-DRAFT-000682	CHEM-000052	ready_to_import	A	透明胶带	宽度：5mm；长度：100米；颜色：透明		包装材料/胶带	卷	5mm透明胶带100米	1	687	否	
+SKU-DRAFT-000683	TOOL-000105	confirm_then_import	B	方头铁锹	规格：大号；类型：方头		工具器具/手动工具	套	大方铁锹	1	688	是	是否含柄需确认，单位按原“套”保留
+SKU-DRAFT-000684	TOOL-000106	confirm_then_import	B	方头铁锹	规格：小号；类型：方头		工具器具/手动工具	套	小方铁锹	1	689	是	是否含柄需确认，单位按原“套”保留
+SKU-DRAFT-000687	PIPE-000109	confirm_then_import	B	橡胶防爆水带	规格：100；材质：橡胶；特征：防爆		消防器材/水带	米	100橡胶防爆水带	1	692	是	压力等级缺失，按规格、材质和防爆特征先建候选
+SKU-DRAFT-000692	PIPE-000111	confirm_then_import	B	铜球阀	品牌：埃美柯；规格：4分；材质：铜		工程材料/阀门	个	埃美柯4分铜球阀	1	697	是	压力等级/连接形式缺失，按品牌、规格和材质先建候选
+SKU-DRAFT-000696	TOOL-000109	confirm_then_import	B	撬杠	规格：60		工具器具/手动工具	个	60撬杠	1	701	是	原规格未说明60为长度还是型号/单位，需确认；材质缺失
+SKU-DRAFT-000697	TOOL-000110	confirm_then_import	B	撬杠	规格：120		工具器具/手动工具	个	120撬杠	1	702	是	原规格未说明120为长度还是型号/单位，需确认；材质缺失
+SKU-DRAFT-000703	TOOL-000111	confirm_then_import	B	网线钳	用途：网线压接		工具器具/电工工具	把	网线钳	1	708	是	适配水晶头类型缺失
+SKU-DRAFT-000704	ELEC-000110	confirm_then_import	B	PVC线管	规格：25；材质：PVC		电气材料/电缆附件	米	25pvc线管	1	709	是	壁厚缺失
+SKU-DRAFT-000705	TOOL-000112	confirm_then_import	B	测电笔	外观：透明；类型：电笔		工具器具/电工工具	个	透明电笔	1	710	是	电压范围缺失
+SKU-DRAFT-000710	PIPE-000116	ready_to_import	A	PPR管卡	品牌：公元；规格：25；类型：管卡		工程材料/PPR管件	个	公元ppr25卡扣	1	715	否	
+SKU-DRAFT-000711	PIPE-000117	confirm_then_import	B	PPR直通	品牌：公元；规格：25；材质：PPR		工程材料/PPR管件	个	公元ppr25直通	1	716	是	压力等级缺失
+SKU-DRAFT-000716	WELD-000018	confirm_then_import	B	割炬	规格：100型		焊接耗材/焊割工具	把	100型割炬	1	721	是	气体类型/品牌缺失
+SKU-DRAFT-000719	ELEC-000112	ready_to_import	A	排气扇	型号：FAD40-400		电气材料/通风设备	台	FAD40-400排气扇	1	724	否	
+SKU-DRAFT-000723	FAST-000008	confirm_then_import	B	膨胀螺丝	规格：M20*140		五金备件/紧固件	个	M20*140膨胀螺丝	1	728	是	材质/表面处理缺失
+SKU-DRAFT-000724	FAST-000009	confirm_then_import	B	膨胀螺丝	规格：M22*140		五金备件/紧固件	个	M22*140膨胀螺丝	1	729	是	材质/表面处理缺失
+SKU-DRAFT-000728	SPARE-000073	confirm_then_import	B	膨胀钩	规格：10厘		五金备件/紧固件	个	10厘膨胀钩	1	733	是	材质/载荷缺失
+SKU-DRAFT-000733	TOOL-000119	ready_to_import	A	水平尺	长度：60cm		工具器具/测量工具	把	60cm水平尺	1	738	否	
+SKU-DRAFT-000734	TOOL-000120	ready_to_import	A	水平尺	长度：100cm		工具器具/测量工具	把	100cm水平尺	1	739	否	
+SKU-DRAFT-000735	METAL-000053	confirm_then_import	B	不锈钢合页	规格：110；材质：不锈钢		五金备件/门窗五金	副	110不锈钢合页	1	740	是	厚度/孔位缺失
+SKU-DRAFT-000744	TOOL-000124	confirm_then_import	B	伸缩铝梯	长度：12米；材质：铝；特征：加厚伸缩		工具器具/登高工具	台	12米加厚伸缩铝梯	1	749	是	承重等级缺失
+SKU-DRAFT-000748	PIPE-000123	confirm_then_import	B	无缝管	规格：325*12		原材料/钢管	米	325*12无缝管	1	753	是	材质/执行标准缺失，按规格和壁厚候选
+SKU-DRAFT-000754	METAL-000054	confirm_then_import	B	不锈钢球阀	品牌：埃美柯；规格：80；材质：不锈钢；特征：厚		工程材料/阀门	个	埃美柯80不锈钢厚球阀	1	759	是	压力等级缺失，按品牌/规格/材质/特征先建候选
+SKU-DRAFT-000755	MAT-000072	confirm_then_import	B	鸭嘴吊具	额定载荷：20T；类型：鸭嘴吊具		吊装索具/吊具	个	20T鸭嘴吊具	1	760	是	执行标准/开口尺寸缺失
+SKU-DRAFT-000761	METAL-000055	confirm_then_import	B	不锈钢骑马卡	规格：40；材质：不锈钢		五金备件/管道紧固	个	40不锈钢骑马卡	1	766	是	规格40的适配管径/厚度需确认
+SKU-DRAFT-000765	MAT-000073	confirm_then_import	B	扁平吊装带	执行标准：国标；额定载荷：3T；长度：3米	颜色:彩色	吊装索具/吊带	付	国标彩色3T*3米吊带	1	770	是	宽度/材质/安全系数缺失
+SKU-DRAFT-000766	MAT-000074	confirm_then_import	B	扁平吊装带	执行标准：国标；额定载荷：5T；长度：6米	颜色:彩色	吊装索具/吊带	付	国标彩色5T*6米吊带	1	771	是	宽度/材质/安全系数缺失
+SKU-DRAFT-000767	MAT-000075	confirm_then_import	B	弓形卸扣	额定载荷：6.5T；型式：弓形		吊装索具/卸扣	个	6.5T弓形卸扣	1	772	是	销轴形式/执行标准缺失
+SKU-DRAFT-000768	MAT-000076	confirm_then_import	B	弓形卸扣	额定载荷：4.75T；型式：弓形		吊装索具/卸扣	个	4.75T弓形卸扣	1	773	是	销轴形式/执行标准缺失
+SKU-DRAFT-000772	MAT-000078	confirm_then_import	B	弓形卸扣	额定载荷：9.5T；型式：弓形		吊装索具/卸扣	个	9.5T弓形卸扣	1	777	是	销轴形式/执行标准缺失
+SKU-DRAFT-000775	ELEC-000114	confirm_then_import	B	DT铜鼻子	型号：DT；适配线径：150mm2；材质：铜		电气材料/电缆附件	个	DT150平方铜鼻子	1	780	是	孔径/是否镀锡缺失
+SKU-DRAFT-000776	ELEC-000115	confirm_then_import	B	DT铜鼻子	型号：DT；适配线径：120mm2；材质：铜		电气材料/电缆附件	个	DT120平方铜鼻子	1	781	是	孔径/是否镀锡缺失
+SKU-DRAFT-000777	ELEC-000116	confirm_then_import	B	DT铜鼻子	型号：DT；适配线径：95mm2；材质：铜		电气材料/电缆附件	个	DT95平方铜鼻子	1	782	是	孔径/是否镀锡缺失
+SKU-DRAFT-000778	ELEC-000117	confirm_then_import	B	DT铜鼻子	型号：DT；适配线径：70mm2；材质：铜		电气材料/电缆附件	个	DT70平方铜鼻子	1	783	是	孔径/是否镀锡缺失
+SKU-DRAFT-000779	ELEC-000118	confirm_then_import	B	OT铜端子	型号：OT25-8；线径规格：25mm2；孔径：8mm；材质：铜		电气材料/电缆附件	个	OT25-8铜端子	1	784	是	是否镀锡需确认
+SKU-DRAFT-000780	ELEC-000119	confirm_then_import	B	OT铜端子	型号：OT6-6；线径规格：6mm2；孔径：6mm；材质：铜		电气材料/电缆附件	个	OT6-6铜端子	1	785	是	是否镀锡需确认
+SKU-DRAFT-000782	PIPE-000130	confirm_then_import	B	国标法兰	规格：DN325；压力等级：16kg；执行标准：国标		管件/法兰	个	325*16KG国标法兰	1	787	是	材质/密封面形式缺失
+SKU-DRAFT-000785	PIPE-000132	confirm_then_import	B	双联重型管卡	适配管径：40；用途：注浆管；型式：重型卡槽两联		管道紧固/管卡	个	40注浆管重型卡槽两联	1	790	是	材质/表面处理缺失
+SKU-DRAFT-000792	MAT-000079	confirm_then_import	B	U型卸扣	额定载荷：10T；型式：U型		吊装索具/卸扣	个	10吨U型卸扣	1	797	是	销轴形式/执行标准缺失
+SKU-DRAFT-000798	PIPE-000134	confirm_then_import	B	透明钢丝软管	公称直径：50；特征：加厚、透明、钢丝增强		管材/软管	米	50加厚透明钢丝管	1	803	是	材质/压力等级缺失，按直径和特征先建候选
+SKU-DRAFT-000818	PIPE-000140	confirm_then_import	B	镀锌外丝接头	规格：50*40；连接：外丝；表面：镀锌		管件/镀锌管件	个	50*40镀锌外丝	1	823	是	变径形式/螺纹标准缺失，按规格和外丝连接先建候选
+SKU-DRAFT-000820	PIPE-000142	confirm_then_import	B	镀锌外接头	公称直径：50；连接：外接；表面：镀锌		管件/镀锌管件	个	50镀锌外接	1	825	是	螺纹标准缺失，按规格和外接类型先建候选
+SKU-DRAFT-000822	PIPE-000144	confirm_then_import	B	无缝钢管	外径：89mm；壁厚：6mm		钢材/钢管	米	89*6无缝管	1	827	是	材质/执行标准缺失，按外径和壁厚先建候选
+SKU-DRAFT-000825	PIPE-000147	confirm_then_import	B	无缝钢管	外径：325mm；壁厚：14mm		钢材/钢管	米	325*14无缝管	1	830	是	材质/执行标准缺失，按外径和壁厚先建候选
+SKU-DRAFT-000828	METAL-000059	confirm_then_import	B	扁钢	规格：80*6mm		钢材/型材	米	80*6扁铁	1	833	是	材质/执行标准缺失，按截面规格先建候选
+SKU-DRAFT-000833	METAL-000060	confirm_then_import	B	槽钢	规格：10#；执行标准：国标		钢材/型材	米	10#国标槽钢	1	838	是	材质缺失，按规格和国标先建候选
+SKU-DRAFT-000834	METAL-000061	confirm_then_import	B	工字钢	规格：20#		钢材/型材	米	20工字钢	1	839	是	材质/执行标准缺失，按规格先建候选
+SKU-DRAFT-000841	PIPE-000152	confirm_then_import	B	双联重型管卡	规格：40*2；型式：双联重型		管道紧固/管卡	套	双联重型管卡40*2	1	846	是	材质/表面处理缺失，按规格和型式先建候选
+SKU-DRAFT-000847	PIPE-000155	confirm_then_import	B	液压快速接头	型号：GR6-25S；类型：快速接头		液压/高压管路	套	GR6-25S液压快速接头	1	852	是	压力等级/螺纹接口缺失，按型号先建候选
+SKU-DRAFT-000857	TOOL-000128	confirm_then_import	B	管钳	长度：300mm		工具/手动工具	个	300管钳	1	862	是	品牌/材质缺失，按长度先建候选
+SKU-DRAFT-000858	TOOL-000129	confirm_then_import	B	管钳	长度：350mm		工具/手动工具	个	350管钳	1	863	是	品牌/材质缺失，按长度先建候选
+SKU-DRAFT-000859	TOOL-000130	confirm_then_import	B	管钳	长度：400mm		工具/手动工具	个	400管钳	1	864	是	品牌/材质缺失，按长度先建候选
+SKU-DRAFT-000869	TOOL-000135	confirm_then_import	B	电动扳手套筒	规格：12号；适用：电动扳手		工具/套筒	支	12号电动扳手套筒	1	874	是	方榫规格/长度缺失
+SKU-DRAFT-000870	TOOL-000136	confirm_then_import	B	电动扳手套筒	规格：42号；适用：电动扳手		工具/套筒	个	42号电动扳手套筒	1	875	是	方榫规格/长度缺失
+SKU-DRAFT-000871	MAT-000084	confirm_then_import	B	扁平吊装带	额定载荷：5T；长度：8米；颜色：彩色		吊装索具/吊带	根	5T*8米彩色吊带	1	876	是	材质/安全系数缺失
+SKU-DRAFT-000875	MAT-000087	confirm_then_import	B	卸扣	额定载荷：6T		吊装索具/卸扣	个	6T卸扣	1	880	是	型式/销轴形式缺失
+SKU-DRAFT-000880	TOOL-000137	confirm_then_import	B	活动扳手	长度：450mm		工具/手动工具	支	450活动扳手	1	885	是	品牌/材质缺失，按长度先建候选
+SKU-DRAFT-000892	SPARE-000085	confirm_then_import	B	传动皮带	型号：BLI1753		备品备件/传动件	条	Bli1753皮带	1	897	是	型号大小写/皮带类型需确认
+SKU-DRAFT-000902	FAST-000024	confirm_then_import	B	膨胀螺丝	规格：M10*80		紧固件/膨胀件	套	10*80膨胀螺丝	1	907	是	材质/表面处理缺失，按规格先建候选
+SKU-DRAFT-000912	METAL-000066	confirm_then_import	B	不锈钢球阀	品牌：埃美柯；公称直径：DN50；材质：不锈钢		阀门/球阀	个	50埃美柯不锈钢球阀	1	917	是	连接方式/压力等级缺失，按品牌/口径/材质先建候选
+SKU-DRAFT-000916	CHEM-000062	confirm_then_import	B	油污清洗剂	功能：去油污		清洁耗材/清洗剂	瓶	油污净	1	921	是	容量/品牌/浓度缺失，按去油污功能先建候选
+SKU-DRAFT-000917	ELEC-000126	confirm_then_import	B	漏电断路器	品牌：施耐德；极数：2P；额定电流：40A		电气材料/低压电器	个	2P40A施耐德漏电保护	1	922	是	型号/漏电动作电流缺失，按品牌/极数/电流先建候选
+SKU-DRAFT-000924	PIPE-000181	confirm_then_import	B	电磁阀	型号：4M210L-8		气动元件/阀	个	4M210L-8电磁阀	1	929	是	电压需确认，按型号先建候选
+SKU-DRAFT-000929	METAL-000068	confirm_then_import	B	不锈钢球阀	品牌：埃美柯；公称直径：DN80；材质：不锈钢		阀门/球阀	个	80埃美柯不锈钢球阀	1	934	是	连接方式/压力等级缺失，按品牌/口径/材质先建候选
+SKU-DRAFT-000930	METAL-000069	confirm_then_import	B	不锈钢单向阀	品牌：埃美柯；公称直径：DN80；材质：不锈钢		阀门/单向阀	个	80埃美柯不锈钢单向阀	1	935	是	连接方式/压力等级缺失，按品牌/口径/材质先建候选
+SKU-DRAFT-000935	WELD-000023	confirm_then_import	B	喷火枪	功能：多功能		工具/焊割工具	个	多功能喷火枪	1	940	是	燃气类型/型号缺失，按多功能喷火枪先建候选
+SKU-DRAFT-000936	TOOL-000140	confirm_then_import	B	热风机	功率：2000W		工具/电动工具	个	2000W热风机	1	941	是	品牌/温度范围/型号缺失，按功率先建候选
+SKU-DRAFT-000937	TOOL-000141	confirm_then_import	B	固定扳手	品牌：世达；规格：24号		工具/手动工具	个	24世达固定扳手	1	942	是	开口/梅花/两用形式需确认
+SKU-DRAFT-000939	FAST-000025	confirm_then_import	B	内六角螺丝	规格：M8*45；头型：内六角		紧固件/螺丝	个	M8*45内六角螺丝	1	944	是	材质/强度等级缺失，按规格和头型先建候选
+SKU-DRAFT-000946	TOOL-000142	confirm_then_import	B	卷尺	品牌：得力；长度：5米		工具/测量工具	个	5米得力卷尺	1	951	是	型号/尺带宽度缺失，按品牌和长度先建候选
+SKU-DRAFT-000947	TOOL-000143	confirm_then_import	B	卷尺	品牌：得力；长度：10米		工具/测量工具	个	10米得力卷尺	1	952	是	型号/尺带宽度缺失，按品牌和长度先建候选
+SKU-DRAFT-000949	PIPE-000190	confirm_then_import	B	气动阀	型号：APL-210V		气动元件/阀	个	APL-210V气动阀	1	954	是	阀门类型/电压或限位开关属性需确认，按型号先建候选
+SKU-DRAFT-000951	PIPE-000192	confirm_then_import	B	消防卡箍	规格：50；用途：消防		管道紧固/卡箍	个	50消防卡箍	1	956	是	沟槽标准/压力等级缺失
+SKU-DRAFT-000952	PIPE-000193	confirm_then_import	B	消防卡箍	规格：65；用途：消防		管道紧固/卡箍	个	65消防卡箍	1	957	是	沟槽标准/压力等级缺失
+SKU-DRAFT-000953	PIPE-000194	confirm_then_import	B	消防卡箍	规格：80；用途：消防		管道紧固/卡箍	个	80消防卡箍	1	958	是	沟槽标准/压力等级缺失
+SKU-DRAFT-000956	TOOL-000144	confirm_then_import	B	电动扳手套筒	品牌：世达；规格：23号；适用：电动扳手		工具/套筒	个	23号世达电动扳手套筒	1	961	是	方榫规格/长度缺失
+SKU-DRAFT-000957	TOOL-000145	confirm_then_import	B	电动扳手套筒	品牌：世达；规格：24号；适用：电动扳手		工具/套筒	个	24号世达电动扳手套筒	1	962	是	方榫规格/长度缺失
+SKU-DRAFT-000964	MAT-000089	confirm_then_import	B	卸扣	宽度：6cm；额定载荷：12T；执行标准：国标		吊装索具/卸扣	个	宽度6cm12吨国标卸扣	1	969	是	型式/销轴形式缺失
+SKU-DRAFT-000965	PIPE-000196	confirm_then_import	B	液压堵头	规格：42L；类型：堵头		液压/高压管路	个	42L液压堵头	1	970	是	螺纹/压力等级缺失，按42L规格先建候选
+SKU-DRAFT-000978	PIPE-000198	confirm_then_import	B	气管直通接头	规格：8厘；类型：直通		气动元件/气管接头	个	8厘气管直通	1	983	是	材质/螺纹或快插形式缺失
+SKU-DRAFT-000979	PIPE-000199	confirm_then_import	B	气管直通接头	规格：10厘；类型：直通		气动元件/气管接头	个	10厘气管直通	1	984	是	材质/螺纹或快插形式缺失
+SKU-DRAFT-000980	PIPE-000200	confirm_then_import	B	气管直通接头	规格：16厘；类型：直通		气动元件/气管接头	个	16厘气管直通	1	985	是	材质/螺纹或快插形式缺失
+SKU-DRAFT-000981	PIPE-000201	confirm_then_import	B	气管弯头接头	规格：8厘；类型：弯头		气动元件/气管接头	个	8厘气管弯头	1	986	是	材质/螺纹或快插形式缺失
+SKU-DRAFT-000982	PIPE-000202	confirm_then_import	B	气管弯头接头	规格：10厘；类型：弯头		气动元件/气管接头	个	10厘气管弯头	1	987	是	材质/螺纹或快插形式缺失
+SKU-DRAFT-000983	PIPE-000203	confirm_then_import	B	气管弯头接头	规格：16厘；类型：弯头		气动元件/气管接头	个	16厘气管弯头	1	988	是	材质/螺纹或快插形式缺失
+SKU-DRAFT-000984	PIPE-000204	confirm_then_import	B	气管三通接头	规格：8厘；类型：三通		气动元件/气管接头	个	8厘气管三通	1	989	是	材质/快插形式缺失
+SKU-DRAFT-000985	PIPE-000205	confirm_then_import	B	气管三通接头	规格：10厘；类型：三通		气动元件/气管接头	个	10厘气管三通	1	990	是	材质/快插形式缺失
+SKU-DRAFT-000986	PIPE-000206	confirm_then_import	B	气管三通接头	规格：16厘；类型：三通		气动元件/气管接头	个	16厘气管三通	1	991	是	材质/快插形式缺失
+SKU-DRAFT-000991	SPARE-000091	confirm_then_import	B	滤芯	型号：06/08-25		备品备件/过滤件	个	06/08-25滤芯	1	996	是	适配设备/过滤精度缺失，按型号先建候选
+SKU-DRAFT-000992	SPARE-000092	confirm_then_import	B	油封	品牌：SKF；型号：37327；进口：是		备品备件/密封件	个	进口SKF-37327油封	1	997	是	尺寸/材质缺失，按品牌型号先建候选
+SKU-DRAFT-000993	PIPE-000207	confirm_then_import	B	铜头铝合金夹	规格：80；组成：铜头、铝合金夹		液压/高压管路	个	80铜头铝合金夹	1	998	是	连接形式需确认
+SKU-DRAFT-001007	SPARE-000094	confirm_then_import	B	传动皮带	型号：XPL2800		备品备件/传动件	个	XPL2800皮带	1	1012	是	皮带类型需确认；单位建议条，按原单位先保留
+SKU-DRAFT-001008	SPARE-000095	confirm_then_import	B	传动皮带	型号：XPL2650		备品备件/传动件	个	XPL2650皮带	1	1013	是	皮带类型需确认；单位建议条，按原单位先保留
+SKU-DRAFT-001009	METAL-000073	confirm_then_import	B	不锈钢双卡抱箍	规格：325；材质：不锈钢；型式：双卡		管道紧固/抱箍	个	325双卡抱箍 不锈钢；325不锈钢双卡抱箍	1	1014	是	厚度/密封件/压力等级缺失，按规格材质型式先建候选
+SKU-DRAFT-001013	CHEM-000069	confirm_then_import	B	胶粘剂	品牌：东泰；型号：S1-5910；进口：是		化工耗材/胶粘剂	支	进口东泰s1-5910胶；东泰S1-5910胶粘剂	1	1018	是	胶种/容量缺失，按品牌型号先建候选
+SKU-DRAFT-001014	PIPE-000211	confirm_then_import	B	PPR直通	材质：PPR；规格：63；类型：直通		PPR管件/直通	个	63PPR直通	1	1019	是	压力等级缺失，按材质规格类型先建候选
+SKU-DRAFT-001019	MAT-000090	confirm_then_import	B	手扳葫芦	额定载荷：2T；链长：6米		吊装索具/葫芦	台	2T*6米手扳葫芦	1	1024	是	品牌/执行标准缺失，按载荷和链长先建候选
+SKU-DRAFT-001020	TOOL-000148	confirm_then_import	B	重型梅花敲击扳手	规格：36；类型：梅花敲击；特征：重型		工具/手动工具	支	36重型梅花敲击扳手	1	1025	是	材质/品牌缺失，按规格和类型先建候选
+SKU-DRAFT-001021	TOOL-000149	confirm_then_import	B	重型梅花敲击扳手	规格：46；类型：梅花敲击；特征：重型		工具/手动工具	支	46重型梅花敲击扳手	1	1026	是	材质/品牌缺失，按规格和类型先建候选
+SKU-DRAFT-001022	TOOL-000150	confirm_then_import	B	重型梅花敲击扳手	规格：55；类型：梅花敲击；特征：重型		工具/手动工具	支	55重型梅花敲击扳手	1	1027	是	材质/品牌缺失，按规格和类型先建候选
+SKU-DRAFT-001023	SAFE-000066	confirm_then_import	B	帆布手套	材质：帆布；结构：双层		劳保耗材/手套	双	帆布双层手套；双层帆布手套	1	1028	是	尺码缺失；与同类帆布手套可合并复核
+SKU-DRAFT-001027	SAFE-000068	confirm_then_import	B	平光防护眼镜	颜色：白色；镜片：平光		劳保耗材/眼面防护	个	白色平光眼镜	1	1032	是	是否防冲击/执行标准缺失，按颜色和镜片类型先建候选
+SKU-DRAFT-001041	PIPE-000218	confirm_then_import	B	铜头铝合金夹	规格：50；组成：铜头、铝扣		液压/高压管路	个	铜头铝套组件；50铜头铝扣	1	1046	是	按同类物料统一名称；连接形式需确认
+SKU-DRAFT-001050	MAT-000094	confirm_then_import	B	扁平吊装带	额定载荷：2T；长度：2米		吊装索具/吊带	条	2T*2米吊带	1	1055	是	材质/安全系数缺失
+SKU-DRAFT-001055	METAL-000075	confirm_then_import	B	槽钢	规格：10#		钢材/型材	米	10号槽钢	1	1060	是	与同类槽钢可合并复核；材质/执行标准缺失
+SKU-DRAFT-001062	MAT-000097	confirm_then_import	B	U型卸扣	额定载荷：9.5T；型式：U型		吊装索具/卸扣	个	9.5TU型卸扣	1	1067	是	销轴形式/标准缺失
+SKU-DRAFT-001075	METAL-000080	confirm_then_import	B	不锈钢管箍	规格：38；材质：不锈钢		管道紧固/管箍	个	38不锈钢管箍	1	1080	是	厚度/适配管径缺失
+SKU-DRAFT-001082	SAFE-000074	confirm_then_import	B	防坠器	承重：300kg；长度：30米；锁具：双锁		安全防护/高处防护	个	300KG30米防坠器双锁	1	1087	是	认证标准/品牌缺失
+SKU-DRAFT-001093	TOOL-000159	confirm_then_import	B	大开口活动扳手	品牌：世达；长度：200mm；特征：大开口		工具/手动工具	个	200世达大开口活动扳手	1	1098	是	最大开口尺寸缺失
+SKU-DRAFT-001094	TOOL-000160	confirm_then_import	B	万用表	型号：UT39C		工具/电工仪表	个	UT39C万能表	1	1099	是	品牌/校准要求缺失
+SKU-DRAFT-001097	MAT-000101	confirm_then_import	B	桶装水电动抽水器	用途：桶装水；驱动：电动		行政后勤/生活用品	个	桶装水电动抽水	1	1102	是	电源方式/型号缺失，按用途和驱动方式先建候选
+SKU-DRAFT-001098	TOOL-000162	confirm_then_import	B	手锤	重量：6磅		工具/手动工具	支	6磅手锤	1	1103	是	柄材质缺失，按重量先建候选
+SKU-DRAFT-001099	TOOL-000163	confirm_then_import	B	手锤	重量：8磅		工具/手动工具	支	8磅手锤	1	1104	是	柄材质缺失，按重量先建候选
+SKU-DRAFT-001101	TOOL-000165	confirm_then_import	B	撬棍	长度：1.3m；规格：30		工具/手动工具	支	1.3m-30撬棍	1	1106	是	“30”规格含义未明，材质缺失，按原规格保留
+SKU-DRAFT-001103	TOOL-000167	confirm_then_import	B	电动扳手套筒	规格：36；适用：电动扳手		工具/套筒	个	36套筒电动	1	1108	是	方榫规格/长度缺失，按套筒规格先建候选
+SKU-DRAFT-001106	MAT-000103	confirm_then_import	B	扁平吊装带	额定载荷：2T；长度：1.5m		吊装索具/吊带	个	2T*1.5m吊带	1	1111	是	材质/宽度缺失，单位建议复核为条或根
+SKU-DRAFT-001107	MAT-000104	confirm_then_import	B	扁平吊装带	额定载荷：1T；长度：1.5m		吊装索具/吊带	个	1T*1.5m吊带	1	1112	是	材质/宽度缺失，单位建议复核为条或根
+SKU-DRAFT-001108	MAT-000105	confirm_then_import	B	手扳葫芦	额定载荷：1.6T；链长：6米		吊装索具/葫芦	个	1.6T*6米手扳葫芦	1	1113	是	品牌/标准缺失，单位建议复核为台
+SKU-DRAFT-001114	TOOL-000169	confirm_then_import	B	十字螺丝刀	规格：6*250；类型：十字		工具/手动工具	个	6*250十字螺丝刀	1	1119	是	材质/品牌缺失，按规格和刀头类型先建候选
+SKU-DRAFT-001115	TOOL-000170	confirm_then_import	B	一字螺丝刀	规格：6*250；类型：一字		工具/手动工具	个	6*250一字螺丝刀	1	1120	是	材质/品牌缺失，按规格和刀头类型先建候选
+SKU-DRAFT-001135	WELD-000027	confirm_then_import	B	氧气瓶手推车	适用气体：氧气；类型：手推车		焊割设备/气瓶搬运	个	氧气手推车	1	1141	是	适配瓶规格/承重缺失，按适用气体和手推车类型先建候选
+SKU-DRAFT-001136	WELD-000028	confirm_then_import	B	乙炔瓶手推车	适用气体：乙炔；类型：手推车		焊割设备/气瓶搬运	个	乙炔手推车	1	1142	是	适配瓶规格/承重缺失，按适用气体和手推车类型先建候选
+SKU-DRAFT-001138	ADMIN-000035	confirm_then_import	B	竹扫把	规格：大号；材质：竹		行政后勤/清洁用品	个	大号竹扫把	1	1145	是	长度缺失，按大号竹扫把先建候选
+SKU-DRAFT-001144	PIPE-000243	confirm_then_import	B	镀锌外丝接头	公称直径：DN80；连接：外丝；表面处理：镀锌		管件/镀锌管件	个	DN80镀锌外丝	1	1151	是	螺纹标准缺失，按公称直径和外丝连接先建候选
+SKU-DRAFT-001153	TOOL-000174	confirm_then_import	B	加长六角套筒	规格：5；特征：加长；类型：六角		工具/套筒	个	5加长六角套筒	1	1160	是	方榫规格/长度缺失
+SKU-DRAFT-001154	TOOL-000175	confirm_then_import	B	加长六角套筒	规格：6；特征：加长；类型：六角		工具/套筒	个	6加长六角套筒	1	1161	是	方榫规格/长度缺失
+SKU-DRAFT-001155	TOOL-000176	confirm_then_import	B	加长六角套筒	规格：7；特征：加长；类型：六角		工具/套筒	个	7加长六角套筒	1	1162	是	方榫规格/长度缺失
+SKU-DRAFT-001156	TOOL-000177	confirm_then_import	B	加长六角套筒	规格：8；特征：加长；类型：六角		工具/套筒	个	8加长六角套筒	1	1163	是	方榫规格/长度缺失
+SKU-DRAFT-001157	TOOL-000178	confirm_then_import	B	加长六角套筒	规格：10；特征：加长；类型：六角		工具/套筒	个	10加长六角套筒	1	1164	是	方榫规格/长度缺失
+SKU-DRAFT-001158	TOOL-000179	confirm_then_import	B	加长六角套筒	规格：12；特征：加长；类型：六角		工具/套筒	个	12加长六角套筒	1	1165	是	方榫规格/长度缺失
+SKU-DRAFT-001159	TOOL-000180	confirm_then_import	B	加长六角套筒	规格：14；特征：加长；类型：六角		工具/套筒	个	14加长六角套筒	1	1166	是	方榫规格/长度缺失
+SKU-DRAFT-001160	TOOL-000181	confirm_then_import	B	混凝土试模	尺寸：150*150*150		工具/检测模具	个	150*150*150混凝土模具	1	1167	是	材质/执行标准缺失，按尺寸先建候选
+SKU-DRAFT-001165	METAL-000083	confirm_then_import	B	扁钢	规格：50*5		钢材/型材	米	50*5扁铁	1	1172	是	材质/执行标准缺失，按截面规格先建候选
+SKU-DRAFT-001170	CHEM-000081	confirm_then_import	B	机油	品牌：道达尔；牌号：46#；包装：20L		化工耗材/润滑油	桶	道达尔46#机油20升	1	1177	是	系列型号/油品类型需确认，按品牌/牌号/包装先建候选
+SKU-DRAFT-001174	TOOL-000183	confirm_then_import	B	美工刀	品牌：得力；颜色：黑色		工具/刀具	个	得力黑美工刀	1	1181	是	刀片宽度缺失，按品牌和颜色先建候选
+SKU-DRAFT-001179	TOOL-000186	confirm_then_import	B	台钳	开口：400；规格：16寸；特征：加重		工具/夹持工具	台	加重400开口16寸台钳	1	1186	是	品牌/型号缺失，按开口和规格先建候选
+SKU-DRAFT-001183	TOOL-000187	confirm_then_import	B	内六角扳手套装	品牌：世达；规格范围：1.5-10		工具/手动工具	套	1.5-10世达内六角扳手	1	1190	是	件数/型号缺失，按品牌和规格范围先建候选
+SKU-DRAFT-001184	TOOL-000188	confirm_then_import	B	开口梅花扳手套装	品牌：世达；规格范围：8-24		工具/手动工具	套	8-24世达开口梅花扳手	1	1191	是	件数/型号缺失，按品牌和规格范围先建候选
+SKU-DRAFT-001185	MAT-000108	confirm_then_import	B	鸭嘴吊具	额定载荷：20T；型式：鸭嘴；功能：万能		吊装索具/吊具	个	20T鸭嘴万能吊具	1	1192	是	认证标准/开口范围缺失，按额定载荷和型式先建候选
+SKU-DRAFT-001186	SPARE-000102	confirm_then_import	B	轴承	品牌：TIMKEN；型号：J90354；进口：是		备品备件/轴承	个	进口TIMKEN-J90354轴承	1	1193	是	轴承类型/尺寸未列，按品牌和型号先建候选
+SKU-DRAFT-001193	CONST-000017	confirm_then_import	B	建筑模板	尺寸：2.44*1.22*15		建筑材料/模板木方	张	2.44*1.22*15模板	1	1200	是	材质/厚度单位缺失，按原尺寸先建候选
+SKU-DRAFT-001200	WELD-000029	confirm_then_import	B	氧气瓶手推车	适用气体：氧气；特征：加厚		焊割设备/气瓶搬运	个	加厚氧气车	1	1207	是	适配瓶规格/承重缺失，按适用气体和加厚特征先建候选
+SKU-DRAFT-001201	WELD-000030	confirm_then_import	B	乙炔瓶手推车	适用气体：乙炔；特征：加厚		焊割设备/气瓶搬运	个	加厚乙炔车	1	1208	是	适配瓶规格/承重缺失，按适用气体和加厚特征先建候选
+SKU-DRAFT-001205	TOOL-000190	confirm_then_import	B	梅花双用扳手	规格：14		工具/手动工具	个	14梅花双用扳手	1	1212	是	品牌/长度缺失，按规格和类型先建候选
+SKU-DRAFT-001211	CONST-000018	confirm_then_import	B	建筑模板	尺寸：2.44*1.22*1.5；颜色：黑色		建筑材料/模板木方	块	2.44*1.22*1.5黑模板	1	1218	是	厚度单位需确认，按原尺寸和颜色先建候选
+SKU-DRAFT-001223	CONST-000019	confirm_then_import	B	建筑模板	尺寸：2.44*1.22*1.5；特征：厚		建筑材料/模板木方	张	2.44*1.22*1.5厚模板	1	1230	是	厚度单位需确认，按原尺寸和厚模板描述先建候选
+SKU-DRAFT-001227	ELEC-TIE-000005	confirm_then_import	B	尼龙扎带	规格：10*50cm；材质：尼龙		电气材料/扎带	包	10*50cm尼龙扎带	1	1234	是	颜色/每包数量缺失，按规格和材质先建候选
+SKU-DRAFT-001228	ELEC-TIE-000006	confirm_then_import	B	尼龙扎带	规格：10*40cm；材质：尼龙		电气材料/扎带	包	10*40cm尼龙扎带	1	1235	是	颜色/每包数量缺失，按规格和材质先建候选
+SKU-DRAFT-001229	ELEC-TIE-000007	confirm_then_import	B	尼龙扎带	规格：10*30cm；材质：尼龙		电气材料/扎带	包	10*30cm尼龙扎带	1	1236	是	颜色/每包数量缺失，按规格和材质先建候选
+SKU-DRAFT-001234	METAL-000088	confirm_then_import	B	铁合页	规格：6；材质：铁；工艺：焊接		五金建材/门窗五金	付	6焊接铁合页	1	1241	是	规格6的尺寸单位/厚度缺失，按原规格先建候选
+SKU-DRAFT-001236	SPARE-000108	confirm_then_import	B	传动皮带	型号：1041		备品备件/传动件	支	皮带1041	1	1243	是	皮带类型需确认；单位建议条，按原单位先保留
+SKU-DRAFT-001237	MAT-000111	confirm_then_import	B	S型挂钩	规格：大号；形状：S型；承重：20kg		五金耗材/挂钩	支	大S挂钩20kg	1	1244	是	材质/表面处理缺失，按规格和承重先建候选
+SKU-DRAFT-001241	TOOL-000198	confirm_then_import	B	重型平口钳	规格：5寸；特征：重型		工具/夹持工具	台	5寸重型平口钳	1	1248	是	开口宽度/品牌缺失，按规格和重型特征先建候选
+SKU-DRAFT-001242	TOOL-000199	confirm_then_import	B	管钳	长度：600mm；特征：防锈型		工具/手动工具	支	防锈型管钳600	1	1249	是	品牌/材质缺失，按长度和防锈型先建候选
+SKU-DRAFT-001245	METAL-000089	confirm_then_import	B	镀锌方管	规格：3*3*3；表面：镀锌		钢材/型材	米	镀锌方管3*3*3	1	1252	是	规格单位/材质未明确，按原规格保留
+SKU-DRAFT-001252	WELD-000033	confirm_then_import	B	氧气瓶手推车	适用气体：氧气；轮型：大充气轮		焊割设备/气瓶搬运	台	大充气轮氧气车	1	1259	是	承重/适配气瓶规格缺失，低精度候选
+SKU-DRAFT-001253	WELD-000034	confirm_then_import	B	乙炔瓶手推车	适用气体：乙炔；轮型：大充气轮		焊割设备/气瓶搬运	台	大充气轮乙炔车	1	1260	是	承重/适配气瓶规格缺失，低精度候选
+SKU-DRAFT-001255	WELD-000035	confirm_then_import	B	氧气瓶手推车	适用气体：氧气；轮胎：43cm		焊割设备/气瓶搬运	台	43cm轮胎氧气车	1	1262	是	承重/适配气瓶规格缺失；43cm轮胎是否等同大充气轮需确认
+SKU-DRAFT-001256	WELD-000036	confirm_then_import	B	乙炔瓶手推车	适用气体：乙炔；轮胎：43cm		焊割设备/气瓶搬运	台	43cm轮胎乙炔车	1	1263	是	承重/适配气瓶规格缺失；43cm轮胎是否等同大充气轮需确认
+SKU-DRAFT-001266	MAT-000113	confirm_then_import	B	手拉葫芦	品牌/标识：三角；额定载荷：1T；链长：6米		吊装索具/葫芦	台	三角手拉葫芦1T*6米	1	1273	是	认证标准未提供，按品牌/标识、载荷和链长候选
+SKU-DRAFT-001267	MAT-000114	confirm_then_import	B	手拉葫芦	品牌/标识：三角；额定载荷：2T；链长：6米		吊装索具/葫芦	台	三角手拉葫芦2T*6米	1	1274	是	认证标准未提供，按品牌/标识、载荷和链长候选
+SKU-DRAFT-001272	PIPE-000267	confirm_then_import	B	PPR球阀	品牌：公元；公称直径：DN50；材质：PPR；类型：球阀		PPR管件/阀门	个	公元DN50PPR球阀	1	1279	是	压力等级缺失，低精度候选
+SKU-DRAFT-001278	PIPE-000272	confirm_then_import	B	PPR三通	品牌：公元；规格：63；材质：PPR；类型：三通		PPR管件/三通	个	公元63 PPR三通	1	1285	是	压力等级缺失，低精度候选
+SKU-DRAFT-001279	PIPE-000273	confirm_then_import	B	PPR直通	品牌：公元；规格：63；材质：PPR；类型：直通		PPR管件/直通	个	公元63 PPR直通	1	1286	是	压力等级缺失，低精度候选
+SKU-DRAFT-001283	PIPE-000276	confirm_then_import	B	PPR球阀	品牌：公元；规格：63；材质：PPR；类型：球阀		PPR管件/阀门	个	公元63PPR球阀	1	1290	是	压力等级缺失，低精度候选
+SKU-DRAFT-001287	SAFE-000085	confirm_then_import	B	布手套	材质：布；结构：双层；特征：加厚		劳保耗材/手套	双	布加厚双层手套	1	1294	是	布与帆布是否同材质需确认
+SKU-DRAFT-001300	MAT-000116	confirm_then_import	B	扁平吊装带	额定载荷：5T；长度：6m；执行标准：国标；颜色：彩色		吊装索具/吊带	根	5T*6m国标彩色吊带	1	1307	是	材质、安全系数缺失
+SKU-DRAFT-001304	PIPE-000280	confirm_then_import	B	铝合金抱箍	规格：50；材质：铝合金		管道紧固/抱箍	个	50铝合金抱箍	1	1311	是	宽度、适配管径缺失
+SKU-DRAFT-001305	PIPE-000281	confirm_then_import	B	铝合金抱箍	规格：80；材质：铝合金		管道紧固/抱箍	个	80铝合金抱箍	1	1312	是	宽度、适配管径缺失
+SKU-DRAFT-001306	TOOL-000202	confirm_then_import	B	管钳	规格：18寸		工具/手动工具	支	18寸管钳	1	1313	是	品牌、材质缺失
+SKU-DRAFT-001307	TOOL-000203	confirm_then_import	B	管钳	规格：24寸		工具/手动工具	支	24寸管钳	1	1314	是	品牌、材质缺失
+SKU-DRAFT-001328	TOOL-000204	confirm_then_import	B	水泵钳	规格：8寸		工具/手动工具	支	8寸水泵钳	1	1335	是	品牌、材质缺失
+SKU-DRAFT-001329	TOOL-000205	confirm_then_import	B	水泵钳	规格：10寸		工具/手动工具	支	10寸水泵钳	1	1336	是	品牌、材质缺失
+SKU-DRAFT-001331	TOOL-000206	confirm_then_import	B	切割机防护罩	适配设备：400切割机；部件：防护罩		工具备件/电动工具配件	个	400切割机防护罩	1	1338	是	适配型号、材质缺失
+SKU-DRAFT-001332	ADMIN-000043	confirm_then_import	B	抹布	形态：大块；颜色：白色		清洁耗材/擦拭材料	kg	大块白抹布	2	1339;1365	是	材质、包装缺失；材质成分缺失，按大块白色抹布先建候选
+SKU-DRAFT-001338	MAT-000120	confirm_then_import	B	木屑	品类：木屑		辅料耗材/吸附填充材料	斤	木屑	1	1345	是	用途、含水率缺失；单位是否改kg需确认
+SKU-DRAFT-001339	ELEC-000144	confirm_then_import	B	插头	类型：三相四线；电流：25A		电气材料/插头插座	个	25A三相四插头；三相四线插头	1	1346	是	电压、防护等级缺失
+SKU-DRAFT-001340	TOOL-000207	confirm_then_import	B	尖凿	规格：大；接口：五坑；类型：尖凿		工具耗材/凿具	支	大五坑尖凿；五坑尖凿	1	1347	是	长度、适配电镐缺失
+SKU-DRAFT-001341	TOOL-000208	confirm_then_import	B	钻头	规格：3.5；材质：钨钢		工具耗材/钻头	支	3.5钨钢钻头	1	1348	是	规格未说明直径等类型；柄型、刃长缺失
+SKU-DRAFT-001342	TOOL-000209	confirm_then_import	B	钻头	规格：3.0；材质：钨钢		工具耗材/钻头	支	3.0钨钢钻头	1	1349	是	规格未说明直径等类型；柄型、刃长缺失
+SKU-DRAFT-001354	MAT-000121	confirm_then_import	B	U型卸扣	额定载荷：17T；型式：U型；执行标准：国标		吊装索具/卸扣	个	17TU型国标卸扣	1	1361	是	销轴形式/证书缺失，按载荷、型式和标准先建候选
+SKU-DRAFT-001355	MAT-000122	confirm_then_import	B	蝴蝶扣	额定载荷：15T；类型：蝴蝶扣		吊装索具/连接件	个	15T蝴蝶扣	1	1362	是	材质/标准/证书缺失，按额定载荷和类型先建候选
+SKU-DRAFT-001373	CHEM-000092	confirm_then_import	B	润滑脂	品牌：克虏伯；型号：NB52		化工耗材/润滑脂	公斤	克虏伯油脂NB52	1	1381	是	包装规格/用途缺失，按品牌和型号先建候选
+SKU-DRAFT-001374	MAT-000129	confirm_then_import	B	PAC污水处理剂	类型：PAC；含量：28%		化工原料/水处理剂	吨	28%PAC污水处理剂	1	1382	是	包装/执行标准缺失，按PAC类型和含量先建候选
+SKU-DRAFT-001375	SPARE-000116	confirm_then_import	B	轴承	品牌：SKF；型号：2315；进口：是		备品备件/轴承	个	进口SKF-2315轴承	1	1383	是	轴承类型/尺寸未列，按品牌和型号先建候选
+SKU-DRAFT-001387	PIPE-000296	confirm_then_import	B	铝合金扣	规格：50；材质：铝合金；特征：加厚		液压/高压管路	个	50加厚铝合金扣	1	1395	是	连接形式缺失，按规格、材质和加厚特征先建候选
+SKU-DRAFT-001388	PIPE-000297	confirm_then_import	B	铝合金扣	规格：80；材质：铝合金；特征：加厚		液压/高压管路	个	80加厚铝合金扣	1	1396	是	连接形式缺失，按规格、材质和加厚特征先建候选
+SKU-DRAFT-001391	ADMIN-000045	confirm_then_import	B	喷壶	容量：2L		行政后勤/清洁用品	个	2升喷壶	1	1399	是	材质/喷头类型缺失，按容量先建候选
+SKU-DRAFT-001405	PIPE-000303	confirm_then_import	B	无缝钢管	外径：76mm；壁厚：8mm		钢材/钢管	米	76*8MM无缝管	1	1414	是	材质/执行标准缺失，按外径和壁厚先建候选
+SKU-DRAFT-001407	MAT-000132	confirm_then_import	B	扁平吊装带	额定载荷：2T；长度：2米；颜色：彩色		吊装索具/吊带	条	彩色吊带2T*2米	1	1416	是	材质/安全系数缺失，按载荷和长度先建候选
+SKU-DRAFT-001408	MAT-000133	confirm_then_import	B	手拉葫芦	额定载荷：2T；链长：3米		吊装索具/葫芦	台	2T*3米手拉葫芦	1	1417	是	品牌/认证标准缺失，按载荷和链长先建候选
+SKU-DRAFT-001411	MAT-000134	confirm_then_import	B	扁平吊装带	执行标准：国标；额定载荷：5T；长度：8米；颜色：彩色		吊装索具/吊带	条	国标彩色吊带5T*8米	1	1420	是	材质/安全系数缺失，按载荷、长度和国标描述先建候选
+SKU-DRAFT-001438	PIPE-000313	confirm_then_import	B	高压胶管	规格：50；结构等级：4SH		液压/高压管路	米	50*4SH高压胶管	1	1447	是	压力等级/执行标准缺失，按规格和4SH结构先建候选；单位为米时接头形式需复核
+SKU-DRAFT-001504	PIPE-000358	confirm_then_import	B	电磁阀	进口：是；型号：2622200		阀门/电磁阀	只	进口电磁阀2622200	1	1513	是	品牌/电压/接口/介质缺失，按型号先建候选
+SKU-DRAFT-001533	TOOL-000229	confirm_then_import	B	钻头	品牌：博世；柄型：五坑三槽；直径：Φ12；长度：200		工具/钻头	支	博世五坑三槽钻头Φ12*200	1	1544	是	材质/适配电锤型号缺失，按品牌、柄型和尺寸先建候选
+SKU-DRAFT-001541	CHEM-000098	confirm_then_import	B	PVC胶水	品牌：公元；包装：1KG；用途：PVC粘接		胶粘剂/PVC胶水	瓶	公元胶水1KG	1	1552	是	型号缺失，按品牌/包装建候选
+SKU-DRAFT-001543	TOOL-000231	confirm_then_import	B	冲孔冲头	直径：Φ14；长度：150		工具/冲头	支	冲孔冲Φ14*150	1	1554	是	材质/适配冲孔机缺失，需后续确认
+SKU-DRAFT-001544	TOOL-000232	confirm_then_import	B	冲孔冲头	直径：Φ16；长度：150		工具/冲头	支	冲孔冲Φ16*150	1	1555	是	材质/适配冲孔机缺失，需后续确认
+SKU-DRAFT-001551	FAST-000072	ready_to_import	A	膨胀螺丝	规格：M12*100		紧固件/膨胀螺丝	支	膨胀螺丝M12*100	1	1562	否	
+SKU-DRAFT-001555	MAT-000156	confirm_then_import	B	空调	品牌：美的；匹数：大1.5匹；功能：冷暖		行政后勤/空调设备	台	美的大1.5匹冷暖空调	1	1566	是	型号/能效等级缺失，需后续确认
+SKU-DRAFT-001557	CONST-000024	ready_to_import	A	PC板	材质：PC；颜色：透明；尺寸：1m*1.5m；厚度：3mm		塑料板材/PC板	块	透明PC板1m*1.5m*3mm	1	1568	否	
+SKU-DRAFT-001559	ADMIN-000047	confirm_then_import	B	记号笔	品牌：得力；颜色：黑色		办公用品/书写工具	支	得力黑色记号笔	1	1570	是	型号/粗细缺失，按品牌/颜色建候选
+SKU-DRAFT-001560	CHEM-000102	confirm_then_import	B	防锈漆	品牌：立邦；颜色：白色；包装：18KG		油漆涂料/防锈漆	桶	立邦白色防锈漆18KG	1	1571	是	型号/适用底材缺失，需后续确认
+SKU-DRAFT-001562	MAT-000157	confirm_then_import	B	整理箱	尺寸：800*800*600；配置：带盖		行政后勤/收纳用品	只	整理箱带盖800*800*600	1	1573	是	材质/容量缺失，需后续确认
+SKU-DRAFT-001604	MAT-000165	confirm_then_import	B	带盖方桶	材质：牛筋；容量：6L；配置：带盖	地点备注:蕰川路	容器/塑料桶	只	牛筋带盖方桶6L(蕰川路)；牛筋带盖方桶6L	2	1615;1893	是	地点备注不进标准名；尺寸/颜色缺失需确认；尺寸/颜色缺失，按材质/容量/配置先建候选；与既有同类可合并需复核
+SKU-DRAFT-001610	TOOL-000236	ready_to_import	A	羊毛刷	规格：3寸；材质：羊毛		涂装工具/刷子	把	羊毛刷3寸	1	1621	否	
+SKU-DRAFT-001611	CHEM-000108	confirm_then_import	B	防锈漆	品牌：立邦；颜色：桔黄色；包装：18kg		油漆涂料/防锈漆	桶	立邦桔黄色防锈漆18kg	1	1622	是	型号/适用底材/SDS缺失，需后续确认
+SKU-DRAFT-001613	CHEM-000110	confirm_then_import	B	防锈漆	品牌：立邦；颜色：深黄；包装：18KG		油漆涂料/防锈漆	桶	立邦深黄防锈漆18KG	1	1624	是	型号/适用底材/SDS缺失，需后续确认
+SKU-DRAFT-001614	CHEM-000111	confirm_then_import	B	防锈漆	品牌：立邦；颜色：黑色；包装：18KG		油漆涂料/防锈漆	桶	立邦黑色防锈漆18KG	1	1625	是	型号/适用底材/SDS缺失，需后续确认
+SKU-DRAFT-001615	CHEM-000112	confirm_then_import	B	防锈漆	品牌：立邦；颜色：大红；包装：18KG		油漆涂料/防锈漆	桶	立邦大红防锈漆18KG	1	1626	是	型号/适用底材/SDS缺失，需后续确认
+SKU-DRAFT-001616	CHEM-000113	confirm_then_import	B	防锈漆	品牌：立邦；颜色：淡黄灰；包装：18KG		油漆涂料/防锈漆	桶	立邦淡黄灰防锈漆18KG	1	1627	是	型号/适用底材/SDS缺失，需后续确认
+SKU-DRAFT-001617	CHEM-000114	confirm_then_import	B	防锈漆	品牌：立邦；颜色：桔红；包装：18KG		油漆涂料/防锈漆	桶	立邦桔红防锈漆18KG	1	1628	是	型号/适用底材/SDS缺失，需后续确认
+SKU-DRAFT-001618	CHEM-000115	confirm_then_import	B	防锈漆	品牌：立邦；颜色：铁红；包装：18KG		油漆涂料/防锈漆	桶	立邦铁红防锈漆18KG	1	1629	是	型号/适用底材/SDS缺失，需后续确认
+SKU-DRAFT-001621	TOOL-000237	ready_to_import	A	羊毛刷	规格：2寸；材质：羊毛		涂装工具/刷子	把	羊毛刷2寸	1	1632	否	
+SKU-DRAFT-001631	METAL-000109	confirm_then_import	B	槽钢	规格：10#		钢材/型钢	米	10#槽钢；10#型槽钢；槽钢10#	1	1642	是	材质/执行标准缺失，需后续确认
+SKU-DRAFT-001632	METAL-000110	confirm_then_import	B	槽钢	规格：8#		钢材/型钢	米	8#槽钢	1	1643	是	材质/执行标准缺失，需后续确认
+SKU-DRAFT-001655	TOOL-000242	confirm_then_import	B	两用扳手	品牌：世达；规格：M16；类型：梅花开口两用		工具/手动工具	把	世达M16梅花开口两用扳手	1	1666	是	长度/型号缺失，按品牌/规格/类型先建候选
+SKU-DRAFT-001661	TOOL-000244	confirm_then_import	B	羊毛刷	规格：2.5寸；材质：羊毛		涂装工具/刷子	只	羊毛刷2.5寸	1	1674	是	单位可按把复核；柄型/等级缺失
+SKU-DRAFT-001669	TOOL-000247	confirm_then_import	B	竹扫把	材质：竹；类型：扫把		清洁工具/扫把	把	竹扫把	1	1683	是	规格缺失，按材质/类型先建候选
+SKU-DRAFT-001671	METAL-000113	confirm_then_import	B	不锈钢漏斗	材质：316不锈钢；口径：18cm		容器/漏斗	只	316漏斗18cm	1	1685	是	容量/出口直径缺失，需后续确认
+SKU-DRAFT-001688	TOOL-000253	confirm_then_import	B	漆刷	规格：3寸	用途:涂漆	涂装工具/刷子	把	漆刷3寸	1	1703	是	刷毛材质未明确，可能与羊毛刷等同类需确认
+SKU-DRAFT-001690	HW-LOCK-000012	confirm_then_import	B	不锈钢挂锁	规格：40；材质：不锈钢；类型：通用挂锁		五金/锁具	把	40不锈钢通用挂锁	1	1705	是	锁梁规格/钥匙通开情况缺失，需后续确认
+SKU-DRAFT-001704	ELEC-000164	confirm_then_import	B	五孔插座	品牌：公牛；安装：明装；类型：五孔		电气/插座	套	公牛明装五孔插座	1	1719	是	额定电流/型号缺失，需后续确认
+SKU-DRAFT-001716	TOOL-000256	confirm_then_import	B	钢卷尺	品牌：雄狮；长度：100m；材质：钢		工具/测量工具	只	雄狮钢卷尺100m	1	1731	是	精度等级/尺带宽度缺失，需后续确认
+SKU-DRAFT-001717	TOOL-000257	confirm_then_import	B	墨斗	类型：墨斗		工具/测量放线工具	个	墨斗	1	1732	是	规格/品牌缺失，按通用墨斗先建候选
+SKU-DRAFT-001728	CHEM-000128	confirm_then_import	B	PET条码不干胶标签	材质：哑银PET；尺寸：40mm*25mm；每卷：1200张		标签耗材/不干胶标签	卷	哑银pet条码不干胶贴纸40mm*25mm*1200张	1	1744	是	胶性/卷芯规格缺失，需后续确认
+SKU-DRAFT-001729	CHEM-000129	confirm_then_import	B	PET条码不干胶标签	材质：哑银PET；尺寸：30mm*10mm；每卷：5000张		标签耗材/不干胶标签	卷	哑银pet条码不干胶贴纸30mm*10mm*5000张	1	1745	是	胶性/卷芯规格缺失，需后续确认
+SKU-DRAFT-001730	MAT-000187	confirm_then_import	B	全树脂基碳带	进口：是；类型：全树脂基；宽度：90mm；长度：300米		标签耗材/碳带	卷	进口全树脂基碳带90mm*300米	1	1746	是	品牌/适配标签材质缺失，需后续确认
+SKU-DRAFT-001731	ELEC-000166	confirm_then_import	B	五孔插座面板	品牌：公牛；类型：五孔插座面板		电气/插座	只	公牛五孔插座面板	1	1747	是	安装方式/额定电流缺失，需后续确认
+SKU-DRAFT-001733	TOOL-000259	confirm_then_import	B	卷尺	品牌：得力；长度：10m		工具/测量工具	把	得力卷尺10m	1	1749	是	尺带宽度/精度缺失，需后续确认
+SKU-DRAFT-001734	TOOL-000260	confirm_then_import	B	卷尺	品牌：得力；长度：5m		工具/测量工具	把	得力卷尺5m	1	1750	是	尺带宽度/精度缺失，需后续确认
+SKU-DRAFT-001758	TOOL-000262	confirm_then_import	B	钢直尺	长度：200mm；材质：钢		工具/测量工具	把	200mm钢直尺	1	1774	是	精度/宽度缺失，按长度和材质先建候选
+SKU-DRAFT-001763	CHEM-000132	confirm_then_import	B	防锈漆	品牌：立邦；颜色：中灰；包装：18KG		油漆涂料/防锈漆	桶	立邦中灰防锈漆18KG	1	1779	是	型号/SDS缺失，按品牌/颜色/包装先建候选
+SKU-DRAFT-001766	TOOL-000264	confirm_then_import	B	电焊钳	额定电流：600A		焊接工具/焊钳	把	电焊钳600A	1	1782	是	品牌/型号缺失，按额定电流先建候选
+SKU-DRAFT-001791	TOOL-000267	confirm_then_import	B	五坑钻头	品牌：博世；柄型：五坑；直径：Φ40；长度：1米		工具/钻头	根	博世五坑钻头Φ40*1米	1	1810	是	材质/适配设备未明确，需后续确认
+SKU-DRAFT-001801	ELEC-000180	confirm_then_import	B	接线端子	型号：UK5N		电气/接线端子	只	接线端子UK5N	1	1820	是	额定电流/线径范围未在原表列明，按型号保留
+SKU-DRAFT-001817	FAST-000080	confirm_then_import	B	高强度全牙螺杆	强度等级：12.9；规格：M30*1m；螺纹形式：全牙	原始:全芽	紧固件/螺杆	根	12.9级全芽螺杆m30*1m	1	1836	是	全芽疑似全牙，按全牙归一；材质/表面处理未明确
+SKU-DRAFT-001824	ELEC-000187	confirm_then_import	B	接线端子	型号：UK5N；颜色：黄绿色		电气/接线端子	只	黄绿色接线端子UK5N	1	1843	是	是否接地端子需确认，额定电流未在原表列明
+SKU-DRAFT-001825	ELEC-000188	confirm_then_import	B	5号电池	品牌：南孚；规格：5号		电气/电池	节	南孚电池5号	1	1844	是	碱性/容量未列明，需后续确认
+SKU-DRAFT-001827	SPARE-000134	confirm_then_import	B	机械密封	材质：合金钢；型号：109-35	原始:机密封	密封件/机械密封	套	合金钢机密封109-35	1	1846	是	机密封按机械密封归一；适配设备/介质未明确
+SKU-DRAFT-001833	SPARE-000136	confirm_then_import	B	泥浆泵活塞	适配型号：BW-250；部件：活塞		设备备件/泥浆泵配件	只	泥浆泵活塞BW-250	1	1852	是	材质/厂家缺失，按适配型号先建候选
+SKU-DRAFT-001834	SPARE-000137	confirm_then_import	B	泥浆泵活塞	适配型号：BW-150；部件：活塞		设备备件/泥浆泵配件	只	泥浆泵活塞BW-150	1	1853	是	材质/厂家缺失，按适配型号先建候选
+SKU-DRAFT-001838	ELEC-000192	confirm_then_import	B	双电源转换器	电压：220V；极数：2P；电流：20A		电气/低压电器	只	双电源转换器220V-2P-20A	1	1857	是	切换方式/型号缺失，按电压/极数/电流先建候选
+SKU-DRAFT-001848	CHEM-000134	confirm_then_import	B	除锈剂	品牌：WD40；容量：500mL		化工耗材/除锈润滑剂	瓶	WD40除锈剂500ML	1	1867	是	具体型号/SDS缺失，按品牌/容量先建候选
+SKU-DRAFT-001855	SPARE-000138	confirm_then_import	B	水封	型号：VS-75		密封件/水封	只	水封VS-75	1	1874	是	适配设备/材质缺失，按型号先建候选
+SKU-DRAFT-001861	CHEM-000137	confirm_then_import	B	除锈剂	品牌：陶喜；容量：450mL		化工耗材/除锈润滑剂	瓶	陶喜除锈剂450mL	1	1880	是	型号/SDS缺失，按品牌/容量先建候选
+SKU-DRAFT-001863	ADMIN-000057	confirm_then_import	B	油性记号笔	颜色：红色；类型：油性		办公用品/书写工具	支	红色油性记号笔	1	1882	是	品牌/笔头粗细缺失，按颜色/类型先建候选
+SKU-DRAFT-001864	TOOL-000275	confirm_then_import	B	管钳	品牌：世达；规格：14寸		工具/手动工具	把	世达管钳14寸	1	1883	是	型号缺失，按品牌/规格先建候选
+SKU-DRAFT-001874	ELEC-000204	confirm_then_import	B	电位器	品牌：天逸；型号：LA42D；阻值：5K		电气/按钮指示元件	只	天逸电位器LA42D-5K	1	1894	是	安装孔径/用途缺失，按品牌/型号/阻值先建候选
+SKU-DRAFT-001943	ELEC-000214	ready_to_import	A	三脚插头	品牌：公牛；极数：三脚；电压：220V；额定电流：10A		电气/插头插座	只	公牛三脚插头220V/10A	1	1964	否	
+SKU-DRAFT-001945	CHEM-000146	confirm_then_import	B	除锈剂	品牌：WD40；容量：350mL		化工耗材/除锈润滑剂	瓶	WD40除锈剂350ML	1	1967	是	型号/SDS未明，按品牌和容量先建候选
+SKU-DRAFT-001954	FAST-000085	confirm_then_import	B	镀锌平垫	表面：镀锌；规格：M8；类型：平垫		紧固件/垫圈	只	镀锌平垫m8	1	1977	是	外径/厚度/执行标准缺失，按M8镀锌平垫先建候选
+SKU-DRAFT-001955	MAT-000217	confirm_then_import	B	开口销	规格：M3*60；类型：开口销		紧固件/销	只	开口销m3*60	1	1978	是	材质/执行标准缺失，按规格先建候选
+SKU-DRAFT-001965	TOOL-000294	confirm_then_import	B	地线夹	额定电流：500A；类型：地线夹		焊接工具/焊机配件	把	500A地线夹	1	1989	是	接线范围/材质缺失，按额定电流先建候选
+SKU-DRAFT-001982	TOOL-000296	confirm_then_import	B	活动扳手	品牌：世达；规格：12寸		工具/手动工具	把	世达活动扳手12寸	1	2007	是	型号缺失，按品牌和尺寸先建候选
+SKU-DRAFT-001983	TOOL-000297	confirm_then_import	B	活动扳手	品牌：世达；规格：10寸		工具/手动工具	把	世达活动扳手10寸	1	2008	是	型号缺失，按品牌和尺寸先建候选
+SKU-DRAFT-001985	TOOL-000298	confirm_then_import	B	钢卷尺	品牌：得力；长度：3m		工具/测量工具	把	得力钢卷尺3m	1	2011	是	尺带宽度/精度缺失，按品牌和长度先建候选
+SKU-DRAFT-001986	TOOL-000299	confirm_then_import	B	钢卷尺	品牌：得力；长度：5m		工具/测量工具	把	得力钢卷尺5m	1	2012	是	尺带宽度/精度缺失，按品牌和长度先建候选
+SKU-DRAFT-001987	TOOL-000300	confirm_then_import	B	钢卷尺	品牌：得力；长度：7.5m		工具/测量工具	把	得力钢卷尺7.5m	1	2013	是	尺带宽度/精度缺失，按品牌和长度先建候选
+SKU-DRAFT-001988	TOOL-000301	confirm_then_import	B	钢卷尺	品牌：得力；长度：10m		工具/测量工具	把	得力钢卷尺10m	1	2014	是	尺带宽度/精度缺失，按品牌和长度先建候选
+SKU-DRAFT-002010	ELEC-000222	confirm_then_import	B	插座	型号：DKJ35-50；颜色：黑色		电气/插头插座	只	DKJ35-50黑色插座	1	2036	是	额定电流/接口类型未明，按型号和颜色先建候选
+SKU-DRAFT-002020	TOOL-000310	confirm_then_import	B	三叉套筒扳手	类型：三叉套筒；规格：14-17-19		工具/手动工具	把	三叉套筒扳手14-17-19	1	2046	是	材质/品牌缺失，按三叉规格先建候选
+SKU-DRAFT-002021	TOOL-000311	confirm_then_import	B	三叉套筒扳手	类型：三叉套筒；规格：13-16-18		工具/手动工具	把	三叉套筒扳手13-16-18	1	2047	是	材质/品牌缺失，按三叉规格先建候选
+SKU-DRAFT-002022	TOOL-000312	confirm_then_import	B	三叉套筒扳手	类型：三叉套筒；规格：10-12-14		工具/手动工具	把	三叉套筒扳手10-12-14	1	2048	是	材质/品牌缺失，按三叉规格先建候选
+SKU-DRAFT-002023	TOOL-000313	confirm_then_import	B	T型套筒扳手套装	类型：T型套筒；规格范围：8-19；件数：6件		工具/手动工具	套	T型套筒扳手8-19/6件套装	1	2049	是	材质/品牌缺失，按规格范围和件数先建候选
+SKU-DRAFT-002060	TOOL-000319	confirm_then_import	B	自紧钻夹头	品牌：马牌；夹持范围：0.3-16；接口：B18		电动工具/电钻配件	个	马牌自紧钻夹头0.3-16B18	1	2086	是	适配设备未明，按品牌/夹持范围/接口先建候选
+SKU-DRAFT-002061	ADMIN-000061	confirm_then_import	B	铅笔	规格：2B		办公用品/书写工具	支	2B铅笔	1	2087	是	品牌缺失，按2B规格先建候选
+SKU-DRAFT-002108	TOOL-000320	confirm_then_import	B	尖嘴钳	品牌：世达；类型：尖嘴钳；规格：6寸		工具/手动工具	把	世达尖嘴钳6寸	1	2134	是	型号缺失，按品牌/类型/尺寸先建候选
+SKU-DRAFT-002127	ELEC-000235	confirm_then_import	B	接地桩套件	表面处理：镀锌；规格：18*1m；配置：带螺丝		电气/接地材料	根	镀锌接地桩18*1m带螺丝	1	2153	是	输入为套件但单位为根，材质/镀层厚度缺失
+SKU-DRAFT-002132	ADMIN-000064	confirm_then_import	B	折叠圆桌	直径：1.5米；结构：折叠；形状：圆形		行政后勤/办公家具	张	1.5米折叠圆桌	1	2158	是	材质缺失
+SKU-DRAFT-002133	ADMIN-000065	confirm_then_import	B	办公桌	材质：实木；尺寸：1.4米*0.6米		行政后勤/办公家具	张	实木办公桌1.4米*0.6米	1	2159	是	高度/款式缺失
+SKU-DRAFT-002135	TOOL-000324	confirm_then_import	B	钻头	品牌：博世；柄型：方柄；直径：Φ14；长度：280		工具/钻头	支	博世方柄钻头Φ14*280	1	2161	是	材质/适配设备缺失
+SKU-DRAFT-002136	TOOL-000325	confirm_then_import	B	钻头	品牌：博世；柄型：方柄；直径：Φ12；长度：260		工具/钻头	支	博世方柄钻头Φ12*260	1	2162	是	材质/适配设备缺失
+SKU-DRAFT-002144	PIPE-000470	confirm_then_import	B	内丝直接	表面处理：镀锌；规格：4分；连接：内丝；类型：直接		管件/镀锌管件	只	镀锌4分内丝直接头	1	2170	是	材质/压力等级缺失
+SKU-DRAFT-002149	MAT-000230	confirm_then_import	B	木方	截面：50*100；长度：4m		建筑材料/木材	根	木方50*100*4m	1	2175	是	木材材质/等级缺失
+SKU-DRAFT-002153	TOOL-000327	confirm_then_import	B	钻头	品牌：博世；柄型：圆柄；直径：Φ10；长度：350		工具/钻头	只	博世圆柄钻头Φ10*350	1	2179	是	材质/适配设备缺失
+SKU-DRAFT-002154	TOOL-000328	confirm_then_import	B	钻头	品牌：博世；柄型：二坑二槽；直径：Φ12；长度：350		工具/钻头	只	博世二坑二槽钻头Φ12*350	1	2180	是	材质/适配设备缺失
+SKU-DRAFT-002155	TOOL-000329	confirm_then_import	B	钻头	品牌：博世；柄型：二坑二槽；直径：Φ14；长度：350		工具/钻头	只	博世二坑二槽钻头Φ14*350	1	2181	是	材质/适配设备缺失
+SKU-DRAFT-002156	TOOL-000330	confirm_then_import	B	钻头	品牌：博世；柄型：二坑二槽；直径：Φ16；长度：350		工具/钻头	只	博世二坑二槽钻头Φ16*350	1	2182	是	材质/适配设备缺失
+SKU-DRAFT-002157	WELD-000057	confirm_then_import	B	二保焊机分流器	适配：500型二保焊机；部件：分流器；材质/类型：陶瓷型		焊接耗材/焊枪配件	只	500型二保焊机分流器陶瓷型	1	2183	是	适配焊枪型号缺失
+SKU-DRAFT-002158	WELD-000058	confirm_then_import	B	二保焊机分流器	适配：350型二保焊机；部件：分流器；材质/类型：陶瓷型		焊接耗材/焊枪配件	只	350型二保焊机分流器陶瓷型	1	2184	是	适配焊枪型号缺失
+SKU-DRAFT-002159	TOOL-000331	confirm_then_import	B	水平尺	长度：1m		工具/测量工具	根	水平尺1m	1	2185	是	精度/材质缺失
+SKU-DRAFT-002160	TOOL-000332	confirm_then_import	B	水平尺	长度：0.6m		工具/测量工具	根	水平尺0.6m	1	2186	是	精度/材质缺失
+SKU-DRAFT-002165	ADMIN-000067	confirm_then_import	B	垃圾桶	容量：240L；配置：带盖、带轮		行政后勤/清洁用品	个	240L垃圾桶带盖轮	1	2191	是	材质/颜色缺失
+SKU-DRAFT-002166	MAT-000231	confirm_then_import	B	吊装带	额定载荷：3T；长度：2m		吊装索具/吊带	根	吊带3T*2m	1	2192	是	材质/安全系数缺失
+SKU-DRAFT-002167	MAT-000232	confirm_then_import	B	吊装带	额定载荷：2T；长度：2m		吊装索具/吊带	根	吊带2T*2m	1	2193	是	与同类可合并为同一标准名称；材质/安全系数缺失
+SKU-DRAFT-002173	MAT-000233	confirm_then_import	B	软玻璃门帘	结构：磁吸式；颜色：透明；尺寸：2.55m*1.46m；厚度：3mm		行政后勤/门帘	付	磁吸式透明软玻璃门帘2.55m*1.46m*3mm	1	2199	是	材质等级缺失
+SKU-DRAFT-002174	METAL-000163	confirm_then_import	B	铁丝	材质：铁；规格：12#		五金耗材/金属丝	KG	铁丝12#	1	2200	是	表面处理/线径换算缺失
+SKU-DRAFT-002182	WELD-000060	confirm_then_import	B	不锈钢割枪	品牌：华凌；型号：100#；特征：加长型；材质：不锈钢		焊接工具/气割工具	把	华凌加长型100#不锈钢割枪	1	2208	是	适用气体/长度缺失
+SKU-DRAFT-002186	CONST-000040	confirm_then_import	B	建筑模板	表面/颜色：黑膜；尺寸：1.22m*2.44m；厚度：15mm		建筑材料/模板	块	黑膜板1.22m*2.44m*15mm	1	2212	是	黑膜板按建筑模板归一；材质/周转次数缺失
+SKU-DRAFT-002187	MAT-000234	confirm_then_import	B	方木	截面：30*30；长度：3m		建筑材料/木材	根	方木30*30*3m	1	2213	是	木材等级/材质缺失
+SKU-DRAFT-002192	FAST-000109	confirm_then_import	B	膨胀螺丝	规格：Φ10*80		紧固件/膨胀螺丝	支	膨胀螺丝Φ10*80	1	2218	是	材质/表面处理缺失
+SKU-DRAFT-002193	FAST-000110	confirm_then_import	B	膨胀螺丝	规格：Φ10*110		紧固件/膨胀螺丝	支	膨胀螺丝Φ10*110	1	2219	是	材质/表面处理缺失
+SKU-DRAFT-002194	FAST-000111	confirm_then_import	B	膨胀螺丝	规格：Φ12*80		紧固件/膨胀螺丝	支	膨胀螺丝Φ12*80	1	2220	是	材质/表面处理缺失
+SKU-DRAFT-002195	FAST-000112	confirm_then_import	B	膨胀螺丝	规格：Φ8*70		紧固件/膨胀螺丝	支	膨胀螺丝Φ8*70	1	2221	是	材质/表面处理缺失
+SKU-DRAFT-002196	FAST-000113	confirm_then_import	B	膨胀螺丝	规格：Φ8*90		紧固件/膨胀螺丝	支	膨胀螺丝Φ8*90	1	2222	是	材质/表面处理缺失
+SKU-DRAFT-002197	FAST-000114	confirm_then_import	B	膨胀螺丝	规格：Φ12*110		紧固件/膨胀螺丝	支	膨胀螺丝Φ12*110	1	2223	是	材质/表面处理缺失
+SKU-DRAFT-002205	SAFE-000128	confirm_then_import	B	雨鞋	品牌：回力；尺码：41码；配置：带衬里		劳保耗材/雨具	双	41码回力雨鞋带衬里	1	2231	是	材质/筒高缺失
+SKU-DRAFT-002225	PIPE-000482	confirm_then_import	B	两半扣	材质：合金；规格：DN80；类型：两半扣		液压/管路扣件	套	合金两半扣DN80	1	2251	是	适配管件/压力等级缺失
+SKU-DRAFT-002226	ELEC-000240	confirm_then_import	B	钳形万用表	品牌：世达；类型：钳形万用表		仪表/电气仪表	只	世达钳型万用表	1	2252	是	量程/精度缺失
+SKU-DRAFT-002227	PIPE-000483	confirm_then_import	B	镀锌外丝六角直接	表面处理：镀锌；连接：外丝；结构：六角；规格：2寸		管件/镀锌管件	只	镀锌外丝六角直接2寸	1	2253	是	材质/压力等级缺失
+SKU-DRAFT-002228	MAT-000243	confirm_then_import	B	混凝土振动棒	电压：380V；直径：Φ50；长度：6m		施工设备/振动棒	根	振动棒380V-Φ50-6m	1	2254	是	功率/接口缺失
+SKU-DRAFT-002230	FAST-000120	confirm_then_import	B	镀锌膨胀钩	表面处理：镀锌；规格：M16*130		紧固件/膨胀件	只	镀锌膨胀钩M16*130	1	2256	是	承载/材质缺失
+SKU-DRAFT-002231	FAST-000121	confirm_then_import	B	镀锌花兰螺丝	表面处理：镀锌；规格：M14*350		紧固件/拉紧件	只	镀锌花兰螺丝m14*350	1	2257	是	材质/结构形式缺失
+SKU-DRAFT-002245	ELEC-000243	confirm_then_import	B	欧标转换插头	标准：欧标；孔位：5孔；功能：带USB		电气/插头插座	只	5孔带USB欧标转换插头	1	2271	是	额定电流/USB输出参数缺失
+SKU-DRAFT-002248	METAL-000168	confirm_then_import	B	B型槽钢	型号：B型；规格：10#		金属材料/型材	米	10#B型槽钢	1	2274	是	材质/执行标准缺失
+SKU-DRAFT-002250	PIPE-000486	confirm_then_import	B	镀锌内丝直接	表面处理：镀锌；连接：内丝；规格：6分		管件/镀锌管件	只	镀锌内丝直接6分	1	2276	是	材质/压力等级缺失
+SKU-DRAFT-002251	PIPE-000487	confirm_then_import	B	镀锌三通	表面处理：镀锌；规格：6分；类型：三通		管件/镀锌管件	只	镀锌三通6分	1	2277	是	材质/压力等级缺失
+SKU-DRAFT-002257	ELEC-000245	confirm_then_import	B	开口铜鼻子	类型：开口；材质：铜；电流：200A		电气/接线端子	只	开口铜鼻子200A	1	2283	是	适配线径/镀层缺失
+SKU-DRAFT-002258	ELEC-000246	confirm_then_import	B	开口铜鼻子	类型：开口；材质：铜；电流：100A		电气/接线端子	只	开口铜鼻子100A	1	2284	是	适配线径/镀层缺失
+SKU-DRAFT-002270	ELEC-000251	confirm_then_import	B	塑壳断路器	品牌：常熟；型号：CM3E-630-3300		电气/断路器	只	常熟断路器CM3E-630-3300	1	2296	是	极数/额定电流脱扣参数需确认
+SKU-DRAFT-002272	ELEC-000253	confirm_then_import	B	电源转换器	输入：24V；输出：12V；电流：2A		电气/电源模块	只	电源转换器24V转12V2A	1	2298	是	功率/接口/防护等级缺失
+SKU-DRAFT-002280	TOOL-000341	ready_to_import	A	梅花开口两用扳手	品牌：世达；规格：41#		手动工具/扳手	把	世达梅开两用扳手41#	1	2306	否	
+SKU-DRAFT-002297	TOOL-000343	confirm_then_import	B	二坑二槽钻头	品牌：博世；柄型：二坑二槽；规格：Φ10*160		工具耗材/钻头	支	博世二坑二槽钻头Φ10*160	1	2323	是	材质/适用对象未明，按品牌/柄型/规格先建候选
+SKU-DRAFT-002298	TOOL-000344	confirm_then_import	B	二坑二槽钻头	品牌：博世；柄型：二坑二槽；规格：Φ14*160		工具耗材/钻头	支	博世二坑二槽钻头Φ14*160	1	2324	是	材质/适用对象未明，按品牌/柄型/规格先建候选
+SKU-DRAFT-002299	TOOL-000345	confirm_then_import	B	二坑二槽钻头	品牌：博世；柄型：二坑二槽；规格：Φ16*200		工具耗材/钻头	支	博世二坑二槽钻头Φ16*200	1	2325	是	材质/适用对象未明，按品牌/柄型/规格先建候选
+SKU-DRAFT-002306	TOOL-000346	confirm_then_import	B	梅花开口两用扳手	规格：13		手动工具/扳手	把	梅花开口扳手13	1	2332	是	品牌/材质未指定，按通用两用扳手先建候选
+SKU-DRAFT-002307	TOOL-000347	confirm_then_import	B	梅花开口两用扳手	规格：14		手动工具/扳手	把	梅花开口扳手14	1	2333	是	品牌/材质未指定，按通用两用扳手先建候选
+SKU-DRAFT-002312	WELD-000065	confirm_then_import	B	割嘴	型号：G01-100；规格：2号		焊割工具/割嘴	只	割咀G01-100型2号	1	2338	是	割咀按割嘴归一；适用气体/品牌未明，按型号和规格先建候选
+SKU-DRAFT-002319	MAT-000254	confirm_then_import	B	吊装带	额定载荷：1T；长度：1米		吊装索具/吊带	根	吊带1T*1米	1	2346	是	材质/安全系数缺失，按载荷和长度先建候选
+SKU-DRAFT-002320	MAT-000255	confirm_then_import	B	吊装带	额定载荷：1T；长度：1.5米		吊装索具/吊带	根	吊带1T*1.5米	1	2347	是	材质/安全系数缺失，按载荷和长度先建候选
+SKU-DRAFT-002321	MAT-000256	confirm_then_import	B	吊装带	额定载荷：5T；长度：3米		吊装索具/吊带	根	吊带5T*3米	1	2348	是	材质/安全系数缺失，按载荷和长度先建候选
+SKU-DRAFT-002324	TOOL-000349	confirm_then_import	B	卷尺	长度：3m		量具/卷尺	把	卷尺3m	1	2351	是	尺带宽度/精度等级缺失，按长度先建候选
+SKU-DRAFT-002325	TOOL-000350	confirm_then_import	B	卷尺	长度：5m		量具/卷尺	把	卷尺5m	1	2352	是	尺带宽度/精度等级缺失，按长度先建候选

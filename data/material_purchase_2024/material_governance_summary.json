@@ -1,0 +1,38 @@
+{
+  "merged_rows": 2329,
+  "governed_rows": 2329,
+  "release_candidate_rows": 48,
+  "governance_queue_rows": 2281,
+  "grade_counts": {
+    "C": 2021,
+    "A": 48,
+    "D": 256,
+    "B": 4
+  },
+  "grade_total": 2329,
+  "issue_type_counts": {
+    "needs_human_review": 571,
+    "low_precision_conflict": 202,
+    "none": 48,
+    "alias_conflict": 243,
+    "needs_note_review": 7,
+    "missing_specs": 550,
+    "unit_conflict": 13,
+    "specs_conflict": 691,
+    "note_question": 4
+  },
+  "rule_source_counts": {
+    "default": 467,
+    "rules_yaml": 1862
+  },
+  "override_counts": {
+    "none": 2329
+  },
+  "outputs": {
+    "governed_catalog": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_purchase_2024\\governed_material_catalog.csv",
+    "release_candidates": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_purchase_2024\\governed_release_candidates.csv",
+    "governance_queue": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_purchase_2024\\material_governance_queue.csv",
+    "breakdown": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_purchase_2024\\material_governance_breakdown.csv",
+    "summary": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_purchase_2024\\material_governance_summary.json"
+  }
+}

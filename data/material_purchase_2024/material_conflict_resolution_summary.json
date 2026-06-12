@@ -1,0 +1,30 @@
+{
+  "merged_rows": 2329,
+  "resolved_rows": 50,
+  "resolution_queue_rows": 1522,
+  "alias_context_rows": 2256,
+  "source_conflicts": 635,
+  "auto_resolved_conflicts": 8,
+  "unresolved_conflicts": 627,
+  "import_ready_ratio": 0.0215,
+  "source_conflict_types": {
+    "specs_conflict": 399,
+    "low_precision_conflict": 86,
+    "unit_conflict": 38,
+    "alias_conflict": 112
+  },
+  "resolution_queue_issue_types": {
+    "specs_conflict": 391,
+    "low_precision_conflict": 86,
+    "unit_conflict": 38,
+    "alias_conflict": 112,
+    "needs_human_review": 887,
+    "needs_note_review": 8
+  },
+  "outputs": {
+    "resolved_catalog": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_purchase_2024\\resolved_standard_item_catalog.csv",
+    "resolution_queue": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_purchase_2024\\material_conflict_resolution_queue.csv",
+    "alias_context": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_purchase_2024\\material_alias_context_map.csv",
+    "summary": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_purchase_2024\\material_conflict_resolution_summary.json"
+  }
+}

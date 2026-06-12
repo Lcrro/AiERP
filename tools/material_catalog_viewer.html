@@ -1,0 +1,1942 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>物料检索库浏览</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f8;
+      --panel: #ffffff;
+      --line: #d9dee5;
+      --line-strong: #bbc5cf;
+      --text: #1c2229;
+      --muted: #66727f;
+      --accent: #0f766e;
+      --accent-soft: #dff5f0;
+      --warn: #9a5b05;
+      --warn-soft: #fff3d6;
+      --service: #5b5bd6;
+      --service-soft: #ececff;
+      --danger: #b42318;
+      --danger-soft: #ffe8e5;
+      --shadow: 0 8px 24px rgba(18, 29, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .app {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      padding: 18px 24px 14px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 720;
+      letter-spacing: 0;
+    }
+
+    .source {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fbfcfd;
+      min-height: 74px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1.15;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(240px, 1fr) 180px 210px 150px 90px;
+      gap: 10px;
+      padding: 14px 24px;
+      background: #eef2f4;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .control {
+      display: flex;
+      align-items: center;
+      height: 38px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: var(--panel);
+      overflow: hidden;
+    }
+
+    .control svg {
+      flex: 0 0 auto;
+      margin-left: 10px;
+      color: var(--muted);
+    }
+
+    input,
+    select {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      padding: 0 10px;
+      min-width: 0;
+    }
+
+    button {
+      height: 38px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+      font: inherit;
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 14px;
+      padding: 14px 24px 24px;
+      min-height: 0;
+    }
+
+    .table-wrap,
+    .detail {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      min-height: 0;
+    }
+
+    .table-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .table-head strong {
+      font-size: 15px;
+    }
+
+    .pager {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pager button {
+      width: 34px;
+      padding: 0;
+    }
+
+    .table-scroll {
+      overflow: auto;
+      max-height: calc(100vh - 228px);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 9px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #f8fafb;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    tr {
+      cursor: pointer;
+    }
+
+    tr:hover td,
+    tr.selected td {
+      background: #f2faf8;
+    }
+
+    .code {
+      color: #334155;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .name {
+      font-weight: 650;
+      overflow-wrap: anywhere;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .clip {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+      min-height: 24px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .tag.ok {
+      background: var(--accent-soft);
+      color: #0b5f59;
+    }
+
+    .tag.warn {
+      background: var(--warn-soft);
+      color: var(--warn);
+    }
+
+    .tag.service {
+      background: var(--service-soft);
+      color: var(--service);
+    }
+
+    .tag.danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .detail {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      overflow: hidden;
+    }
+
+    .detail-title {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .detail-title strong {
+      display: block;
+      font-size: 16px;
+      overflow-wrap: anywhere;
+    }
+
+    .detail-body {
+      overflow: auto;
+      max-height: calc(100vh - 184px);
+      padding: 12px 14px 18px;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .field div {
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    .empty {
+      padding: 32px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 980px) {
+      .stats {
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .table-scroll,
+      .detail-body {
+        max-height: none;
+      }
+    }
+
+    @media (max-width: 620px) {
+      header,
+      .toolbar,
+      main {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .title-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .source {
+        white-space: normal;
+      }
+
+      .stats,
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      th:nth-child(4),
+      td:nth-child(4),
+      th:nth-child(5),
+      td:nth-child(5) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title-row">
+        <h1>物料检索库浏览</h1>
+        <div class="source" id="sourceText">加载中</div>
+      </div>
+      <section class="stats" aria-label="物料统计">
+        <div class="metric"><strong id="countCatalog">0</strong><span>原始标准候选</span></div>
+        <div class="metric"><strong id="countMerged">0</strong><span>合并后候选</span></div>
+        <div class="metric"><strong id="countGovernedA">0</strong><span>A级候选</span></div>
+        <div class="metric"><strong id="countGovernanceQueue">0</strong><span>A/B/C/D队列</span></div>
+        <div class="metric"><strong id="countItemMasterDraft">0</strong><span>SKU草案</span></div>
+        <div class="metric"><strong id="countItemMasterImportReady">0</strong><span>可导入SKU</span></div>
+        <div class="metric"><strong id="countItemMasterMissing">0</strong><span>补规格问题</span></div>
+        <div class="metric"><strong id="countItemMasterDedupe">0</strong><span>去重/冲突复核</span></div>
+        <div class="metric"><strong id="countResolved">0</strong><span>可导入物料</span></div>
+        <div class="metric"><strong id="countResolutionQueue">0</strong><span>冲突治理队列</span></div>
+        <div class="metric"><strong id="countConflicts">0</strong><span>冲突清单</span></div>
+        <div class="metric"><strong id="countAliases">0</strong><span>别名上下文</span></div>
+        <div class="metric"><strong id="countManualGovernance">0</strong><span>人工已治理</span></div>
+        <div class="metric"><strong id="countReview">0</strong><span>待确认</span></div>
+        <div class="metric"><strong id="countServices">0</strong><span>非库存服务</span></div>
+      </section>
+    </header>
+
+    <section class="toolbar" aria-label="筛选栏">
+      <div class="control">
+        <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <input id="query" type="search" placeholder="搜索编号、名称、规格、别名、来源行、冲突原因">
+      </div>
+      <div class="control">
+        <select id="dataset">
+          <option value="catalog">标准候选</option>
+          <option value="merged">合并后候选</option>
+          <option value="compositionItems">组成明细</option>
+          <option value="compositionBreakdown">组成统计</option>
+          <option value="governedCatalog">治理后全量</option>
+          <option value="governedRelease">A级候选</option>
+          <option value="materialGovernanceQueue">A/B/C/D队列</option>
+          <option value="materialGovernanceBreakdown">治理统计</option>
+          <option value="itemMasterDraft">SKU草案</option>
+          <option value="itemMasterImportReady">可导入SKU</option>
+          <option value="itemMasterMissingQuestions">补规格问题</option>
+          <option value="itemMasterDedupeReview">去重/冲突复核</option>
+          <option value="manualGovernance">人工治理批次</option>
+          <option value="governanceOverrides">规则覆盖表</option>
+          <option value="resolved">可导入物料</option>
+          <option value="resolutionQueue">冲突治理队列</option>
+          <option value="aliasContext">别名上下文</option>
+          <option value="conflicts">冲突清单</option>
+          <option value="manual">待确认</option>
+          <option value="services">非库存服务</option>
+        </select>
+      </div>
+      <div class="control">
+        <select id="groupFilter">
+          <option value="">全部分组</option>
+        </select>
+      </div>
+      <div class="control">
+        <select id="statusFilter">
+          <option value="">全部状态</option>
+        </select>
+      </div>
+      <button id="resetBtn" type="button" title="清空筛选">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path>
+        </svg>
+      </button>
+    </section>
+
+    <main>
+      <section class="table-wrap">
+        <div class="table-head">
+          <strong id="resultTitle">标准候选</strong>
+          <div class="pager">
+            <button id="prevBtn" type="button" title="上一页">&lt;</button>
+            <span id="pageText">0 / 0</span>
+            <button id="nextBtn" type="button" title="下一页">&gt;</button>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 142px;">编号</th>
+                <th style="width: 180px;">名称</th>
+                <th style="width: 230px;">规格</th>
+                <th style="width: 210px;">分组</th>
+                <th style="width: 90px;">单位</th>
+                <th style="width: 130px;">状态</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+          <div id="empty" class="empty" hidden>没有匹配记录</div>
+        </div>
+      </section>
+
+      <aside class="detail">
+        <div class="detail-title">
+          <strong id="detailName">未选择物料</strong>
+          <span class="muted" id="detailCode">从左侧列表选择一行</span>
+        </div>
+        <div class="detail-body" id="detailBody"></div>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const DATA_PATHS = {
+      catalog: "../data/material_purchase_2024/standard_item_catalog_from_review.csv",
+      aliases: "../data/material_purchase_2024/item_aliases_from_review.csv",
+      merged: "../data/material_purchase_2024/merged_standard_item_catalog.csv",
+      mergedAliases: "../data/material_purchase_2024/merged_item_aliases.csv",
+      conflicts: "../data/material_purchase_2024/merge_conflicts.csv",
+      summary: "../data/material_purchase_2024/merge_summary.json",
+      resolved: "../data/material_purchase_2024/resolved_standard_item_catalog.csv",
+      resolutionQueue: "../data/material_purchase_2024/material_conflict_resolution_queue.csv",
+      aliasContext: "../data/material_purchase_2024/material_alias_context_map.csv",
+      resolutionSummary: "../data/material_purchase_2024/material_conflict_resolution_summary.json",
+      compositionItems: "../data/material_purchase_2024/material_catalog_composition_items.csv",
+      compositionBreakdown: "../data/material_purchase_2024/material_catalog_composition_breakdown.csv",
+      compositionSummary: "../data/material_purchase_2024/material_catalog_composition_summary.json",
+      governedCatalog: "../data/material_purchase_2024/governed_material_catalog.csv",
+      governedRelease: "../data/material_purchase_2024/governed_release_candidates.csv",
+      materialGovernanceQueue: "../data/material_purchase_2024/material_governance_queue.csv",
+      materialGovernanceBreakdown: "../data/material_purchase_2024/material_governance_breakdown.csv",
+      materialGovernanceSummary: "../data/material_purchase_2024/material_governance_summary.json",
+      itemMasterDraft: "../data/material_purchase_2024/standard_item_master_draft.tsv",
+      itemMasterDedupeReview: "../data/material_purchase_2024/material_dedupe_review_queue.tsv",
+      itemMasterMissingQuestions: "../data/material_purchase_2024/material_missing_spec_questions.tsv",
+      itemMasterImportReady: "../data/material_purchase_2024/material_import_ready_items.tsv",
+      itemMasterSummary: "../data/material_purchase_2024/standard_item_master_draft_summary.json",
+      manualGovernance: "../data/material_purchase_2024/manual_governance_progress.csv",
+      groupGovernanceOverrides: "../data/material_purchase_2024/material_group_governance_overrides.csv",
+      itemGovernanceOverrides: "../data/material_purchase_2024/material_item_governance_overrides.csv",
+      aliasGovernanceOverrides: "../data/material_purchase_2024/material_alias_governance_overrides.csv",
+      manual: "../data/material_purchase_2024/manual_review_queue_from_review.csv",
+      services: "../data/material_purchase_2024/non_stock_services_from_review.csv",
+      mappings: "../data/material_purchase_2024/material_group_canonical_mapping.csv"
+    };
+
+    const state = {
+      datasets: {
+        catalog: [],
+        merged: [],
+        compositionItems: [],
+        compositionBreakdown: [],
+        governedCatalog: [],
+        governedRelease: [],
+        materialGovernanceQueue: [],
+        materialGovernanceBreakdown: [],
+        itemMasterDraft: [],
+        itemMasterImportReady: [],
+        itemMasterMissingQuestions: [],
+        itemMasterDedupeReview: [],
+        manualGovernance: [],
+        governanceOverrides: [],
+        resolved: [],
+        resolutionQueue: [],
+        aliasContext: [],
+        conflicts: [],
+        manual: [],
+        services: []
+      },
+      aliases: [],
+      mergedAliases: [],
+      summary: {},
+      resolutionSummary: {},
+      compositionSummary: {},
+      materialGovernanceSummary: {},
+      itemMasterSummary: {},
+      mappings: new Map(),
+      filtered: [],
+      dataset: "catalog",
+      selectedId: "",
+      page: 1,
+      pageSize: 40
+    };
+
+    const el = {
+      sourceText: document.getElementById("sourceText"),
+      countCatalog: document.getElementById("countCatalog"),
+      countMerged: document.getElementById("countMerged"),
+      countGovernedA: document.getElementById("countGovernedA"),
+      countGovernanceQueue: document.getElementById("countGovernanceQueue"),
+      countItemMasterDraft: document.getElementById("countItemMasterDraft"),
+      countItemMasterImportReady: document.getElementById("countItemMasterImportReady"),
+      countItemMasterMissing: document.getElementById("countItemMasterMissing"),
+      countItemMasterDedupe: document.getElementById("countItemMasterDedupe"),
+      countResolved: document.getElementById("countResolved"),
+      countResolutionQueue: document.getElementById("countResolutionQueue"),
+      countConflicts: document.getElementById("countConflicts"),
+      countAliases: document.getElementById("countAliases"),
+      countManualGovernance: document.getElementById("countManualGovernance"),
+      countReview: document.getElementById("countReview"),
+      countServices: document.getElementById("countServices"),
+      query: document.getElementById("query"),
+      dataset: document.getElementById("dataset"),
+      groupFilter: document.getElementById("groupFilter"),
+      statusFilter: document.getElementById("statusFilter"),
+      resetBtn: document.getElementById("resetBtn"),
+      resultTitle: document.getElementById("resultTitle"),
+      prevBtn: document.getElementById("prevBtn"),
+      nextBtn: document.getElementById("nextBtn"),
+      pageText: document.getElementById("pageText"),
+      tbody: document.getElementById("tbody"),
+      empty: document.getElementById("empty"),
+      detailName: document.getElementById("detailName"),
+      detailCode: document.getElementById("detailCode"),
+      detailBody: document.getElementById("detailBody")
+    };
+
+    init().catch((error) => {
+      el.sourceText.textContent = "加载失败";
+      el.tbody.innerHTML = "";
+      el.empty.hidden = false;
+      el.empty.textContent = error.message;
+    });
+
+    async function init() {
+      const [
+        catalog,
+        aliases,
+        merged,
+        mergedAliases,
+        conflicts,
+        summary,
+        resolved,
+        resolutionQueue,
+        aliasContext,
+        resolutionSummary,
+        compositionItems,
+        compositionBreakdown,
+        compositionSummary,
+        governedCatalog,
+        governedRelease,
+        materialGovernanceQueue,
+        materialGovernanceBreakdown,
+        materialGovernanceSummary,
+        itemMasterDraft,
+        itemMasterDedupeReview,
+        itemMasterMissingQuestions,
+        itemMasterImportReady,
+        itemMasterSummary,
+        manualGovernance,
+        groupGovernanceOverrides,
+        itemGovernanceOverrides,
+        aliasGovernanceOverrides,
+        manual,
+        services,
+        mappings
+      ] = await Promise.all([
+        loadCsv(DATA_PATHS.catalog),
+        loadCsv(DATA_PATHS.aliases),
+        loadCsv(DATA_PATHS.merged),
+        loadCsv(DATA_PATHS.mergedAliases),
+        loadCsv(DATA_PATHS.conflicts),
+        loadJson(DATA_PATHS.summary),
+        loadCsv(DATA_PATHS.resolved),
+        loadCsv(DATA_PATHS.resolutionQueue),
+        loadCsv(DATA_PATHS.aliasContext),
+        loadJson(DATA_PATHS.resolutionSummary),
+        loadCsv(DATA_PATHS.compositionItems),
+        loadCsv(DATA_PATHS.compositionBreakdown),
+        loadJson(DATA_PATHS.compositionSummary),
+        loadCsv(DATA_PATHS.governedCatalog),
+        loadCsv(DATA_PATHS.governedRelease),
+        loadCsv(DATA_PATHS.materialGovernanceQueue),
+        loadCsv(DATA_PATHS.materialGovernanceBreakdown),
+        loadJson(DATA_PATHS.materialGovernanceSummary),
+        loadTsv(DATA_PATHS.itemMasterDraft),
+        loadTsv(DATA_PATHS.itemMasterDedupeReview),
+        loadTsv(DATA_PATHS.itemMasterMissingQuestions),
+        loadTsv(DATA_PATHS.itemMasterImportReady),
+        loadJson(DATA_PATHS.itemMasterSummary),
+        loadCsv(DATA_PATHS.manualGovernance),
+        loadCsv(DATA_PATHS.groupGovernanceOverrides),
+        loadCsv(DATA_PATHS.itemGovernanceOverrides),
+        loadCsv(DATA_PATHS.aliasGovernanceOverrides),
+        loadCsv(DATA_PATHS.manual),
+        loadCsv(DATA_PATHS.services),
+        loadCsv(DATA_PATHS.mappings)
+      ]);
+
+      mappings.forEach((row) => state.mappings.set(row.reviewed_group_path, row));
+      state.aliases = aliases;
+      state.mergedAliases = mergedAliases;
+      state.summary = summary;
+      state.resolutionSummary = resolutionSummary;
+      state.compositionSummary = compositionSummary;
+      state.materialGovernanceSummary = materialGovernanceSummary;
+      state.itemMasterSummary = itemMasterSummary;
+      state.datasets.catalog = catalog.map((row) => normalizeCatalogRow(row));
+      state.datasets.merged = merged.map((row) => normalizeMergedRow(row));
+      state.datasets.compositionItems = compositionItems.map((row) => normalizeCompositionItemRow(row));
+      state.datasets.compositionBreakdown = compositionBreakdown.map((row, index) => normalizeCompositionBreakdownRow(row, index));
+      state.datasets.governedCatalog = governedCatalog.map((row) => normalizeGovernedRow(row, "governedCatalog"));
+      state.datasets.governedRelease = governedRelease.map((row) => normalizeGovernedRow(row, "governedRelease"));
+      state.datasets.materialGovernanceQueue = materialGovernanceQueue.map((row) => normalizeMaterialGovernanceQueueRow(row));
+      state.datasets.materialGovernanceBreakdown = materialGovernanceBreakdown.map((row, index) => normalizeGovernanceBreakdownRow(row, index));
+      state.datasets.itemMasterDraft = itemMasterDraft.map((row) => normalizeItemMasterDraftRow(row));
+      state.datasets.itemMasterDedupeReview = itemMasterDedupeReview.map((row) => normalizeItemMasterDedupeReviewRow(row));
+      state.datasets.itemMasterMissingQuestions = itemMasterMissingQuestions.map((row) => normalizeItemMasterMissingQuestionRow(row));
+      state.datasets.itemMasterImportReady = itemMasterImportReady.map((row) => normalizeItemMasterImportReadyRow(row));
+      state.datasets.manualGovernance = manualGovernance.map((row) => normalizeManualGovernanceRow(row));
+      state.datasets.governanceOverrides = normalizeGovernanceOverrides([
+        ["分组覆盖表", groupGovernanceOverrides],
+        ["单物料覆盖表", itemGovernanceOverrides],
+        ["别名覆盖表", aliasGovernanceOverrides]
+      ]);
+      state.datasets.resolved = resolved.map((row) => normalizeResolvedRow(row));
+      state.datasets.resolutionQueue = resolutionQueue.map((row) => normalizeResolutionQueueRow(row));
+      state.datasets.aliasContext = aliasContext.map((row) => normalizeAliasContextRow(row));
+      state.datasets.conflicts = conflicts.map((row, index) => normalizeConflictRow(row, index));
+      state.datasets.manual = manual.map((row) => normalizeQueueRow(row, "manual"));
+      state.datasets.services = services.map((row) => normalizeQueueRow(row, "services"));
+
+      el.countCatalog.textContent = formatNumber(summary.source_rows || state.datasets.catalog.length);
+      el.countMerged.textContent = formatNumber(summary.merged_rows || state.datasets.merged.length);
+      el.countGovernedA.textContent = formatNumber(
+        materialGovernanceSummary.release_candidate_rows || state.datasets.governedRelease.length
+      );
+      el.countGovernanceQueue.textContent = formatNumber(
+        materialGovernanceSummary.governance_queue_rows || state.datasets.materialGovernanceQueue.length
+      );
+      el.countItemMasterDraft.textContent = formatNumber(itemMasterSummary.draft_sku_count || state.datasets.itemMasterDraft.length);
+      el.countItemMasterImportReady.textContent = formatNumber(itemMasterSummary.import_ready_count || state.datasets.itemMasterImportReady.length);
+      el.countItemMasterMissing.textContent = formatNumber(itemMasterSummary.missing_question_count || state.datasets.itemMasterMissingQuestions.length);
+      el.countItemMasterDedupe.textContent = formatNumber(state.datasets.itemMasterDedupeReview.length);
+      el.countResolved.textContent = formatNumber(resolutionSummary.resolved_rows || state.datasets.resolved.length);
+      el.countResolutionQueue.textContent = formatNumber(
+        resolutionSummary.resolution_queue_rows || state.datasets.resolutionQueue.length
+      );
+      el.countConflicts.textContent = formatNumber(summary.conflicts || state.datasets.conflicts.length);
+      el.countAliases.textContent = formatNumber(
+        resolutionSummary.alias_context_rows || state.datasets.aliasContext.length
+      );
+      el.countManualGovernance.textContent = formatNumber(state.datasets.manualGovernance.length);
+      el.countReview.textContent = formatNumber(state.datasets.manual.length);
+      el.countServices.textContent = formatNumber(state.datasets.services.length);
+      el.sourceText.textContent = "data/material_purchase_2024";
+
+      bindEvents();
+      refreshFilters();
+      applyFilters();
+    }
+
+    function bindEvents() {
+      el.query.addEventListener("input", () => {
+        state.page = 1;
+        applyFilters();
+      });
+      el.dataset.addEventListener("change", () => {
+        state.dataset = el.dataset.value;
+        state.page = 1;
+        state.selectedId = "";
+        refreshFilters();
+        applyFilters();
+      });
+      el.groupFilter.addEventListener("change", () => {
+        state.page = 1;
+        applyFilters();
+      });
+      el.statusFilter.addEventListener("change", () => {
+        state.page = 1;
+        applyFilters();
+      });
+      el.resetBtn.addEventListener("click", () => {
+        el.query.value = "";
+        el.groupFilter.value = "";
+        el.statusFilter.value = "";
+        state.page = 1;
+        applyFilters();
+      });
+      el.prevBtn.addEventListener("click", () => {
+        if (state.page > 1) {
+          state.page -= 1;
+          renderTable();
+        }
+      });
+      el.nextBtn.addEventListener("click", () => {
+        const totalPages = Math.max(1, Math.ceil(state.filtered.length / state.pageSize));
+        if (state.page < totalPages) {
+          state.page += 1;
+          renderTable();
+        }
+      });
+    }
+
+    function refreshFilters() {
+      const rows = state.datasets[state.dataset];
+      const groups = unique(rows.map((row) => row.group).filter(Boolean)).sort(localeSort);
+      const statuses = unique(rows.map((row) => row.status).filter(Boolean)).sort(localeSort);
+      fillSelect(el.groupFilter, "全部分组", groups);
+      fillSelect(el.statusFilter, "全部状态", statuses);
+    }
+
+    function applyFilters() {
+      const query = normalizeText(el.query.value);
+      const group = el.groupFilter.value;
+      const status = el.statusFilter.value;
+      const rows = state.datasets[state.dataset];
+
+      state.filtered = rows.filter((row) => {
+        if (group && row.group !== group) return false;
+        if (status && row.status !== status) return false;
+        if (!query) return true;
+        return row.searchText.includes(query);
+      });
+
+      renderTable();
+      renderSelected();
+    }
+
+    function renderTable() {
+      const totalPages = Math.max(1, Math.ceil(state.filtered.length / state.pageSize));
+      state.page = Math.min(state.page, totalPages);
+      const start = (state.page - 1) * state.pageSize;
+      const rows = state.filtered.slice(start, start + state.pageSize);
+      const titleMap = {
+        catalog: "标准候选",
+        merged: "合并后候选",
+        compositionItems: "组成明细",
+        compositionBreakdown: "组成统计",
+        governedCatalog: "治理后全量",
+        governedRelease: "A级候选",
+        materialGovernanceQueue: "A/B/C/D队列",
+        materialGovernanceBreakdown: "治理统计",
+        itemMasterDraft: "SKU草案",
+        itemMasterImportReady: "可导入SKU",
+        itemMasterMissingQuestions: "补规格问题",
+        itemMasterDedupeReview: "去重/冲突复核",
+        manualGovernance: "人工治理批次",
+        governanceOverrides: "规则覆盖表",
+        resolved: "可导入物料",
+        resolutionQueue: "冲突治理队列",
+        aliasContext: "别名上下文",
+        conflicts: "冲突清单",
+        manual: "待确认",
+        services: "非库存服务"
+      };
+
+      el.resultTitle.textContent = `${titleMap[state.dataset]} · ${formatNumber(state.filtered.length)} 条`;
+      el.pageText.textContent = `${state.page} / ${totalPages}`;
+      el.prevBtn.disabled = state.page <= 1;
+      el.nextBtn.disabled = state.page >= totalPages;
+      el.empty.hidden = rows.length > 0;
+
+      el.tbody.innerHTML = rows.map((row) => `
+        <tr data-id="${escapeHtml(row.id)}" class="${row.id === state.selectedId ? "selected" : ""}">
+          <td><div class="code">${escapeHtml(row.code)}</div><div class="muted">${escapeHtml(row.sourceRows || "")}</div></td>
+          <td><div class="name">${escapeHtml(row.name)}</div><div class="muted clip">${escapeHtml(row.aliases || row.rawName || "")}</div></td>
+          <td><div class="clip">${escapeHtml(row.specs || "")}</div></td>
+          <td><div class="clip">${escapeHtml(row.canonicalGroup || row.group || "")}</div><div class="muted clip">${escapeHtml(row.group || "")}</div></td>
+          <td>${escapeHtml(row.unit || "")}</td>
+          <td>${statusTag(row)}</td>
+        </tr>
+      `).join("");
+
+      [...el.tbody.querySelectorAll("tr")].forEach((tr) => {
+        tr.addEventListener("click", () => {
+          state.selectedId = tr.dataset.id;
+          renderTable();
+          renderSelected();
+        });
+      });
+    }
+
+    function renderSelected() {
+      const row = state.filtered.find((item) => item.id === state.selectedId) || state.filtered[0];
+      if (!row) {
+        el.detailName.textContent = "未选择物料";
+        el.detailCode.textContent = "没有匹配记录";
+        el.detailBody.innerHTML = "";
+        return;
+      }
+      if (!state.selectedId) state.selectedId = row.id;
+
+      el.detailName.textContent = row.name;
+      el.detailCode.textContent = row.code;
+      const fields = [
+        ["标准名称", row.name],
+        ["临时编号", row.code],
+        ["原始叫法 / 别名", row.aliases || row.rawName],
+        ["规格", row.specs],
+        ["单位", row.unit],
+        ["原始分组", row.group],
+        ["治理后分组", row.canonicalGroup],
+        ["分组映射依据", row.mappingReason],
+        ["状态", row.status],
+        ["草案 SKU ID", row.draftSkuId],
+        ["编码前缀", row.codePrefix],
+        ["发布状态", row.releaseStatus],
+        ["导入决策", row.importDecision],
+        ["导入状态", row.importStatus],
+        ["确认原因", row.confirmationReason],
+        ["候选数量", row.candidateCount],
+        ["等级计数", row.gradeCounts],
+        ["匹配分类", row.matchedCategory],
+        ["去重键", row.dedupeKey],
+        ["来源行", row.sourceRows],
+        ["来源数量", row.sourceCount],
+        ["来源候选数", row.sourceCandidateCount],
+        ["合并来源类型", row.mergeSourceType],
+        ["合并来源", row.mergedFrom],
+        ["合并原因", row.mergeReason],
+        ["合并置信度", row.mergeConfidence],
+        ["置信度区间", row.confidenceBucket],
+        ["治理等级", row.governanceGrade],
+        ["治理状态", row.governanceStatus],
+        ["识别", row.identify],
+        ["规格归一", row.specNormalization],
+        ["标准名归一", row.standardNameNormalization],
+        ["治理原因", row.governanceReason],
+        ["治理下一步", row.nextAction],
+        ["缺失规格", row.missingSpecs],
+        ["匹配规则", row.matchedRuleKey],
+        ["规则来源", row.ruleSource],
+        ["覆盖来源", row.overrideSource],
+        ["覆盖表", row.overrideTable],
+        ["处理状态", row.resolutionStatus],
+        ["处理原因", row.resolutionReason],
+        ["组成主分类", row.compositionBucket],
+        ["组成原因", row.compositionReason],
+        ["阻塞冲突", row.blockingConflictTypes],
+        ["相关冲突", row.relatedConflictTypes],
+        ["治理问题类型", row.resolutionIssueTypes],
+        ["人工判断", row.judgement],
+        ["冲突类型", row.conflictType],
+        ["候选编号", row.candidateCodes],
+        ["冲突原因", row.reason],
+        ["统计维度", row.breakdownSection],
+        ["统计数量", row.breakdownCount],
+        ["统计占比", row.breakdownPercent],
+        ["问题编号", row.questionId],
+        ["优先级", row.priority],
+        ["严重程度", row.severity],
+        ["复核状态", row.reviewStatus],
+        ["建议动作", row.suggestedAction],
+        ["候选上下文", row.candidateContexts],
+        ["是否需要确认", row.requiresConfirmation],
+        ["别名歧义原因", row.ambiguityReason],
+        ["备注 / 问题", row.notes || row.question],
+        ["人工复核", row.needsReview ? "需要" : "不需要"]
+      ];
+
+      el.detailBody.innerHTML = fields
+        .filter(([, value]) => value !== undefined && value !== null && value !== "")
+        .map(([label, value]) => `
+          <div class="field">
+            <label>${escapeHtml(label)}</label>
+            <div>${escapeHtml(String(value))}</div>
+          </div>
+        `).join("");
+    }
+
+    function normalizeCatalogRow(row) {
+      const mapping = state.mappings.get(row.item_group) || {};
+      const canonicalGroup = mapping.canonical_group_path || row.item_group || "";
+      const needsReview = mapping.needs_human_review === "true";
+      const status = row.source_statuses || (needsReview ? "需复核" : "可建档");
+      return {
+        type: "catalog",
+        id: row.proposed_item_code,
+        code: row.proposed_item_code,
+        name: row.standard_name,
+        group: row.item_group,
+        canonicalGroup,
+        specs: row.specs,
+        unit: row.unit,
+        status,
+        aliases: row.alias_names,
+        sourceRows: row.source_rows,
+        sourceCount: row.source_count,
+        notes: row.notes,
+        needsReview,
+        mappingReason: mapping.rule_reason || "",
+        searchText: normalizeText([
+          row.proposed_item_code,
+          row.standard_name,
+          row.item_group,
+          canonicalGroup,
+          row.specs,
+          row.unit,
+          row.source_statuses,
+          row.alias_names,
+          row.source_rows,
+          row.notes
+        ].join(" "))
+      };
+    }
+
+    function normalizeMergedRow(row) {
+      const needsReview = row.needs_human_review === "true";
+      const status = needsReview ? "需复核" : "可作为导入候选";
+      return {
+        type: "merged",
+        id: row.merged_item_code,
+        code: row.merged_item_code,
+        name: row.standard_name,
+        group: row.reviewed_group_paths,
+        canonicalGroup: row.canonical_group_path,
+        specs: row.specs,
+        unit: row.unit,
+        status,
+        aliases: row.alias_names,
+        sourceRows: row.source_rows,
+        sourceCount: row.source_count,
+        notes: row.notes,
+        mergedFrom: row.merged_from_codes,
+        mergeReason: row.merge_reason,
+        mergeConfidence: row.merge_confidence,
+        needsReview,
+        mappingReason: "",
+        searchText: normalizeText([
+          row.merged_item_code,
+          row.standard_name,
+          row.reviewed_group_paths,
+          row.canonical_group_path,
+          row.specs,
+          row.unit,
+          row.source_statuses,
+          row.alias_names,
+          row.source_rows,
+          row.notes,
+          row.merged_from_codes,
+          row.merge_reason,
+          row.merge_confidence,
+          status
+        ].join(" "))
+      };
+    }
+
+    function normalizeCompositionItemRow(row) {
+      const needsReview = row.needs_human_review === "true" || row.composition_bucket.includes("冲突") || row.composition_bucket.includes("复核");
+      return {
+        type: "compositionItems",
+        id: row.merged_item_code,
+        code: row.merged_item_code,
+        name: row.standard_name,
+        group: row.canonical_group_path,
+        canonicalGroup: row.canonical_group_path,
+        specs: row.specs,
+        unit: row.unit,
+        status: row.composition_bucket,
+        aliases: row.alias_names,
+        sourceRows: row.source_rows,
+        sourceCount: row.source_count,
+        sourceCandidateCount: row.source_candidate_count,
+        mergeSourceType: row.merge_source_type,
+        mergeReason: row.merge_reason,
+        mergeConfidence: row.merge_confidence,
+        confidenceBucket: row.confidence_bucket,
+        relatedConflictTypes: row.related_conflict_types,
+        resolutionIssueTypes: row.resolution_issue_types,
+        compositionBucket: row.composition_bucket,
+        compositionReason: row.composition_reason,
+        needsReview,
+        mappingReason: "",
+        searchText: normalizeText([
+          row.merged_item_code,
+          row.standard_name,
+          row.canonical_group_path,
+          row.specs,
+          row.unit,
+          row.source_count,
+          row.source_candidate_count,
+          row.merge_source_type,
+          row.merge_reason,
+          row.merge_confidence,
+          row.confidence_bucket,
+          row.needs_human_review,
+          row.note_has_open_question,
+          row.related_conflict_types,
+          row.resolution_issue_types,
+          row.composition_bucket,
+          row.composition_reason,
+          row.source_rows,
+          row.alias_names
+        ].join(" "))
+      };
+    }
+
+    function normalizeCompositionBreakdownRow(row, index) {
+      const status = `${row.count} · ${row.percent}`;
+      return {
+        type: "compositionBreakdown",
+        id: `breakdown-${index}-${row.section}-${row.key}`,
+        code: row.section,
+        name: row.label || row.key,
+        group: row.section,
+        canonicalGroup: row.section,
+        specs: row.description,
+        unit: row.count,
+        status,
+        aliases: row.key,
+        sourceRows: "",
+        sourceCount: row.count,
+        notes: row.description,
+        breakdownSection: row.section,
+        breakdownCount: row.count,
+        breakdownPercent: row.percent,
+        needsReview: row.section === "主分类" && (row.key.includes("冲突") || row.key.includes("复核") || row.key.includes("治理")),
+        mappingReason: "",
+        searchText: normalizeText([
+          row.section,
+          row.key,
+          row.label,
+          row.count,
+          row.percent,
+          row.description
+        ].join(" "))
+      };
+    }
+
+    function normalizeGovernedRow(row, type) {
+      const needsReview = row.governance_grade !== "A";
+      return {
+        type,
+        id: row.merged_item_code,
+        code: row.merged_item_code,
+        name: row.standard_name,
+        group: row.canonical_group_path,
+        canonicalGroup: row.canonical_group_path,
+        specs: row.specs,
+        unit: row.unit,
+        status: row.governance_status || row.governance_grade,
+        aliases: row.alias_names,
+        sourceRows: row.source_rows,
+        sourceCount: row.source_count,
+        sourceCandidateCount: row.source_candidate_count,
+        mergeReason: row.merge_reason,
+        mergeConfidence: row.merge_confidence,
+        governanceGrade: row.governance_grade,
+        governanceStatus: row.governance_status,
+        governanceReason: row.governance_reason,
+        nextAction: row.next_action,
+        missingSpecs: row.missing_specs,
+        matchedRuleKey: row.matched_rule_key,
+        ruleSource: ruleSourceLabel(row.rule_source),
+        overrideSource: row.override_source,
+        conflictType: row.issue_type,
+        relatedConflictTypes: row.related_conflict_types,
+        resolutionIssueTypes: row.resolution_issue_types,
+        compositionBucket: row.original_composition_bucket,
+        needsReview,
+        mappingReason: "",
+        searchText: normalizeText([
+          row.merged_item_code,
+          row.standard_name,
+          row.canonical_group_path,
+          row.specs,
+          row.unit,
+          row.source_count,
+          row.source_candidate_count,
+          row.alias_names,
+          row.source_rows,
+          row.governance_grade,
+          row.governance_status,
+          row.issue_type,
+          row.missing_specs,
+          row.governance_reason,
+          row.next_action,
+          row.matched_rule_key,
+          row.matched_rule_label,
+          row.rule_source,
+          row.override_source,
+          row.related_conflict_types,
+          row.resolution_issue_types,
+          row.original_composition_bucket,
+          row.merge_confidence,
+          row.merge_reason
+        ].join(" "))
+      };
+    }
+
+    function normalizeMaterialGovernanceQueueRow(row) {
+      return {
+        type: "materialGovernanceQueue",
+        id: row.merged_item_code,
+        code: row.merged_item_code,
+        name: row.standard_name,
+        group: row.canonical_group_path,
+        canonicalGroup: row.canonical_group_path,
+        specs: row.specs,
+        unit: row.unit,
+        status: `${row.governance_grade}-${governanceGradeLabel(row.governance_grade)}`,
+        aliases: row.alias_names,
+        sourceRows: row.source_rows,
+        sourceCount: "",
+        governanceGrade: row.governance_grade,
+        conflictType: row.issue_type,
+        missingSpecs: row.missing_specs,
+        governanceReason: row.governance_reason,
+        nextAction: row.next_action,
+        priority: priorityLabel(row.priority),
+        needsReview: true,
+        mappingReason: "",
+        searchText: normalizeText([
+          row.merged_item_code,
+          row.governance_grade,
+          row.priority,
+          row.issue_type,
+          row.standard_name,
+          row.canonical_group_path,
+          row.specs,
+          row.unit,
+          row.missing_specs,
+          row.governance_reason,
+          row.next_action,
+          row.source_rows,
+          row.alias_names
+        ].join(" "))
+      };
+    }
+
+    function normalizeGovernanceBreakdownRow(row, index) {
+      const status = `${row.count} · ${row.percent}`;
+      return {
+        type: "materialGovernanceBreakdown",
+        id: `governance-breakdown-${index}-${row.section}-${row.key}`,
+        code: row.section,
+        name: row.label || row.key,
+        group: row.section,
+        canonicalGroup: row.section,
+        specs: row.description,
+        unit: row.count,
+        status,
+        aliases: row.key,
+        sourceRows: "",
+        sourceCount: row.count,
+        notes: row.description,
+        breakdownSection: row.section,
+        breakdownCount: row.count,
+        breakdownPercent: row.percent,
+        needsReview: row.section === "治理等级" && row.key !== "A",
+        mappingReason: "",
+        searchText: normalizeText([
+          row.section,
+          row.key,
+          row.label,
+          row.count,
+          row.percent,
+          row.description
+        ].join(" "))
+      };
+    }
+
+    function normalizeItemMasterDraftRow(row) {
+      const grade = row["放行等级"] || "";
+      const status = `${grade}-${itemMasterReleaseStatusLabel(row.release_status)}`;
+      return {
+        type: "itemMasterDraft",
+        id: row.draft_sku_id,
+        code: row.draft_item_code,
+        name: row["标准名称"],
+        group: row["标准分组"],
+        canonicalGroup: row.matched_category,
+        specs: row["必填规格"],
+        unit: row["标准单位"],
+        status,
+        aliases: row["别名/土名"],
+        sourceRows: row.source_candidate_rows,
+        sourceCount: row.candidate_count,
+        notes: row["整理依据"],
+        governanceGrade: grade,
+        missingSpecs: row.missing_specs,
+        draftSkuId: row.draft_sku_id,
+        codePrefix: row.code_prefix,
+        releaseStatus: itemMasterReleaseStatusLabel(row.release_status),
+        importDecision: itemMasterImportDecisionLabel(row.import_decision),
+        candidateCount: row.candidate_count,
+        gradeCounts: row.grade_counts,
+        matchedCategory: row.matched_category,
+        dedupeKey: row.dedupe_key,
+        needsReview: grade !== "A",
+        mappingReason: "",
+        searchText: normalizeText([
+          row.draft_sku_id,
+          row.draft_item_code,
+          row.code_prefix,
+          row.release_status,
+          row["放行等级"],
+          row["标准名称"],
+          row["必填规格"],
+          row["辅助规格"],
+          row["标准分组"],
+          row["标准单位"],
+          row["别名/土名"],
+          row.candidate_count,
+          row.source_candidate_rows,
+          row.source_file_rows,
+          row.grade_counts,
+          row.matched_category,
+          row.import_decision,
+          row.missing_specs,
+          row["整理依据"]
+        ].join(" "))
+      };
+    }
+
+    function normalizeItemMasterImportReadyRow(row) {
+      const grade = row["放行等级"] || "";
+      return {
+        type: "itemMasterImportReady",
+        id: row.draft_sku_id,
+        code: row.draft_item_code,
+        name: row["标准名称"],
+        group: row["标准分组"],
+        canonicalGroup: row["标准分组"],
+        specs: row["必填规格"],
+        unit: row["标准单位"],
+        status: itemMasterImportStatusLabel(row.import_status),
+        aliases: row["别名/土名"],
+        sourceRows: row.source_candidate_rows,
+        sourceCount: row.candidate_count,
+        notes: row.confirmation_reason,
+        governanceGrade: grade,
+        draftSkuId: row.draft_sku_id,
+        importStatus: itemMasterImportStatusLabel(row.import_status),
+        confirmationReason: row.confirmation_reason,
+        candidateCount: row.candidate_count,
+        needsReview: row.confirmation_required === "是",
+        mappingReason: "",
+        searchText: normalizeText([
+          row.draft_sku_id,
+          row.draft_item_code,
+          row.import_status,
+          row["放行等级"],
+          row["标准名称"],
+          row["必填规格"],
+          row["辅助规格"],
+          row["标准分组"],
+          row["标准单位"],
+          row["别名/土名"],
+          row.candidate_count,
+          row.source_candidate_rows,
+          row.confirmation_required,
+          row.confirmation_reason
+        ].join(" "))
+      };
+    }
+
+    function normalizeItemMasterMissingQuestionRow(row) {
+      return {
+        type: "itemMasterMissingQuestions",
+        id: row.question_id,
+        code: row.draft_item_code || row.question_id,
+        name: row["标准名称"],
+        group: row["标准分组"],
+        canonicalGroup: row["标准分组"],
+        specs: row["当前必填规格"],
+        unit: row["标准单位"],
+        status: `${priorityLabel(row.priority) || row.priority || ""}-${row["放行等级"] || ""}`,
+        aliases: "",
+        sourceRows: row.source_candidate_rows,
+        sourceCount: "",
+        notes: row["整理依据"],
+        governanceGrade: row["放行等级"],
+        missingSpecs: row.missing_specs,
+        question: row.question,
+        questionId: row.question_id,
+        draftSkuId: row.draft_sku_id,
+        priority: priorityLabel(row.priority),
+        suggestedAction: row.recommended_next_action,
+        needsReview: true,
+        mappingReason: "",
+        searchText: normalizeText([
+          row.question_id,
+          row.draft_sku_id,
+          row.draft_item_code,
+          row.priority,
+          row["放行等级"],
+          row["标准名称"],
+          row["标准分组"],
+          row["标准单位"],
+          row["当前必填规格"],
+          row.missing_specs,
+          row.question,
+          row.recommended_next_action,
+          row.source_candidate_rows,
+          row["整理依据"]
+        ].join(" "))
+      };
+    }
+
+    function normalizeItemMasterDedupeReviewRow(row) {
+      const needsReview = row.review_status !== "auto_merged";
+      return {
+        type: "itemMasterDedupeReview",
+        id: row.issue_id,
+        code: row.issue_id,
+        name: row.standard_name,
+        group: row.standard_group,
+        canonicalGroup: row.standard_group,
+        specs: row.required_specs,
+        unit: row.unit_values,
+        status: itemMasterDedupeIssueLabel(row.issue_type),
+        aliases: row.draft_item_codes,
+        sourceRows: row.source_candidate_rows,
+        sourceCount: row.candidate_count,
+        notes: "",
+        conflictType: row.issue_type,
+        candidateCodes: row.draft_item_codes,
+        reason: row.reason,
+        suggestedAction: row.suggested_action,
+        priority: itemMasterSeverityLabel(row.severity),
+        severity: itemMasterSeverityLabel(row.severity),
+        reviewStatus: itemMasterReviewStatusLabel(row.review_status),
+        needsReview,
+        mappingReason: "",
+        searchText: normalizeText([
+          row.issue_id,
+          row.issue_type,
+          row.severity,
+          row.review_status,
+          row.standard_name,
+          row.standard_group,
+          row.required_specs,
+          row.unit_values,
+          row.draft_sku_ids,
+          row.draft_item_codes,
+          row.candidate_count,
+          row.source_candidate_rows,
+          row.reason,
+          row.suggested_action
+        ].join(" "))
+      };
+    }
+
+    function normalizeManualGovernanceRow(row) {
+      const grade = row.release_grade || "";
+      return {
+        type: "manualGovernance",
+        id: row.issue_id,
+        code: row.issue_id,
+        name: row.source_name,
+        rawName: row.identify,
+        group: row.group_normalization,
+        canonicalGroup: row.group_normalization,
+        specs: row.spec_normalization,
+        unit: "",
+        status: `${grade}-${governanceGradeLabel(grade)}`,
+        aliases: "",
+        sourceRows: `批次 ${row.batch}`,
+        sourceCount: "",
+        governanceGrade: grade,
+        governanceReason: row.judgement,
+        nextAction: row.next_action,
+        identify: row.identify,
+        specNormalization: row.spec_normalization,
+        standardNameNormalization: row.standard_name_normalization,
+        judgement: row.judgement,
+        needsReview: grade !== "A",
+        mappingReason: "",
+        searchText: normalizeText([
+          row.batch,
+          row.issue_id,
+          row.source_name,
+          row.identify,
+          row.spec_normalization,
+          row.standard_name_normalization,
+          row.group_normalization,
+          row.release_grade,
+          row.judgement,
+          row.next_action
+        ].join(" "))
+      };
+    }
+
+    function normalizeGovernanceOverrides(tables) {
+      const rows = [];
+      tables.forEach(([label, values]) => {
+        if (!values.length) {
+          rows.push({
+            type: "governanceOverrides",
+            id: `${label}-empty`,
+            code: label,
+            name: "暂无启用覆盖记录",
+            group: label,
+            canonicalGroup: label,
+            specs: "覆盖表已创建；后续人工确认或规则修正写入这里。",
+            unit: "",
+            status: "空表",
+            aliases: "",
+            sourceRows: "",
+            sourceCount: "0",
+            overrideTable: label,
+            needsReview: false,
+            mappingReason: "",
+            searchText: normalizeText(`${label} 暂无启用覆盖记录 空表`)
+          });
+          return;
+        }
+        values.forEach((row, index) => {
+          const code = row.merged_item_code || row.canonical_group_pattern || row.raw_name || `${label}-${index + 1}`;
+          const status = row.disabled === "true" ? "已停用" : "启用";
+          rows.push({
+            type: "governanceOverrides",
+            id: `${label}-${index}-${code}`,
+            code,
+            name: row.governance_reason || row.group_rule_key || row.alias_policy || row.issue_type || code,
+            group: label,
+            canonicalGroup: label,
+            specs: Object.entries(row).map(([key, value]) => value ? `${key}: ${value}` : "").filter(Boolean).join("；"),
+            unit: "",
+            status,
+            aliases: row.raw_name || "",
+            sourceRows: "",
+            sourceCount: "",
+            overrideTable: label,
+            governanceReason: row.governance_reason,
+            nextAction: row.next_action,
+            missingSpecs: row.missing_specs,
+            needsReview: false,
+            mappingReason: "",
+            searchText: normalizeText(Object.values(row).join(" "))
+          });
+        });
+      });
+      return rows;
+    }
+
+    function normalizeResolvedRow(row) {
+      const status = resolutionStatusLabel(row.resolution_status);
+      return {
+        type: "resolved",
+        id: row.merged_item_code,
+        code: row.merged_item_code,
+        name: row.standard_name,
+        group: row.reviewed_group_paths,
+        canonicalGroup: row.canonical_group_path,
+        specs: row.specs,
+        unit: row.unit,
+        status,
+        aliases: row.alias_names,
+        sourceRows: row.source_rows,
+        sourceCount: row.source_count,
+        notes: row.notes,
+        mergedFrom: row.merged_from_codes,
+        mergeReason: row.merge_reason,
+        mergeConfidence: row.merge_confidence,
+        resolutionStatus: status,
+        resolutionReason: row.resolution_reason,
+        relatedConflictTypes: row.related_conflict_types,
+        blockingConflictTypes: row.blocking_conflict_types,
+        needsReview: false,
+        mappingReason: "",
+        searchText: normalizeText([
+          row.merged_item_code,
+          row.standard_name,
+          row.reviewed_group_paths,
+          row.canonical_group_path,
+          row.specs,
+          row.unit,
+          row.source_statuses,
+          row.alias_names,
+          row.source_rows,
+          row.notes,
+          row.merged_from_codes,
+          row.merge_reason,
+          row.merge_confidence,
+          row.resolution_status,
+          row.resolution_reason,
+          row.related_conflict_types,
+          row.blocking_conflict_types
+        ].join(" "))
+      };
+    }
+
+    function normalizeResolutionQueueRow(row) {
+      const status = resolutionIssueLabel(row.issue_type);
+      return {
+        type: "resolutionQueue",
+        id: row.issue_id,
+        code: row.issue_id,
+        name: row.standard_name,
+        group: row.canonical_group_path,
+        canonicalGroup: row.canonical_group_path,
+        specs: row.specs_values,
+        unit: row.unit_values,
+        status,
+        aliases: "",
+        sourceRows: row.source_rows,
+        sourceCount: "",
+        notes: "",
+        conflictType: row.issue_type,
+        candidateCodes: row.candidate_codes,
+        reason: row.reason,
+        priority: priorityLabel(row.priority),
+        suggestedAction: row.suggested_action,
+        needsReview: true,
+        mappingReason: "",
+        searchText: normalizeText([
+          row.issue_id,
+          row.issue_type,
+          status,
+          row.priority,
+          row.standard_name,
+          row.canonical_group_path,
+          row.candidate_codes,
+          row.source_proposed_codes,
+          row.source_rows,
+          row.unit_values,
+          row.specs_values,
+          row.reason,
+          row.suggested_action
+        ].join(" "))
+      };
+    }
+
+    function normalizeAliasContextRow(row) {
+      const requiresConfirmation = row.requires_confirmation === "true";
+      return {
+        type: "aliasContext",
+        id: `${row.raw_name}-${row.candidate_codes}`,
+        code: row.raw_name,
+        name: row.raw_name,
+        group: "",
+        canonicalGroup: "",
+        specs: row.candidate_contexts,
+        unit: "",
+        status: requiresConfirmation ? "需确认" : "唯一候选",
+        aliases: row.candidate_codes,
+        sourceRows: "",
+        sourceCount: row.candidate_count,
+        notes: "",
+        candidateCodes: row.candidate_codes,
+        resolutionStatus: row.import_ready_candidate_codes ? "有可导入候选" : "无可导入候选",
+        reason: row.ambiguity_reason,
+        requiresConfirmation: requiresConfirmation ? "需要" : "不需要",
+        ambiguityReason: row.ambiguity_reason,
+        candidateContexts: row.candidate_contexts,
+        needsReview: requiresConfirmation,
+        mappingReason: "",
+        searchText: normalizeText([
+          row.raw_name,
+          row.normalized_raw_name,
+          row.candidate_count,
+          row.candidate_codes,
+          row.import_ready_candidate_codes,
+          row.requires_confirmation,
+          row.ambiguity_reason,
+          row.candidate_contexts
+        ].join(" "))
+      };
+    }
+
+    function normalizeConflictRow(row, index) {
+      const code = row.conflict_type || `conflict-${index + 1}`;
+      const status = conflictLabel(row.conflict_type);
+      return {
+        type: "conflicts",
+        id: `conflict-${index + 1}-${row.candidate_codes}`,
+        code,
+        name: row.standard_name,
+        group: row.canonical_group_path,
+        canonicalGroup: row.canonical_group_path,
+        specs: row.specs_values,
+        unit: row.unit_values,
+        status,
+        aliases: "",
+        sourceRows: row.source_rows,
+        sourceCount: "",
+        notes: "",
+        conflictType: row.conflict_type,
+        candidateCodes: row.candidate_codes,
+        reason: row.reason,
+        needsReview: true,
+        mappingReason: "",
+        searchText: normalizeText([
+          row.conflict_type,
+          status,
+          row.standard_name,
+          row.canonical_group_path,
+          row.unit_values,
+          row.specs_values,
+          row.candidate_codes,
+          row.source_rows,
+          row.reason
+        ].join(" "))
+      };
+    }
+
+    function normalizeQueueRow(row, type) {
+      const mapping = state.mappings.get(row.item_group) || {};
+      const code = `${type === "manual" ? "REVIEW" : "SERVICE"}-${row.excel_row || row.sequence}`;
+      const canonicalGroup = mapping.canonical_group_path || row.item_group || "";
+      return {
+        type,
+        id: `${type}-${row.sequence}-${row.excel_row}`,
+        code,
+        name: row.standard_name || row.raw_name,
+        rawName: row.raw_name,
+        group: row.item_group,
+        canonicalGroup,
+        specs: row.specs,
+        unit: row.unit,
+        status: row.status || (type === "manual" ? "待确认" : "服务项"),
+        sourceRows: row.excel_row ? `Sheet1:${row.excel_row}` : "",
+        sourceCount: "",
+        notes: "",
+        question: row.question,
+        needsReview: type === "manual" || mapping.needs_human_review === "true",
+        mappingReason: mapping.rule_reason || "",
+        searchText: normalizeText([
+          row.sequence,
+          row.excel_row,
+          row.raw_name,
+          row.standard_name,
+          row.item_group,
+          canonicalGroup,
+          row.specs,
+          row.unit,
+          row.status,
+          row.question
+        ].join(" "))
+      };
+    }
+
+    async function loadCsv(path) {
+      const response = await fetch(path);
+      if (!response.ok) throw new Error(`无法加载 ${path}: ${response.status}`);
+      return parseCsv(await response.text());
+    }
+
+    async function loadTsv(path) {
+      const response = await fetch(path);
+      if (!response.ok) throw new Error(`无法加载 ${path}: ${response.status}`);
+      return parseDelimited(await response.text(), "\t");
+    }
+
+    async function loadJson(path) {
+      const response = await fetch(path);
+      if (!response.ok) throw new Error(`无法加载 ${path}: ${response.status}`);
+      return response.json();
+    }
+
+    function parseCsv(text) {
+      return parseDelimited(text, ",");
+    }
+
+    function parseDelimited(text, delimiter) {
+      const rows = [];
+      let row = [];
+      let field = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i += 1) {
+        const char = text[i];
+        const next = text[i + 1];
+        if (inQuotes) {
+          if (char === '"' && next === '"') {
+            field += '"';
+            i += 1;
+          } else if (char === '"') {
+            inQuotes = false;
+          } else {
+            field += char;
+          }
+          continue;
+        }
+        if (char === '"') {
+          inQuotes = true;
+        } else if (char === delimiter) {
+          row.push(field);
+          field = "";
+        } else if (char === "\n") {
+          row.push(field);
+          rows.push(row);
+          row = [];
+          field = "";
+        } else if (char !== "\r") {
+          field += char;
+        }
+      }
+      if (field || row.length) {
+        row.push(field);
+        rows.push(row);
+      }
+
+      const headers = rows.shift() || [];
+      return rows
+        .filter((values) => values.some((value) => value !== ""))
+        .map((values) => Object.fromEntries(headers.map((header, index) => [header, values[index] || ""])));
+    }
+
+    function fillSelect(select, label, values) {
+      const current = select.value;
+      select.innerHTML = `<option value="">${escapeHtml(label)}</option>` + values
+        .map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`)
+        .join("");
+      if (values.includes(current)) select.value = current;
+    }
+
+    function statusTag(row) {
+      let cls = "ok";
+      if (row.type === "manual" || row.needsReview || row.status.includes("待确认") || row.status.includes("需确认")) cls = "warn";
+      if (row.type === "services") cls = "service";
+      if (row.type === "conflicts" || row.type === "resolutionQueue") cls = "danger";
+      if (row.type === "materialGovernanceQueue" && row.governanceGrade === "D") cls = "danger";
+      if (row.type === "itemMasterDedupeReview" && row.needsReview) cls = "danger";
+      if (row.type === "itemMasterMissingQuestions") cls = "warn";
+      if (row.type === "itemMasterDraft" && row.governanceGrade === "C") cls = "warn";
+      if (row.type === "itemMasterDraft" && row.governanceGrade === "D") cls = "danger";
+      if (row.type === "itemMasterImportReady" && row.needsReview) cls = "warn";
+      if (row.type === "manualGovernance" && row.governanceGrade === "A") cls = "ok";
+      if (row.type === "manualGovernance" && row.governanceGrade === "D") cls = "danger";
+      if ((row.type === "governedCatalog" || row.type === "governedRelease") && row.governanceGrade === "A") cls = "ok";
+      if ((row.type === "governedCatalog" || row.type === "governedRelease") && row.governanceGrade === "D") cls = "danger";
+      if (row.status.includes("危险") || row.status.includes("禁止")) cls = "danger";
+      return `<span class="tag ${cls}">${escapeHtml(row.status || "")}</span>`;
+    }
+
+    function conflictLabel(value) {
+      const labels = {
+        specs_conflict: "规格冲突",
+        low_precision_conflict: "低精度冲突",
+        unit_conflict: "单位冲突",
+        alias_conflict: "别名冲突"
+      };
+      return labels[value] || value || "冲突";
+    }
+
+    function resolutionIssueLabel(value) {
+      const labels = {
+        specs_conflict: "规格冲突",
+        low_precision_conflict: "低精度冲突",
+        unit_conflict: "单位冲突",
+        alias_conflict: "别名冲突",
+        needs_human_review: "人工复核",
+        needs_note_review: "备注待确认",
+        low_merge_confidence: "低置信度"
+      };
+      return labels[value] || value || "需治理";
+    }
+
+    function resolutionStatusLabel(value) {
+      const labels = {
+        ready: "可导入",
+        ready_distinct_specs: "按规格拆分可导入"
+      };
+      return labels[value] || value || "可导入";
+    }
+
+    function priorityLabel(value) {
+      const labels = {
+        high: "高",
+        medium: "中",
+        low: "低"
+      };
+      return labels[value] || value || "";
+    }
+
+    function governanceGradeLabel(value) {
+      const labels = {
+        A: "可发布候选",
+        B: "简单确认",
+        C: "补关键规格",
+        D: "阻塞冲突"
+      };
+      return labels[value] || value || "";
+    }
+
+    function ruleSourceLabel(value) {
+      const labels = {
+        default: "默认规则",
+        rules_yaml: "规则配置",
+        group_override: "分组覆盖表"
+      };
+      return labels[value] || value || "";
+    }
+
+    function itemMasterReleaseStatusLabel(value) {
+      const labels = {
+        ready: "可直接发布",
+        needs_confirmation: "需确认",
+        needs_missing_specs: "补关键规格",
+        blocked: "阻塞"
+      };
+      return labels[value] || value || "";
+    }
+
+    function itemMasterImportDecisionLabel(value) {
+      const labels = {
+        import_ready: "可导入",
+        confirm_then_import: "确认后导入",
+        do_not_import_missing_specs: "缺规格暂不导入",
+        do_not_import_blocked: "阻塞暂不导入"
+      };
+      return labels[value] || value || "";
+    }
+
+    function itemMasterImportStatusLabel(value) {
+      const labels = {
+        ready_to_import: "可导入",
+        confirm_then_import: "确认后导入"
+      };
+      return labels[value] || value || "";
+    }
+
+    function itemMasterDedupeIssueLabel(value) {
+      const labels = {
+        exact_duplicate_auto_merged: "完全重复已合并",
+        unit_conflict_review: "单位冲突待复核",
+        alias_conflict_review: "别名冲突待复核"
+      };
+      return labels[value] || value || "去重复核";
+    }
+
+    function itemMasterSeverityLabel(value) {
+      const labels = {
+        high: "高",
+        medium: "中",
+        low: "低"
+      };
+      return labels[value] || value || "";
+    }
+
+    function itemMasterReviewStatusLabel(value) {
+      const labels = {
+        auto_merged: "已自动合并",
+        needs_review: "待复核"
+      };
+      return labels[value] || value || "";
+    }
+
+    function unique(values) {
+      return [...new Set(values)];
+    }
+
+    function localeSort(a, b) {
+      return a.localeCompare(b, "zh-CN");
+    }
+
+    function normalizeText(value) {
+      return String(value || "").toLowerCase().replace(/\s+/g, "");
+    }
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat("zh-CN").format(value);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
+</body>
+</html>

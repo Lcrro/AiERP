@@ -5,12 +5,12 @@ import runpy
 import sys
 from pathlib import Path
 
-_TARGET = Path(__file__).resolve().parent / "material_master" / "process_purchase_list.py"
+_TARGET = Path(__file__).resolve().parent / "material_master" / "summarize_material_catalog_composition.py"
 
 if __name__ == "__main__":
     runpy.run_path(str(_TARGET), run_name="__main__")
 else:
-    _spec = importlib.util.spec_from_file_location("_nexterp_script_process_purchase_list", _TARGET)
+    _spec = importlib.util.spec_from_file_location("_nexterp_script_summarize_material_catalog_composition", _TARGET)
     if _spec is None or _spec.loader is None:
         raise ImportError(f"Cannot load script module: {_TARGET}")
     _module = importlib.util.module_from_spec(_spec)

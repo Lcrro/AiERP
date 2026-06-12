@@ -1,0 +1,43 @@
+{
+  "source_candidate_rows": 2355,
+  "draft_sku_count": 2328,
+  "auto_merged_duplicate_source_rows": 27,
+  "source_grade_counts": {
+    "A": 160,
+    "B": 538,
+    "C": 1657
+  },
+  "draft_grade_counts": {
+    "A": 157,
+    "B": 531,
+    "C": 1640
+  },
+  "dedupe_issue_counts": {
+    "alias_conflict_review": 120,
+    "exact_duplicate_auto_merged": 25,
+    "unit_conflict_review": 25
+  },
+  "missing_question_count": 2168,
+  "import_ready_count": 588,
+  "import_ready_counts": {
+    "confirm_then_import": 460,
+    "ready_to_import": 128
+  },
+  "code_prefix_counts": {
+    "ADMIN": 73,
+    "CHEM": 167,
+    "CONST": 42,
+    "ELEC": 253,
+    "ELEC-TIE": 13,
+    "FAST": 123,
+    "HW-LOCK": 17,
+    "MAT": 256,
+    "MAT-CEM": 18,
+    "METAL": 169,
+    "PIPE": 495,
+    "SAFE": 142,
+    "SPARE": 143,
+    "TOOL": 350,
+    "WELD": 67
+  }
+}

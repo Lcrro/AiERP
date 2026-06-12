@@ -1,0 +1,204 @@
+version: 0.2
+
+defaults:
+  grade_when_complete: A
+  grade_when_note_question: B
+  grade_when_missing_specs: C
+  grade_when_blocked: D
+  default_uom_policy: keep_source
+  alias_policy: confirm_when_ambiguous
+  required_any:
+    - 规格
+    - 型号
+    - 类型
+    - 材质
+    - 品牌
+    - 尺寸
+    - 长度
+    - 厚度
+    - 功率
+    - 包装规格
+    - 适用设备
+
+blocking_issue_types:
+  - alias_conflict
+  - unit_conflict
+
+low_precision_issue_types:
+  - low_precision_conflict
+  - needs_human_review
+  - needs_note_review
+
+open_question_markers:
+  - "?"
+  - "？"
+  - 是否
+  - 需不需要
+  - 需要区分
+  - 未说明
+  - 疑似
+  - 原文
+
+group_rules:
+  - key: fastener
+    label: 紧固件
+    canonical_group_patterns:
+      - 紧固件
+    default_uom_policy: keep_source
+    required_any:
+      - 规格
+      - 直径
+      - 长度
+      - 型号
+    recommended_next_action: 确认规格、材质/强度等级和单位。
+
+  - key: pipe_and_fitting
+    label: 管材管件
+    canonical_group_patterns:
+      - 管道管件
+      - 水暖建材
+      - PPR
+      - PVC
+    required_any:
+      - 规格
+      - 口径
+      - DN
+      - 材质
+      - 类型
+    recommended_next_action: 确认材质、口径/规格、连接方式和类型。
+
+  - key: electrical
+    label: 电气与自动化
+    canonical_group_patterns:
+      - 电气与自动化
+      - 电气材料
+    required_any:
+      - 型号
+      - 规格
+      - 品牌
+      - 电流
+      - 电压
+      - 功率
+      - 位数
+    recommended_next_action: 确认品牌、型号、电气参数和安装/连接方式。
+
+  - key: tool
+    label: 工具器具
+    canonical_group_patterns:
+      - 工具器具
+      - 手动工具
+      - 电动工具
+    required_any:
+      - 型号
+      - 规格
+      - 品牌
+      - 尺寸
+      - 适用设备
+    recommended_next_action: 确认品牌、型号/规格和适用设备。
+
+  - key: equipment_part
+    label: 设备备件与加工件
+    canonical_group_patterns:
+      - 设备备件
+      - 加工件
+      - 过滤
+      - 密封
+      - 轴承
+    required_any:
+      - 型号
+      - 规格
+      - 图号
+      - 适用设备
+      - 材质
+    recommended_next_action: 确认型号、图号、适用设备和关键尺寸。
+
+  - key: construction_material
+    label: 工程建材
+    canonical_group_patterns:
+      - 工程建材
+      - 建筑材料
+      - 水泥
+      - 砂石
+      - 模板
+      - 板材型材
+    required_any:
+      - 规格
+      - 型号
+      - 材质
+      - 厚度
+      - 尺寸
+      - 包装规格
+      - 强度等级
+    recommended_next_action: 确认规格、材质/强度等级、尺寸和包装单位。
+
+  - key: metal_material
+    label: 金属材料
+    canonical_group_patterns:
+      - 金属原材料
+      - 金属材料
+      - 板材
+      - 型材
+    required_any:
+      - 材质
+      - 规格
+      - 厚度
+      - 宽度
+      - 长度
+      - 表面
+    recommended_next_action: 确认材质、规格尺寸和执行标准。
+
+  - key: chemical_paint_adhesive
+    label: 化工油漆胶粘
+    canonical_group_patterns:
+      - 化工油漆胶粘
+      - 化工耗材
+      - 油漆
+      - 胶粘
+    required_any:
+      - 类型
+      - 品牌
+      - 型号
+      - 包装规格
+      - 颜色
+    recommended_next_action: 确认类型、品牌/型号、颜色和包装规格。
+
+  - key: welding
+    label: 焊接焊割
+    canonical_group_patterns:
+      - 焊接焊割
+      - 焊割
+      - 焊丝
+      - 焊条
+    required_any:
+      - 型号
+      - 规格
+      - 直径
+      - 材质
+      - 类型
+    recommended_next_action: 确认型号、直径/规格、材质和包装。
+
+  - key: safety
+    label: 安防劳保
+    canonical_group_patterns:
+      - 安防劳保
+      - 劳保
+      - 安全
+    required_any:
+      - 类型
+      - 规格
+      - 材质
+      - 型号
+    recommended_next_action: 确认类型、规格、材质和安全等级。
+
+  - key: office_cleaning
+    label: 行政办公与清洁
+    canonical_group_patterns:
+      - 行政办公
+      - 清洁
+      - 办公
+    required_any:
+      - 规格
+      - 类型
+      - 品牌
+      - 包装规格
+    recommended_next_action: 确认规格、品牌和包装单位。

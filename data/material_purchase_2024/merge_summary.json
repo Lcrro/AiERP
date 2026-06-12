@@ -1,0 +1,20 @@
+{
+  "source_rows": 2355,
+  "merged_rows": 2329,
+  "alias_rows": 2388,
+  "conflicts": 635,
+  "auto_merged_clusters": 26,
+  "needs_human_review_rows": 2186,
+  "conflict_types": {
+    "specs_conflict": 399,
+    "low_precision_conflict": 86,
+    "unit_conflict": 38,
+    "alias_conflict": 112
+  },
+  "outputs": {
+    "merged_catalog": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_purchase_2024\\merged_standard_item_catalog.csv",
+    "merged_aliases": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_purchase_2024\\merged_item_aliases.csv",
+    "conflicts": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_purchase_2024\\merge_conflicts.csv",
+    "summary": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_purchase_2024\\merge_summary.json"
+  }
+}

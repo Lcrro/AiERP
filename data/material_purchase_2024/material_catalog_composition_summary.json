@@ -1,0 +1,31 @@
+{
+  "merged_rows": 2329,
+  "composition_items": 2329,
+  "breakdown_rows": 47,
+  "primary_bucket_counts": {
+    "需复核-人工标记": 2186,
+    "冲突-低精度": 36,
+    "可导入-按规格拆分": 22,
+    "可导入-直接可用": 28,
+    "需复核-备注问题": 25,
+    "冲突-别名一对多": 29,
+    "冲突-单位不一致": 3
+  },
+  "primary_bucket_total": 2329,
+  "source_type_counts": {
+    "单条候选保留": 2303,
+    "多条候选自动合并": 26
+  },
+  "confidence_bucket_counts": {
+    "低置信度 0.70-0.89": 1364,
+    "高置信度 >= 0.95": 143,
+    "极低置信度 < 0.70": 822
+  },
+  "needs_human_review_count": 2186,
+  "note_open_question_count": 111,
+  "outputs": {
+    "items": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_purchase_2024\\material_catalog_composition_items.csv",
+    "breakdown": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_purchase_2024\\material_catalog_composition_breakdown.csv",
+    "summary": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_purchase_2024\\material_catalog_composition_summary.json"
+  }
+}
