@@ -1,0 +1,286 @@
+{
+  "summary": {
+    "mode": "apply",
+    "scenario_prefix": "SCEN-CIVIL",
+    "company": "STEC (Demo)",
+    "failed_total": 0,
+    "counts": {
+      "skip_existing_warehouse": 2,
+      "skip_existing_project": 3,
+      "skip_existing_supplier": 4,
+      "skip_existing_user": 15,
+      "skip_existing_stock_entry": 2
+    },
+    "context": {
+      "company": "STEC (Demo)",
+      "warehouses": {
+        "center": "SCEN-CIVIL 中心仓 - SD",
+        "project": "SCEN-CIVIL 项目仓 - SD"
+      },
+      "projects": {
+        "城东道路改造项目": "PROJ-0004",
+        "南区排水管网项目": "PROJ-0005",
+        "西站配套设施项目": "PROJ-0006"
+      },
+      "suppliers": {
+        "SCEN-CIVIL 安科劳保用品": "SCEN-CIVIL 安科劳保用品",
+        "SCEN-CIVIL 通达管材": "SCEN-CIVIL 通达管材",
+        "SCEN-CIVIL 强盛建材": "SCEN-CIVIL 强盛建材",
+        "SCEN-CIVIL 恒信电气": "SCEN-CIVIL 恒信电气"
+      },
+      "users": {
+        "陈建国（总经理）": "chen.jianguo@scen-civil.local",
+        "刘敏（财务主管）": "liu.min@scen-civil.local",
+        "赵强（采购主管）": "zhao.qiang@scen-civil.local",
+        "孙丽（行政采购员）": "sun.li@scen-civil.local",
+        "王海（仓库主管）": "wang.hai@scen-civil.local",
+        "周鹏（项目仓管员）": "zhou.peng@scen-civil.local",
+        "李志远（项目经理）": "li.zhiyuan@scen-civil.local",
+        "马超（施工班组长）": "ma.chao@scen-civil.local",
+        "黄伟（项目经理）": "huang.wei@scen-civil.local",
+        "郭亮（施工班组长）": "guo.liang@scen-civil.local",
+        "何珊（项目经理）": "he.shan@scen-civil.local",
+        "邓凯（机电班组长）": "deng.kai@scen-civil.local",
+        "袁芳（供应商联络员）": "yuan.fang@scen-civil.local",
+        "曹瑞（质检员）": "cao.rui@scen-civil.local",
+        "许峰（系统管理员）": "xu.feng@scen-civil.local"
+      }
+    }
+  },
+  "events": [
+    {
+      "action": "skip_existing",
+      "doctype": "Warehouse",
+      "name": "SCEN-CIVIL 中心仓 - SD",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "Warehouse",
+      "name": "SCEN-CIVIL 项目仓 - SD",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "Project",
+      "name": "PROJ-0004",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "Project",
+      "name": "PROJ-0005",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "Project",
+      "name": "PROJ-0006",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "Supplier",
+      "name": "SCEN-CIVIL 安科劳保用品",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "Supplier",
+      "name": "SCEN-CIVIL 通达管材",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "Supplier",
+      "name": "SCEN-CIVIL 强盛建材",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "Supplier",
+      "name": "SCEN-CIVIL 恒信电气",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "User",
+      "name": "chen.jianguo@scen-civil.local",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "User",
+      "name": "liu.min@scen-civil.local",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "User",
+      "name": "zhao.qiang@scen-civil.local",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "User",
+      "name": "sun.li@scen-civil.local",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "User",
+      "name": "wang.hai@scen-civil.local",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "User",
+      "name": "zhou.peng@scen-civil.local",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "User",
+      "name": "li.zhiyuan@scen-civil.local",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "User",
+      "name": "ma.chao@scen-civil.local",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "User",
+      "name": "huang.wei@scen-civil.local",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "User",
+      "name": "guo.liang@scen-civil.local",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "User",
+      "name": "he.shan@scen-civil.local",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "User",
+      "name": "deng.kai@scen-civil.local",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "User",
+      "name": "yuan.fang@scen-civil.local",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "User",
+      "name": "cao.rui@scen-civil.local",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "User",
+      "name": "xu.feng@scen-civil.local",
+      "ok": true,
+      "message": "already exists",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "Stock Entry",
+      "name": "MAT-STE-2026-00003",
+      "ok": true,
+      "message": "stock seed already exists: SCEN-CIVIL-SEED-STOCK-CENTER",
+      "error_type": "",
+      "error": ""
+    },
+    {
+      "action": "skip_existing",
+      "doctype": "Stock Entry",
+      "name": "MAT-STE-2026-00004",
+      "ok": true,
+      "message": "stock seed already exists: SCEN-CIVIL-SEED-STOCK-PROJECT",
+      "error_type": "",
+      "error": ""
+    }
+  ]
+}

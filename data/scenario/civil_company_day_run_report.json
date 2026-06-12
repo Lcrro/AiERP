@@ -1,0 +1,1884 @@
+{
+  "summary": {
+    "mode": "apply",
+    "company": "STEC (Demo)",
+    "scenario": "civil-company-day",
+    "step_total": 10,
+    "executed": 10,
+    "skipped_write": 0,
+    "failed": 0,
+    "counts": {
+      "ok": 10
+    },
+    "report_note": "Apply mode executed write ToolCalls that create draft documents only; no submit ToolCalls are included."
+  },
+  "steps": [
+    {
+      "id": "08-00-auth-smoke",
+      "time": "08:00",
+      "actor": "陈建国，总经理",
+      "event": "确认当前 ERPNext API 会话可用",
+      "status": "ok",
+      "writes": false,
+      "tool_call": {
+        "id": "toolcall_ac4deadb87b04a46a6aa8d440f3abd06",
+        "created_at": "2026-06-11T16:01:41.459266+00:00",
+        "tool": "erpnext.get_logged_user",
+        "arguments": {},
+        "risk_level": "L0",
+        "user_context": {
+          "actor": "陈建国，总经理",
+          "scenario_step": "08-00-auth-smoke"
+        },
+        "reason": "确认当前 ERPNext API 会话可用"
+      },
+      "tool_result": {
+        "ok": true,
+        "data": "agent.test@example.com",
+        "tool_call_id": "toolcall_ac4deadb87b04a46a6aa8d440f3abd06",
+        "duration_ms": 2052,
+        "status_code": 200,
+        "raw_status_code": 200
+      },
+      "expected_gap": "",
+      "note": ""
+    },
+    {
+      "id": "08-20-search-gloves",
+      "time": "08:20",
+      "actor": "马超，施工班组长",
+      "event": "城东项目提报帆布手套需求前检索物料",
+      "status": "ok",
+      "writes": false,
+      "tool_call": {
+        "id": "toolcall_f9c88797e8354f20b298bafb06c39ee8",
+        "created_at": "2026-06-11T16:01:43.511623+00:00",
+        "tool": "erpnext.search_items",
+        "arguments": {
+          "query": "帆布手套",
+          "limit": 5
+        },
+        "risk_level": "L0",
+        "user_context": {
+          "actor": "马超，施工班组长",
+          "scenario_step": "08-20-search-gloves"
+        },
+        "reason": "城东项目提报帆布手套需求前检索物料"
+      },
+      "tool_result": {
+        "ok": true,
+        "data": {
+          "status": "needs_confirmation",
+          "query": "帆布手套",
+          "specs": {},
+          "item_group": null,
+          "top_score": 180,
+          "candidates": [
+            {
+              "item_code": "SAFE-000096",
+              "item_name": "帆布手套",
+              "item_group": "劳保耗材/手套",
+              "score": 180,
+              "confidence": "high",
+              "enabled": true,
+              "match_reasons": [
+                "item_name 模糊匹配",
+                "标准名称精确命中",
+                "别名/土名精确命中",
+                "原始名称命中",
+                "关键词重合"
+              ],
+              "match_reason": "item_name 模糊匹配；标准名称精确命中；别名/土名精确命中；原始名称命中；关键词重合",
+              "missing_specs": [],
+              "data": {
+                "name": "SAFE-000096",
+                "item_code": "SAFE-000096",
+                "item_name": "帆布手套",
+                "item_group": "劳保耗材/手套",
+                "stock_uom": "付",
+                "specification": "材质：帆布",
+                "material": null,
+                "standard": null,
+                "brand": null,
+                "model": null,
+                "package_spec": null,
+                "raw_name": "帆布手套",
+                "alias_names": "帆布手套",
+                "disabled": 0
+              }
+            },
+            {
+              "item_code": "SAFE-000133",
+              "item_name": "帆布手套",
+              "item_group": "劳保用品/手套",
+              "score": 180,
+              "confidence": "high",
+              "enabled": true,
+              "match_reasons": [
+                "item_name 模糊匹配",
+                "标准名称精确命中",
+                "别名/土名精确命中",
+                "原始名称命中",
+                "关键词重合"
+              ],
+              "match_reason": "item_name 模糊匹配；标准名称精确命中；别名/土名精确命中；原始名称命中；关键词重合",
+              "missing_specs": [],
+              "data": {
+                "name": "SAFE-000133",
+                "item_code": "SAFE-000133",
+                "item_name": "帆布手套",
+                "item_group": "劳保用品/手套",
+                "stock_uom": "付",
+                "specification": "材质：帆布",
+                "material": null,
+                "standard": null,
+                "brand": null,
+                "model": null,
+                "package_spec": null,
+                "raw_name": "帆布手套",
+                "alias_names": "帆布手套",
+                "disabled": 0
+              }
+            },
+            {
+              "item_code": "SAFE-000001",
+              "item_name": "帆布手套",
+              "item_group": "劳保耗材/手套",
+              "score": 165,
+              "confidence": "high",
+              "enabled": true,
+              "match_reasons": [
+                "item_name 模糊匹配",
+                "标准名称精确命中",
+                "别名/土名包含查询词",
+                "原始名称命中",
+                "关键词重合"
+              ],
+              "match_reason": "item_name 模糊匹配；标准名称精确命中；别名/土名包含查询词；原始名称命中；关键词重合",
+              "missing_specs": [],
+              "data": {
+                "name": "SAFE-000001",
+                "item_code": "SAFE-000001",
+                "item_name": "帆布手套",
+                "item_group": "劳保耗材/手套",
+                "stock_uom": "双",
+                "specification": "类型：双重/双层帆布",
+                "material": null,
+                "standard": null,
+                "brand": null,
+                "model": null,
+                "package_spec": null,
+                "raw_name": "双重帆布手套",
+                "alias_names": "双重帆布手套",
+                "disabled": 0
+              }
+            },
+            {
+              "item_code": "SAFE-000005",
+              "item_name": "帆布手套",
+              "item_group": "劳保耗材/手套",
+              "score": 165,
+              "confidence": "high",
+              "enabled": true,
+              "match_reasons": [
+                "item_name 模糊匹配",
+                "标准名称精确命中",
+                "别名/土名包含查询词",
+                "原始名称命中",
+                "关键词重合"
+              ],
+              "match_reason": "item_name 模糊匹配；标准名称精确命中；别名/土名包含查询词；原始名称命中；关键词重合",
+              "missing_specs": [],
+              "data": {
+                "name": "SAFE-000005",
+                "item_code": "SAFE-000005",
+                "item_name": "帆布手套",
+                "item_group": "劳保耗材/手套",
+                "stock_uom": "双",
+                "specification": "材质：帆布；特征：加厚、双层",
+                "material": null,
+                "standard": null,
+                "brand": null,
+                "model": null,
+                "package_spec": null,
+                "raw_name": "加厚双层帆布手套",
+                "alias_names": "加厚双层帆布手套",
+                "disabled": 0
+              }
+            },
+            {
+              "item_code": "SAFE-000066",
+              "item_name": "帆布手套",
+              "item_group": "劳保耗材/手套",
+              "score": 165,
+              "confidence": "high",
+              "enabled": true,
+              "match_reasons": [
+                "item_name 模糊匹配",
+                "标准名称精确命中",
+                "别名/土名包含查询词",
+                "原始名称命中",
+                "关键词重合"
+              ],
+              "match_reason": "item_name 模糊匹配；标准名称精确命中；别名/土名包含查询词；原始名称命中；关键词重合",
+              "missing_specs": [],
+              "data": {
+                "name": "SAFE-000066",
+                "item_code": "SAFE-000066",
+                "item_name": "帆布手套",
+                "item_group": "劳保耗材/手套",
+                "stock_uom": "双",
+                "specification": "材质：帆布；结构：双层",
+                "material": null,
+                "standard": null,
+                "brand": null,
+                "model": null,
+                "package_spec": null,
+                "raw_name": "帆布双层手套；双层帆布手套",
+                "alias_names": "帆布双层手套；双层帆布手套",
+                "disabled": 0
+              }
+            }
+          ],
+          "questions": [
+            "找到多个相近物料，请让用户确认选择哪一个，或补充规格后再检索。"
+          ],
+          "decision_reason": "存在多个相近候选，分差不足以自动选择。",
+          "warnings": [],
+          "debug": {
+            "status": "needs_confirmation",
+            "top_score": 180,
+            "second_score": 180,
+            "score_gap": 0,
+            "why_status": "存在多个相近候选，分差不足以自动选择。",
+            "warnings": []
+          }
+        },
+        "tool_call_id": "toolcall_f9c88797e8354f20b298bafb06c39ee8",
+        "duration_ms": 18502
+      },
+      "expected_gap": "",
+      "note": ""
+    },
+    {
+      "id": "08-20-create-material-request",
+      "time": "08:20",
+      "actor": "马超，施工班组长",
+      "event": "创建城东项目劳保用品材料申请草稿",
+      "status": "ok",
+      "writes": true,
+      "tool_call": {
+        "id": "toolcall_3234e04368a44dbe96a598fde970afc5",
+        "created_at": "2026-06-11T16:02:02.013875+00:00",
+        "tool": "erpnext.buying.create_material_request_draft",
+        "arguments": {
+          "material_request_type": "Purchase",
+          "company": "STEC (Demo)",
+          "schedule_date": "2026-06-13",
+          "items": [
+            {
+              "item_code": "SAFE-000005",
+              "qty": 20,
+              "uom": "双",
+              "schedule_date": "2026-06-13",
+              "warehouse": "SCEN-CIVIL 项目仓 - SD",
+              "description": "城东道路改造项目劳保用品需求：帆布手套。"
+            }
+          ]
+        },
+        "risk_level": "L3",
+        "user_context": {
+          "actor": "马超，施工班组长",
+          "scenario_step": "08-20-create-material-request"
+        },
+        "reason": "创建城东项目劳保用品材料申请草稿"
+      },
+      "tool_result": {
+        "ok": true,
+        "data": {
+          "doctype": "Material Request",
+          "name": "MAT-MR-2026-00004",
+          "docstatus": 0,
+          "status": "Draft",
+          "summary": "Created Material Request draft with 1 item rows.",
+          "next_actions": [
+            "review_draft",
+            "confirm_submit"
+          ],
+          "risk": {
+            "level": "L3",
+            "requires_confirmation_for_submit": true,
+            "submit_tool": "erpnext.buying.submit_document"
+          }
+        },
+        "tool_call_id": "toolcall_3234e04368a44dbe96a598fde970afc5",
+        "duration_ms": 4207,
+        "status_code": 200,
+        "raw_status_code": 200,
+        "debug": {
+          "raw_document": {
+            "name": "MAT-MR-2026-00004",
+            "owner": "agent.test@example.com",
+            "creation": "2026-06-12 00:02:06.139354",
+            "modified": "2026-06-12 00:02:06.139354",
+            "modified_by": "agent.test@example.com",
+            "docstatus": 0,
+            "idx": 0,
+            "naming_series": "MAT-MR-.YYYY.-",
+            "title": "采购申请帆布手套",
+            "material_request_type": "Purchase",
+            "company": "STEC (Demo)",
+            "transaction_date": "2026-06-12",
+            "schedule_date": "2026-06-13",
+            "buying_price_list": "标准采购",
+            "last_scanned_warehouse": null,
+            "status": "Draft",
+            "per_ordered": 0.0,
+            "transfer_status": "",
+            "per_received": 0.0,
+            "doctype": "Material Request",
+            "items": [
+              {
+                "name": "5vdblvddu5",
+                "owner": "agent.test@example.com",
+                "creation": "2026-06-12 00:02:06.139354",
+                "modified": "2026-06-12 00:02:06.139354",
+                "modified_by": "agent.test@example.com",
+                "docstatus": 0,
+                "idx": 1,
+                "item_code": "SAFE-000005",
+                "item_name": "帆布手套",
+                "agent_item_specification": "材质：帆布；特征：加厚、双层",
+                "schedule_date": "2026-06-13",
+                "description": "城东道路改造项目劳保用品需求：帆布手套。",
+                "item_group": "劳保耗材/手套",
+                "image": "",
+                "qty": 20.0,
+                "stock_uom": "双",
+                "warehouse": "SCEN-CIVIL 项目仓 - SD",
+                "uom": "双",
+                "conversion_factor": 1.0,
+                "stock_qty": 20.0,
+                "min_order_qty": 0.0,
+                "projected_qty": 50.0,
+                "actual_qty": 50.0,
+                "ordered_qty": 0.0,
+                "received_qty": 0.0,
+                "rate": 0.0,
+                "price_list_rate": 0.0,
+                "amount": 0.0,
+                "expense_account": "Cost of Goods Sold - SD",
+                "cost_center": "Main - SD",
+                "page_break": 0,
+                "parent": "MAT-MR-2026-00004",
+                "parentfield": "items",
+                "parenttype": "Material Request",
+                "doctype": "Material Request Item",
+                "__unsaved": 1
+              }
+            ]
+          }
+        }
+      },
+      "expected_gap": "Material Request 工具目前没有 project 字段，项目归属还不能稳定写入 MR 行。",
+      "note": ""
+    },
+    {
+      "id": "09-30-search-pending-mr",
+      "time": "09:30",
+      "actor": "赵强，采购主管",
+      "event": "采购汇总待处理材料申请",
+      "status": "ok",
+      "writes": false,
+      "tool_call": {
+        "id": "toolcall_d86aeb1db9804d50b6ecff35e3723582",
+        "created_at": "2026-06-11T16:02:06.221762+00:00",
+        "tool": "erpnext.search_documents",
+        "arguments": {
+          "doctype": "Material Request",
+          "filters": {
+            "material_request_type": "Purchase",
+            "docstatus": 0
+          },
+          "fields": [
+            "name",
+            "title",
+            "status",
+            "transaction_date",
+            "schedule_date",
+            "company"
+          ],
+          "limit": 10,
+          "order_by": "modified desc"
+        },
+        "risk_level": "L0",
+        "user_context": {
+          "actor": "赵强，采购主管",
+          "scenario_step": "09-30-search-pending-mr"
+        },
+        "reason": "采购汇总待处理材料申请"
+      },
+      "tool_result": {
+        "ok": true,
+        "data": [
+          {
+            "name": "MAT-MR-2026-00004",
+            "title": "采购申请帆布手套",
+            "status": "Draft",
+            "transaction_date": "2026-06-12",
+            "schedule_date": "2026-06-13",
+            "company": "STEC (Demo)"
+          }
+        ],
+        "tool_call_id": "toolcall_d86aeb1db9804d50b6ecff35e3723582",
+        "duration_ms": 2069,
+        "status_code": 200,
+        "raw_status_code": 200
+      },
+      "expected_gap": "",
+      "note": ""
+    },
+    {
+      "id": "10-00-create-po-draft",
+      "time": "10:00",
+      "actor": "孙丽，行政采购员",
+      "event": "常用劳保用品创建采购订单草稿",
+      "status": "ok",
+      "writes": true,
+      "tool_call": {
+        "id": "toolcall_550f8e21ffa743d69986b62ed8a38717",
+        "created_at": "2026-06-11T16:02:08.291404+00:00",
+        "tool": "erpnext.buying.create_purchase_order_draft",
+        "arguments": {
+          "supplier": "SCEN-CIVIL 安科劳保用品",
+          "company": "STEC (Demo)",
+          "transaction_date": "2026-06-12",
+          "schedule_date": "2026-06-13",
+          "items": [
+            {
+              "item_code": "SAFE-000005",
+              "qty": 20,
+              "uom": "双",
+              "warehouse": "SCEN-CIVIL 中心仓 - SD",
+              "rate": 8
+            }
+          ]
+        },
+        "risk_level": "L3",
+        "user_context": {
+          "actor": "孙丽，行政采购员",
+          "scenario_step": "10-00-create-po-draft"
+        },
+        "reason": "常用劳保用品创建采购订单草稿"
+      },
+      "tool_result": {
+        "ok": true,
+        "data": {
+          "doctype": "Purchase Order",
+          "name": "PUR-ORD-2026-00023",
+          "docstatus": 0,
+          "status": "Draft",
+          "summary": "Created Purchase Order draft for SCEN-CIVIL 安科劳保用品 with 1 item rows.",
+          "next_actions": [
+            "review_draft",
+            "confirm_submit"
+          ],
+          "risk": {
+            "level": "L3",
+            "requires_confirmation_for_submit": true,
+            "submit_tool": "erpnext.buying.submit_document"
+          }
+        },
+        "tool_call_id": "toolcall_550f8e21ffa743d69986b62ed8a38717",
+        "duration_ms": 4266,
+        "status_code": 200,
+        "raw_status_code": 200,
+        "debug": {
+          "raw_document": {
+            "name": "PUR-ORD-2026-00023",
+            "owner": "agent.test@example.com",
+            "creation": "2026-06-12 00:02:12.399824",
+            "modified": "2026-06-12 00:02:12.399824",
+            "modified_by": "agent.test@example.com",
+            "docstatus": 0,
+            "idx": 0,
+            "title": "{supplier_name}",
+            "naming_series": "PUR-ORD-.YYYY.-",
+            "supplier": "SCEN-CIVIL 安科劳保用品",
+            "supplier_name": "SCEN-CIVIL 安科劳保用品",
+            "transaction_date": "2026-06-12",
+            "schedule_date": "2026-06-13",
+            "company": "STEC (Demo)",
+            "apply_tds": 0,
+            "is_subcontracted": 0,
+            "has_unit_price_items": 0,
+            "currency": "CNY",
+            "conversion_rate": 1.0,
+            "buying_price_list": "标准采购",
+            "price_list_currency": "CNY",
+            "plc_conversion_rate": 1.0,
+            "ignore_pricing_rule": 0,
+            "last_scanned_warehouse": null,
+            "total_qty": 20.0,
+            "total_net_weight": 0.0,
+            "base_total": 160.0,
+            "base_net_total": 160.0,
+            "total": 160.0,
+            "net_total": 160.0,
+            "tax_withholding_net_total": 160.0,
+            "base_tax_withholding_net_total": 160.0,
+            "tax_category": "",
+            "base_taxes_and_charges_added": 0.0,
+            "base_taxes_and_charges_deducted": 0.0,
+            "base_total_taxes_and_charges": 0.0,
+            "taxes_and_charges_added": 0.0,
+            "taxes_and_charges_deducted": 0.0,
+            "total_taxes_and_charges": 0.0,
+            "base_grand_total": 160.0,
+            "base_rounding_adjustment": 0.0,
+            "base_in_words": "CNY One Hundred And Sixty 仅。",
+            "base_rounded_total": 160.0,
+            "grand_total": 160.0,
+            "rounding_adjustment": 0.0,
+            "rounded_total": 160.0,
+            "disable_rounded_total": 0,
+            "in_words": "CNY One Hundred And Sixty 仅。",
+            "advance_paid": 0.0,
+            "apply_discount_on": "Grand Total",
+            "base_discount_amount": 0.0,
+            "additional_discount_percentage": 0.0,
+            "discount_amount": 0.0,
+            "status": "Draft",
+            "per_billed": 0.0,
+            "per_received": 0.0,
+            "group_same_items": 0,
+            "language": "zh",
+            "is_internal_supplier": 0,
+            "represents_company": "",
+            "party_account_currency": "CNY",
+            "is_old_subcontracting_flow": 0,
+            "doctype": "Purchase Order",
+            "taxes": [],
+            "pricing_rules": [],
+            "supplied_items": [],
+            "payment_schedule": [
+              {
+                "name": "61d4u6d8go",
+                "owner": "agent.test@example.com",
+                "creation": "2026-06-12 00:02:12.530977",
+                "modified": "2026-06-12 00:02:12.530977",
+                "modified_by": "agent.test@example.com",
+                "docstatus": 0,
+                "idx": 1,
+                "due_date": "2026-06-12",
+                "invoice_portion": 100.0,
+                "credit_days": 0,
+                "credit_months": 0,
+                "discount": 0.0,
+                "discount_validity": 0,
+                "payment_amount": 160.0,
+                "outstanding": 160.0,
+                "paid_amount": 0.0,
+                "discounted_amount": 0.0,
+                "base_payment_amount": 160.0,
+                "base_outstanding": 160.0,
+                "base_paid_amount": 0.0,
+                "parent": "PUR-ORD-2026-00023",
+                "parentfield": "payment_schedule",
+                "parenttype": "Purchase Order",
+                "doctype": "Payment Schedule"
+              }
+            ],
+            "items": [
+              {
+                "name": "61c1ojbtik",
+                "owner": "agent.test@example.com",
+                "creation": "2026-06-12 00:02:12.399824",
+                "modified": "2026-06-12 00:02:12.399824",
+                "modified_by": "agent.test@example.com",
+                "docstatus": 0,
+                "idx": 1,
+                "fg_item_qty": 0.0,
+                "item_code": "SAFE-000005",
+                "item_name": "帆布手套",
+                "schedule_date": "2026-06-13",
+                "item_group": "劳保耗材/手套",
+                "description": "<p>帆布手套</p><p>材质：帆布；特征：加厚、双层</p><p>别名：加厚双层帆布手套</p>",
+                "image": "",
+                "qty": 20.0,
+                "stock_uom": "双",
+                "subcontracted_quantity": 0.0,
+                "uom": "双",
+                "conversion_factor": 1.0,
+                "stock_qty": 20.0,
+                "price_list_rate": 0.0,
+                "last_purchase_rate": 0.0,
+                "base_price_list_rate": 0.0,
+                "margin_type": "",
+                "margin_rate_or_amount": 0.0,
+                "rate_with_margin": 0.0,
+                "discount_percentage": 0.0,
+                "discount_amount": 0.0,
+                "distributed_discount_amount": 0.0,
+                "base_rate_with_margin": 0.0,
+                "rate": 8.0,
+                "amount": 160.0,
+                "base_rate": 8.0,
+                "base_amount": 160.0,
+                "stock_uom_rate": 8.0,
+                "is_free_item": 0,
+                "apply_tds": 1,
+                "net_rate": 8.0,
+                "net_amount": 160.0,
+                "base_net_rate": 8.0,
+                "base_net_amount": 160.0,
+                "warehouse": "SCEN-CIVIL 中心仓 - SD",
+                "actual_qty": 300.0,
+                "company_total_stock": 350.0,
+                "delivered_by_supplier": 0,
+                "against_blanket_order": 0,
+                "blanket_order_rate": 0.0,
+                "received_qty": 0.0,
+                "returned_qty": 0.0,
+                "billed_amt": 0.0,
+                "expense_account": "Cost of Goods Sold - SD",
+                "include_exploded_items": 0,
+                "weight_per_unit": 0.0,
+                "total_weight": 0.0,
+                "cost_center": "Main - SD",
+                "is_fixed_asset": 0,
+                "item_tax_rate": "{}",
+                "page_break": 0,
+                "parent": "PUR-ORD-2026-00023",
+                "parentfield": "items",
+                "parenttype": "Purchase Order",
+                "doctype": "Purchase Order Item",
+                "__unsaved": 1
+              }
+            ]
+          }
+        }
+      },
+      "expected_gap": "当前 PO 草稿不是从 MR 自动带出，MR 到 PO 的引用关系需要后续 wrapper 验收。",
+      "note": ""
+    },
+    {
+      "id": "11-20-check-center-stock",
+      "time": "11:20",
+      "actor": "王海，仓库主管",
+      "event": "中心仓检查帆布手套库存",
+      "status": "ok",
+      "writes": false,
+      "tool_call": {
+        "id": "toolcall_05c411355ffe4e3a94261bbde90b5055",
+        "created_at": "2026-06-11T16:02:12.557630+00:00",
+        "tool": "erpnext.stock.get_balance",
+        "arguments": {
+          "item_code": "SAFE-000005",
+          "warehouse": "SCEN-CIVIL 中心仓 - SD"
+        },
+        "risk_level": "L0",
+        "user_context": {
+          "actor": "王海，仓库主管",
+          "scenario_step": "11-20-check-center-stock"
+        },
+        "reason": "中心仓检查帆布手套库存"
+      },
+      "tool_result": {
+        "ok": true,
+        "data": [
+          {
+            "name": "03595geb70",
+            "item_code": "SAFE-000005",
+            "warehouse": "SCEN-CIVIL 中心仓 - SD",
+            "actual_qty": 300.0,
+            "projected_qty": 300.0,
+            "reserved_qty": 0.0,
+            "ordered_qty": 0.0,
+            "planned_qty": 0.0,
+            "valuation_rate": 8.0,
+            "stock_value": 2400.0
+          }
+        ],
+        "tool_call_id": "toolcall_05c411355ffe4e3a94261bbde90b5055",
+        "duration_ms": 2066,
+        "status_code": 200,
+        "raw_status_code": 200
+      },
+      "expected_gap": "",
+      "note": ""
+    },
+    {
+      "id": "13-30-create-pr-draft",
+      "time": "13:30",
+      "actor": "王海，仓库主管",
+      "event": "供应商送来劳保用品，创建采购收货草稿",
+      "status": "ok",
+      "writes": true,
+      "tool_call": {
+        "id": "toolcall_1825eff37cec4d12b785dd118cdce0ef",
+        "created_at": "2026-06-11T16:02:14.624738+00:00",
+        "tool": "erpnext.buying.create_purchase_receipt_draft",
+        "arguments": {
+          "supplier": "SCEN-CIVIL 安科劳保用品",
+          "company": "STEC (Demo)",
+          "posting_date": "2026-06-12",
+          "items": [
+            {
+              "item_code": "SAFE-000005",
+              "qty": 20,
+              "uom": "双",
+              "warehouse": "SCEN-CIVIL 中心仓 - SD",
+              "rate": 8
+            }
+          ]
+        },
+        "risk_level": "L3",
+        "user_context": {
+          "actor": "王海，仓库主管",
+          "scenario_step": "13-30-create-pr-draft"
+        },
+        "reason": "供应商送来劳保用品，创建采购收货草稿"
+      },
+      "tool_result": {
+        "ok": true,
+        "data": {
+          "doctype": "Purchase Receipt",
+          "name": "MAT-PRE-2026-00006",
+          "docstatus": 0,
+          "status": "Draft",
+          "summary": "Created Purchase Receipt draft for SCEN-CIVIL 安科劳保用品 with 1 item rows.",
+          "next_actions": [
+            "review_draft",
+            "confirm_submit"
+          ],
+          "risk": {
+            "level": "L3",
+            "requires_confirmation_for_submit": true,
+            "submit_tool": "erpnext.buying.submit_document"
+          }
+        },
+        "tool_call_id": "toolcall_1825eff37cec4d12b785dd118cdce0ef",
+        "duration_ms": 4199,
+        "status_code": 200,
+        "raw_status_code": 200,
+        "debug": {
+          "raw_document": {
+            "name": "MAT-PRE-2026-00006",
+            "owner": "agent.test@example.com",
+            "creation": "2026-06-12 00:02:18.738320",
+            "modified": "2026-06-12 00:02:18.738320",
+            "modified_by": "agent.test@example.com",
+            "docstatus": 0,
+            "idx": 0,
+            "title": "SCEN-CIVIL 安科劳保用品",
+            "naming_series": "MAT-PRE-.YYYY.-",
+            "supplier": "SCEN-CIVIL 安科劳保用品",
+            "supplier_name": "SCEN-CIVIL 安科劳保用品",
+            "posting_date": "2026-06-12",
+            "posting_time": "00:02:18.749796",
+            "set_posting_time": 0,
+            "company": "STEC (Demo)",
+            "apply_putaway_rule": 0,
+            "is_return": 0,
+            "currency": "CNY",
+            "conversion_rate": 1.0,
+            "buying_price_list": "标准采购",
+            "price_list_currency": "CNY",
+            "plc_conversion_rate": 1.0,
+            "ignore_pricing_rule": 0,
+            "last_scanned_warehouse": null,
+            "is_subcontracted": 0,
+            "total_qty": 20.0,
+            "total_net_weight": 0.0,
+            "base_total": 160.0,
+            "base_net_total": 160.0,
+            "total": 160.0,
+            "net_total": 160.0,
+            "tax_withholding_net_total": 160.0,
+            "base_tax_withholding_net_total": 160.0,
+            "tax_category": "",
+            "base_taxes_and_charges_added": 0.0,
+            "base_taxes_and_charges_deducted": 0.0,
+            "base_total_taxes_and_charges": 0.0,
+            "taxes_and_charges_added": 0.0,
+            "taxes_and_charges_deducted": 0.0,
+            "total_taxes_and_charges": 0.0,
+            "base_grand_total": 160.0,
+            "base_rounding_adjustment": 0.0,
+            "base_rounded_total": 160.0,
+            "base_in_words": "CNY One Hundred And Sixty 仅。",
+            "grand_total": 160.0,
+            "rounding_adjustment": 0.0,
+            "rounded_total": 160.0,
+            "in_words": "CNY One Hundred And Sixty 仅。",
+            "disable_rounded_total": 0,
+            "apply_discount_on": "Grand Total",
+            "base_discount_amount": 0.0,
+            "additional_discount_percentage": 0.0,
+            "discount_amount": 0.0,
+            "status": "Draft",
+            "per_billed": 0.0,
+            "per_returned": 0.0,
+            "group_same_items": 0,
+            "language": "zh",
+            "is_internal_supplier": 0,
+            "represents_company": "",
+            "is_old_subcontracting_flow": 0,
+            "doctype": "Purchase Receipt",
+            "pricing_rules": [],
+            "items": [
+              {
+                "name": "63beh0295d",
+                "owner": "agent.test@example.com",
+                "creation": "2026-06-12 00:02:18.738320",
+                "modified": "2026-06-12 00:02:18.738320",
+                "modified_by": "agent.test@example.com",
+                "docstatus": 0,
+                "idx": 1,
+                "has_item_scanned": 0,
+                "item_code": "SAFE-000005",
+                "item_name": "帆布手套",
+                "description": "<p>帆布手套</p><p>材质：帆布；特征：加厚、双层</p><p>别名：加厚双层帆布手套</p>",
+                "item_group": "劳保耗材/手套",
+                "image": "",
+                "received_qty": 20.0,
+                "qty": 20.0,
+                "rejected_qty": 0.0,
+                "uom": "双",
+                "stock_uom": "双",
+                "conversion_factor": 1.0,
+                "retain_sample": 0,
+                "sample_quantity": 0,
+                "received_stock_qty": 0.0,
+                "stock_qty": 20.0,
+                "returned_qty": 0.0,
+                "price_list_rate": 8.0,
+                "base_price_list_rate": 8.0,
+                "margin_type": "",
+                "margin_rate_or_amount": 0.0,
+                "rate_with_margin": 0.0,
+                "discount_percentage": 0.0,
+                "discount_amount": 0.0,
+                "distributed_discount_amount": 0.0,
+                "base_rate_with_margin": 0.0,
+                "rate": 8.0,
+                "amount": 160.0,
+                "base_rate": 8.0,
+                "base_amount": 160.0,
+                "stock_uom_rate": 8.0,
+                "is_free_item": 0,
+                "apply_tds": 1,
+                "net_rate": 8.0,
+                "net_amount": 160.0,
+                "base_net_rate": 8.0,
+                "base_net_amount": 160.0,
+                "valuation_rate": 8.0,
+                "sales_incoming_rate": 0.0,
+                "item_tax_amount": 0.0,
+                "rm_supp_cost": 0.0,
+                "landed_cost_voucher_amount": 0.0,
+                "amount_difference_with_purchase_invoice": 0.0,
+                "billed_amt": 0.0,
+                "warehouse": "SCEN-CIVIL 中心仓 - SD",
+                "allow_zero_valuation_rate": 0,
+                "return_qty_from_rejected_warehouse": 0,
+                "is_fixed_asset": 0,
+                "use_serial_batch_fields": 0,
+                "include_exploded_items": 0,
+                "weight_per_unit": 0.0,
+                "total_weight": 0.0,
+                "expense_account": "Cost of Goods Sold - SD",
+                "item_tax_rate": "{}",
+                "cost_center": "Main - SD",
+                "page_break": 0,
+                "parent": "MAT-PRE-2026-00006",
+                "parentfield": "items",
+                "parenttype": "Purchase Receipt",
+                "doctype": "Purchase Receipt Item",
+                "__unsaved": 1
+              }
+            ],
+            "supplied_items": [],
+            "taxes": []
+          }
+        }
+      },
+      "expected_gap": "PR 草稿未从已提交 PO 自动生成，PO 到 PR 引用关系需要后续 wrapper 验收。",
+      "note": ""
+    },
+    {
+      "id": "14-30-project-issue-context",
+      "time": "14:30",
+      "actor": "周鹏，项目仓管员",
+      "event": "项目仓预览城东项目领料是否足够",
+      "status": "ok",
+      "writes": false,
+      "tool_call": {
+        "id": "toolcall_a449d41fd6874c639833869498ddc116",
+        "created_at": "2026-06-11T16:02:18.824598+00:00",
+        "tool": "erpnext.projects.get_material_issue_context",
+        "arguments": {
+          "project": "PROJ-0004",
+          "source_warehouse": "SCEN-CIVIL 项目仓 - SD",
+          "items": [
+            {
+              "item_code": "SAFE-000005",
+              "qty": 10,
+              "uom": "双",
+              "description": "城东项目班组领用帆布手套。"
+            }
+          ]
+        },
+        "risk_level": "L1",
+        "user_context": {
+          "actor": "周鹏，项目仓管员",
+          "scenario_step": "14-30-project-issue-context"
+        },
+        "reason": "项目仓预览城东项目领料是否足够"
+      },
+      "tool_result": {
+        "ok": true,
+        "data": {
+          "doctype": "Stock Entry",
+          "name": null,
+          "docstatus": null,
+          "status": "Ready",
+          "summary": "Prepared project material issue preview for PROJ-0004: 0 shortage row(s).",
+          "project": {
+            "name": "PROJ-0004",
+            "project_name": "SCEN-CIVIL 城东道路改造项目",
+            "company": "STEC (Demo)"
+          },
+          "source_warehouse": "SCEN-CIVIL 项目仓 - SD",
+          "items": [
+            {
+              "item_code": "SAFE-000005",
+              "requested_qty": 10.0,
+              "available_qty": 50.0,
+              "shortage_qty": 0.0,
+              "source_warehouse": "SCEN-CIVIL 项目仓 - SD",
+              "uom": "双",
+              "description": "城东项目班组领用帆布手套。",
+              "can_issue": true
+            }
+          ],
+          "shortages": [],
+          "next_actions": [
+            "create_material_issue_draft"
+          ],
+          "risk": {
+            "level": "L1",
+            "writes_document": false
+          }
+        },
+        "tool_call_id": "toolcall_a449d41fd6874c639833869498ddc116",
+        "duration_ms": 4083,
+        "status_code": 200,
+        "raw_status_code": 200,
+        "debug": {
+          "raw_project": {
+            "name": "PROJ-0004",
+            "owner": "agent.test@example.com",
+            "creation": "2026-06-11 23:50:07.790138",
+            "modified": "2026-06-11 23:50:07.790138",
+            "modified_by": "agent.test@example.com",
+            "docstatus": 0,
+            "idx": 0,
+            "naming_series": "PROJ-.####",
+            "project_name": "SCEN-CIVIL 城东道路改造项目",
+            "status": "Open",
+            "is_active": "Yes",
+            "percent_complete_method": "Task Completion",
+            "percent_complete": 0.0,
+            "priority": "Medium",
+            "actual_time": 0.0,
+            "estimated_costing": 0.0,
+            "total_costing_amount": 0.0,
+            "total_purchase_cost": 0.0,
+            "company": "STEC (Demo)",
+            "total_sales_amount": 0.0,
+            "total_billable_amount": 0.0,
+            "total_billed_amount": 0.0,
+            "total_consumed_material_cost": 0.0,
+            "gross_margin": 0.0,
+            "per_gross_margin": 0.0,
+            "collect_progress": 0,
+            "frequency": "Hourly",
+            "from_time": "23:50:7.787313",
+            "to_time": "23:50:7.787564",
+            "first_email": "23:50:7.787579",
+            "second_email": "23:50:7.78759",
+            "daily_time_to_send": "23:50:7.787599",
+            "day_to_send": "Monday",
+            "weekly_time_to_send": "23:50:7.787608",
+            "doctype": "Project",
+            "users": []
+          },
+          "raw_balances": [
+            {
+              "item_code": "SAFE-000005",
+              "raw_balance": [
+                {
+                  "name": "07pih9qma4",
+                  "item_code": "SAFE-000005",
+                  "warehouse": "SCEN-CIVIL 项目仓 - SD",
+                  "actual_qty": 50.0,
+                  "projected_qty": 50.0,
+                  "reserved_qty": 0.0,
+                  "ordered_qty": 0.0,
+                  "planned_qty": 0.0,
+                  "valuation_rate": 8.0,
+                  "stock_value": 400.0
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected_gap": "",
+      "note": ""
+    },
+    {
+      "id": "14-30-create-material-issue",
+      "time": "14:30",
+      "actor": "周鹏，项目仓管员",
+      "event": "创建城东项目领料出库草稿",
+      "status": "ok",
+      "writes": true,
+      "tool_call": {
+        "id": "toolcall_af8b3bab9b3f4750969dc42bd33b3a3a",
+        "created_at": "2026-06-11T16:02:22.908170+00:00",
+        "tool": "erpnext.projects.create_material_issue_draft",
+        "arguments": {
+          "project": "PROJ-0004",
+          "source_warehouse": "SCEN-CIVIL 项目仓 - SD",
+          "company": "STEC (Demo)",
+          "posting_date": "2026-06-12",
+          "remarks": "SCEN-CIVIL day runner: 城东项目帆布手套领料草稿",
+          "items": [
+            {
+              "item_code": "SAFE-000005",
+              "qty": 10,
+              "uom": "双",
+              "description": "城东项目班组领用帆布手套。"
+            }
+          ]
+        },
+        "risk_level": "L3",
+        "user_context": {
+          "actor": "周鹏，项目仓管员",
+          "scenario_step": "14-30-create-material-issue"
+        },
+        "reason": "创建城东项目领料出库草稿"
+      },
+      "tool_result": {
+        "ok": true,
+        "data": {
+          "doctype": "Stock Entry",
+          "name": "MAT-STE-2026-00005",
+          "docstatus": 0,
+          "status": "Draft",
+          "summary": "Created project material issue draft for PROJ-0004 with 1 item row(s).",
+          "next_actions": [
+            "review_draft",
+            "confirm_submit"
+          ],
+          "risk": {
+            "level": "L3",
+            "requires_confirmation_for_submit": true,
+            "submit_tool": "erpnext.stock.submit_document"
+          },
+          "project": "PROJ-0004",
+          "source_warehouse": "SCEN-CIVIL 项目仓 - SD"
+        },
+        "tool_call_id": "toolcall_af8b3bab9b3f4750969dc42bd33b3a3a",
+        "duration_ms": 6211,
+        "status_code": 200,
+        "raw_status_code": 200,
+        "debug": {
+          "raw_document": {
+            "name": "MAT-STE-2026-00005",
+            "owner": "agent.test@example.com",
+            "creation": "2026-06-12 00:02:29.061382",
+            "modified": "2026-06-12 00:02:29.061382",
+            "modified_by": "agent.test@example.com",
+            "docstatus": 0,
+            "idx": 0,
+            "naming_series": "MAT-STE-.YYYY.-",
+            "stock_entry_type": "Material Issue",
+            "purpose": "Material Issue",
+            "add_to_transit": 0,
+            "company": "STEC (Demo)",
+            "posting_date": "2026-06-12",
+            "posting_time": "00:02:29.071008",
+            "set_posting_time": 0,
+            "inspection_required": 0,
+            "apply_putaway_rule": 0,
+            "from_bom": 0,
+            "use_multi_level_bom": 1,
+            "fg_completed_qty": 0.0,
+            "process_loss_percentage": 0.0,
+            "process_loss_qty": 0.0,
+            "last_scanned_warehouse": null,
+            "total_outgoing_value": 80.0,
+            "total_incoming_value": 0.0,
+            "value_difference": -80.0,
+            "total_additional_costs": 0.0,
+            "is_opening": "No",
+            "remarks": "SCEN-CIVIL day runner: 城东项目帆布手套领料草稿",
+            "per_transferred": 0.0,
+            "total_amount": 80.0,
+            "is_return": 0,
+            "doctype": "Stock Entry",
+            "items": [
+              {
+                "name": "66icjdmrmb",
+                "owner": "agent.test@example.com",
+                "creation": "2026-06-12 00:02:29.061382",
+                "modified": "2026-06-12 00:02:29.061382",
+                "modified_by": "agent.test@example.com",
+                "docstatus": 0,
+                "idx": 1,
+                "has_item_scanned": 0,
+                "s_warehouse": "SCEN-CIVIL 项目仓 - SD",
+                "item_code": "SAFE-000005",
+                "item_name": "帆布手套",
+                "is_finished_item": 0,
+                "is_scrap_item": 0,
+                "description": "城东项目班组领用帆布手套。",
+                "item_group": "劳保耗材/手套",
+                "qty": 10.0,
+                "transfer_qty": 10.0,
+                "retain_sample": 0,
+                "uom": "双",
+                "stock_uom": "双",
+                "conversion_factor": 1.0,
+                "sample_quantity": 0,
+                "basic_rate": 8.0,
+                "additional_cost": 0.0,
+                "valuation_rate": 8.0,
+                "allow_zero_valuation_rate": 0,
+                "set_basic_rate_manually": 0,
+                "basic_amount": 80.0,
+                "amount": 80.0,
+                "use_serial_batch_fields": 0,
+                "expense_account": "Stock Adjustment - SD",
+                "cost_center": "Main - SD",
+                "project": "PROJ-0004",
+                "actual_qty": 0.0,
+                "transferred_qty": 0.0,
+                "allow_alternative_item": 0,
+                "parent": "MAT-STE-2026-00005",
+                "parentfield": "items",
+                "parenttype": "Stock Entry",
+                "doctype": "Stock Entry Detail",
+                "__unsaved": 1
+              }
+            ],
+            "additional_costs": []
+          },
+          "project_material_issue_context": {
+            "doctype": "Stock Entry",
+            "name": null,
+            "docstatus": null,
+            "status": "Ready",
+            "summary": "Prepared project material issue preview for PROJ-0004: 0 shortage row(s).",
+            "project": {
+              "name": "PROJ-0004",
+              "project_name": "SCEN-CIVIL 城东道路改造项目",
+              "company": "STEC (Demo)"
+            },
+            "source_warehouse": "SCEN-CIVIL 项目仓 - SD",
+            "items": [
+              {
+                "item_code": "SAFE-000005",
+                "requested_qty": 10.0,
+                "available_qty": 50.0,
+                "shortage_qty": 0.0,
+                "source_warehouse": "SCEN-CIVIL 项目仓 - SD",
+                "uom": "双",
+                "description": "城东项目班组领用帆布手套。",
+                "can_issue": true
+              }
+            ],
+            "shortages": [],
+            "next_actions": [
+              "create_material_issue_draft"
+            ],
+            "risk": {
+              "level": "L1",
+              "writes_document": false
+            }
+          }
+        }
+      },
+      "expected_gap": "",
+      "note": ""
+    },
+    {
+      "id": "16-00-accounts-payable",
+      "time": "16:00",
+      "actor": "刘敏，财务主管",
+      "event": "财务查看应付账款报表",
+      "status": "ok",
+      "writes": false,
+      "tool_call": {
+        "id": "toolcall_ce3d6322fb1d44649b2b38cc3b624f37",
+        "created_at": "2026-06-11T16:02:29.119688+00:00",
+        "tool": "erpnext.accounting.accounts_payable",
+        "arguments": {
+          "company": "STEC (Demo)",
+          "from_date": "2026-06-01",
+          "to_date": "2026-06-12"
+        },
+        "risk_level": "L0",
+        "user_context": {
+          "actor": "刘敏，财务主管",
+          "scenario_step": "16-00-accounts-payable"
+        },
+        "reason": "财务查看应付账款报表"
+      },
+      "tool_result": {
+        "ok": true,
+        "data": {
+          "report_name": "Accounts Payable",
+          "filters": {
+            "company": "STEC (Demo)",
+            "from_date": "2026-06-01",
+            "to_date": "2026-06-12"
+          },
+          "columns": [
+            {
+              "label": "记帐日期",
+              "fieldname": "posting_date",
+              "fieldtype": "Date",
+              "options": null,
+              "width": 90
+            },
+            {
+              "label": "往来单位类型",
+              "fieldname": "party_type",
+              "fieldtype": "Data",
+              "options": null,
+              "width": 100
+            },
+            {
+              "label": "往来单位",
+              "fieldname": "party",
+              "fieldtype": "Dynamic Link",
+              "options": "party_type",
+              "width": 180
+            },
+            {
+              "label": "应付科目",
+              "fieldname": "party_account",
+              "fieldtype": "Link",
+              "options": "Account",
+              "width": 180
+            },
+            {
+              "label": "成本中心",
+              "fieldname": "cost_center",
+              "fieldtype": "Data",
+              "options": null,
+              "width": 120
+            },
+            {
+              "label": "项目",
+              "fieldname": "project",
+              "fieldtype": "Link",
+              "options": "Project",
+              "width": 120
+            },
+            {
+              "label": "凭证类型",
+              "fieldname": "voucher_type",
+              "fieldtype": "Data",
+              "options": null,
+              "width": 120
+            },
+            {
+              "label": "凭证编号",
+              "fieldname": "voucher_no",
+              "fieldtype": "Dynamic Link",
+              "options": "voucher_type",
+              "width": 180
+            },
+            {
+              "label": "到期日",
+              "fieldname": "due_date",
+              "fieldtype": "Date",
+              "options": null,
+              "width": 90
+            },
+            {
+              "label": "账单编号",
+              "fieldname": "bill_no",
+              "fieldtype": "Data",
+              "options": null,
+              "width": 120
+            },
+            {
+              "label": "账单日期",
+              "fieldname": "bill_date",
+              "fieldtype": "Date",
+              "options": null,
+              "width": 90
+            },
+            {
+              "label": "费用清单金额",
+              "fieldname": "invoiced",
+              "fieldtype": "Currency",
+              "options": "currency",
+              "width": 120
+            },
+            {
+              "label": "已付金额",
+              "fieldname": "paid",
+              "fieldtype": "Currency",
+              "options": "currency",
+              "width": 120
+            },
+            {
+              "label": "借项通知单",
+              "fieldname": "credit_note",
+              "fieldtype": "Currency",
+              "options": "currency",
+              "width": 120
+            },
+            {
+              "label": "未付金额",
+              "fieldname": "outstanding",
+              "fieldtype": "Currency",
+              "options": "currency",
+              "width": 120
+            },
+            {
+              "label": "时间（天）",
+              "fieldname": "age",
+              "fieldtype": "Int",
+              "options": null,
+              "width": 80
+            },
+            {
+              "label": "0-30",
+              "fieldname": "range1",
+              "fieldtype": "Currency",
+              "options": "currency",
+              "width": 120
+            },
+            {
+              "label": "31-60",
+              "fieldname": "range2",
+              "fieldtype": "Currency",
+              "options": "currency",
+              "width": 120
+            },
+            {
+              "label": "61-90",
+              "fieldname": "range3",
+              "fieldtype": "Currency",
+              "options": "currency",
+              "width": 120
+            },
+            {
+              "label": "91-120",
+              "fieldname": "range4",
+              "fieldtype": "Currency",
+              "options": "currency",
+              "width": 120
+            },
+            {
+              "label": "121-以上",
+              "fieldname": "range5",
+              "fieldtype": "Currency",
+              "options": "currency",
+              "width": 120
+            },
+            {
+              "label": "货币",
+              "fieldname": "currency",
+              "fieldtype": "Link",
+              "options": "Currency",
+              "width": 80
+            },
+            {
+              "label": "供应商群组",
+              "fieldname": "supplier_group",
+              "fieldtype": "Link",
+              "options": "Supplier Group",
+              "width": 120
+            }
+          ],
+          "rows": [
+            {
+              "voucher_type": "Payment Entry",
+              "voucher_no": "ACC-PAY-2026-00007",
+              "party": "Zuckerman Security Ltd.",
+              "party_account": "Creditors - SD",
+              "posting_date": "2026-01-02",
+              "account_currency": "CNY",
+              "remarks": null,
+              "invoiced": 0.0,
+              "paid": 71250.0,
+              "credit_note": 0.0,
+              "outstanding": -71250.0,
+              "invoiced_in_account_currency": 0.0,
+              "paid_in_account_currency": 71250.0,
+              "credit_note_in_account_currency": 0.0,
+              "outstanding_in_account_currency": -71250.0,
+              "cost_center": null,
+              "project": null,
+              "party_type": "Supplier",
+              "invoice_grand_total": 0.0,
+              "supplier_name": "Zuckerman Security Ltd.",
+              "supplier_group": "Demo Supplier Group",
+              "currency": "CNY",
+              "range1": 0.0,
+              "range2": 0.0,
+              "range3": 0.0,
+              "range4": 0.0,
+              "range5": -71250.0,
+              "age": 161,
+              "total_due": -71250.0
+            },
+            {
+              "voucher_type": "Payment Entry",
+              "voucher_no": "ACC-PAY-2026-00008",
+              "party": "MA Inc.",
+              "party_account": "Creditors - SD",
+              "posting_date": "2026-01-07",
+              "account_currency": "CNY",
+              "remarks": null,
+              "invoiced": 0.0,
+              "paid": 40404.0,
+              "credit_note": 0.0,
+              "outstanding": -40404.0,
+              "invoiced_in_account_currency": 0.0,
+              "paid_in_account_currency": 40404.0,
+              "credit_note_in_account_currency": 0.0,
+              "outstanding_in_account_currency": -40404.0,
+              "cost_center": null,
+              "project": null,
+              "party_type": "Supplier",
+              "invoice_grand_total": 0.0,
+              "supplier_name": "MA Inc.",
+              "supplier_group": "Demo Supplier Group",
+              "currency": "CNY",
+              "range1": 0.0,
+              "range2": 0.0,
+              "range3": 0.0,
+              "range4": 0.0,
+              "range5": -40404.0,
+              "age": 156,
+              "total_due": -40404.0
+            },
+            {
+              "voucher_type": "Payment Entry",
+              "voucher_no": "ACC-PAY-2026-00006",
+              "party": "Summit Traders Ltd.",
+              "party_account": "Creditors - SD",
+              "posting_date": "2026-01-13",
+              "account_currency": "CNY",
+              "remarks": null,
+              "invoiced": 0.0,
+              "paid": 53200.0,
+              "credit_note": 0.0,
+              "outstanding": -53200.0,
+              "invoiced_in_account_currency": 0.0,
+              "paid_in_account_currency": 53200.0,
+              "credit_note_in_account_currency": 0.0,
+              "outstanding_in_account_currency": -53200.0,
+              "cost_center": null,
+              "project": null,
+              "party_type": "Supplier",
+              "invoice_grand_total": 0.0,
+              "supplier_name": "Summit Traders Ltd.",
+              "supplier_group": "Demo Supplier Group",
+              "currency": "CNY",
+              "range1": 0.0,
+              "range2": 0.0,
+              "range3": 0.0,
+              "range4": 0.0,
+              "range5": -53200.0,
+              "age": 150,
+              "total_due": -53200.0
+            },
+            [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              164854.0,
+              "",
+              -164854.0,
+              467.0,
+              "",
+              "",
+              "",
+              "",
+              -164854.0,
+              "CNY",
+              ""
+            ]
+          ],
+          "summary": "Fetched 4 rows from Accounts Payable.",
+          "report_summary": null,
+          "next_actions": [],
+          "risk": {
+            "level": "L0"
+          }
+        },
+        "tool_call_id": "toolcall_ce3d6322fb1d44649b2b38cc3b624f37",
+        "duration_ms": 2093,
+        "status_code": 200,
+        "raw_status_code": 200,
+        "debug": {
+          "raw_report": {
+            "result": [
+              {
+                "voucher_type": "Payment Entry",
+                "voucher_no": "ACC-PAY-2026-00007",
+                "party": "Zuckerman Security Ltd.",
+                "party_account": "Creditors - SD",
+                "posting_date": "2026-01-02",
+                "account_currency": "CNY",
+                "remarks": null,
+                "invoiced": 0.0,
+                "paid": 71250.0,
+                "credit_note": 0.0,
+                "outstanding": -71250.0,
+                "invoiced_in_account_currency": 0.0,
+                "paid_in_account_currency": 71250.0,
+                "credit_note_in_account_currency": 0.0,
+                "outstanding_in_account_currency": -71250.0,
+                "cost_center": null,
+                "project": null,
+                "party_type": "Supplier",
+                "invoice_grand_total": 0.0,
+                "supplier_name": "Zuckerman Security Ltd.",
+                "supplier_group": "Demo Supplier Group",
+                "currency": "CNY",
+                "range1": 0.0,
+                "range2": 0.0,
+                "range3": 0.0,
+                "range4": 0.0,
+                "range5": -71250.0,
+                "age": 161,
+                "total_due": -71250.0
+              },
+              {
+                "voucher_type": "Payment Entry",
+                "voucher_no": "ACC-PAY-2026-00008",
+                "party": "MA Inc.",
+                "party_account": "Creditors - SD",
+                "posting_date": "2026-01-07",
+                "account_currency": "CNY",
+                "remarks": null,
+                "invoiced": 0.0,
+                "paid": 40404.0,
+                "credit_note": 0.0,
+                "outstanding": -40404.0,
+                "invoiced_in_account_currency": 0.0,
+                "paid_in_account_currency": 40404.0,
+                "credit_note_in_account_currency": 0.0,
+                "outstanding_in_account_currency": -40404.0,
+                "cost_center": null,
+                "project": null,
+                "party_type": "Supplier",
+                "invoice_grand_total": 0.0,
+                "supplier_name": "MA Inc.",
+                "supplier_group": "Demo Supplier Group",
+                "currency": "CNY",
+                "range1": 0.0,
+                "range2": 0.0,
+                "range3": 0.0,
+                "range4": 0.0,
+                "range5": -40404.0,
+                "age": 156,
+                "total_due": -40404.0
+              },
+              {
+                "voucher_type": "Payment Entry",
+                "voucher_no": "ACC-PAY-2026-00006",
+                "party": "Summit Traders Ltd.",
+                "party_account": "Creditors - SD",
+                "posting_date": "2026-01-13",
+                "account_currency": "CNY",
+                "remarks": null,
+                "invoiced": 0.0,
+                "paid": 53200.0,
+                "credit_note": 0.0,
+                "outstanding": -53200.0,
+                "invoiced_in_account_currency": 0.0,
+                "paid_in_account_currency": 53200.0,
+                "credit_note_in_account_currency": 0.0,
+                "outstanding_in_account_currency": -53200.0,
+                "cost_center": null,
+                "project": null,
+                "party_type": "Supplier",
+                "invoice_grand_total": 0.0,
+                "supplier_name": "Summit Traders Ltd.",
+                "supplier_group": "Demo Supplier Group",
+                "currency": "CNY",
+                "range1": 0.0,
+                "range2": 0.0,
+                "range3": 0.0,
+                "range4": 0.0,
+                "range5": -53200.0,
+                "age": 150,
+                "total_due": -53200.0
+              },
+              [
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                164854.0,
+                "",
+                -164854.0,
+                467.0,
+                "",
+                "",
+                "",
+                "",
+                -164854.0,
+                "CNY",
+                ""
+              ]
+            ],
+            "columns": [
+              {
+                "label": "记帐日期",
+                "fieldname": "posting_date",
+                "fieldtype": "Date",
+                "options": null,
+                "width": 90
+              },
+              {
+                "label": "往来单位类型",
+                "fieldname": "party_type",
+                "fieldtype": "Data",
+                "options": null,
+                "width": 100
+              },
+              {
+                "label": "往来单位",
+                "fieldname": "party",
+                "fieldtype": "Dynamic Link",
+                "options": "party_type",
+                "width": 180
+              },
+              {
+                "label": "应付科目",
+                "fieldname": "party_account",
+                "fieldtype": "Link",
+                "options": "Account",
+                "width": 180
+              },
+              {
+                "label": "成本中心",
+                "fieldname": "cost_center",
+                "fieldtype": "Data",
+                "options": null,
+                "width": 120
+              },
+              {
+                "label": "项目",
+                "fieldname": "project",
+                "fieldtype": "Link",
+                "options": "Project",
+                "width": 120
+              },
+              {
+                "label": "凭证类型",
+                "fieldname": "voucher_type",
+                "fieldtype": "Data",
+                "options": null,
+                "width": 120
+              },
+              {
+                "label": "凭证编号",
+                "fieldname": "voucher_no",
+                "fieldtype": "Dynamic Link",
+                "options": "voucher_type",
+                "width": 180
+              },
+              {
+                "label": "到期日",
+                "fieldname": "due_date",
+                "fieldtype": "Date",
+                "options": null,
+                "width": 90
+              },
+              {
+                "label": "账单编号",
+                "fieldname": "bill_no",
+                "fieldtype": "Data",
+                "options": null,
+                "width": 120
+              },
+              {
+                "label": "账单日期",
+                "fieldname": "bill_date",
+                "fieldtype": "Date",
+                "options": null,
+                "width": 90
+              },
+              {
+                "label": "费用清单金额",
+                "fieldname": "invoiced",
+                "fieldtype": "Currency",
+                "options": "currency",
+                "width": 120
+              },
+              {
+                "label": "已付金额",
+                "fieldname": "paid",
+                "fieldtype": "Currency",
+                "options": "currency",
+                "width": 120
+              },
+              {
+                "label": "借项通知单",
+                "fieldname": "credit_note",
+                "fieldtype": "Currency",
+                "options": "currency",
+                "width": 120
+              },
+              {
+                "label": "未付金额",
+                "fieldname": "outstanding",
+                "fieldtype": "Currency",
+                "options": "currency",
+                "width": 120
+              },
+              {
+                "label": "时间（天）",
+                "fieldname": "age",
+                "fieldtype": "Int",
+                "options": null,
+                "width": 80
+              },
+              {
+                "label": "0-30",
+                "fieldname": "range1",
+                "fieldtype": "Currency",
+                "options": "currency",
+                "width": 120
+              },
+              {
+                "label": "31-60",
+                "fieldname": "range2",
+                "fieldtype": "Currency",
+                "options": "currency",
+                "width": 120
+              },
+              {
+                "label": "61-90",
+                "fieldname": "range3",
+                "fieldtype": "Currency",
+                "options": "currency",
+                "width": 120
+              },
+              {
+                "label": "91-120",
+                "fieldname": "range4",
+                "fieldtype": "Currency",
+                "options": "currency",
+                "width": 120
+              },
+              {
+                "label": "121-以上",
+                "fieldname": "range5",
+                "fieldtype": "Currency",
+                "options": "currency",
+                "width": 120
+              },
+              {
+                "label": "货币",
+                "fieldname": "currency",
+                "fieldtype": "Link",
+                "options": "Currency",
+                "width": 80
+              },
+              {
+                "label": "供应商群组",
+                "fieldname": "supplier_group",
+                "fieldtype": "Link",
+                "options": "Supplier Group",
+                "width": 120
+              }
+            ],
+            "message": null,
+            "chart": {
+              "data": {
+                "labels": [
+                  "0-30",
+                  "31-60",
+                  "61-90",
+                  "91-120",
+                  "121-以上"
+                ],
+                "datasets": [
+                  {
+                    "values": [
+                      0.0,
+                      0.0,
+                      0.0,
+                      0.0,
+                      -71250.0
+                    ]
+                  },
+                  {
+                    "values": [
+                      0.0,
+                      0.0,
+                      0.0,
+                      0.0,
+                      -40404.0
+                    ]
+                  },
+                  {
+                    "values": [
+                      0.0,
+                      0.0,
+                      0.0,
+                      0.0,
+                      -53200.0
+                    ]
+                  }
+                ]
+              },
+              "type": "percentage"
+            },
+            "report_summary": null,
+            "skip_total_row": 0,
+            "status": null,
+            "execution_time": 0.022668,
+            "add_total_row": true
+          }
+        }
+      },
+      "expected_gap": "如果当天只创建草稿、不提交采购发票，应付报表不会体现新增业务。",
+      "note": ""
+    }
+  ]
+}

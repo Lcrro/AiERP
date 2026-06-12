@@ -1,0 +1,393 @@
+{
+  "summary": {
+    "ok": true,
+    "material_request": "MAT-MR-2026-00005",
+    "purchase_order": "PUR-ORD-2026-00024",
+    "po_docstatus": 0,
+    "source_material_request": "MAT-MR-2026-00005",
+    "source_item_count": 1
+  },
+  "steps": [
+    {
+      "tool": "erpnext.buying.create_material_request_draft",
+      "arguments": {
+        "material_request_type": "Purchase",
+        "company": "STEC (Demo)",
+        "schedule_date": "2026-06-13",
+        "items": [
+          {
+            "item_code": "SAFE-000005",
+            "qty": 2,
+            "warehouse": "SCEN-CIVIL 项目仓 - SD",
+            "project": "PROJ-0004",
+            "description": "SCEN-CIVIL smoke: MR to PO wrapper test."
+          }
+        ]
+      },
+      "result": {
+        "ok": true,
+        "data": {
+          "doctype": "Material Request",
+          "name": "MAT-MR-2026-00005",
+          "docstatus": 0,
+          "status": "Draft",
+          "summary": "Created Material Request draft with 1 item rows.",
+          "next_actions": [
+            "review_draft",
+            "confirm_submit"
+          ],
+          "risk": {
+            "level": "L3",
+            "requires_confirmation_for_submit": true,
+            "submit_tool": "erpnext.buying.submit_document"
+          }
+        },
+        "tool_call_id": "toolcall_7304bc6a2c254b25a2c886e22a5d89d7",
+        "duration_ms": 4257,
+        "status_code": 200,
+        "raw_status_code": 200,
+        "debug": {
+          "raw_document": {
+            "name": "MAT-MR-2026-00005",
+            "owner": "agent.test@example.com",
+            "creation": "2026-06-12 08:04:24.591350",
+            "modified": "2026-06-12 08:04:24.591350",
+            "modified_by": "agent.test@example.com",
+            "docstatus": 0,
+            "idx": 0,
+            "naming_series": "MAT-MR-.YYYY.-",
+            "title": "采购申请帆布手套",
+            "material_request_type": "Purchase",
+            "company": "STEC (Demo)",
+            "transaction_date": "2026-06-12",
+            "schedule_date": "2026-06-13",
+            "buying_price_list": "标准采购",
+            "last_scanned_warehouse": null,
+            "status": "Draft",
+            "per_ordered": 0.0,
+            "transfer_status": "",
+            "per_received": 0.0,
+            "doctype": "Material Request",
+            "items": [
+              {
+                "name": "0im7na1kft",
+                "owner": "agent.test@example.com",
+                "creation": "2026-06-12 08:04:24.591350",
+                "modified": "2026-06-12 08:04:24.591350",
+                "modified_by": "agent.test@example.com",
+                "docstatus": 0,
+                "idx": 1,
+                "item_code": "SAFE-000005",
+                "item_name": "帆布手套",
+                "agent_item_specification": "材质：帆布；特征：加厚、双层",
+                "schedule_date": "2026-06-13",
+                "description": "SCEN-CIVIL smoke: MR to PO wrapper test.",
+                "item_group": "劳保耗材/手套",
+                "image": "",
+                "qty": 2.0,
+                "stock_uom": "双",
+                "warehouse": "SCEN-CIVIL 项目仓 - SD",
+                "uom": "双",
+                "conversion_factor": 1.0,
+                "stock_qty": 2.0,
+                "min_order_qty": 0.0,
+                "projected_qty": 50.0,
+                "actual_qty": 50.0,
+                "ordered_qty": 0.0,
+                "received_qty": 0.0,
+                "rate": 0.0,
+                "price_list_rate": 0.0,
+                "amount": 0.0,
+                "expense_account": "Cost of Goods Sold - SD",
+                "project": "PROJ-0004",
+                "cost_center": "Main - SD",
+                "page_break": 0,
+                "parent": "MAT-MR-2026-00005",
+                "parentfield": "items",
+                "parenttype": "Material Request",
+                "doctype": "Material Request Item",
+                "__unsaved": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "erpnext.buying.submit_document",
+      "arguments": {
+        "doctype": "Material Request",
+        "name": "MAT-MR-2026-00005",
+        "confirmation": {
+          "confirmed": true,
+          "confirmed_by": "agent.test@example.com",
+          "confirmed_at": "2026-06-12T00:04:24.728935+00:00",
+          "confirmation_text": "确认提交材料申请 MAT-MR-2026-00005",
+          "reason": "本地 sandbox 验证 MR 到 PO wrapper。"
+        }
+      },
+      "result": {
+        "ok": true,
+        "data": {
+          "doctype": "Material Request",
+          "name": "MAT-MR-2026-00005",
+          "docstatus": 1,
+          "status": "Submitted",
+          "summary": "Submitted Material Request MAT-MR-2026-00005.",
+          "next_actions": [
+            "monitor_status",
+            "review_downstream_impacts"
+          ],
+          "risk": {
+            "level": "L4",
+            "requires_confirmation_for_submit": true
+          }
+        },
+        "tool_call_id": "toolcall_d9ca4b12bd724033b6f3a904986d5c16",
+        "duration_ms": 2152,
+        "status_code": 200,
+        "raw_status_code": 200,
+        "debug": {
+          "raw_document": {
+            "doctype": "Material Request",
+            "name": "MAT-MR-2026-00005",
+            "docstatus": 1,
+            "modified": "2026-06-12 08:04:26.772392"
+          }
+        }
+      }
+    },
+    {
+      "tool": "erpnext.buying.create_purchase_order_from_material_request_draft",
+      "arguments": {
+        "material_request": "MAT-MR-2026-00005",
+        "supplier": "SCEN-CIVIL 安科劳保用品",
+        "transaction_date": "2026-06-12",
+        "selected_items": [
+          {
+            "item_code": "SAFE-000005",
+            "qty": 2,
+            "rate": 8
+          }
+        ]
+      },
+      "result": {
+        "ok": true,
+        "data": {
+          "doctype": "Purchase Order",
+          "name": "PUR-ORD-2026-00024",
+          "docstatus": 0,
+          "status": "Draft",
+          "summary": "Created Purchase Order draft from Material Request MAT-MR-2026-00005 for SCEN-CIVIL 安科劳保用品 with 1 item row(s).",
+          "next_actions": [
+            "review_draft",
+            "confirm_submit"
+          ],
+          "risk": {
+            "level": "L3",
+            "requires_confirmation_for_submit": true,
+            "submit_tool": "erpnext.buying.submit_document"
+          },
+          "source_material_request": "MAT-MR-2026-00005",
+          "source_item_count": 1,
+          "warnings": []
+        },
+        "tool_call_id": "toolcall_13ac8a2d0b804a0ea6e407c63392d87d",
+        "duration_ms": 6341,
+        "status_code": 200,
+        "raw_status_code": 200,
+        "debug": {
+          "raw_document": {
+            "name": "PUR-ORD-2026-00024",
+            "owner": "agent.test@example.com",
+            "creation": "2026-06-12 08:04:33.091723",
+            "modified": "2026-06-12 08:04:33.091723",
+            "modified_by": "agent.test@example.com",
+            "docstatus": 0,
+            "idx": 0,
+            "title": "{supplier_name}",
+            "naming_series": "PUR-ORD-.YYYY.-",
+            "supplier": "SCEN-CIVIL 安科劳保用品",
+            "supplier_name": "SCEN-CIVIL 安科劳保用品",
+            "transaction_date": "2026-06-12",
+            "schedule_date": "2026-06-13",
+            "company": "STEC (Demo)",
+            "apply_tds": 0,
+            "is_subcontracted": 0,
+            "has_unit_price_items": 0,
+            "currency": "CNY",
+            "conversion_rate": 1.0,
+            "buying_price_list": "标准采购",
+            "price_list_currency": "CNY",
+            "plc_conversion_rate": 1.0,
+            "ignore_pricing_rule": 0,
+            "last_scanned_warehouse": null,
+            "total_qty": 2.0,
+            "total_net_weight": 0.0,
+            "base_total": 16.0,
+            "base_net_total": 16.0,
+            "total": 16.0,
+            "net_total": 16.0,
+            "tax_withholding_net_total": 16.0,
+            "base_tax_withholding_net_total": 16.0,
+            "tax_category": "",
+            "base_taxes_and_charges_added": 0.0,
+            "base_taxes_and_charges_deducted": 0.0,
+            "base_total_taxes_and_charges": 0.0,
+            "taxes_and_charges_added": 0.0,
+            "taxes_and_charges_deducted": 0.0,
+            "total_taxes_and_charges": 0.0,
+            "base_grand_total": 16.0,
+            "base_rounding_adjustment": 0.0,
+            "base_in_words": "CNY Sixteen 仅。",
+            "base_rounded_total": 16.0,
+            "grand_total": 16.0,
+            "rounding_adjustment": 0.0,
+            "rounded_total": 16.0,
+            "disable_rounded_total": 0,
+            "in_words": "CNY Sixteen 仅。",
+            "advance_paid": 0.0,
+            "apply_discount_on": "Grand Total",
+            "base_discount_amount": 0.0,
+            "additional_discount_percentage": 0.0,
+            "discount_amount": 0.0,
+            "status": "Draft",
+            "per_billed": 0.0,
+            "per_received": 0.0,
+            "group_same_items": 0,
+            "language": "zh",
+            "is_internal_supplier": 0,
+            "represents_company": "",
+            "party_account_currency": "CNY",
+            "is_old_subcontracting_flow": 0,
+            "doctype": "Purchase Order",
+            "taxes": [],
+            "pricing_rules": [],
+            "supplied_items": [],
+            "payment_schedule": [
+              {
+                "name": "0lc229bqv9",
+                "owner": "agent.test@example.com",
+                "creation": "2026-06-12 08:04:33.201295",
+                "modified": "2026-06-12 08:04:33.201295",
+                "modified_by": "agent.test@example.com",
+                "docstatus": 0,
+                "idx": 1,
+                "due_date": "2026-06-12",
+                "invoice_portion": 100.0,
+                "credit_days": 0,
+                "credit_months": 0,
+                "discount": 0.0,
+                "discount_validity": 0,
+                "payment_amount": 16.0,
+                "outstanding": 16.0,
+                "paid_amount": 0.0,
+                "discounted_amount": 0.0,
+                "base_payment_amount": 16.0,
+                "base_outstanding": 16.0,
+                "base_paid_amount": 0.0,
+                "parent": "PUR-ORD-2026-00024",
+                "parentfield": "payment_schedule",
+                "parenttype": "Purchase Order",
+                "doctype": "Payment Schedule"
+              }
+            ],
+            "items": [
+              {
+                "name": "0lbh94b9ek",
+                "owner": "agent.test@example.com",
+                "creation": "2026-06-12 08:04:33.091723",
+                "modified": "2026-06-12 08:04:33.091723",
+                "modified_by": "agent.test@example.com",
+                "docstatus": 0,
+                "idx": 1,
+                "fg_item_qty": 0.0,
+                "item_code": "SAFE-000005",
+                "item_name": "帆布手套",
+                "schedule_date": "2026-06-13",
+                "item_group": "劳保耗材/手套",
+                "description": "SCEN-CIVIL smoke: MR to PO wrapper test.",
+                "image": "",
+                "qty": 2.0,
+                "stock_uom": "双",
+                "subcontracted_quantity": 0.0,
+                "uom": "双",
+                "conversion_factor": 1.0,
+                "stock_qty": 2.0,
+                "price_list_rate": 8.0,
+                "last_purchase_rate": 0.0,
+                "base_price_list_rate": 8.0,
+                "margin_type": "",
+                "margin_rate_or_amount": 0.0,
+                "rate_with_margin": 0.0,
+                "discount_percentage": 0.0,
+                "discount_amount": 0.0,
+                "distributed_discount_amount": 0.0,
+                "base_rate_with_margin": 0.0,
+                "rate": 8.0,
+                "amount": 16.0,
+                "base_rate": 8.0,
+                "base_amount": 16.0,
+                "stock_uom_rate": 8.0,
+                "is_free_item": 0,
+                "apply_tds": 1,
+                "net_rate": 8.0,
+                "net_amount": 16.0,
+                "base_net_rate": 8.0,
+                "base_net_amount": 16.0,
+                "warehouse": "SCEN-CIVIL 项目仓 - SD",
+                "actual_qty": 50.0,
+                "company_total_stock": 350.0,
+                "material_request": "MAT-MR-2026-00005",
+                "material_request_item": "0im7na1kft",
+                "delivered_by_supplier": 0,
+                "against_blanket_order": 0,
+                "blanket_order_rate": 0.0,
+                "received_qty": 0.0,
+                "returned_qty": 0.0,
+                "billed_amt": 0.0,
+                "expense_account": "Cost of Goods Sold - SD",
+                "include_exploded_items": 0,
+                "weight_per_unit": 0.0,
+                "total_weight": 0.0,
+                "project": "PROJ-0004",
+                "cost_center": "Main - SD",
+                "is_fixed_asset": 0,
+                "item_tax_rate": "{}",
+                "page_break": 0,
+                "parent": "PUR-ORD-2026-00024",
+                "parentfield": "items",
+                "parenttype": "Purchase Order",
+                "doctype": "Purchase Order Item",
+                "__unsaved": 1
+              }
+            ]
+          },
+          "material_request_context": {
+            "material_request": "MAT-MR-2026-00005",
+            "default_schedule_date": "2026-06-13",
+            "items": [
+              {
+                "item_code": "SAFE-000005",
+                "qty": 2.0,
+                "uom": "双",
+                "schedule_date": "2026-06-13",
+                "warehouse": "SCEN-CIVIL 项目仓 - SD",
+                "rate": 8,
+                "description": "SCEN-CIVIL smoke: MR to PO wrapper test.",
+                "material_request": "MAT-MR-2026-00005",
+                "material_request_item": "0im7na1kft",
+                "project": "PROJ-0004",
+                "cost_center": "Main - SD"
+              }
+            ],
+            "warnings": [],
+            "errors": [],
+            "source_row_count": 1,
+            "selected_row_count": 1
+          }
+        }
+      }
+    }
+  ]
+}
