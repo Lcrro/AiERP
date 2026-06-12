@@ -13,6 +13,7 @@ from .tool_schemas.common import (
     _object_schema,
 )
 from .tool_schemas.generic import GENERIC_AGENT_TOOL_SCHEMAS, GENERIC_CORE_TOOL_SCHEMAS, GENERIC_TOOL_SCHEMAS
+from .tool_schemas.projects import PROJECTS_TOOL_SCHEMAS
 from .tool_schemas.stock import STOCK_TOOL_SCHEMAS
 from .tool_schemas.users import USERS_TOOL_SCHEMAS
 
@@ -22,6 +23,7 @@ ERPNext_TOOL_SCHEMAS = (
     + ACCOUNTING_TOOL_SCHEMAS
     + ASSETS_TOOL_SCHEMAS
     + STOCK_TOOL_SCHEMAS
+    + PROJECTS_TOOL_SCHEMAS
     + GENERIC_AGENT_TOOL_SCHEMAS
     + BUYING_TOOL_SCHEMAS
 )

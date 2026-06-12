@@ -42,6 +42,8 @@ Read-only Stock tools:
 | `erpnext.stock.list_delivery_notes` | `Delivery Note` | `L0` | Stock-side read-only review; Sales owns draft/business workflow. |
 | `erpnext.stock.list_purchase_receipts` | `Purchase Receipt` | `L0` | Stock-side read-only review; Buying owns draft/business workflow. |
 | `erpnext.stock.get_document_impact` | `Delivery Note`, `Purchase Receipt`, `Stock Ledger Entry` | `L0` | Reads document summary plus stock ledger impact; does not edit or create cross-module documents. |
+| `erpnext.stock.verify_purchase_receipt_stock_impact` | `Purchase Receipt`, `Purchase Receipt Item`, `Stock Ledger Entry` | `L0` | Verifies submitted receipt quantities/value against stock ledger rows and returns warnings when impact is missing or mismatched. |
+| `erpnext.stock.get_item_lifecycle_summary` | `Item`, `Purchase Receipt Item`, `Quality Inspection`, `Stock Ledger Entry`, `Stock Entry Detail`, `Purchase Invoice Item` | `L0` | Reads one material's lifecycle across procurement, quality, inventory, project issue, and invoice rows. |
 | `erpnext.stock.list_item_reorders` | `Item Reorder` | `L0` | Reads reorder thresholds and reorder quantities by item, warehouse, or material request type. |
 | `erpnext.stock.list_quality_inspections` | `Quality Inspection` | `L0` | Reads incoming/outgoing/in-process quality inspection rows by item, reference document, status, or docstatus. |
 
@@ -62,6 +64,7 @@ Preparation and draft tools:
 | `erpnext.stock.update_uom` | `UOM` | `L3` | Master data write; no stock movement. |
 | `erpnext.stock.create_batch` | `Batch` | `L3` | Traceability write for an existing Item; no stock movement. |
 | `erpnext.stock.create_serial_no` | `Serial No` | `L3` | Traceability write for an existing Item; no stock movement. |
+| `erpnext.stock.create_quality_inspection_draft` | `Quality Inspection` | `L3` | Creates a draft quality inspection linked to an Item and optional reference document; no stock movement. |
 | `erpnext.stock.create_pick_list_draft` | `Pick List` | `L3` | Draft picking workflow for Delivery, Material Transfer, or Manufacture; submit is L4. |
 | `erpnext.stock.create_reservation_draft` | `Stock Reservation Entry` | `L3` | Draft reservation for a resolved Item and source voucher; submit affects available stock and is L4. |
 
@@ -171,6 +174,9 @@ Use generic tools for simple support reads:
 | Search `Item Group` or `UOM` | `erpnext.stock.list_item_groups`, `erpnext.stock.list_uoms` |
 | Read stock settings or reorder policy | `erpnext.stock.get_stock_settings`, `erpnext.stock.list_item_reorders` |
 | Review quality gate status | `erpnext.stock.list_quality_inspections` |
+| Create an incoming inspection draft | `erpnext.stock.create_quality_inspection_draft` |
+| Verify submitted purchase receipt stock impact | `erpnext.stock.verify_purchase_receipt_stock_impact` |
+| Review one material's procurement-to-issue lifecycle | `erpnext.stock.get_item_lifecycle_summary` |
 | Inspect DocType metadata | `erpnext.get_doctype_schema` |
 | Attach count sheets or warehouse evidence | `erpnext.attach_file` |
 | Comment on draft stock documents | `erpnext.add_comment` |
@@ -192,6 +198,21 @@ This prevents Stock ToolCalls from silently creating sales delivery or purchasin
 receiving documents while still giving warehouse users a stable way to inspect
 stock effects.
 
+## Material Lifecycle Helpers
+
+The material lifecycle helpers are intentionally read/preview oriented:
+
+```text
+Purchase Receipt submitted
+  -> erpnext.stock.verify_purchase_receipt_stock_impact
+  -> erpnext.stock.get_item_lifecycle_summary
+  -> erpnext.projects.verify_material_issue_cost_impact
+```
+
+`erpnext.stock.create_quality_inspection_draft` is the only write helper in this
+group, and it only creates a draft Quality Inspection. It does not accept,
+reject, return, or move stock by itself.
+
 ## Not Implemented Yet
 
 - Local integration smoke that creates real stock movement fixtures; safe unit coverage exists.
@@ -202,13 +223,13 @@ stock effects.
 Unit tests:
 
 ```powershell
-pytest tests/test_stock_tools.py
+python -m pytest tests\unit\erpnext\test_stock_tools.py -q
 ```
 
 Broader tool-layer regression:
 
 ```powershell
-pytest tests/test_stock_tools.py tests/test_erpnext_adapter.py
+python -m pytest tests\unit\erpnext\test_stock_tools.py tests\unit\erpnext\test_projects_tools.py -q
 ```
 
 Optional local integration smoke, when `NEXTERP_LOCAL_*` credentials and safe

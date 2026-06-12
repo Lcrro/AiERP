@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import csv
+from html import escape
+from pathlib import Path
+
 import frappe
 import frappe.permissions
 from frappe.utils import cint, today
@@ -192,6 +196,51 @@ ITEM_MASTER_RULES = {
     },
 }
 
+ITEM_IMPORT_WHOLE_NUMBER_UOMS = {
+    "个",
+    "只",
+    "件",
+    "套",
+    "把",
+    "根",
+    "支",
+    "张",
+    "包",
+    "盒",
+    "桶",
+    "瓶",
+    "块",
+    "卷",
+    "台",
+    "双",
+    "付",
+    "副",
+    "条",
+    "本",
+    "袋",
+    "片",
+    "盘",
+    "箱",
+    "组",
+    "节",
+    "辆",
+    "部",
+    "床",
+}
+
+ITEM_IMPORT_REQUIRED_COLUMNS = {
+    "draft_sku_id",
+    "draft_item_code",
+    "release_status",
+    "放行等级",
+    "标准名称",
+    "必填规格",
+    "辅助规格",
+    "标准分组",
+    "标准单位",
+    "别名/土名",
+}
+
 
 @frappe.whitelist()
 def ping() -> dict:
@@ -201,6 +250,291 @@ def ping() -> dict:
         "ok": True,
         "site": frappe.local.site,
         "user": frappe.session.user,
+    }
+
+
+@frappe.whitelist()
+def import_standard_item_master_draft(
+    input_path: str,
+    limit: int | None = None,
+    offset: int = 0,
+    update_existing: bool = False,
+    commit_every: int = 100,
+) -> dict:
+    """Import the local SKU draft TSV into ERPNext Item records.
+
+    This is intended for the local sandbox. It still uses normal Frappe document
+    creation and validation, but avoids thousands of external HTTP calls.
+    """
+
+    frappe.only_for("System Manager")
+    setup_item_master()
+
+    path = Path(input_path).expanduser()
+    if not path.exists():
+        frappe.throw(f"input_path does not exist: {input_path}")
+
+    rows = _read_standard_item_rows(path)
+    offset = cint(offset)
+    limit_value = cint(limit) if limit not in (None, "") else None
+    selected_rows = rows[offset:]
+    if limit_value:
+        selected_rows = selected_rows[:limit_value]
+
+    item_group_map = _build_import_item_group_map(selected_rows)
+    summary = {
+        "input_path": str(path),
+        "total_input_rows": len(rows),
+        "selected_rows": len(selected_rows),
+        "offset": offset,
+        "limit": limit_value,
+        "created_uoms": 0,
+        "skipped_existing_uoms": 0,
+        "created_item_groups": 0,
+        "skipped_existing_item_groups": 0,
+        "created_items": 0,
+        "updated_items": 0,
+        "skipped_existing_items": 0,
+        "failed_items": 0,
+        "failures": [],
+    }
+
+    for uom in sorted({_clean_import_text(row.get("标准单位")) or "个" for row in selected_rows}):
+        if frappe.db.exists("UOM", uom):
+            summary["skipped_existing_uoms"] += 1
+            continue
+        doc = frappe.get_doc(
+            {
+                "doctype": "UOM",
+                "uom_name": uom,
+                "enabled": 1,
+                "must_be_whole_number": 1 if uom in ITEM_IMPORT_WHOLE_NUMBER_UOMS else 0,
+            }
+        )
+        doc.insert(ignore_permissions=True)
+        summary["created_uoms"] += 1
+
+    parent_item_group = _choose_import_item_group_root()
+    for target_group in sorted(set(item_group_map.values())):
+        if frappe.db.exists("Item Group", target_group):
+            summary["skipped_existing_item_groups"] += 1
+            continue
+        doc = frappe.get_doc(
+            {
+                "doctype": "Item Group",
+                "item_group_name": target_group,
+                "parent_item_group": parent_item_group,
+                "is_group": 0,
+            }
+        )
+        doc.insert(ignore_permissions=True)
+        summary["created_item_groups"] += 1
+
+    item_meta = frappe.get_meta("Item")
+    custom_fields = {
+        fieldname
+        for fieldname in ("specification", "raw_name", "alias_names")
+        if item_meta.has_field(fieldname)
+    }
+
+    for index, row in enumerate(selected_rows, start=1):
+        item_code = _clean_import_text(row.get("draft_item_code"))
+        if not item_code:
+            summary["failed_items"] += 1
+            summary["failures"].append({"row": offset + index, "error": "draft_item_code is blank"})
+            continue
+
+        try:
+            item_doc = _build_import_item_doc(row, item_group_map, custom_fields)
+            if frappe.db.exists("Item", item_code):
+                if update_existing:
+                    doc = frappe.get_doc("Item", item_code)
+                    doc.update(item_doc)
+                    doc.save(ignore_permissions=True)
+                    summary["updated_items"] += 1
+                else:
+                    summary["skipped_existing_items"] += 1
+            else:
+                frappe.get_doc(item_doc).insert(ignore_permissions=True)
+                summary["created_items"] += 1
+        except Exception as exc:
+            summary["failed_items"] += 1
+            summary["failures"].append({"item_code": item_code, "row": offset + index, "error": str(exc)})
+
+        if commit_every and index % cint(commit_every) == 0:
+            frappe.db.commit()
+
+    frappe.db.commit()
+    return summary
+
+
+@frappe.whitelist()
+def apply_material_catalog_usability_fixes(
+    input_path: str,
+    limit: int | None = None,
+    offset: int = 0,
+    commit_every: int = 200,
+) -> dict:
+    """Make imported materials easier to use in purchase/stock forms."""
+
+    frappe.only_for("System Manager")
+    setup_item_master()
+    return {
+        "material_request_labels": setup_material_request_chinese_labels(),
+        "material_request_item_view": setup_material_request_item_user_view(),
+        "item_search_fields": setup_item_search_fields(),
+        "clean_item_descriptions": clean_imported_item_descriptions(
+            input_path=input_path,
+            limit=limit,
+            offset=offset,
+            commit_every=commit_every,
+        ),
+    }
+
+
+@frappe.whitelist()
+def setup_material_request_chinese_labels() -> dict:
+    """Use business-friendly Chinese labels on Material Request forms."""
+
+    frappe.only_for("System Manager")
+    created = []
+    updated = []
+    for doctype, fieldname, label in [
+        ("Material Request", "schedule_date", "需求日期"),
+        ("Material Request Item", "schedule_date", "需求日期"),
+    ]:
+        result = _set_property_setter(doctype, fieldname, "label", label, "Data")
+        created.extend(result["created"])
+        updated.extend(result["updated"])
+
+    frappe.clear_cache(doctype="Material Request")
+    frappe.clear_cache(doctype="Material Request Item")
+    frappe.db.commit()
+    return {"created": created, "updated": updated}
+
+
+@frappe.whitelist()
+def setup_material_request_item_user_view() -> dict:
+    """Show item name and specification in Material Request child rows."""
+
+    frappe.only_for("System Manager")
+    created = []
+    updated = []
+
+    field_result = _upsert_custom_field(
+        "Material Request Item",
+        "agent_item_specification",
+        {
+            "label": "规格型号",
+            "fieldtype": "Data",
+            "insert_after": "item_name",
+            "fetch_from": "item_code.specification",
+            "fetch_if_empty": 1,
+            "read_only": 1,
+            "in_list_view": 1,
+            "columns": 3,
+        },
+    )
+    created.extend(field_result["created"])
+    updated.extend(field_result["updated"])
+
+    for fieldname, property_name, value, property_type in [
+        ("item_code", "columns", 2, "Int"),
+        ("item_name", "in_list_view", 1, "Check"),
+        ("item_name", "columns", 3, "Int"),
+        ("description", "in_list_view", 0, "Check"),
+        ("schedule_date", "columns", 2, "Int"),
+        ("qty", "columns", 1, "Int"),
+        ("warehouse", "columns", 2, "Int"),
+        ("uom", "columns", 1, "Int"),
+    ]:
+        result = _set_property_setter(
+            "Material Request Item",
+            fieldname,
+            property_name,
+            value,
+            property_type,
+        )
+        created.extend(result["created"])
+        updated.extend(result["updated"])
+
+    frappe.clear_cache(doctype="Material Request Item")
+    frappe.db.commit()
+    return {"created": created, "updated": updated}
+
+
+@frappe.whitelist()
+def setup_item_search_fields() -> dict:
+    """Let Item links search by name, group, description, specification and aliases."""
+
+    frappe.only_for("System Manager")
+    result = _set_property_setter(
+        "Item",
+        None,
+        "search_fields",
+        "item_name,item_group,description,specification,alias_names",
+        "Small Text",
+        for_doctype=True,
+    )
+    frappe.clear_cache(doctype="Item")
+    frappe.db.commit()
+    return result
+
+
+@frappe.whitelist()
+def clean_imported_item_descriptions(
+    input_path: str,
+    limit: int | None = None,
+    offset: int = 0,
+    commit_every: int = 200,
+) -> dict:
+    """Replace noisy import audit descriptions with purchase-friendly text."""
+
+    frappe.only_for("System Manager")
+    path = Path(input_path).expanduser()
+    if not path.exists():
+        frappe.throw(f"input_path does not exist: {input_path}")
+
+    rows = _read_standard_item_rows(path)
+    offset = cint(offset)
+    limit_value = cint(limit) if limit not in (None, "") else None
+    selected_rows = rows[offset:]
+    if limit_value:
+        selected_rows = selected_rows[:limit_value]
+
+    updated = 0
+    skipped_missing_item = 0
+    skipped_unchanged = 0
+    sample_updates = []
+    for index, row in enumerate(selected_rows, start=1):
+        item_code = _clean_import_text(row.get("draft_item_code"))
+        if not item_code or not frappe.db.exists("Item", item_code):
+            skipped_missing_item += 1
+            continue
+
+        new_description = _build_clean_item_description(row)
+        old_description = frappe.db.get_value("Item", item_code, "description")
+        if old_description == new_description:
+            skipped_unchanged += 1
+            continue
+
+        frappe.db.set_value("Item", item_code, "description", new_description, update_modified=False)
+        updated += 1
+        if len(sample_updates) < 5:
+            sample_updates.append({"item_code": item_code, "description": new_description})
+
+        if commit_every and index % cint(commit_every) == 0:
+            frappe.db.commit()
+
+    frappe.db.commit()
+    return {
+        "input_path": str(path),
+        "total_input_rows": len(rows),
+        "selected_rows": len(selected_rows),
+        "updated_items": updated,
+        "skipped_missing_item": skipped_missing_item,
+        "skipped_unchanged": skipped_unchanged,
+        "sample_updates": sample_updates,
     }
 
 
@@ -813,6 +1147,205 @@ def get_manager_exceptions(limit: int = 50) -> dict:
         "project_risks": risks,
         "delayed_sales_orders": delayed_sales_orders,
     }
+
+
+def _read_standard_item_rows(path: Path) -> list[dict]:
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        reader = csv.DictReader(handle, delimiter="\t")
+        missing = ITEM_IMPORT_REQUIRED_COLUMNS - set(reader.fieldnames or [])
+        if missing:
+            frappe.throw(f"input file is missing columns: {', '.join(sorted(missing))}")
+        return [{key: _clean_import_text(value) for key, value in row.items()} for row in reader]
+
+
+def _build_import_item_group_map(rows: list[dict]) -> dict:
+    item_group_map = {}
+    for row in rows:
+        source_group = _clean_import_text(row.get("标准分组")) or "未分类物料"
+        if source_group in item_group_map:
+            continue
+        if frappe.db.exists("Item Group", source_group):
+            item_group_map[source_group] = source_group
+        else:
+            item_group_map[source_group] = source_group
+    return item_group_map
+
+
+def _choose_import_item_group_root() -> str:
+    for item_group in ("所有物料群组", "All Item Groups"):
+        if frappe.db.exists("Item Group", item_group):
+            return item_group
+    roots = frappe.get_all("Item Group", filters={"is_group": 1}, fields=["name"], limit_page_length=1)
+    return roots[0].name if roots else "所有物料群组"
+
+
+def _build_import_item_doc(row: dict, item_group_map: dict, custom_fields: set[str]) -> dict:
+    item_code = _clean_import_text(row.get("draft_item_code"))
+    standard_name = _clean_import_text(row.get("标准名称")) or item_code
+    required_specs = _clean_import_text(row.get("必填规格"))
+    optional_specs = _clean_import_text(row.get("辅助规格"))
+    aliases = _clean_import_text(row.get("别名/土名"))
+    source_group = _clean_import_text(row.get("标准分组")) or "未分类物料"
+    item_group = item_group_map.get(source_group, source_group)
+    stock_uom = _clean_import_text(row.get("标准单位")) or "个"
+
+    doc = {
+        "doctype": "Item",
+        "item_code": item_code,
+        "item_name": _clamp_import_text(standard_name, 140),
+        "item_group": item_group,
+        "stock_uom": stock_uom,
+        "disabled": 0,
+        "is_stock_item": 1,
+        "is_purchase_item": 1,
+        "is_sales_item": 0,
+        "include_item_in_manufacturing": 0,
+        "description": _build_import_item_description(row, item_group),
+    }
+    optional_field_values = {
+        "specification": _clamp_import_text(_join_import_parts(required_specs, optional_specs), 140),
+        "raw_name": _clamp_import_text(aliases or standard_name, 140),
+        "alias_names": aliases,
+    }
+    for fieldname, value in optional_field_values.items():
+        if fieldname in custom_fields and value:
+            doc[fieldname] = value
+    return {key: value for key, value in doc.items() if value not in (None, "")}
+
+
+def _build_import_item_description(row: dict, item_group: str) -> str:
+    fields = [
+        ("SKU 草案编号", row.get("draft_sku_id")),
+        ("标准编码", row.get("draft_item_code")),
+        ("标准名称", row.get("标准名称")),
+        ("必填规格", row.get("必填规格")),
+        ("辅助规格", row.get("辅助规格")),
+        ("标准分组", item_group),
+        ("标准单位", row.get("标准单位")),
+        ("别名/土名", row.get("别名/土名")),
+        ("放行等级", row.get("放行等级")),
+        ("草案状态", row.get("release_status")),
+        ("导入决策", row.get("import_decision")),
+        ("整理依据", row.get("整理依据")),
+        ("来源候选行", row.get("source_candidate_rows")),
+        ("来源采购行", row.get("source_file_rows")),
+    ]
+    list_items = []
+    for label, value in fields:
+        value = _clean_import_text(value)
+        if value:
+            list_items.append(f"<li><strong>{escape(label)}：</strong>{escape(value)}</li>")
+    return "<p><strong>Agent 物料主数据草案导入</strong></p><ul>" + "".join(list_items) + "</ul>"
+
+
+def _build_clean_item_description(row: dict) -> str:
+    name = _clean_import_text(row.get("标准名称")) or _clean_import_text(row.get("draft_item_code"))
+    required_specs = _clean_import_text(row.get("必填规格"))
+    optional_specs = _clean_import_text(row.get("辅助规格"))
+    aliases = _clean_import_text(row.get("别名/土名"))
+    spec = _join_import_parts(required_specs, optional_specs)
+
+    paragraphs = [f"<p>{escape(name)}</p>"]
+    if spec:
+        paragraphs.append(f"<p>{escape(spec)}</p>")
+    if aliases and aliases != name:
+        paragraphs.append(f"<p>别名：{escape(aliases)}</p>")
+    return "".join(paragraphs)
+
+
+def _upsert_custom_field(dt: str, fieldname: str, spec: dict) -> dict:
+    created = []
+    updated = []
+    name = frappe.db.get_value("Custom Field", {"dt": dt, "fieldname": fieldname}, "name")
+    if name:
+        changed = False
+        doc = frappe.get_doc("Custom Field", name)
+        for key, value in spec.items():
+            if doc.get(key) != value:
+                doc.set(key, value)
+                changed = True
+        if changed:
+            doc.save(ignore_permissions=True)
+            updated.append(f"Custom Field:{dt}.{fieldname}")
+        return {"created": created, "updated": updated}
+
+    payload = {"doctype": "Custom Field", "dt": dt, "fieldname": fieldname}
+    payload.update(spec)
+    frappe.get_doc(payload).insert(ignore_permissions=True)
+    created.append(f"Custom Field:{dt}.{fieldname}")
+    return {"created": created, "updated": updated}
+
+
+def _set_property_setter(
+    doctype: str,
+    fieldname: str | None,
+    property_name: str,
+    value,
+    property_type: str,
+    for_doctype: bool = False,
+) -> dict:
+    created = []
+    updated = []
+    filters = {
+        "doc_type": doctype,
+        "property": property_name,
+        "doctype_or_field": "DocType" if for_doctype else "DocField",
+    }
+    if fieldname:
+        filters["field_name"] = fieldname
+
+    name = frappe.db.get_value("Property Setter", filters, "name")
+    value = str(value)
+    if name:
+        doc = frappe.get_doc("Property Setter", name)
+        changed = False
+        if doc.value != value:
+            doc.value = value
+            changed = True
+        if doc.property_type != property_type:
+            doc.property_type = property_type
+            changed = True
+        if changed:
+            doc.save(ignore_permissions=True)
+            updated.append(_property_setter_label(doctype, fieldname, property_name))
+        return {"created": created, "updated": updated}
+
+    frappe.get_doc(
+        {
+            "doctype": "Property Setter",
+            "doctype_or_field": "DocType" if for_doctype else "DocField",
+            "doc_type": doctype,
+            "field_name": fieldname,
+            "property": property_name,
+            "value": value,
+            "property_type": property_type,
+            "is_system_generated": 1,
+        }
+    ).insert(ignore_permissions=True)
+    created.append(_property_setter_label(doctype, fieldname, property_name))
+    return {"created": created, "updated": updated}
+
+
+def _property_setter_label(doctype: str, fieldname: str | None, property_name: str) -> str:
+    target = doctype if not fieldname else f"{doctype}.{fieldname}"
+    return f"Property Setter:{target}.{property_name}"
+
+
+def _clean_import_text(value) -> str:
+    if value is None:
+        return ""
+    return str(value).replace("\ufeff", "").strip()
+
+
+def _clamp_import_text(value: str, length: int) -> str:
+    value = _clean_import_text(value)
+    if len(value) <= length:
+        return value
+    return value[: length - 1] + "…"
+
+
+def _join_import_parts(*values: str) -> str:
+    return "；".join(value for value in (_clean_import_text(value) for value in values) if value)
 
 
 def _match_item_group(intent: dict) -> str | None:

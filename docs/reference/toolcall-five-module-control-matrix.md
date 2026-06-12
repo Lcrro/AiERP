@@ -1,6 +1,6 @@
 # ToolCall 五大模块控制矩阵
 
-最后更新：2026-06-09
+最后更新：2026-06-12
 
 这个文档回答一个问题：
 
@@ -12,28 +12,31 @@ Users & Permissions、资产、库存、采购、财务
 当前已验证的工具注册状态：
 
 ```text
-137 个 tool schema
-137 个 adapter handler
+150 个 tool schema
+150 个 adapter handler
 missing = []
 extra = []
 ```
 
-五个重点模块的工具数量：
+五个重点模块与项目专项的工具数量：
 
 | 模块 | Tool 前缀 | Tool 数量 |
 | --- | --- | ---: |
 | Users & Permissions / 用户与权限 | `erpnext.users.*` | 18 |
 | Assets / 资产 | `erpnext.assets.*` | 13 |
-| Stock / 库存 | `erpnext.stock.*` | 35 |
-| Buying / 采购 | `erpnext.buying.*` | 17 |
-| Accounting / 财务 | `erpnext.accounting.*` | 24 |
+| Stock / 库存 | `erpnext.stock.*` | 38 |
+| Buying / 采购 | `erpnext.buying.*` | 22 |
+| Accounting / 财务 | `erpnext.accounting.*` | 25 |
+| Projects / 项目专项 | `erpnext.projects.*` | 4 |
 
 当前验证结果：
 
 ```text
-五个重点模块单元测试：60 passed
-无本地凭据全量测试：97 passed, 3 skipped
-加载本地 sandbox .env 全量测试：100 passed
+全量单元测试：140 passed, 3 skipped
+采购/库存/项目/财务相关单测：61 passed
+土木公司 ToolCall 覆盖检查：registered=150 / referenced=44 / missing=0
+土木公司 runner dry-run：10 steps / 6 executed / 4 skipped_write / failed=0
+加载本地 sandbox .env 全量测试：本轮未运行；上一轮为 100 passed
 ```
 
 ## 控制级别
@@ -52,6 +55,7 @@ ToolCall 当前使用的风险等级：
 | --- | --- |
 | `L0` | 只读。 |
 | `L1` | 预览、校验、准备、推荐。 |
+| `L2` | 轻量写入，例如评论、ToDo、附件或异常记录，不提交核心业务单据。 |
 | `L3` | 草稿单据或主数据写入。 |
 | `L4` | 已提交的业务操作，例如库存或采购提交。 |
 | `L5_ADMIN` | 用户、角色、权限、系统访问变更。 |
@@ -171,8 +175,11 @@ Delivery Note / Purchase Receipt stock impact review
 | 查询发货单 | `erpnext.stock.list_delivery_notes` | 读取 | `L0` | 从库存角度查看 Delivery Note；销售模块拥有业务流程。 |
 | 查询采购收货 | `erpnext.stock.list_purchase_receipts` | 读取 | `L0` | 从库存角度查看 Purchase Receipt；采购模块拥有业务流程。 |
 | 单据库存影响 | `erpnext.stock.get_document_impact` | 读取 | `L0` | 读取 Delivery Note 或 Purchase Receipt 及其库存流水影响。 |
+| 采购收货库存影响验证 | `erpnext.stock.verify_purchase_receipt_stock_impact` | 读取 / 验证 | `L0` | 对比 Purchase Receipt 明细和 Stock Ledger Entry，验证入库数量和库存价值影响。 |
+| 物料生命周期摘要 | `erpnext.stock.get_item_lifecycle_summary` | 读取 / 摘要 | `L0` | 汇总单个物料的采购收货、质检、库存流水、项目领料、采购发票行。 |
 | 物料补货规则 | `erpnext.stock.list_item_reorders` | 读取 | `L0` | 读取补货阈值和补货数量。 |
 | 质量检验 | `erpnext.stock.list_quality_inspections` | 读取 | `L0` | 读取 Quality Inspection。 |
+| 创建质量检验草稿 | `erpnext.stock.create_quality_inspection_draft` | 草稿写入 | `L3` | 创建 Quality Inspection 草稿，可关联采购收货等来源单据；不接受/拒收、不移动库存。 |
 | 查询仓库 | `erpnext.stock.list_warehouses` | 读取 | `L0` | 查询 Warehouse。 |
 | 创建仓库 | `erpnext.stock.create_warehouse` | 草稿 / 主数据写入 | `L3` | 创建 Warehouse 主数据，不移动库存。 |
 | 更新仓库 | `erpnext.stock.update_warehouse` | 草稿 / 主数据写入 | `L3` | 更新 Warehouse 主数据，不移动库存。 |
@@ -202,6 +209,7 @@ Delivery Note / Purchase Receipt stock impact review
 Supplier, Supplier Group, Supplier Scorecard,
 Material Request, Request for Quotation,
 Supplier Quotation, Purchase Order, Purchase Receipt,
+Purchase Receipt Return, Receiving Discrepancy,
 Item Supplier, Item Price, Buying Settings,
 Purchase Analytics
 ```
@@ -217,7 +225,12 @@ Purchase Analytics
 | 创建询价单草稿 | `erpnext.buying.create_request_for_quotation_draft` | 草稿写入 | `L3` | 创建带供应商行和已解析物料的 Request for Quotation 草稿。 |
 | 创建供应商报价草稿 | `erpnext.buying.create_supplier_quotation_draft` | 草稿写入 | `L3` | 创建 Supplier Quotation 草稿。 |
 | 创建采购订单草稿 | `erpnext.buying.create_purchase_order_draft` | 草稿写入 | `L3` | 创建 Purchase Order 草稿，不提交采购承诺。 |
+| 从采购申请创建采购订单草稿 | `erpnext.buying.create_purchase_order_from_material_request_draft` | 草稿写入 | `L3` | 从已提交 Purchase Material Request 生成 Purchase Order 草稿，并保留源单行引用。 |
 | 创建采购收货草稿 | `erpnext.buying.create_purchase_receipt_draft` | 草稿写入 | `L3` | 创建 Purchase Receipt 草稿，不提交库存移动。 |
+| 从采购订单创建采购收货草稿 | `erpnext.buying.create_purchase_receipt_from_purchase_order_draft` | 草稿写入 | `L3` | 从已提交 Purchase Order 生成 Purchase Receipt 草稿，并保留采购订单行引用。 |
+| 记录到货差异 | `erpnext.buying.record_purchase_receipt_discrepancy` | 轻量写入 | `L2` | 在 Purchase Receipt 上增加异常评论和可选 ToDo，可返回退货预览；不创建退货、不改变库存。 |
+| 采购收货退货上下文 | `erpnext.buying.get_purchase_receipt_return_context` | 预览 | `L1` | 读取已提交 Purchase Receipt，计算可退明细、可退数量、退货原因和异常。 |
+| 创建采购收货退货草稿 | `erpnext.buying.create_purchase_receipt_return_draft` | 草稿写入 | `L3` | 基于原始 Purchase Receipt 创建 `is_return=1`、`return_against`、负数量的退货草稿，不提交库存反向移动。 |
 | 采购建议 | `erpnext.buying.generate_purchase_suggestions` | 读取 / 分析 | `L0` | 通过 agent_bridge 业务方法生成低库存采购建议。 |
 | 查询物料供应商 | `erpnext.buying.search_item_suppliers` | 读取 | `L0` | 查询 Item Supplier。 |
 | 查询采购价格 | `erpnext.buying.search_item_prices` | 读取 | `L0` | 按物料、价格表、供应商、币种和有效期查询 buying Item Price。 |
@@ -234,7 +247,31 @@ Purchase Analytics
 - RFQ 到 Supplier Quotation 的 mapper
 - Supplier Quotation 到 Purchase Order 的 mapper
 - 报价中标流程
-- MR 到 PO/PR 的完整本地采购 smoke 测试
+- MR 到 PO/PR/PI 的完整 stateful runner smoke 测试
+
+## Projects / 项目专项
+
+当前覆盖范围：
+
+```text
+Project, Task, Stock Entry, Purchase Receipt,
+项目成本上下文，项目领料预览，项目领料 Stock Entry 草稿，
+项目领料成本影响验证
+```
+
+| ERPNext 功能 | ToolCall | 控制级别 | 风险 | 当前能力 |
+| --- | --- | --- | --- | --- |
+| 项目成本上下文 | `erpnext.projects.get_project_cost_context` | 读取 | `L0` | 读取 Project，并可汇总相关 Task、Stock Entry、Purchase Receipt，用于项目成本复盘。 |
+| 项目领料预览 | `erpnext.projects.get_material_issue_context` | 预览 | `L1` | 按项目、来源仓库和物料行检查可用库存，返回缺料行，不写入 ERPNext。 |
+| 创建项目领料草稿 | `erpnext.projects.create_material_issue_draft` | 草稿写入 | `L3` | 创建 `Material Issue` 类型 Stock Entry 草稿，并把 project/cost_center 写到明细行；默认缺料时阻断。 |
+| 项目领料成本影响验证 | `erpnext.projects.verify_material_issue_cost_impact` | 读取 / 验证 | `L0` | 读取 Stock Entry 和 Stock Ledger Entry，复核项目、成本中心、领料数量和库存价值影响。 |
+
+尚未覆盖：
+
+- 项目预算与实际成本差异报表 wrapper
+- 项目工时、外包、机械台班等非库存成本归集
+- 项目退料/剩料回库业务 ToolCall
+- 项目成本中心自动创建和项目-仓库-班组绑定规则
 
 ## Accounting / 财务
 
@@ -267,6 +304,7 @@ Bank Reconciliation
 | 创建付款单草稿 | `erpnext.accounting.create_payment_entry_draft` | 草稿写入 | `L3` | 创建 Payment Entry 草稿，不提交付款。 |
 | 创建销售发票草稿 | `erpnext.accounting.create_sales_invoice_draft` | 草稿写入 | `L3` | 创建 Sales Invoice 草稿，不提交发票。 |
 | 创建采购发票草稿 | `erpnext.accounting.create_purchase_invoice_draft` | 草稿写入 | `L3` | 创建 Purchase Invoice 草稿，不提交发票。 |
+| 从采购收货创建采购发票草稿 | `erpnext.accounting.create_purchase_invoice_from_purchase_receipt_draft` | 草稿写入 | `L3` | 从已提交 Purchase Receipt 生成 Purchase Invoice 草稿，并保留 PR/PO 行引用。 |
 | 创建期末结转凭证草稿 | `erpnext.accounting.create_period_closing_voucher_draft` | 草稿写入 | `L3` | 创建 Period Closing Voucher 草稿，不提交期末结转。 |
 | 付款分配准备 | `erpnext.accounting.prepare_payment_allocation` | 预览 | `L1` | 准备 Payment Entry 引用分配，不创建付款。 |
 | 发票税费准备 | `erpnext.accounting.prepare_invoice_taxes` | 预览 | `L1` | 准备税费行和估算税额；最终发票草稿仍由 ERPNext 校验。 |
@@ -281,7 +319,7 @@ Bank Reconciliation
 - ERPNext 服务端 Payment Entry builder 预览
 - 从付款分配结果创建 Payment Entry 的 helper
 - 服务端发票税费/总额预览
-- 从源单据创建发票草稿
+- 从销售/交付源单据创建销售发票草稿
 - 银行对账候选评分
 - 从 Bank Transaction 创建付款/JV 草稿
 - Budget Variance 报表 wrapper
@@ -314,4 +352,3 @@ ERPNext 的每个按钮、每条工作流边界、每个服务端 controller 动
 
 下一步开发重点是继续把更多 ERPNext 页面动作变成专用 ToolCall 或
 `agent_bridge` wrapper，尤其是那些用通用 CRUD 太危险或会丢失业务逻辑的动作。
-

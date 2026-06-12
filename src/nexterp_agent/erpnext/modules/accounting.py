@@ -259,6 +259,69 @@ class AccountingToolsMixin:
             requires_confirmation_for_submit=True,
         )
 
+    def _accounting_create_purchase_invoice_from_purchase_receipt_draft(self, args: dict[str, Any]) -> ToolResult:
+        purchase_receipt = args["purchase_receipt"]
+        result = self.client.get_document("Purchase Receipt", purchase_receipt)
+        if not result.ok:
+            return result
+        doc = result.data if isinstance(result.data, dict) else {}
+        guard = _validate_purchase_receipt_for_purchase_invoice(doc, purchase_receipt)
+        if guard:
+            return guard
+
+        context = _purchase_receipt_invoice_context(doc, args)
+        errors = context["errors"]
+        items = context["items"]
+        if errors or not items:
+            return ToolResult(
+                ok=False,
+                error="Purchase Invoice draft cannot be created from the current Purchase Receipt context.",
+                error_type="validation_error",
+                user_message="无法从该采购收货单创建采购发票草稿：请检查收货单状态、明细和可开票数量。",
+                data={
+                    "doctype": "Purchase Receipt",
+                    "name": purchase_receipt,
+                    "status": "Purchase Invoice Draft Blocked",
+                    "summary": "Review Purchase Receipt context before creating a Purchase Invoice draft.",
+                    "errors": errors,
+                    "warnings": context["warnings"],
+                    "next_actions": ["review_purchase_receipt", "retry_with_valid_rows"],
+                    "risk": {"level": "L1", "requires_confirmation_for_submit": False},
+                },
+                debug={"raw_purchase_receipt": doc},
+            )
+
+        data = _without_empty(
+            {
+                "doctype": "Purchase Invoice",
+                "supplier": doc.get("supplier"),
+                "company": args.get("company") or doc.get("company"),
+                "posting_date": args.get("posting_date"),
+                "bill_no": args.get("bill_no"),
+                "bill_date": args.get("bill_date"),
+                "currency": doc.get("currency"),
+                "project": doc.get("project"),
+                "cost_center": doc.get("cost_center"),
+                "items": items,
+                "docstatus": 0,
+            }
+        )
+        draft_result = _module_doc_result(
+            self.client.create_document("Purchase Invoice", data),
+            "Purchase Invoice",
+            "L3",
+            f"Created Purchase Invoice draft from Purchase Receipt {purchase_receipt} with {len(items)} item row(s).",
+            ["review_taxes_and_totals", "confirm_submit"],
+            requires_confirmation_for_submit=True,
+        )
+        if draft_result.ok and isinstance(draft_result.data, dict):
+            draft_result.data["source_purchase_receipt"] = purchase_receipt
+            draft_result.data["source_item_count"] = len(items)
+            draft_result.data["warnings"] = context["warnings"]
+        if draft_result.ok and isinstance(draft_result.debug, dict):
+            draft_result.debug["purchase_receipt_context"] = context
+        return draft_result
+
     def _accounting_create_period_closing_voucher_draft(self, args: dict[str, Any]) -> ToolResult:
         data = _draft_doc("Period Closing Voucher", args["data"])
         return _module_doc_result(
@@ -517,3 +580,153 @@ class AccountingToolsMixin:
             ["audit_posting", "review_gl_impact"],
             requires_confirmation_for_submit=True,
         )
+
+
+def _validate_purchase_receipt_for_purchase_invoice(doc: dict[str, Any], purchase_receipt: str) -> ToolResult | None:
+    if doc.get("docstatus") != 1:
+        return ToolResult(
+            ok=False,
+            error=f"Purchase Receipt {purchase_receipt} is not submitted.",
+            error_type="validation_error",
+            user_message="只有已提交的采购收货单才能生成采购发票草稿。",
+            data={
+                "doctype": "Purchase Receipt",
+                "name": purchase_receipt,
+                "docstatus": doc.get("docstatus"),
+                "status": "Not Submitted",
+                "summary": "Submit the Purchase Receipt before creating a Purchase Invoice from it.",
+                "next_actions": ["submit_purchase_receipt", "retry_purchase_invoice_creation"],
+                "risk": {"level": "L1", "requires_confirmation_for_submit": False},
+            },
+        )
+    if _truthy(doc.get("is_return")):
+        return ToolResult(
+            ok=False,
+            error=f"Purchase Receipt {purchase_receipt} is a return document.",
+            error_type="validation_error",
+            user_message="退货收货单不能通过这个工具直接生成普通采购发票草稿。",
+            data={
+                "doctype": "Purchase Receipt",
+                "name": purchase_receipt,
+                "status": "Return Receipt Unsupported",
+                "summary": "Use normal submitted Purchase Receipts for Purchase Invoice creation.",
+                "next_actions": ["choose_original_purchase_receipt"],
+                "risk": {"level": "L1", "requires_confirmation_for_submit": False},
+            },
+        )
+    return None
+
+
+def _purchase_receipt_invoice_context(doc: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    source_rows = [row for row in doc.get("items") or [] if isinstance(row, dict)]
+    requests = [row for row in args.get("selected_items") or [] if isinstance(row, dict)]
+    warnings: list[dict[str, Any]] = []
+    errors: list[dict[str, Any]] = []
+    items: list[dict[str, Any]] = []
+
+    if requests:
+        selected_rows: list[tuple[dict[str, Any], dict[str, Any]]] = []
+        for request in requests:
+            matches = _match_purchase_receipt_invoice_rows(source_rows, request)
+            if not matches:
+                errors.append({"type": "row_not_found", "request": request, "message": "No Purchase Receipt item row matched this request."})
+                continue
+            if len(matches) > 1:
+                errors.append({"type": "ambiguous_row", "request": request, "message": "Multiple Purchase Receipt rows matched; provide purchase_receipt_item."})
+                continue
+            selected_rows.append((matches[0], request))
+    else:
+        selected_rows = [(row, {}) for row in source_rows]
+
+    remaining_by_row: dict[str, float] = {}
+    for index, (row, request) in enumerate(selected_rows):
+        row_key = str(row.get("name") or f"row-{index}")
+        billable_qty = remaining_by_row.setdefault(row_key, _purchase_receipt_billable_qty(row))
+        if billable_qty <= 0:
+            warnings.append(
+                {
+                    "type": "fully_billed_row_skipped",
+                    "purchase_receipt_item": row.get("name"),
+                    "item_code": row.get("item_code"),
+                    "message": "Purchase Receipt row has no remaining quantity to bill.",
+                }
+            )
+            continue
+        requested_qty = _float_or_none(request.get("qty")) if request else None
+        invoice_qty = requested_qty if requested_qty is not None else billable_qty
+        if invoice_qty <= 0:
+            errors.append({"type": "invalid_qty", "request": request, "message": "Requested Purchase Invoice quantity must be greater than zero."})
+            continue
+        if invoice_qty > billable_qty:
+            errors.append(
+                {
+                    "type": "qty_exceeds_billable",
+                    "purchase_receipt_item": row.get("name"),
+                    "item_code": row.get("item_code"),
+                    "requested_qty": invoice_qty,
+                    "billable_qty": billable_qty,
+                }
+            )
+            continue
+        if not row.get("item_code"):
+            errors.append({"type": "missing_item_code", "purchase_receipt_item": row.get("name"), "message": "Purchase Receipt row has no item_code."})
+            continue
+        items.append(_purchase_invoice_item_from_purchase_receipt_row(row, request, invoice_qty, doc))
+        remaining_by_row[row_key] = billable_qty - invoice_qty
+
+    return {
+        "purchase_receipt": doc.get("name"),
+        "items": items,
+        "warnings": warnings,
+        "errors": errors,
+        "source_row_count": len(source_rows),
+        "selected_row_count": len(selected_rows),
+    }
+
+
+def _match_purchase_receipt_invoice_rows(rows: list[dict[str, Any]], request: dict[str, Any]) -> list[dict[str, Any]]:
+    if request.get("purchase_receipt_item"):
+        return [row for row in rows if row.get("name") == request["purchase_receipt_item"]]
+    if request.get("item_code"):
+        return [row for row in rows if row.get("item_code") == request["item_code"]]
+    return []
+
+
+def _purchase_receipt_billable_qty(row: dict[str, Any]) -> float:
+    qty = _float_or_none(row.get("qty")) or _float_or_none(row.get("received_qty")) or 0.0
+    returned_qty = _float_or_none(row.get("returned_qty")) or 0.0
+    billed_qty = _float_or_none(row.get("billed_qty"))
+    if billed_qty is None:
+        billed_amt = _float_or_none(row.get("billed_amt"))
+        rate = _float_or_none(row.get("rate")) or _float_or_none(row.get("net_rate")) or 0.0
+        billed_qty = (billed_amt / rate) if billed_amt is not None and rate > 0 else 0.0
+    return max(qty - returned_qty - billed_qty, 0.0)
+
+
+def _purchase_invoice_item_from_purchase_receipt_row(
+    row: dict[str, Any],
+    request: dict[str, Any],
+    qty: float,
+    doc: dict[str, Any],
+) -> dict[str, Any]:
+    rate = request.get("rate") if request.get("rate") is not None else row.get("rate")
+    return _without_empty(
+        {
+            "item_code": row.get("item_code"),
+            "qty": qty,
+            "received_qty": qty,
+            "uom": row.get("uom") or row.get("stock_uom"),
+            "conversion_factor": row.get("conversion_factor"),
+            "rate": rate,
+            "price_list_rate": row.get("price_list_rate"),
+            "warehouse": row.get("warehouse"),
+            "expense_account": row.get("expense_account"),
+            "cost_center": row.get("cost_center") or doc.get("cost_center"),
+            "project": row.get("project") or doc.get("project"),
+            "description": row.get("description"),
+            "purchase_receipt": doc.get("name"),
+            "pr_detail": row.get("name"),
+            "purchase_order": row.get("purchase_order"),
+            "po_detail": row.get("purchase_order_item"),
+        }
+    )

@@ -50,6 +50,44 @@ class AccountingFakeClient:
             )
         if doctype in {"Sales Invoice", "Purchase Invoice"}:
             return ToolResult(ok=True, data={"name": name, "grand_total": 100, "outstanding_amount": 100})
+        if doctype == "Purchase Receipt" and name == "PR-001":
+            return ToolResult(
+                ok=True,
+                data={
+                    "doctype": "Purchase Receipt",
+                    "name": "PR-001",
+                    "supplier": "SUP-001",
+                    "company": "Acme",
+                    "currency": "USD",
+                    "docstatus": 1,
+                    "is_return": 0,
+                    "project": "PROJ-001",
+                    "cost_center": "Bridge - A",
+                    "items": [
+                        {
+                            "name": "PRI-001",
+                            "item_code": "ITEM-001",
+                            "item_name": "Test Item",
+                            "qty": 10,
+                            "returned_qty": 1,
+                            "billed_amt": 24,
+                            "uom": "Nos",
+                            "conversion_factor": 1,
+                            "rate": 12,
+                            "price_list_rate": 12,
+                            "warehouse": "Stores - A",
+                            "expense_account": "Cost of Goods Sold - A",
+                            "cost_center": "Bridge - A",
+                            "project": "PROJ-001",
+                            "purchase_order": "PO-001",
+                            "purchase_order_item": "POI-001",
+                            "description": "Received project material",
+                        }
+                    ],
+                },
+            )
+        if doctype == "Purchase Receipt" and name == "PR-DRAFT":
+            return ToolResult(ok=True, data={"doctype": "Purchase Receipt", "name": "PR-DRAFT", "docstatus": 0, "items": []})
         return ToolResult(ok=True, data={"name": name})
 
     def run_report(self, report_name, **kwargs) -> ToolResult:
@@ -262,6 +300,106 @@ def test_period_closing_voucher_draft_is_supported_and_guarded() -> None:
             },
         )
     ]
+
+
+def test_purchase_invoice_from_purchase_receipt_preserves_source_references() -> None:
+    client = AccountingFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    result = adapter.execute(
+        {
+            "tool": "erpnext.accounting.create_purchase_invoice_from_purchase_receipt_draft",
+            "arguments": {
+                "purchase_receipt": "PR-001",
+                "posting_date": "2026-06-12",
+                "bill_no": "BILL-001",
+                "bill_date": "2026-06-12",
+                "selected_items": [{"purchase_receipt_item": "PRI-001", "qty": 3}],
+            },
+        }
+    )
+
+    assert result.ok
+    assert result.data["doctype"] == "Purchase Invoice"
+    assert result.data["status"] == "Draft"
+    assert result.data["source_purchase_receipt"] == "PR-001"
+    assert result.data["source_item_count"] == 1
+    assert result.data["risk"] == {"level": "L3", "requires_confirmation_for_submit": True}
+    assert client.calls == [
+        ("get_document", "Purchase Receipt", "PR-001"),
+        (
+            "create_document",
+            "Purchase Invoice",
+            {
+                "doctype": "Purchase Invoice",
+                "supplier": "SUP-001",
+                "company": "Acme",
+                "posting_date": "2026-06-12",
+                "bill_no": "BILL-001",
+                "bill_date": "2026-06-12",
+                "currency": "USD",
+                "project": "PROJ-001",
+                "cost_center": "Bridge - A",
+                "items": [
+                    {
+                        "item_code": "ITEM-001",
+                        "qty": 3.0,
+                        "received_qty": 3.0,
+                        "uom": "Nos",
+                        "conversion_factor": 1,
+                        "rate": 12,
+                        "price_list_rate": 12,
+                        "warehouse": "Stores - A",
+                        "expense_account": "Cost of Goods Sold - A",
+                        "cost_center": "Bridge - A",
+                        "project": "PROJ-001",
+                        "description": "Received project material",
+                        "purchase_receipt": "PR-001",
+                        "pr_detail": "PRI-001",
+                        "purchase_order": "PO-001",
+                        "po_detail": "POI-001",
+                    }
+                ],
+                "docstatus": 0,
+            },
+        ),
+    ]
+
+
+def test_purchase_invoice_from_purchase_receipt_requires_submitted_receipt() -> None:
+    client = AccountingFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    result = adapter.execute(
+        {
+            "tool": "erpnext.accounting.create_purchase_invoice_from_purchase_receipt_draft",
+            "arguments": {"purchase_receipt": "PR-DRAFT"},
+        }
+    )
+
+    assert not result.ok
+    assert result.error_type == "validation_error"
+    assert result.data["status"] == "Not Submitted"
+    assert result.data["next_actions"] == ["submit_purchase_receipt", "retry_purchase_invoice_creation"]
+    assert client.calls == [("get_document", "Purchase Receipt", "PR-DRAFT")]
+
+
+def test_purchase_invoice_from_purchase_receipt_blocks_overbilling() -> None:
+    client = AccountingFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    result = adapter.execute(
+        {
+            "tool": "erpnext.accounting.create_purchase_invoice_from_purchase_receipt_draft",
+            "arguments": {"purchase_receipt": "PR-001", "selected_items": [{"purchase_receipt_item": "PRI-001", "qty": 8}]},
+        }
+    )
+
+    assert not result.ok
+    assert result.error_type == "validation_error"
+    assert result.data["errors"][0]["type"] == "qty_exceeds_billable"
+    assert result.data["errors"][0]["billable_qty"] == 7.0
+    assert client.calls == [("get_document", "Purchase Receipt", "PR-001")]
 
 
 def test_financial_submit_requires_confirmation_metadata() -> None:
@@ -519,6 +657,7 @@ def test_accounting_tools_infer_expected_risk_levels() -> None:
     assert ToolCall.from_dict({"tool": "erpnext.accounting.general_ledger"}).risk_level == "L0"
     assert ToolCall.from_dict({"tool": "erpnext.accounting.get_report_filters"}).risk_level == "L0"
     assert ToolCall.from_dict({"tool": "erpnext.accounting.create_sales_invoice_draft"}).risk_level == "L3"
+    assert ToolCall.from_dict({"tool": "erpnext.accounting.create_purchase_invoice_from_purchase_receipt_draft"}).risk_level == "L3"
     assert ToolCall.from_dict({"tool": "erpnext.accounting.create_period_closing_voucher_draft"}).risk_level == "L3"
     assert ToolCall.from_dict({"tool": "erpnext.accounting.prepare_payment_allocation"}).risk_level == "L1"
     assert ToolCall.from_dict({"tool": "erpnext.accounting.prepare_invoice_taxes"}).risk_level == "L1"

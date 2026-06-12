@@ -37,6 +37,7 @@ Draft-only document creation:
 | `erpnext.accounting.create_payment_entry_draft` | `Payment Entry` | `L3` | Forces `docstatus = 0`; no payment submission. |
 | `erpnext.accounting.create_sales_invoice_draft` | `Sales Invoice` | `L3` | Forces `docstatus = 0`; no invoice posting. |
 | `erpnext.accounting.create_purchase_invoice_draft` | `Purchase Invoice` | `L3` | Forces `docstatus = 0`; no invoice posting. |
+| `erpnext.accounting.create_purchase_invoice_from_purchase_receipt_draft` | `Purchase Invoice` | `L3` | Creates a Purchase Invoice draft from a submitted Purchase Receipt, preserving PR/PO row references. |
 | `erpnext.accounting.create_period_closing_voucher_draft` | `Period Closing Voucher` | `L3` | Forces `docstatus = 0`; no period close submission. |
 | `erpnext.accounting.create_budget_draft` | `Budget` | `L3` | Forces `docstatus = 0`; no budget submission. |
 | `erpnext.accounting.update_budget_draft` | `Budget` | `L3` | Updates a Budget draft and forces `docstatus = 0`. |
@@ -117,6 +118,27 @@ Preferred submit tool:
 }
 ```
 
+## Purchase Receipt To Purchase Invoice
+
+`erpnext.accounting.create_purchase_invoice_from_purchase_receipt_draft` is the
+formal wrapper for turning a submitted Purchase Receipt into a Purchase Invoice
+draft.
+
+Rules:
+
+- The source `Purchase Receipt` must be submitted.
+- Return receipts are blocked by this wrapper.
+- Item rows keep `purchase_receipt` and `pr_detail` references.
+- When available, item rows also keep `purchase_order` and `po_detail`.
+- Item rows can keep `project`, `cost_center`, `expense_account`, and
+  `warehouse` context.
+- Requested invoice quantity cannot exceed remaining billable quantity. The
+  wrapper uses `billed_qty` when present, or estimates billed quantity from
+  `billed_amt / rate` when ERPNext only exposes billed amount.
+- The result is still a draft Purchase Invoice. Submitting it is a separate
+  `erpnext.accounting.submit_financial_document` action with financial
+  confirmation metadata.
+
 Module tools return stable `ToolResult.data` shapes. Draft and submit tools
 return:
 
@@ -148,7 +170,7 @@ Read/report tools return records or rows with `summary`, `next_actions`, and
 | `Journal Entry` | Draft create supported; submit guarded | `create_journal_entry_draft`, `submit_financial_document`. |
 | `Payment Entry` | Draft create supported; submit guarded | `create_payment_entry_draft`, `submit_financial_document`. |
 | `Sales Invoice` | Draft create supported; submit guarded | `create_sales_invoice_draft`, `submit_financial_document`. |
-| `Purchase Invoice` | Draft create supported; submit guarded | `create_purchase_invoice_draft`, `submit_financial_document`. |
+| `Purchase Invoice` | Draft create supported; source PR wrapper supported; submit guarded | `create_purchase_invoice_draft`, `create_purchase_invoice_from_purchase_receipt_draft`, `submit_financial_document`. |
 | `GL Entry` | Read supported through report | Prefer `general_ledger`; generic search for narrow row audit. |
 | Accounts Receivable | Read supported | `erpnext.accounting.accounts_receivable`. |
 | Accounts Payable | Read supported | `erpnext.accounting.accounts_payable`. |
@@ -174,8 +196,17 @@ Read/report tools return records or rows with `summary`, `next_actions`, and
 Unit tests:
 
 ```powershell
-pytest tests/test_accounting_tools.py tests/test_erpnext_adapter.py
+python -m pytest tests\unit\erpnext\test_accounting_tools.py -q
 ```
+
+Local ERPNext smoke verified:
+
+```text
+MAT-PRE-2026-00007 -> ACC-PINV-2026-00013
+```
+
+The created Purchase Invoice draft preserved `purchase_receipt`, `pr_detail`,
+`purchase_order`, `po_detail`, and `project` on the invoice row.
 
 Optional local integration smoke, when `NEXTERP_LOCAL_*` credentials are set:
 

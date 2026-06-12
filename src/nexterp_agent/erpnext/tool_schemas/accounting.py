@@ -187,6 +187,32 @@ ACCOUNTING_TOOL_SCHEMAS = [
         "parameters": _object_schema(["data"], {"data": {"type": "object"}}),
     },
     {
+        "name": "erpnext.accounting.create_purchase_invoice_from_purchase_receipt_draft",
+        "description": "Create a Purchase Invoice draft from a submitted Purchase Receipt while preserving source row references and checking billable quantity.",
+        "parameters": _object_schema(
+            ["purchase_receipt"],
+            {
+                "purchase_receipt": {"type": "string"},
+                "posting_date": {"type": "string"},
+                "bill_no": {"type": "string"},
+                "bill_date": {"type": "string"},
+                "company": {"type": "string"},
+                "selected_items": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "purchase_receipt_item": {"type": "string"},
+                            "item_code": {"type": "string"},
+                            "qty": {"type": "number", "exclusiveMinimum": 0},
+                            "rate": {"type": "number", "minimum": 0},
+                        },
+                    },
+                },
+            },
+        ),
+    },
+    {
         "name": "erpnext.accounting.create_period_closing_voucher_draft",
         "description": "Create a Period Closing Voucher draft only. Submitting period close is a separate high-risk financial action requiring confirmation metadata.",
         "parameters": _object_schema(["data"], {"data": {"type": "object"}}),

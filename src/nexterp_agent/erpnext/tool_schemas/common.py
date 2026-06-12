@@ -16,6 +16,8 @@ BUYING_ITEM_LINE_SCHEMA = {
         "schedule_date": {"type": "string"},
         "required_by": {"type": "string"},
         "warehouse": {"type": "string"},
+        "project": {"type": "string"},
+        "cost_center": {"type": "string"},
         "rate": {"type": "number", "minimum": 0},
         "price_list_rate": {"type": "number", "minimum": 0},
         "conversion_factor": {"type": "number", "exclusiveMinimum": 0},

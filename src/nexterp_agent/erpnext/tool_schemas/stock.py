@@ -320,6 +320,73 @@ STOCK_TOOL_SCHEMAS = [
         ),
     },
     {
+        "name": "erpnext.stock.create_quality_inspection_draft",
+        "description": "Create a Quality Inspection draft for incoming/outgoing/process inspection. L3 draft only; submit is separate if needed.",
+        "parameters": _object_schema(
+            [],
+            {
+                "item_code": {"type": "string"},
+                "item_query": {"type": "string"},
+                "selected_item_code": {"type": "string"},
+                "selection_confirmed": {"type": "boolean"},
+                "inspection_type": {"type": "string"},
+                "reference_type": {"type": "string"},
+                "reference_name": {"type": "string"},
+                "sample_size": {"type": "number", "minimum": 0},
+                "inspected_by": {"type": "string"},
+                "verified_by": {"type": "string"},
+                "report_date": {"type": "string"},
+                "status": {"type": "string"},
+                "remarks": {"type": "string"},
+                "readings": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "specification": {"type": "string"},
+                            "value": {"type": "string"},
+                            "status": {"type": "string"},
+                            "numeric_value": {"type": "number"},
+                            "min_value": {"type": "number"},
+                            "max_value": {"type": "number"},
+                        },
+                    },
+                },
+            },
+        ),
+    },
+    {
+        "name": "erpnext.stock.verify_purchase_receipt_stock_impact",
+        "description": "Verify a submitted Purchase Receipt against Stock Ledger Entry rows and summarize received quantity/value impact. Read-only L0.",
+        "parameters": _object_schema(
+            ["purchase_receipt"],
+            {
+                "purchase_receipt": {"type": "string"},
+                "item_code": {"type": "string"},
+                "warehouse": {"type": "string"},
+                "limit": {"type": "integer", "minimum": 1, "maximum": 500},
+            },
+        ),
+    },
+    {
+        "name": "erpnext.stock.get_item_lifecycle_summary",
+        "description": "Read a material lifecycle summary across Item, Purchase Receipt items, Stock Ledger, Quality Inspection, Stock Entry details, and Purchase Invoice items. Read-only L0.",
+        "parameters": _object_schema(
+            [],
+            {
+                "item_code": {"type": "string"},
+                "item_query": {"type": "string"},
+                "selected_item_code": {"type": "string"},
+                "selection_confirmed": {"type": "boolean"},
+                "project": {"type": "string"},
+                "warehouse": {"type": "string"},
+                "from_date": {"type": "string"},
+                "to_date": {"type": "string"},
+                "limit": {"type": "integer", "minimum": 1, "maximum": 200},
+            },
+        ),
+    },
+    {
         "name": "erpnext.stock.list_warehouses",
         "description": "List Warehouse records by company or name query. Read-only L0.",
         "parameters": _object_schema([], {"company": {"type": "string"}, "query": {"type": "string"}, "limit": {"type": "integer", "minimum": 1, "maximum": 200}}),

@@ -10,12 +10,21 @@ from .modules.assets import AssetsToolsMixin
 from .modules.buying import BuyingToolsMixin
 from .modules.common import *
 from .modules.generic import GenericToolsMixin
+from .modules.projects import ProjectsToolsMixin
 from .modules.stock import StockToolsMixin
 from .modules.users import UsersPermissionsToolsMixin
 from .schemas import ToolCall, ToolResult
 
 
-class ERPNextAdapter(GenericToolsMixin, UsersPermissionsToolsMixin, AssetsToolsMixin, BuyingToolsMixin, AccountingToolsMixin, StockToolsMixin):
+class ERPNextAdapter(
+    GenericToolsMixin,
+    UsersPermissionsToolsMixin,
+    AssetsToolsMixin,
+    BuyingToolsMixin,
+    AccountingToolsMixin,
+    StockToolsMixin,
+    ProjectsToolsMixin,
+):
     """Execute structured ToolCalls against ERPNext."""
 
     def __init__(self, client: ERPNextClient) -> None:
@@ -79,7 +88,12 @@ class ERPNextAdapter(GenericToolsMixin, UsersPermissionsToolsMixin, AssetsToolsM
             "erpnext.buying.create_supplier_quotation_draft": self._buying_create_supplier_quotation_draft,
             "erpnext.buying.compare_supplier_quotations": self._buying_compare_supplier_quotations,
             "erpnext.buying.create_purchase_order_draft": self._buying_create_purchase_order_draft,
+            "erpnext.buying.create_purchase_order_from_material_request_draft": self._buying_create_purchase_order_from_material_request_draft,
             "erpnext.buying.create_purchase_receipt_draft": self._buying_create_purchase_receipt_draft,
+            "erpnext.buying.create_purchase_receipt_from_purchase_order_draft": self._buying_create_purchase_receipt_from_purchase_order_draft,
+            "erpnext.buying.record_purchase_receipt_discrepancy": self._buying_record_purchase_receipt_discrepancy,
+            "erpnext.buying.get_purchase_receipt_return_context": self._buying_get_purchase_receipt_return_context,
+            "erpnext.buying.create_purchase_receipt_return_draft": self._buying_create_purchase_receipt_return_draft,
             "erpnext.buying.generate_purchase_suggestions": self._buying_generate_purchase_suggestions,
             "erpnext.buying.search_item_suppliers": self._buying_search_item_suppliers,
             "erpnext.buying.search_item_prices": self._buying_search_item_prices,
@@ -102,6 +116,7 @@ class ERPNextAdapter(GenericToolsMixin, UsersPermissionsToolsMixin, AssetsToolsM
             "erpnext.accounting.create_payment_entry_draft": self._accounting_create_payment_entry_draft,
             "erpnext.accounting.create_sales_invoice_draft": self._accounting_create_sales_invoice_draft,
             "erpnext.accounting.create_purchase_invoice_draft": self._accounting_create_purchase_invoice_draft,
+            "erpnext.accounting.create_purchase_invoice_from_purchase_receipt_draft": self._accounting_create_purchase_invoice_from_purchase_receipt_draft,
             "erpnext.accounting.create_period_closing_voucher_draft": self._accounting_create_period_closing_voucher_draft,
             "erpnext.accounting.prepare_payment_allocation": self._accounting_prepare_payment_allocation,
             "erpnext.accounting.prepare_invoice_taxes": self._accounting_prepare_invoice_taxes,
@@ -148,6 +163,9 @@ class ERPNextAdapter(GenericToolsMixin, UsersPermissionsToolsMixin, AssetsToolsM
             "erpnext.stock.get_document_impact": self._stock_get_document_impact,
             "erpnext.stock.list_item_reorders": self._stock_list_item_reorders,
             "erpnext.stock.list_quality_inspections": self._stock_list_quality_inspections,
+            "erpnext.stock.create_quality_inspection_draft": self._stock_create_quality_inspection_draft,
+            "erpnext.stock.verify_purchase_receipt_stock_impact": self._stock_verify_purchase_receipt_stock_impact,
+            "erpnext.stock.get_item_lifecycle_summary": self._stock_get_item_lifecycle_summary,
             "erpnext.stock.list_warehouses": self._stock_list_warehouses,
             "erpnext.stock.create_warehouse": self._stock_create_warehouse,
             "erpnext.stock.update_warehouse": self._stock_update_warehouse,
@@ -158,6 +176,10 @@ class ERPNextAdapter(GenericToolsMixin, UsersPermissionsToolsMixin, AssetsToolsM
             "erpnext.stock.create_uom": self._stock_create_uom,
             "erpnext.stock.update_uom": self._stock_update_uom,
             "erpnext.stock.submit_document": self._stock_submit_document,
+            "erpnext.projects.get_project_cost_context": self._projects_get_project_cost_context,
+            "erpnext.projects.get_material_issue_context": self._projects_get_material_issue_context,
+            "erpnext.projects.create_material_issue_draft": self._projects_create_material_issue_draft,
+            "erpnext.projects.verify_material_issue_cost_impact": self._projects_verify_material_issue_cost_impact,
         }
 
     def execute(self, tool_call: ToolCall | dict[str, Any]) -> ToolResult:

@@ -386,6 +386,231 @@ class StockToolsMixin:
             limit=args.get("limit", 50),
         )
 
+    def _stock_create_quality_inspection_draft(self, args: dict[str, Any]) -> ToolResult:
+        data = dict(args)
+        if not data.get("item_code"):
+            data["item_code"] = self._stock_item_code_from_args(data)
+        if not data.get("item_code"):
+            return _item_resolution_error("质量检验草稿中无法解析 item_code。")
+
+        data = _without_empty(
+            {
+                "doctype": "Quality Inspection",
+                "item_code": data.get("item_code"),
+                "inspection_type": data.get("inspection_type") or "Incoming",
+                "reference_type": data.get("reference_type"),
+                "reference_name": data.get("reference_name"),
+                "sample_size": data.get("sample_size"),
+                "inspected_by": data.get("inspected_by"),
+                "verified_by": data.get("verified_by"),
+                "report_date": data.get("report_date"),
+                "status": data.get("status"),
+                "remarks": data.get("remarks"),
+                "readings": [_quality_inspection_reading(row) for row in data.get("readings") or [] if isinstance(row, dict)],
+                "docstatus": 0,
+            }
+        )
+        result = self.client.create_document("Quality Inspection", data)
+        if not result.ok:
+            return result
+        raw = result.data if isinstance(result.data, dict) else {}
+        return ToolResult(
+            ok=True,
+            status_code=result.status_code,
+            raw_status_code=result.raw_status_code,
+            data={
+                "doctype": "Quality Inspection",
+                "name": raw.get("name"),
+                "docstatus": raw.get("docstatus", 0),
+                "status": "Draft",
+                "summary": f"Created Quality Inspection draft for Item {data.get('item_code')}.",
+                "item_code": data.get("item_code"),
+                "reference": _clean_mapping({"reference_type": data.get("reference_type"), "reference_name": data.get("reference_name")}),
+                "reading_count": len(data.get("readings") or []),
+                "next_actions": ["review_quality_inspection_draft", "record_purchase_receipt_discrepancy_if_failed"],
+                "risk": {"level": "L3", "requires_confirmation_for_submit": False, "does_not_move_stock": True},
+            },
+            debug={"raw_document": raw},
+        )
+
+    def _stock_verify_purchase_receipt_stock_impact(self, args: dict[str, Any]) -> ToolResult:
+        purchase_receipt = args["purchase_receipt"]
+        document = self.client.get_document("Purchase Receipt", purchase_receipt)
+        if not document.ok:
+            return document
+        doc = document.data if isinstance(document.data, dict) else {}
+        ledger = self.client.get_stock_ledger_entries(
+            voucher_type="Purchase Receipt",
+            voucher_no=purchase_receipt,
+            limit=args.get("limit", 200),
+        )
+        if not ledger.ok:
+            return ledger
+        ledger_rows = [row for row in (ledger.data if isinstance(ledger.data, list) else []) if isinstance(row, dict)]
+        if args.get("item_code"):
+            ledger_rows = [row for row in ledger_rows if row.get("item_code") == args["item_code"]]
+        if args.get("warehouse"):
+            ledger_rows = [row for row in ledger_rows if row.get("warehouse") == args["warehouse"]]
+
+        item_rows = _purchase_receipt_expected_stock_rows(doc, item_code=args.get("item_code"), warehouse=args.get("warehouse"))
+        matches = _match_expected_rows_to_ledger(item_rows, ledger_rows)
+        warnings = _purchase_receipt_stock_warnings(doc, item_rows, ledger_rows, matches)
+        status = "Verified" if doc.get("docstatus") == 1 and not warnings else "Review Required"
+        total_expected_qty = sum(_float_or_none(row.get("expected_stock_qty")) or 0.0 for row in item_rows)
+        total_ledger_qty = sum(_float_or_none(row.get("ledger_actual_qty")) or 0.0 for row in matches)
+        total_ledger_value = sum(_float_or_none(row.get("ledger_stock_value_difference")) or 0.0 for row in matches)
+        return ToolResult(
+            ok=True,
+            status_code=document.status_code,
+            raw_status_code=document.raw_status_code,
+            data={
+                "doctype": "Purchase Receipt",
+                "name": purchase_receipt,
+                "docstatus": doc.get("docstatus"),
+                "status": status,
+                "summary": (
+                    f"Verified Purchase Receipt {purchase_receipt}: "
+                    f"{len(item_rows)} expected row(s), {len(ledger_rows)} stock ledger row(s)."
+                ),
+                "supplier": doc.get("supplier"),
+                "posting_date": doc.get("posting_date"),
+                "totals": {
+                    "expected_stock_qty": round(total_expected_qty, 6),
+                    "ledger_actual_qty": round(total_ledger_qty, 6),
+                    "ledger_stock_value_difference": round(total_ledger_value, 2),
+                },
+                "rows": matches,
+                "warnings": warnings,
+                "next_actions": ["review_purchase_receipt_stock_impact"] if warnings else ["create_purchase_invoice_from_purchase_receipt_draft", "issue_material_to_project_when_needed"],
+                "risk": {"level": "L0", "writes_document": False, "moves_stock": False},
+            },
+            debug={"raw_purchase_receipt": doc, "raw_stock_ledger_entries": ledger_rows},
+        )
+
+    def _stock_get_item_lifecycle_summary(self, args: dict[str, Any]) -> ToolResult:
+        item_code = self._stock_item_code_from_args(args)
+        if not item_code:
+            return _item_resolution_error("物料生命周期摘要中无法解析 item_code。")
+
+        limit = args.get("limit", 50)
+        item_result = self.client.get_document("Item", item_code)
+        if not item_result.ok:
+            return item_result
+
+        purchase_receipt_items = self.client.search_documents(
+            "Purchase Receipt Item",
+            filters=_item_child_filters(args, item_code, warehouse_field="warehouse", project_field="project"),
+            fields=["name", "parent", "item_code", "item_name", "qty", "received_qty", "warehouse", "project", "rate", "amount"],
+            limit=limit,
+            order_by="modified desc",
+        )
+        if not purchase_receipt_items.ok:
+            return purchase_receipt_items
+
+        quality_inspections = self.client.list_quality_inspections(
+            item_code=item_code,
+            reference_type=args.get("reference_type"),
+            reference_name=args.get("reference_name"),
+            limit=limit,
+        )
+        if not quality_inspections.ok:
+            return quality_inspections
+
+        ledger_filters = _stock_ledger_lifecycle_filters(args, item_code)
+        stock_ledger = self.client.search_documents(
+            "Stock Ledger Entry",
+            filters=ledger_filters,
+            fields=[
+                "name",
+                "item_code",
+                "warehouse",
+                "posting_date",
+                "posting_time",
+                "voucher_type",
+                "voucher_no",
+                "actual_qty",
+                "qty_after_transaction",
+                "valuation_rate",
+                "stock_value_difference",
+                "stock_value",
+                "is_cancelled",
+            ],
+            limit=limit,
+            order_by="posting_date desc, posting_time desc, creation desc",
+        )
+        if not stock_ledger.ok:
+            return stock_ledger
+
+        stock_entry_details = self.client.search_documents(
+            "Stock Entry Detail",
+            filters=_stock_entry_detail_lifecycle_filters(args, item_code),
+            fields=["name", "parent", "item_code", "qty", "s_warehouse", "t_warehouse", "project", "cost_center", "basic_rate", "basic_amount"],
+            limit=limit,
+            order_by="modified desc",
+        )
+        if not stock_entry_details.ok:
+            return stock_entry_details
+
+        purchase_invoice_items = self.client.search_documents(
+            "Purchase Invoice Item",
+            filters=_item_child_filters(args, item_code, project_field="project"),
+            fields=["name", "parent", "item_code", "item_name", "qty", "purchase_receipt", "pr_detail", "purchase_order", "po_detail", "project", "rate", "amount"],
+            limit=limit,
+            order_by="modified desc",
+        )
+        if not purchase_invoice_items.ok:
+            return purchase_invoice_items
+
+        item = item_result.data if isinstance(item_result.data, dict) else {}
+        pr_rows = purchase_receipt_items.data if isinstance(purchase_receipt_items.data, list) else []
+        qi_rows = quality_inspections.data if isinstance(quality_inspections.data, list) else []
+        sle_rows = stock_ledger.data if isinstance(stock_ledger.data, list) else []
+        se_rows = stock_entry_details.data if isinstance(stock_entry_details.data, list) else []
+        pi_rows = purchase_invoice_items.data if isinstance(purchase_invoice_items.data, list) else []
+        totals = _item_lifecycle_totals(pr_rows, sle_rows, se_rows, pi_rows)
+        return ToolResult(
+            ok=True,
+            status_code=item_result.status_code,
+            raw_status_code=item_result.raw_status_code,
+            data={
+                "doctype": "Item",
+                "name": item_code,
+                "status": "Lifecycle Summary Ready",
+                "summary": (
+                    f"Prepared lifecycle summary for Item {item_code}: "
+                    f"{len(pr_rows)} receipt row(s), {len(sle_rows)} ledger row(s), "
+                    f"{len(se_rows)} stock entry detail row(s), {len(qi_rows)} quality inspection row(s)."
+                ),
+                "item": _clean_mapping(
+                    {
+                        "item_code": item.get("item_code") or item_code,
+                        "item_name": item.get("item_name"),
+                        "item_group": item.get("item_group"),
+                        "stock_uom": item.get("stock_uom"),
+                        "disabled": item.get("disabled"),
+                    }
+                ),
+                "filters": _clean_mapping(
+                    {
+                        "project": args.get("project"),
+                        "warehouse": args.get("warehouse"),
+                        "from_date": args.get("from_date"),
+                        "to_date": args.get("to_date"),
+                        "limit": limit,
+                    }
+                ),
+                "totals": totals,
+                "purchase_receipt_items": pr_rows,
+                "quality_inspections": qi_rows,
+                "stock_ledger_entries": sle_rows,
+                "stock_entry_details": se_rows,
+                "purchase_invoice_items": pi_rows,
+                "next_actions": ["review_lifecycle_summary", "verify_stock_or_project_cost_impact"],
+                "risk": {"level": "L0", "writes_document": False},
+            },
+            debug={"raw_item": item},
+        )
+
     def _stock_list_warehouses(self, args: dict[str, Any]) -> ToolResult:
         return self.client.list_warehouses(
             company=args.get("company"),
@@ -521,3 +746,199 @@ class StockToolsMixin:
             "voucher_detail_no",
         }
         return _without_empty({field: row.get(field) for field in allowed_fields})
+
+
+def _quality_inspection_reading(row: dict[str, Any]) -> dict[str, Any]:
+    return _without_empty(
+        {
+            "specification": row.get("specification"),
+            "value": row.get("value"),
+            "status": row.get("status"),
+            "numeric_value": row.get("numeric_value"),
+            "min_value": row.get("min_value"),
+            "max_value": row.get("max_value"),
+        }
+    )
+
+
+def _purchase_receipt_expected_stock_rows(
+    doc: dict[str, Any],
+    *,
+    item_code: str | None = None,
+    warehouse: str | None = None,
+) -> list[dict[str, Any]]:
+    grouped: dict[tuple[str | None, str | None], dict[str, Any]] = {}
+    for row in doc.get("items") or []:
+        if not isinstance(row, dict):
+            continue
+        row_item = row.get("item_code")
+        row_warehouse = row.get("warehouse")
+        if item_code and row_item != item_code:
+            continue
+        if warehouse and row_warehouse != warehouse:
+            continue
+        key = (row_item, row_warehouse)
+        bucket = grouped.setdefault(
+            key,
+            {
+                "item_code": row_item,
+                "item_name": row.get("item_name"),
+                "warehouse": row_warehouse,
+                "uom": row.get("stock_uom") or row.get("uom"),
+                "expected_stock_qty": 0.0,
+                "accepted_qty": 0.0,
+                "rejected_qty": 0.0,
+                "amount": 0.0,
+                "source_rows": [],
+            },
+        )
+        stock_qty = _first_float(row, ("stock_qty", "received_stock_qty", "received_qty", "qty")) or 0.0
+        rejected_qty = _float_or_none(row.get("rejected_qty")) or 0.0
+        bucket["expected_stock_qty"] += stock_qty
+        bucket["accepted_qty"] += max(stock_qty - rejected_qty, 0.0)
+        bucket["rejected_qty"] += rejected_qty
+        bucket["amount"] += _first_float(row, ("base_net_amount", "net_amount", "base_amount", "amount")) or 0.0
+        bucket["source_rows"].append(
+            _clean_mapping(
+                {
+                    "name": row.get("name"),
+                    "item_code": row_item,
+                    "warehouse": row_warehouse,
+                    "qty": row.get("qty"),
+                    "stock_qty": row.get("stock_qty"),
+                    "received_qty": row.get("received_qty"),
+                    "rejected_qty": row.get("rejected_qty"),
+                    "purchase_order": row.get("purchase_order"),
+                    "purchase_order_item": row.get("purchase_order_item"),
+                    "project": row.get("project"),
+                }
+            )
+        )
+    return [_round_stock_row(row) for row in grouped.values()]
+
+
+def _match_expected_rows_to_ledger(expected_rows: list[dict[str, Any]], ledger_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    ledger_by_key: dict[tuple[str | None, str | None], dict[str, Any]] = {}
+    for row in ledger_rows:
+        key = (row.get("item_code"), row.get("warehouse"))
+        bucket = ledger_by_key.setdefault(
+            key,
+            {
+                "ledger_actual_qty": 0.0,
+                "ledger_stock_value_difference": 0.0,
+                "ledger_entry_count": 0,
+                "ledger_entries": [],
+            },
+        )
+        bucket["ledger_actual_qty"] += _float_or_none(row.get("actual_qty")) or 0.0
+        bucket["ledger_stock_value_difference"] += _first_float(row, ("stock_value_difference", "stock_value")) or 0.0
+        bucket["ledger_entry_count"] += 1
+        bucket["ledger_entries"].append(row)
+
+    matches = []
+    for expected in expected_rows:
+        key = (expected.get("item_code"), expected.get("warehouse"))
+        ledger = ledger_by_key.get(key, {"ledger_actual_qty": 0.0, "ledger_stock_value_difference": 0.0, "ledger_entry_count": 0, "ledger_entries": []})
+        delta = (_float_or_none(ledger.get("ledger_actual_qty")) or 0.0) - (_float_or_none(expected.get("expected_stock_qty")) or 0.0)
+        matches.append(
+            {
+                **expected,
+                "ledger_actual_qty": round(_float_or_none(ledger.get("ledger_actual_qty")) or 0.0, 6),
+                "ledger_stock_value_difference": round(_float_or_none(ledger.get("ledger_stock_value_difference")) or 0.0, 2),
+                "ledger_entry_count": ledger.get("ledger_entry_count") or 0,
+                "qty_delta": round(delta, 6),
+                "matched": abs(delta) < 0.000001 and bool(ledger.get("ledger_entry_count")),
+            }
+        )
+    return matches
+
+
+def _purchase_receipt_stock_warnings(
+    doc: dict[str, Any],
+    expected_rows: list[dict[str, Any]],
+    ledger_rows: list[dict[str, Any]],
+    matches: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    warnings = []
+    if doc.get("docstatus") != 1:
+        warnings.append({"type": "not_submitted", "message": "Purchase Receipt is not submitted, so stock ledger impact may not exist yet."})
+    if not expected_rows:
+        warnings.append({"type": "no_expected_rows", "message": "No Purchase Receipt item rows matched the supplied filters."})
+    if doc.get("docstatus") == 1 and not ledger_rows:
+        warnings.append({"type": "no_stock_ledger_entries", "message": "Submitted Purchase Receipt has no matching Stock Ledger Entry rows."})
+    mismatches = [row for row in matches if row.get("ledger_entry_count") and abs(_float_or_none(row.get("qty_delta")) or 0.0) >= 0.000001]
+    if mismatches:
+        warnings.append({"type": "quantity_mismatch", "message": "Expected receipt quantity does not match Stock Ledger Entry actual quantity.", "rows": mismatches})
+    return warnings
+
+
+def _round_stock_row(row: dict[str, Any]) -> dict[str, Any]:
+    rounded = dict(row)
+    for key in ("expected_stock_qty", "accepted_qty", "rejected_qty", "amount"):
+        if key in rounded:
+            rounded[key] = round(_float_or_none(rounded.get(key)) or 0.0, 6 if key.endswith("qty") else 2)
+    return rounded
+
+
+def _item_child_filters(
+    args: dict[str, Any],
+    item_code: str,
+    *,
+    warehouse_field: str | None = None,
+    project_field: str | None = None,
+) -> dict[str, Any]:
+    filters: dict[str, Any] = {"item_code": item_code}
+    if warehouse_field and args.get("warehouse"):
+        filters[warehouse_field] = args["warehouse"]
+    if project_field and args.get("project"):
+        filters[project_field] = args["project"]
+    return filters
+
+
+def _stock_ledger_lifecycle_filters(args: dict[str, Any], item_code: str) -> dict[str, Any]:
+    filters: dict[str, Any] = {"item_code": item_code, "is_cancelled": 0}
+    if args.get("warehouse"):
+        filters["warehouse"] = args["warehouse"]
+    if args.get("from_date") and args.get("to_date"):
+        filters["posting_date"] = ["between", [args["from_date"], args["to_date"]]]
+    elif args.get("from_date"):
+        filters["posting_date"] = [">=", args["from_date"]]
+    elif args.get("to_date"):
+        filters["posting_date"] = ["<=", args["to_date"]]
+    return filters
+
+
+def _stock_entry_detail_lifecycle_filters(args: dict[str, Any], item_code: str) -> dict[str, Any]:
+    filters: dict[str, Any] = {"item_code": item_code}
+    if args.get("project"):
+        filters["project"] = args["project"]
+    if args.get("warehouse"):
+        filters["s_warehouse"] = args["warehouse"]
+    return filters
+
+
+def _item_lifecycle_totals(
+    purchase_receipt_items: list[dict[str, Any]],
+    stock_ledger_entries: list[dict[str, Any]],
+    stock_entry_details: list[dict[str, Any]],
+    purchase_invoice_items: list[dict[str, Any]],
+) -> dict[str, Any]:
+    receipt_qty = sum(_first_float(row, ("stock_qty", "received_qty", "qty")) or 0.0 for row in purchase_receipt_items if isinstance(row, dict))
+    ledger_in_qty = sum(max(_float_or_none(row.get("actual_qty")) or 0.0, 0.0) for row in stock_ledger_entries if isinstance(row, dict))
+    ledger_out_qty = abs(sum(min(_float_or_none(row.get("actual_qty")) or 0.0, 0.0) for row in stock_ledger_entries if isinstance(row, dict)))
+    ledger_value = sum(_first_float(row, ("stock_value_difference", "stock_value")) or 0.0 for row in stock_ledger_entries if isinstance(row, dict))
+    project_issue_qty = sum(_float_or_none(row.get("qty")) or 0.0 for row in stock_entry_details if isinstance(row, dict) and row.get("s_warehouse"))
+    project_issue_amount = sum(_first_float(row, ("basic_amount", "amount")) or 0.0 for row in stock_entry_details if isinstance(row, dict) and row.get("s_warehouse"))
+    invoiced_qty = sum(_float_or_none(row.get("qty")) or 0.0 for row in purchase_invoice_items if isinstance(row, dict))
+    invoiced_amount = sum(_first_float(row, ("base_net_amount", "net_amount", "base_amount", "amount")) or 0.0 for row in purchase_invoice_items if isinstance(row, dict))
+    return {
+        "purchase_receipt_qty": round(receipt_qty, 6),
+        "ledger_in_qty": round(ledger_in_qty, 6),
+        "ledger_out_qty": round(ledger_out_qty, 6),
+        "ledger_net_qty": round(ledger_in_qty - ledger_out_qty, 6),
+        "ledger_value_difference": round(ledger_value, 2),
+        "project_issue_qty": round(project_issue_qty, 6),
+        "project_issue_amount": round(project_issue_amount, 2),
+        "purchase_invoice_qty": round(invoiced_qty, 6),
+        "purchase_invoice_amount": round(invoiced_amount, 2),
+    }

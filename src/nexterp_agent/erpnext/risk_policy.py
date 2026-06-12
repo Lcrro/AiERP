@@ -58,11 +58,15 @@ def infer_risk_level(tool: str) -> str:
         "erpnext.stock.get_document_impact",
         "erpnext.stock.list_item_reorders",
         "erpnext.stock.list_quality_inspections",
+        "erpnext.stock.verify_purchase_receipt_stock_impact",
+        "erpnext.stock.get_item_lifecycle_summary",
         "erpnext.assets.search_assets",
         "erpnext.assets.search_asset_categories",
         "erpnext.assets.search_asset_locations",
         "erpnext.assets.get_financial_snapshot",
         "erpnext.assets.get_depreciation_schedule",
+        "erpnext.projects.get_project_cost_context",
+        "erpnext.projects.verify_material_issue_cost_impact",
     }:
         return "L0"
     if tool in {
@@ -71,10 +75,12 @@ def infer_risk_level(tool: str) -> str:
         "erpnext.stock.allocate_shortages",
         "erpnext.assets.prepare_disposal_or_sale",
         "erpnext.buying.get_supplier_procurement_profile",
+        "erpnext.buying.get_purchase_receipt_return_context",
         "erpnext.accounting.prepare_payment_allocation",
         "erpnext.accounting.prepare_invoice_taxes",
         "erpnext.accounting.prepare_bank_reconciliation",
         "erpnext.buying.compare_supplier_quotations",
+        "erpnext.projects.get_material_issue_context",
     }:
         return "L1"
     if tool in {
@@ -106,7 +112,7 @@ def infer_risk_level(tool: str) -> str:
         "erpnext.accounting.financial_report",
     }:
         return "L0"
-    if tool in {"erpnext.create_todo", "erpnext.add_comment", "erpnext.assign_to", "erpnext.attach_file"}:
+    if tool in {"erpnext.create_todo", "erpnext.add_comment", "erpnext.assign_to", "erpnext.attach_file", "erpnext.buying.record_purchase_receipt_discrepancy"}:
         return "L2"
     if tool in {
         "erpnext.buying.create_supplier_draft",
@@ -115,7 +121,10 @@ def infer_risk_level(tool: str) -> str:
         "erpnext.buying.create_request_for_quotation_draft",
         "erpnext.buying.create_supplier_quotation_draft",
         "erpnext.buying.create_purchase_order_draft",
+        "erpnext.buying.create_purchase_order_from_material_request_draft",
         "erpnext.buying.create_purchase_receipt_draft",
+        "erpnext.buying.create_purchase_receipt_from_purchase_order_draft",
+        "erpnext.buying.create_purchase_receipt_return_draft",
     }:
         return "L3"
     if tool in {
@@ -128,6 +137,7 @@ def infer_risk_level(tool: str) -> str:
         "erpnext.accounting.create_payment_entry_draft",
         "erpnext.accounting.create_sales_invoice_draft",
         "erpnext.accounting.create_purchase_invoice_draft",
+        "erpnext.accounting.create_purchase_invoice_from_purchase_receipt_draft",
         "erpnext.accounting.create_period_closing_voucher_draft",
         "erpnext.accounting.create_budget_draft",
         "erpnext.accounting.update_budget_draft",
@@ -143,12 +153,14 @@ def infer_risk_level(tool: str) -> str:
         "erpnext.stock.create_serial_no",
         "erpnext.stock.create_pick_list_draft",
         "erpnext.stock.create_reservation_draft",
+        "erpnext.stock.create_quality_inspection_draft",
         "erpnext.assets.create_asset_draft",
         "erpnext.assets.create_movement_draft",
         "erpnext.assets.create_maintenance_draft",
         "erpnext.assets.create_maintenance_log_draft",
         "erpnext.assets.create_repair_draft",
         "erpnext.assets.create_value_adjustment_draft",
+        "erpnext.projects.create_material_issue_draft",
     }:
         return "L3"
     if tool in {

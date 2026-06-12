@@ -15,7 +15,33 @@ class StockFakeClient:
         if doctype == "Delivery Note" and name == "DN-001":
             return ToolResult(ok=True, data={"doctype": doctype, "name": name, "docstatus": 1, "status": "Completed", "customer": "Customer A"})
         if doctype == "Purchase Receipt" and name == "PR-001":
-            return ToolResult(ok=True, data={"doctype": doctype, "name": name, "docstatus": 1, "status": "Completed", "supplier": "Supplier A"})
+            return ToolResult(
+                ok=True,
+                data={
+                    "doctype": doctype,
+                    "name": name,
+                    "docstatus": 1,
+                    "status": "Completed",
+                    "supplier": "Supplier A",
+                    "posting_date": "2026-06-01",
+                    "items": [
+                        {
+                            "name": "PRI-001",
+                            "item_code": "ITEM-001",
+                            "item_name": "Test Item",
+                            "warehouse": "Stores - A",
+                            "qty": 5,
+                            "stock_qty": 5,
+                            "uom": "Nos",
+                            "stock_uom": "Nos",
+                            "amount": 50,
+                            "purchase_order": "PO-001",
+                            "purchase_order_item": "POI-001",
+                            "project": "PROJ-001",
+                        }
+                    ],
+                },
+            )
         return ToolResult(ok=False, error_type="not_found")
 
     def search_documents(self, doctype, **kwargs) -> ToolResult:
@@ -57,6 +83,12 @@ class StockFakeClient:
                     },
                 ],
             )
+        if doctype == "Purchase Receipt Item":
+            return ToolResult(ok=True, data=[{"name": "PRI-001", "parent": "PR-001", "item_code": "ITEM-001", "qty": 5, "warehouse": "Stores - A", "project": "PROJ-001", "amount": 50}])
+        if doctype == "Stock Entry Detail":
+            return ToolResult(ok=True, data=[{"name": "SED-001", "parent": "STE-001", "item_code": "ITEM-001", "qty": 2, "s_warehouse": "Stores - A", "project": "PROJ-001", "basic_amount": 20}])
+        if doctype == "Purchase Invoice Item":
+            return ToolResult(ok=True, data=[{"name": "PII-001", "parent": "PI-001", "item_code": "ITEM-001", "qty": 5, "purchase_receipt": "PR-001", "project": "PROJ-001", "amount": 50}])
         return ToolResult(ok=True, data=[])
 
     def get_stock_balance(self, item_code=None, **kwargs) -> ToolResult:
@@ -69,6 +101,8 @@ class StockFakeClient:
 
     def get_stock_ledger_entries(self, **kwargs) -> ToolResult:
         self.calls.append(("get_stock_ledger_entries", kwargs))
+        if kwargs.get("voucher_type") == "Purchase Receipt":
+            return ToolResult(ok=True, data=[{"item_code": "ITEM-001", "warehouse": "Stores - A", "actual_qty": 5, "stock_value_difference": 50}])
         return ToolResult(ok=True, data=[{"item_code": "ITEM-001", "actual_qty": -2, "stock_value_difference": -20}])
 
     def get_stock_settings(self) -> ToolResult:
@@ -173,6 +207,8 @@ class StockFakeClient:
 
     def create_document(self, doctype, data) -> ToolResult:
         self.calls.append(("create_document", doctype, data))
+        if doctype == "Quality Inspection":
+            return ToolResult(ok=True, data={"doctype": doctype, "name": "QI-001", **data})
         return ToolResult(ok=True, data={"doctype": doctype, "name": data.get("name") or data.get("item_group_name") or data.get("uom_name"), **data})
 
     def update_document(self, doctype, name, data) -> ToolResult:
@@ -679,6 +715,97 @@ def test_stock_settings_reorders_and_quality_inspections_are_l0_reads() -> None:
     ]
 
 
+def test_stock_create_quality_inspection_draft_returns_l3_draft_shape() -> None:
+    client = StockFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    result = adapter.execute(
+        {
+            "tool": "erpnext.stock.create_quality_inspection_draft",
+            "arguments": {
+                "item_code": "ITEM-001",
+                "reference_type": "Purchase Receipt",
+                "reference_name": "PR-001",
+                "sample_size": 2,
+                "status": "Accepted",
+                "readings": [{"specification": "外观", "value": "合格", "status": "Accepted"}],
+            },
+        }
+    )
+
+    assert result.ok
+    assert result.data["doctype"] == "Quality Inspection"
+    assert result.data["name"] == "QI-001"
+    assert result.data["status"] == "Draft"
+    assert result.data["reading_count"] == 1
+    assert result.data["risk"] == {"level": "L3", "requires_confirmation_for_submit": False, "does_not_move_stock": True}
+    assert client.calls == [
+        (
+            "create_document",
+            "Quality Inspection",
+            {
+                "doctype": "Quality Inspection",
+                "item_code": "ITEM-001",
+                "inspection_type": "Incoming",
+                "reference_type": "Purchase Receipt",
+                "reference_name": "PR-001",
+                "sample_size": 2,
+                "status": "Accepted",
+                "readings": [{"specification": "外观", "value": "合格", "status": "Accepted"}],
+                "docstatus": 0,
+            },
+        )
+    ]
+
+
+def test_stock_verify_purchase_receipt_stock_impact_matches_ledger() -> None:
+    client = StockFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    result = adapter.execute(
+        {
+            "tool": "erpnext.stock.verify_purchase_receipt_stock_impact",
+            "arguments": {"purchase_receipt": "PR-001", "item_code": "ITEM-001", "warehouse": "Stores - A"},
+        }
+    )
+
+    assert result.ok
+    assert result.data["status"] == "Verified"
+    assert result.data["totals"] == {
+        "expected_stock_qty": 5.0,
+        "ledger_actual_qty": 5.0,
+        "ledger_stock_value_difference": 50.0,
+    }
+    assert result.data["rows"][0]["matched"] is True
+    assert result.data["warnings"] == []
+    assert result.data["risk"] == {"level": "L0", "writes_document": False, "moves_stock": False}
+    assert client.calls == [
+        ("get_document", "Purchase Receipt", "PR-001"),
+        ("get_stock_ledger_entries", {"voucher_type": "Purchase Receipt", "voucher_no": "PR-001", "limit": 200}),
+    ]
+
+
+def test_stock_item_lifecycle_summary_reads_cross_module_rows() -> None:
+    client = StockFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    result = adapter.execute(
+        {
+            "tool": "erpnext.stock.get_item_lifecycle_summary",
+            "arguments": {"item_code": "ITEM-001", "project": "PROJ-001", "warehouse": "Stores - A", "limit": 10},
+        }
+    )
+
+    assert result.ok
+    assert result.data["doctype"] == "Item"
+    assert result.data["status"] == "Lifecycle Summary Ready"
+    assert result.data["totals"]["purchase_receipt_qty"] == 5.0
+    assert result.data["totals"]["ledger_net_qty"] == 3.0
+    assert result.data["totals"]["project_issue_qty"] == 2.0
+    assert result.data["totals"]["purchase_invoice_amount"] == 50.0
+    assert result.data["risk"] == {"level": "L0", "writes_document": False}
+
+
 def test_stock_tools_infer_expected_risk_levels() -> None:
     assert ToolCall.from_dict({"tool": "erpnext.stock.get_balance"}).risk_level == "L0"
     assert ToolCall.from_dict({"tool": "erpnext.stock.list_batch_balances"}).risk_level == "L0"
@@ -699,4 +826,7 @@ def test_stock_tools_infer_expected_risk_levels() -> None:
     assert ToolCall.from_dict({"tool": "erpnext.stock.get_stock_settings"}).risk_level == "L0"
     assert ToolCall.from_dict({"tool": "erpnext.stock.list_item_reorders"}).risk_level == "L0"
     assert ToolCall.from_dict({"tool": "erpnext.stock.list_quality_inspections"}).risk_level == "L0"
+    assert ToolCall.from_dict({"tool": "erpnext.stock.create_quality_inspection_draft"}).risk_level == "L3"
+    assert ToolCall.from_dict({"tool": "erpnext.stock.verify_purchase_receipt_stock_impact"}).risk_level == "L0"
+    assert ToolCall.from_dict({"tool": "erpnext.stock.get_item_lifecycle_summary"}).risk_level == "L0"
     assert ToolCall.from_dict({"tool": "erpnext.stock.submit_document"}).risk_level == "L4"

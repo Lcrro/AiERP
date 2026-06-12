@@ -146,6 +146,34 @@ BUYING_TOOL_SCHEMAS = [
         ),
     },
     {
+        "name": "erpnext.buying.create_purchase_order_from_material_request_draft",
+        "description": "Create a Purchase Order draft from a submitted Material Request while preserving source row references.",
+        "parameters": _object_schema(
+            ["material_request", "supplier"],
+            {
+                "material_request": {"type": "string"},
+                "supplier": {"type": "string"},
+                "transaction_date": {"type": "string"},
+                "schedule_date": {"type": "string"},
+                "company": {"type": "string"},
+                "currency": {"type": "string"},
+                "selected_items": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "material_request_item": {"type": "string"},
+                            "item_code": {"type": "string"},
+                            "qty": {"type": "number", "exclusiveMinimum": 0},
+                            "rate": {"type": "number", "minimum": 0},
+                            "warehouse": {"type": "string"},
+                        },
+                    },
+                },
+            },
+        ),
+    },
+    {
         "name": "erpnext.buying.create_purchase_receipt_draft",
         "description": "Create a Purchase Receipt draft for received purchasing items. Does not submit stock movement.",
         "parameters": _object_schema(
@@ -155,6 +183,117 @@ BUYING_TOOL_SCHEMAS = [
                 "posting_date": {"type": "string"},
                 "company": {"type": "string"},
                 "items": {"type": "array", "items": BUYING_ITEM_LINE_SCHEMA},
+            },
+        ),
+    },
+    {
+        "name": "erpnext.buying.create_purchase_receipt_from_purchase_order_draft",
+        "description": "Create a Purchase Receipt draft from a submitted Purchase Order while preserving source row references.",
+        "parameters": _object_schema(
+            ["purchase_order"],
+            {
+                "purchase_order": {"type": "string"},
+                "posting_date": {"type": "string"},
+                "company": {"type": "string"},
+                "selected_items": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "purchase_order_item": {"type": "string"},
+                            "item_code": {"type": "string"},
+                            "qty": {"type": "number", "exclusiveMinimum": 0},
+                            "warehouse": {"type": "string"},
+                        },
+                    },
+                },
+            },
+        ),
+    },
+    {
+        "name": "erpnext.buying.record_purchase_receipt_discrepancy",
+        "description": "Record receiving discrepancy/spec mismatch on a Purchase Receipt by adding a comment and optional ToDo; does not submit, return, or change stock.",
+        "parameters": _object_schema(
+            ["purchase_receipt", "description"],
+            {
+                "purchase_receipt": {"type": "string"},
+                "description": {"type": "string"},
+                "discrepancy_type": {"type": "string"},
+                "severity": {"type": "string"},
+                "reported_by": {"type": "string"},
+                "assigned_to": {"type": "string"},
+                "priority": {"type": "string"},
+                "due_date": {"type": "string"},
+                "create_todo": {"type": "boolean"},
+                "prepare_return": {"type": "boolean"},
+                "full_return": {"type": "boolean"},
+                "comment_email": {"type": "string"},
+                "comment_by": {"type": "string"},
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "purchase_receipt_item": {"type": "string"},
+                            "item_code": {"type": "string"},
+                            "warehouse": {"type": "string"},
+                            "qty": {"type": "number", "exclusiveMinimum": 0},
+                            "expected": {"type": "string"},
+                            "actual": {"type": "string"},
+                            "reason": {"type": "string"},
+                        },
+                    },
+                },
+            },
+        ),
+    },
+    {
+        "name": "erpnext.buying.get_purchase_receipt_return_context",
+        "description": "Preview returnable rows for a submitted Purchase Receipt before creating a supplier return draft.",
+        "parameters": _object_schema(
+            ["purchase_receipt"],
+            {
+                "purchase_receipt": {"type": "string"},
+                "full_return": {"type": "boolean"},
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "purchase_receipt_item": {"type": "string"},
+                            "item_code": {"type": "string"},
+                            "qty": {"type": "number", "exclusiveMinimum": 0},
+                            "warehouse": {"type": "string"},
+                            "reason": {"type": "string"},
+                        },
+                    },
+                },
+            },
+        ),
+    },
+    {
+        "name": "erpnext.buying.create_purchase_receipt_return_draft",
+        "description": "Create a Purchase Receipt return draft from an existing submitted Purchase Receipt. Does not submit the return.",
+        "parameters": _object_schema(
+            ["purchase_receipt"],
+            {
+                "purchase_receipt": {"type": "string"},
+                "posting_date": {"type": "string"},
+                "full_return": {"type": "boolean"},
+                "reason": {"type": "string"},
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "purchase_receipt_item": {"type": "string"},
+                            "item_code": {"type": "string"},
+                            "qty": {"type": "number", "exclusiveMinimum": 0},
+                            "warehouse": {"type": "string"},
+                            "reason": {"type": "string"},
+                        },
+                    },
+                },
             },
         ),
     },
