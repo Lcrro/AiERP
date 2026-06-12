@@ -65,6 +65,7 @@ Start here:
 
 - [Documentation Index](docs/README.md)
 - [Architecture Roadmap](docs/architecture/roadmap.md)
+- [Project Structure And Boundaries](docs/architecture/project-structure.md)
 - [DocType Index Design](docs/architecture/doctype-index.md)
 - [ERPNext Capability Map](docs/reference/erpnext-capability-map.md)
 - [Material Master Standard](docs/reference/material-master-standard.md)
@@ -75,11 +76,21 @@ Start here:
 ## Repository Layout
 
 ```text
-docs/                         Project documentation
-frappe_apps/agent_bridge/      Tracked mirror of the local Frappe bridge app
-scripts/                       Smoke, sync, and sandbox helper scripts
 src/nexterp_agent/             Python package
-tests/                         Unit tests
+  agent_runtime/               Future natural-language brain: routing, state, planning
+  erpnext/                     ERPNext ToolCall schemas, adapter, client, risk policy
+  item_master/                 Material master rules, coding, search, PostgreSQL catalog
+  scenarios/                   Future reusable business scenario runners
+frappe_apps/agent_bridge/      Tracked mirror of the local Frappe bridge app
+scripts/                       Compatibility wrappers plus categorized script folders
+  dev/                         Local sandbox, sync, smoke checks
+  erpnext/                     ERPNext setup, cleanup, import, verification
+  material_master/             Material data processing, governance, search evaluation
+  scenarios/                   Business sandbox seed, runner, coverage checks
+data/                          Local data assets and generated reports
+docs/                          Project documentation
+tools/                         Local viewer/debug pages
+tests/                         Unit, integration, and future scenario tests
 ```
 
 ## Current Local Sandbox

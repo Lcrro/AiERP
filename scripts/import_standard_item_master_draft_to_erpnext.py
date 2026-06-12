@@ -5,12 +5,12 @@ import runpy
 import sys
 from pathlib import Path
 
-_TARGET = Path(__file__).resolve().parent / "erpnext" / "setup_item_master.py"
+_TARGET = Path(__file__).resolve().parent / "erpnext" / "import_standard_item_master_draft_to_erpnext.py"
 
 if __name__ == "__main__":
     runpy.run_path(str(_TARGET), run_name="__main__")
 else:
-    _spec = importlib.util.spec_from_file_location("_nexterp_script_setup_item_master", _TARGET)
+    _spec = importlib.util.spec_from_file_location("_nexterp_script_import_standard_item_master_draft_to_erpnext", _TARGET)
     if _spec is None or _spec.loader is None:
         raise ImportError(f"Cannot load script module: {_TARGET}")
     _module = importlib.util.module_from_spec(_spec)

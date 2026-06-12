@@ -1,65 +1,79 @@
-# Documentation Index
+# 文档索引
 
-This project uses a lightweight documentation structure inspired by the Diataxis framework:
+这个项目使用轻量文档结构，参考了 Diataxis 的分类思路：
 
 ```text
-overview      where to start and what exists
-architecture  how the system is shaped
-reference     precise API/schema/tool facts
-planning      versioned work plans and checklists
-operations    how to run, verify, and maintain local systems
+overview      从哪里开始、项目里有什么
+architecture  系统架构、模块关系和长期路线
+reference     稳定事实，例如 API、schema、ToolCall、规则
+planning      分版本计划、开发清单和验收标准
+operations    本地运行、验证、维护和排障
+scenarios     业务沙盘、角色、流程样例
 ```
 
-The goal is to keep each document responsible for one kind of question.
+目标是让每个文档只回答一类问题，避免所有内容混在一起。
 
-## Start Here
+## 从这里开始
 
-- [Project README](../README.md): short project entrypoint.
-- [Project Status](project-status.md): current branch, coverage counts, test status, and next queue.
-- [Architecture Roadmap](architecture/roadmap.md): staged architecture goals.
-- [Tool Layer v0.1 Checklist](planning/tool-layer-v0.1.md): current backend tool-layer work queue.
-- [Item Master Search v0.1 Plan](planning/item-master-search-v0.1.md): material master and search work queue.
+- [项目 README](../README.md)：项目根目录的简短入口。
+- [项目状态](project-status.md)：当前分支、覆盖数量、测试状态和下一步队列。
+- [架构路线图](architecture/roadmap.md)：分阶段架构目标。
+- [Tool Layer v0.1 清单](planning/tool-layer-v0.1.md)：后端工具层工作队列。
+- [物料主数据与检索 v0.1 计划](planning/item-master-search-v0.1.md)：物料表和检索工作队列。
 
-## Architecture
+## 架构
 
-- [Architecture Roadmap](architecture/roadmap.md)
-- [DocType Index And Agent Context](architecture/doctype-index.md)
+- [架构路线图](architecture/roadmap.md)
+- [项目结构与解耦边界](architecture/project-structure.md)
+- [DocType 索引与 Agent 上下文](architecture/doctype-index.md)
 
-Architecture docs explain how the system should be shaped and why.
+架构文档回答“系统应该长什么样，以及为什么这样设计”。
 
-## Planning
+## 计划
 
 - [ERPNext Tool Layer v0.1](planning/tool-layer-v0.1.md)
-- [ERPNext Tool Layer v0.2 Module Coverage](planning/tool-layer-v0.2-module-coverage.md)
-- [Item Master Search v0.1](planning/item-master-search-v0.1.md)
+- [ERPNext Tool Layer v0.2 模块覆盖](planning/tool-layer-v0.2-module-coverage.md)
+- [物料主数据与检索 v0.1](planning/item-master-search-v0.1.md)
 
-Planning docs are versioned work queues. They should contain checklists, acceptance criteria, and the next task.
+计划文档是按版本组织的工作队列，应该包含开发清单、验收标准和下一步任务。
 
-## Operations
+## 运行与维护
 
-- [Local Sandbox Operations](operations/local-sandbox.md)
-- [Material Catalog PostgreSQL Operations](operations/material-catalog-postgres.md)
+- [本地 Sandbox 运行说明](operations/local-sandbox.md)
+- [物料目录 PostgreSQL 运行说明](operations/material-catalog-postgres.md)
 
-Operations docs explain how to run and verify local infrastructure.
+运行文档回答“本地系统怎么启动、怎么验证、怎么维护”。
 
-## Reference
+## 业务场景
 
-- [ERPNext Capability Map](reference/erpnext-capability-map.md)
-- [Material Master Standard](reference/material-master-standard.md)
-- [ERPNext Item Search Tool](reference/item-search-tool.md)
-- [Purchase Material Standardization](reference/purchase-material-standardization.md)
-- [Standard Item Catalog From Purchase Review](reference/standard-item-catalog-from-review.md)
-- [Material Catalog PostgreSQL Layer](reference/material-catalog-postgres.md)
-- [ToolCall Users & Permissions](reference/toolcall-users-permissions.md)
-- [ToolCall Five Module Control Matrix](reference/toolcall-five-module-control-matrix.md)
-- [ToolCall Assets](reference/toolcall-assets.md)
-- [ToolCall Stock](reference/toolcall-stock.md)
-- [ToolCall Buying](reference/toolcall-buying.md)
-- [ToolCall Accounting](reference/toolcall-accounting.md)
+- [小型土木公司一日运转模拟：员工角色表](scenarios/civil-company-day-roles.md)
+- [小型土木公司一日运转模拟：时间顺序事件流](scenarios/civil-company-day-events.md)
+- [小型土木公司一日运转模拟：ToolCall 覆盖矩阵](scenarios/civil-company-day-toolcall-coverage.md)
+- [小型土木公司一日运转模拟：Sandbox 初始化](scenarios/civil-company-day-seed.md)
 
-Reference docs should be added when we have stable facts about schemas, tool contracts, or API behavior.
+业务场景文档回答“系统要服务哪些人、他们在真实业务中怎么协作”。
 
-Planned reference docs:
+## 参考
+
+- [ERPNext 能力地图](reference/erpnext-capability-map.md)
+- [物料主数据标准](reference/material-master-standard.md)
+- [ERPNext 物料检索工具](reference/item-search-tool.md)
+- [采购清单物料标准化归档](reference/purchase-material-standardization.md)
+- [采购清单整理后的标准物料目录](reference/standard-item-catalog-from-review.md)
+- [物料主数据 SKU 草案 v0.3](reference/material-item-master-draft-v0.3.md)
+- [物料目录 PostgreSQL 层](reference/material-catalog-postgres.md)
+- [当前 ToolCall 清单](reference/toolcall-current-inventory.md)
+- [ToolCall 用户与权限](reference/toolcall-users-permissions.md)
+- [ToolCall 五大模块控制矩阵](reference/toolcall-five-module-control-matrix.md)
+- [ToolCall 资产](reference/toolcall-assets.md)
+- [ToolCall 库存](reference/toolcall-stock.md)
+- [ToolCall 采购](reference/toolcall-buying.md)
+- [ToolCall 项目专项](reference/toolcall-projects.md)
+- [ToolCall 财务](reference/toolcall-accounting.md)
+
+当 schema、工具契约、API 行为或业务规则已经比较稳定时，把它们放到参考文档里。
+
+计划中的参考文档：
 
 ```text
 docs/reference/tool-contracts.md
@@ -67,12 +81,13 @@ docs/reference/agent-bridge-api.md
 docs/reference/configuration.md
 ```
 
-## Documentation Rules
+## 文档规则
 
-- Keep the root `README.md` short.
-- Put long architecture and design material under `docs/architecture/`.
-- Put version-specific task lists under `docs/planning/`.
-- Put runbooks under `docs/operations/`.
-- Put stable schemas, tool contracts, and API details under `docs/reference/`.
-- Do not commit generated caches, secrets, or live ERPNext business data.
-- Prefer links over duplicated content.
+- 根目录 `README.md` 保持简短。
+- 长架构说明和设计材料放到 `docs/architecture/`。
+- 分版本任务清单放到 `docs/planning/`。
+- 运行手册和排障说明放到 `docs/operations/`。
+- 业务沙盘、角色表和流程样例放到 `docs/scenarios/`。
+- 稳定的 schema、工具契约和 API 细节放到 `docs/reference/`。
+- 不提交生成缓存、密钥或真实 ERPNext 业务数据。
+- 优先使用链接，不重复粘贴同一份内容。

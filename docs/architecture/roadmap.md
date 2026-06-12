@@ -1,316 +1,316 @@
-# Architecture Roadmap
+# 架构路线图
 
-This roadmap describes the project by architecture stage.
+这个路线图按架构阶段描述项目。
 
-Each stage answers one question:
+每个阶段回答一个问题：
 
 ```text
-What should the system architecture be able to do at this point?
+到这个阶段，系统架构应该具备什么能力？
 ```
 
-The roadmap should stay architecture-first. Product features can grow later, but every stage must make the system structure clearer and more capable.
+路线图应该始终优先描述架构。产品功能可以后续逐步生长，但每个阶段都必须让系统结构更清晰、更有能力。
 
-## Stage 1: Natural Language ERPNext Loop
+## 阶段 1：自然语言 ERPNext 闭环
 
-Architecture goal:
+架构目标：
 
 ```text
-User speaks naturally
-  -> Agent translates intent into ToolCall
-  -> System executes ToolCall
-  -> ERPNext returns ToolResult
-  -> Agent translates result back into natural language
+用户说人话
+  -> Agent 把意图翻译成 ToolCall
+  -> 系统执行 ToolCall
+  -> ERPNext 返回 ToolResult
+  -> Agent 把结果翻译回人话
 ```
 
-This is the first complete running architecture.
+这是第一个完整可运行的架构闭环。
 
-Stage 1 is not about deep business optimization yet. It is about proving that a user can talk to an assistant, the assistant can produce structured ERPNext actions, the adapter can execute those actions, and the assistant can explain the ERPNext result back to the user.
+阶段 1 暂时不追求深度业务优化。它要证明一件事：用户可以和助理对话，助理可以生成结构化 ERPNext 动作，Adapter 可以执行这些动作，助理也可以把 ERPNext 的结果解释回给用户。
 
-Target architecture:
+目标架构：
 
 ```text
-User
-  -> Chat / CLI / simple API entry
+用户
+  -> Chat / CLI / 简单 API 入口
   -> Agent Runtime
   -> ToolCall
   -> ERPNext Adapter
   -> ERPNext / Frappe API
   -> ToolResult
   -> Agent Runtime
-  -> Natural language answer
+  -> 自然语言回答
 ```
 
-Core components:
+核心组件：
 
-- Chat or CLI entrypoint
+- Chat 或 CLI 入口
 - Agent Runtime
-- Tool schema registry
+- Tool schema 注册表
 - ToolCall schema
 - ToolResult schema
 - ERPNext Adapter
-- ERPNext/Frappe HTTP client
-- Basic `agent_bridge` Frappe app
-- Basic execution log
+- ERPNext/Frappe HTTP 客户端
+- 基础 `agent_bridge` Frappe app
+- 基础执行日志
 
-What already exists:
+已经存在：
 
 - `ToolCall` and `ToolResult` schemas
 - ERPNext Adapter
-- ERPNext/Frappe HTTP client
-- local ERPNext sandbox in WSL
-- `agent_bridge` app installed on local ERPNext
-- smoke tests for auth, customer query, and bridge ping
+- ERPNext/Frappe HTTP 客户端
+- WSL 中的本地 ERPNext sandbox
+- 已安装到本地 ERPNext 的 `agent_bridge` app
+- auth、客户查询、bridge ping 的 smoke 测试
 
-What is still missing:
+仍然缺少：
 
-- natural language input entrypoint
+- 自然语言输入入口
 - Agent Runtime
-- LLM tool selection
-- conversion from user intent to valid `ToolCall`
-- conversion from `ToolResult` to natural language answer
-- basic conversation/session state
+- LLM 工具选择
+- 从用户意图到合法 `ToolCall` 的转换
+- 从 `ToolResult` 到自然语言回答的转换
+- 基础对话/会话状态
 
-Stage 1 acceptance criteria:
+阶段 1 验收标准：
 
-- User can type a natural language request.
-- Agent selects a valid ERPNext tool.
-- Agent produces a structured `ToolCall`.
-- Adapter executes the `ToolCall`.
-- ERPNext returns real data or a real validation error.
-- Result is represented as `ToolResult`.
-- Agent explains the result in natural language.
-- The whole loop runs from one command or endpoint.
+- 用户可以输入自然语言请求。
+- Agent 选择一个合法的 ERPNext tool。
+- Agent 生成结构化 `ToolCall`。
+- Adapter 执行这个 `ToolCall`。
+- ERPNext 返回真实数据或真实校验错误。
+- 结果被表示为 `ToolResult`。
+- Agent 用自然语言解释结果。
+- 整个闭环可以通过一个命令或一个 endpoint 跑起来。
 
-Example target command:
+目标命令示例：
 
 ```powershell
 python scripts/chat_once.py --profile local "帮我查一个客户"
 ```
 
-Example target response:
+目标响应示例：
 
 ```text
 我查到一个客户：Grant Plastics Ltd.
 ```
 
-Important rule:
+重要规则：
 
 ```text
-The Agent Runtime may choose tools.
-The Agent Runtime must not call ERPNext HTTP APIs directly.
-Only the ERPNext Adapter talks to ERPNext/Frappe.
+Agent Runtime 可以选择工具。
+Agent Runtime 不能直接调用 ERPNext HTTP API。
+只有 ERPNext Adapter 可以和 ERPNext/Frappe 通信。
 ```
 
-## Stage 2: Employee Context And Role Agent Layer
+## 阶段 2：员工上下文与岗位助理层
 
-Architecture goal:
+架构目标：
 
 ```text
-Employee account
-  -> user context
-  -> role-aware assistant profile
+员工账号
+  -> 用户上下文
+  -> 岗位感知的助理画像
   -> Agent Runtime
-  -> ERPNext tools
+  -> ERPNext 工具
 ```
 
-Stage 2 adds the identity and role layer on top of the Stage 1 loop.
+阶段 2 在阶段 1 闭环之上增加身份和岗位层。
 
-The system should know who the employee is, what role they have, and which assistant profile should guide the agent's behavior.
+系统应该知道员工是谁、属于什么岗位，以及应该用哪个助理画像来指导 agent 的行为。
 
-Target architecture additions:
+目标架构新增内容：
 
-- Employee/user context model
-- ERPNext user mapping
-- role-to-assistant registry
-- assistant profiles
-- role-specific tool hints
-- role-specific DocType hints
-- role-specific answer style
+- 员工/用户上下文模型
+- ERPNext 用户映射
+- 岗位到助理的注册表
+- 助理画像
+- 岗位专属 tool 提示
+- 岗位专属 DocType 提示
+- 岗位专属回答风格
 
-Example roles:
+岗位示例：
 
-- Purchase
-- Sales
-- Warehouse
-- Finance
-- Technician
-- Project Manager
-- Company Manager
-- General Employee
+- 采购
+- 销售
+- 仓库
+- 财务
+- 技术员
+- 项目经理
+- 公司经理
+- 普通员工
 
-Acceptance criteria:
+验收标准：
 
-- A user can be mapped to an ERPNext account.
-- The system can load a role-aware assistant profile.
-- The same Agent Runtime can behave differently based on role context.
-- The Stage 1 loop still runs unchanged underneath.
+- 用户可以映射到一个 ERPNext 账号。
+- 系统可以加载岗位感知的助理画像。
+- 同一个 Agent Runtime 可以根据岗位上下文表现出不同工作方式。
+- 阶段 1 的闭环在底层保持不变。
 
-## Stage 3: ERPNext Knowledge And DocType Index Layer
+## 阶段 3：ERPNext 知识与 DocType 索引层
 
-Architecture goal:
+架构目标：
 
 ```text
-ERPNext metadata
+ERPNext 元数据
   -> DocType index
-  -> field/schema summaries
-  -> Agent tool planning context
+  -> 字段/schema 摘要
+  -> Agent 工具规划上下文
 ```
 
-Stage 3 makes the agent aware of the structure of Nexterp/ERPNext instead of relying only on prompts and hardcoded examples.
+阶段 3 让 agent 理解 Nexterp/ERPNext 的结构，而不是只依赖 prompt 和硬编码示例。
 
-Target architecture additions:
+目标架构新增内容：
 
-- DocType crawler/indexer
-- DocType schema cache
-- field summary generator
-- child table mapping
-- link field mapping
-- required field detection
-- submittable/workflow metadata
-- report/method registry
+- DocType 爬取/索引器
+- DocType schema 缓存
+- 字段摘要生成器
+- 子表映射
+- Link 字段映射
+- 必填字段识别
+- 可提交/工作流元数据
+- 报表/method 注册表
 
-Acceptance criteria:
+验收标准：
 
-- The system can list available DocTypes.
-- The system can summarize important fields for a DocType.
-- The agent can inspect schema before creating/updating documents.
-- The agent can ask follow-up questions for missing required fields.
-- Field debugging can be done through the index and live ERPNext metadata.
+- 系统可以列出可用 DocType。
+- 系统可以总结某个 DocType 的重要字段。
+- agent 在创建/更新文档前可以检查 schema。
+- agent 可以针对缺失必填字段追问用户。
+- 字段调试可以通过索引和实时 ERPNext 元数据完成。
 
-## Stage 4: Business Workflow Orchestration Layer
+## 阶段 4：业务流程编排层
 
-Architecture goal:
+架构目标：
 
 ```text
-User goal
+用户目标
   -> ActionPlan
-  -> multiple ToolCalls
-  -> intermediate ToolResults
-  -> final business answer
+  -> 多个 ToolCall
+  -> 中间 ToolResult
+  -> 最终业务回答
 ```
 
-Stage 4 turns single tool calls into multi-step ERP workflows.
+阶段 4 把单次工具调用升级成多步骤 ERP 工作流。
 
-Target architecture additions:
+目标架构新增内容：
 
 - ActionPlan schema
-- multi-step planner
-- intermediate state store
-- follow-up question handling
-- draft-first execution pattern
-- workflow templates
-- rollback/correction strategy where possible
+- 多步骤规划器
+- 中间状态存储
+- 追问处理
+- 先草稿后执行的模式
+- 工作流模板
+- 可行范围内的回滚/纠错策略
 
-Acceptance criteria:
+验收标准：
 
-- The agent can plan several ERPNext operations before executing.
-- The agent can pause and ask for missing information.
-- The agent can create drafts before high-impact operations.
-- The Stage 1 ToolCall loop remains the execution unit.
+- agent 可以在执行前规划多个 ERPNext 操作。
+- agent 可以暂停并追问缺失信息。
+- agent 可以在高影响操作前先创建草稿。
+- 阶段 1 的 ToolCall 闭环仍然是执行单元。
 
-## Stage 5: Proactive Agent Scheduler Layer
+## 阶段 5：主动 Agent 调度层
 
-Architecture goal:
-
-```text
-Scheduled monitor
-  -> Agent/Tool execution
-  -> detected business event
-  -> employee notification or suggested action
-```
-
-Stage 5 lets the system initiate work instead of only replying to user messages.
-
-Target architecture additions:
-
-- scheduled jobs
-- saved monitors
-- notification queue
-- employee daily brief
-- manager exception digest
-- suggested action queue
-
-Acceptance criteria:
-
-- The system can run scheduled ERPNext checks.
-- The system can produce role-specific reminders.
-- A reminder can become a user-confirmed ToolCall.
-
-## Stage 6: Supervisor Agent And Policy Layer
-
-Architecture goal:
+架构目标：
 
 ```text
-Personal Agent ActionPlan / ToolCall
-  -> Supervisor Agent / policy review
-  -> allow / confirm / deny / escalate
-  -> ERPNext Adapter execution
+定时监控
+  -> Agent/Tool 执行
+  -> 发现业务事件
+  -> 员工通知或建议动作
 ```
 
-Stage 6 adds enterprise control as an independent layer.
+阶段 5 让系统可以主动发起工作，而不只是回复用户消息。
 
-Target architecture additions:
+目标架构新增内容：
 
-- policy engine
-- supervisor agent
-- risk classification
-- action confirmation
-- approval escalation
-- audit dashboard
-- immutable action log
+- 定时任务
+- 已保存的监控项
+- 通知队列
+- 员工每日简报
+- 管理层异常摘要
+- 建议动作队列
 
-Acceptance criteria:
+验收标准：
 
-- ToolCalls are auditable.
-- High-risk actions can be intercepted.
-- The supervisor layer is independent from the personal assistant.
-- The system can explain why an action was allowed or blocked.
+- 系统可以定时运行 ERPNext 检查。
+- 系统可以生成岗位专属提醒。
+- 提醒可以转化为用户确认后的 ToolCall。
 
-## Stage 7: Production Runtime Layer
+## 阶段 6：监管 Agent 与策略层
 
-Architecture goal:
+架构目标：
 
 ```text
-Reliable multi-user service
-  -> secure credentials
-  -> logs and monitoring
-  -> retries and queues
-  -> local and remote Nexterp support
+个人助理 ActionPlan / ToolCall
+  -> 监管 Agent / 策略审查
+  -> 允许 / 确认 / 拒绝 / 升级
+  -> ERPNext Adapter 执行
 ```
 
-Stage 7 hardens the system for real company usage.
+阶段 6 把企业控制能力作为独立层加入系统。
 
-Target architecture additions:
+目标架构新增内容：
 
-- secrets management
-- per-user or delegated ERPNext identity
-- rate limits
-- structured logging
-- retries and idempotency
-- background worker queue
-- deployment scripts
-- monitoring
-- staging/production profiles
+- 策略引擎
+- 监管 agent
+- 风险分类
+- 动作确认
+- 审批升级
+- 审计看板
+- 不可变动作日志
 
-Acceptance criteria:
+验收标准：
 
-- Local and remote Nexterp profiles work through the same adapter.
-- No secrets are committed.
-- Failed tool calls are visible and recoverable.
-- The system can support multiple employee accounts.
+- ToolCall 可审计。
+- 高风险动作可以被拦截。
+- 监管层独立于个人助理。
+- 系统可以解释某个动作为什么被允许或拦截。
 
-## Immediate Next Architecture Target
+## 阶段 7：生产运行层
 
-Complete Stage 1.
+架构目标：
 
-The next code target is:
+```text
+可靠的多用户服务
+  -> 安全凭据
+  -> 日志和监控
+  -> 重试和队列
+  -> 本地与远程 Nexterp 支持
+```
+
+阶段 7 把系统加固到可以支撑真实公司使用。
+
+目标架构新增内容：
+
+- 密钥管理
+- 每用户或委托式 ERPNext 身份
+- 速率限制
+- 结构化日志
+- 重试和幂等
+- 后台 worker 队列
+- 部署脚本
+- 监控
+- staging/production 配置
+
+验收标准：
+
+- 本地和远程 Nexterp profile 都通过同一个 adapter 工作。
+- 不提交任何密钥。
+- 失败的工具调用可见且可恢复。
+- 系统可以支持多个员工账号。
+
+## 近期架构目标
+
+完成阶段 1。
+
+下一个代码目标是：
 
 ```text
 scripts/chat_once.py
-  -> accepts natural language
-  -> invokes Agent Runtime
-  -> gets ToolCall
-  -> executes ERPNextAdapter
-  -> sends ToolResult back to Agent Runtime
-  -> prints natural language answer
+  -> 接收自然语言
+  -> 调用 Agent Runtime
+  -> 得到 ToolCall
+  -> 执行 ERPNextAdapter
+  -> 把 ToolResult 送回 Agent Runtime
+  -> 打印自然语言回答
 ```
