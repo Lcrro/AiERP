@@ -4,6 +4,7 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .playwright-mcp/
+.codegraph/
 .mypy_cache/
 .ruff_cache/
 dist/

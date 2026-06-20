@@ -1,0 +1,1042 @@
+version: 1
+module: buying
+tools:
+  erpnext.buying.search_suppliers:
+    purpose: "L0：查询供应商主数据，用于采购寻源、下单前校验和候选展示。"
+    expose: agent_visible
+    allowed_roles: ["采购", "仓管", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Supplier"]
+      methods: ["search_documents"]
+      notes: "只读 Supplier 安全字段，按名称、分组、类型和冻结/禁用状态过滤。"
+    audit_fields: ["query", "supplier_group", "supplier_type", "disabled", "is_frozen", "on_hold", "limit"]
+    repair: ["resolve_entity", "present_candidates", "ask_clarification", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "只允许读取供应商候选和采购拦截标记，不创建、不修改供应商。"
+      - "query 仅作为检索词；命中多个供应商时必须展示候选，不允许模型擅自选择。"
+      - "on_hold、is_frozen、prevent_rfqs、prevent_pos 等字段只能作为后续采购决策依据，不能在本工具中改写。"
+    parameters:
+      query:
+        source: "用户原话"
+        constraints:
+          - "仅作为 Supplier.supplier_name 模糊检索输入。"
+      supplier_group:
+        source: "Supplier Group Resolver"
+        resolver: supplier_group
+        constraints:
+          - "必须是 ERPNext Supplier Group.name 全称。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      supplier_type:
+        source: "用户选择 / ERPNext 枚举"
+        constraints:
+          - "必须传 ERPNext 可接受的 Supplier Type 值。"
+      limit:
+        source: "Runtime 默认值"
+        constraints:
+          - "不得超过 schema 上限。"
+
+  erpnext.buying.search_supplier_scorecards:
+    purpose: "L0：查询供应商评分卡和 RFQ/PO 警告或阻止标记。"
+    expose: agent_visible
+    allowed_roles: ["采购", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Supplier Scorecard"]
+      methods: ["search_documents"]
+    audit_fields: ["supplier", "status", "limit", "offset", "order_by"]
+    repair: ["resolve_entity", "present_candidates", "ask_clarification", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "只读评分卡，不改变供应商状态或采购限制。"
+      - "supplier 缺失时可作为列表查询；supplier 存在时必须解析为真实 Supplier.name。"
+      - "评分卡中的 warn/prevent 标记必须在创建 RFQ/PO 草稿前作为风险提示。"
+    parameters:
+      supplier:
+        required: conditional
+        source: "Supplier Resolver"
+        resolver: supplier
+        constraints:
+          - "必须是 ERPNext Supplier.name 全称。"
+          - "不得直接使用用户简称作为主键。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      status:
+        source: "用户选择 / ERPNext 状态"
+        constraints:
+          - "站点配置项：Supplier Scorecard status 的合法枚举必须从当前 ERPNext 元数据或报表返回值读取。"
+      limit:
+        source: "Runtime 默认值"
+        constraints:
+          - "不得超过 schema 上限。"
+
+  erpnext.buying.get_supplier_procurement_profile:
+    purpose: "L1：汇总供应商、评分卡、物料供应商和采购价格上下文，供 RFQ/PO 前置判断。"
+    expose: agent_visible
+    allowed_roles: ["采购", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Supplier", "Supplier Scorecard", "Item Supplier", "Item Price"]
+      methods: ["get_document", "search_documents"]
+    audit_fields: ["supplier", "company", "item_code", "currency", "price_list", "scorecard_limit"]
+    repair: ["resolve_entity", "present_candidates", "ask_clarification", "inject_context", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "只读采购资格预览，不创建 RFQ、PO 或价格。"
+      - "supplier 必须唯一解析；如果供应商被禁用、冻结、on hold 或存在 prevent 标记，后续创建类工具必须提示风险或阻止。"
+      - "item_code 可选；提供后必须先解析成真实 Item.item_code，再读取 Item Supplier 和 Item Price。"
+      - "默认口径：company 用于上下文、审计和跨公司隔离；只有当目标 DocType/报表存在 company 字段时才参与价格或资格过滤。"
+    parameters:
+      supplier:
+        required: yes
+        source: "Supplier Resolver"
+        resolver: supplier
+        constraints:
+          - "必须是 ERPNext Supplier.name 全称。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      company:
+        required: conditional
+        source: "Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+          - "模型不应猜公司名。"
+        repair: ["inject_context", "resolve_entity", "ask_clarification"]
+      item_code:
+        required: conditional
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是已存在、未禁用的 ERPNext Item.item_code。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      price_list:
+        source: "Buying Price List Resolver / 用户选择"
+        constraints:
+          - "默认口径：价格表必须通过 Price List resolver 精确命中且 buying=1；无匹配时不填价格表并提示用户选择。"
+      scorecard_limit:
+        source: "Runtime 默认值"
+        constraints:
+          - "建议保持较小值，仅用于最近评分卡上下文。"
+
+  erpnext.buying.create_supplier_group_draft:
+    purpose: "L3：创建供应商分组主数据草稿/记录。"
+    expose: agent_visible
+    allowed_roles: ["采购", "管理层"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Supplier Group"]
+      methods: ["create_document"]
+    audit_fields: ["supplier_group_name", "parent_supplier_group", "is_group"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "创建前必须确认分组名称、上级分组和是否为 group。"
+      - "不得用自然语言简称直接写 parent_supplier_group，必须解析为 ERPNext Supplier Group.name。"
+      - "默认口径：Supplier Group 通过 resolver 精确命中；新建分组默认挂到站点根供应商组，命名冲突交由 ERPNext 唯一性校验拦截。"
+    parameters:
+      supplier_group_name:
+        required: yes
+        source: "用户确认"
+        constraints:
+          - "必须是用户确认的新分组名称。"
+          - "创建前建议先搜索同名或近似分组。"
+        repair: ["ask_clarification", "present_candidates"]
+      parent_supplier_group:
+        required: conditional
+        source: "Supplier Group Resolver"
+        resolver: supplier_group
+        constraints:
+          - "必须是 ERPNext Supplier Group.name 全称。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      is_group:
+        source: "用户选择 / Runtime 默认"
+        constraints:
+          - "默认值待 ERPNext 后端处理；用户明确指定时必须保留。"
+
+  erpnext.buying.create_supplier_draft:
+    purpose: "L3：创建供应商主数据草稿/记录，不提交采购交易。"
+    expose: agent_visible
+    allowed_roles: ["采购", "管理层"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Supplier"]
+      methods: ["create_document"]
+    audit_fields: ["supplier_name", "supplier_group", "supplier_type", "country", "tax_id", "default_currency"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "创建前必须确认供应商名称、分组、类型和必要税务/币种信息。"
+      - "创建供应商主数据不代表采购准入通过，也不会创建 RFQ/PO。"
+      - "创建前建议先调用 search_suppliers 检查重名或近似供应商。"
+      - "默认口径：供应商最小字段从 Supplier 元数据读取；tax_id 如存在唯一策略必须前置查重，准入审批交给 ERPNext Workflow/权限控制。"
+    parameters:
+      supplier_name:
+        required: yes
+        source: "用户确认"
+        constraints:
+          - "必须是用户确认的新供应商名称。"
+          - "不得用模型猜测或补全法人名称。"
+        repair: ["ask_clarification", "present_candidates"]
+      supplier_group:
+        required: conditional
+        source: "Supplier Group Resolver"
+        resolver: supplier_group
+        constraints:
+          - "必须是 ERPNext Supplier Group.name 全称。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      supplier_type:
+        source: "用户选择 / ERPNext 默认"
+        constraints:
+          - "站点配置项：合法 Supplier Type 必须从 Supplier 元数据 options 或站点供应商类型字典读取。"
+      default_currency:
+        source: "Currency Resolver / 用户确认"
+        constraints:
+          - "默认口径：默认币种非必填；缺省使用公司默认币种，跨币种采购必须由用户明确确认。"
+
+  erpnext.buying.create_material_request_draft:
+    purpose: "L3：创建采购类材料申请草稿，不提交。"
+    expose: agent_visible
+    allowed_roles: ["采购", "项目经理", "班组长"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Material Request", "Material Request Item"]
+      methods: ["create_document"]
+    audit_fields: ["company", "material_request_type", "schedule_date", "items"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "创建前必须确认物料、数量、需求日期、目标仓库或项目归属。"
+      - "items 至少 1 行；每行必须有真实 item_code 或已确认 selected_item_code。"
+      - "数量必须是正数，不能接受一批、若干等模糊数量。"
+      - "项目采购或项目领用场景必须带 project 或能从当前员工上下文注入。"
+    parameters:
+      material_request_type:
+        source: "Runtime 默认 / 用户选择"
+        constraints:
+          - "建议限定在 ERPNext 合法 Material Request Type。"
+      schedule_date:
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+        repair: ["ask_clarification", "inject_context"]
+      company:
+        required: conditional
+        source: "Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+          - "模型不应猜公司名。"
+        repair: ["inject_context", "resolve_entity"]
+      items:
+        required: yes
+        source: "Item Resolver + Slot Extractor"
+        resolver: item
+        constraints:
+          - "数组至少 1 行。"
+          - "每行 qty 必须大于 0。"
+          - "每行 item_code 必须来自 Item Resolver。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      "items[].item_code":
+        required: conditional
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "外键：必须是已存在、未禁用的 ERPNext Item.item_code。"
+      "items[].schedule_date":
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "行级日期缺省时可继承顶层 schedule_date。"
+      "items[].warehouse":
+        required: conditional
+        source: "Warehouse Resolver / 员工默认仓库"
+        resolver: warehouse
+        constraints:
+          - "必须是 ERPNext Warehouse.name 全称。"
+          - "禁止把中心仓、项目仓等简称直接写入 ToolCall。"
+
+  erpnext.buying.create_request_for_quotation_draft:
+    purpose: "L3：创建询价单草稿，包含已解析供应商和物料行，不提交。"
+    expose: agent_visible
+    allowed_roles: ["采购"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Request for Quotation", "Request for Quotation Supplier", "Request for Quotation Item"]
+      methods: ["create_document"]
+    audit_fields: ["transaction_date", "schedule_date", "company", "suppliers", "items", "message_for_supplier"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "创建前必须确认至少一个供应商和至少一个物料行。"
+      - "供应商必须解析为真实 Supplier.name；命中多个供应商时必须展示候选。"
+      - "创建 RFQ 草稿不代表发出询价；提交需另走 buying.submit_document。"
+      - "实现约定：RFQ 创建工具应把 company 与 message_for_supplier 写入 payload；补映射前 Runtime 不依赖这两个字段落库。"
+    parameters:
+      transaction_date:
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+      schedule_date:
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+      company:
+        required: conditional
+        source: "Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+        repair: ["inject_context", "resolve_entity"]
+      suppliers:
+        required: yes
+        source: "Supplier Resolver"
+        resolver: supplier
+        constraints:
+          - "数组至少 1 行。"
+          - "每个 supplier 必须是 ERPNext Supplier.name 全称。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      items:
+        required: yes
+        source: "Item Resolver + Slot Extractor"
+        resolver: item
+        constraints:
+          - "数组至少 1 行。"
+          - "每行 qty 必须大于 0。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      "items[].item_code":
+        required: conditional
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是已存在、未禁用的 ERPNext Item.item_code。"
+      "items[].schedule_date":
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "行级日期缺省时可继承顶层 schedule_date。"
+      "items[].warehouse":
+        required: conditional
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints:
+          - "如填写，必须是 ERPNext Warehouse.name 全称。"
+
+  erpnext.buying.create_supplier_quotation_draft:
+    purpose: "L3：创建供应商报价单草稿，不提交。"
+    expose: agent_visible
+    allowed_roles: ["采购"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Supplier Quotation", "Supplier Quotation Item"]
+      methods: ["create_document"]
+    audit_fields: ["supplier", "transaction_date", "valid_till", "company", "currency", "buying_price_list", "items"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "创建前必须确认供应商、报价物料、数量、价格和有效期。"
+      - "supplier 必须解析为真实 Supplier.name，不允许直接使用用户简称。"
+      - "报价单草稿不代表采纳报价；比较或转订单需后续独立工具和确认。"
+      - "实现约定：Supplier Quotation 草稿工具应把 company 与 buying_price_list 写入 payload；补映射前 Runtime 只把它们作为确认摘要和后续修正依据。"
+    parameters:
+      supplier:
+        required: yes
+        source: "Supplier Resolver"
+        resolver: supplier
+        constraints:
+          - "必须是 ERPNext Supplier.name 全称。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      transaction_date:
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+      valid_till:
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+          - "默认口径：valid_till 必须不早于 transaction_date；早于交易日期时追问或拒绝生成草稿。"
+      company:
+        required: conditional
+        source: "Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+        repair: ["inject_context", "resolve_entity"]
+      items:
+        required: yes
+        source: "Item Resolver + Slot Extractor"
+        resolver: item
+        constraints:
+          - "数组至少 1 行。"
+          - "每行 qty 必须大于 0，rate 或 price_list_rate 不得为负。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+      "items[].item_code":
+        required: conditional
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是已存在、未禁用的 ERPNext Item.item_code。"
+      "items[].warehouse":
+        required: conditional
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints:
+          - "如填写，必须是 ERPNext Warehouse.name 全称。"
+
+  erpnext.buying.create_purchase_order_draft:
+    purpose: "L3：创建采购订单草稿，不提交采购承诺。"
+    expose: agent_visible
+    allowed_roles: ["采购"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Purchase Order", "Purchase Order Item"]
+      methods: ["create_document"]
+    audit_fields: ["supplier", "schedule_date", "transaction_date", "company", "currency", "buying_price_list", "items"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "创建前必须确认供应商、公司、物料、数量、价格、交期和仓库/项目归属。"
+      - "supplier 必须解析为真实 Supplier.name；若供应商资料显示 prevent_pos，应阻止或升级人工处理。"
+      - "采购订单草稿不提交、不触发正式采购承诺；提交需另走 buying.submit_document。"
+      - "实现约定：Purchase Order 草稿工具应把 buying_price_list 写入 payload；补映射前 Runtime 只把它作为确认摘要和后续修正依据。"
+    parameters:
+      supplier:
+        required: yes
+        source: "Supplier Resolver"
+        resolver: supplier
+        constraints:
+          - "必须是 ERPNext Supplier.name 全称。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      schedule_date:
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+      transaction_date:
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+      company:
+        required: conditional
+        source: "Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+        repair: ["inject_context", "resolve_entity"]
+      items:
+        required: yes
+        source: "Item Resolver + Slot Extractor"
+        resolver: item
+        constraints:
+          - "数组至少 1 行。"
+          - "每行 qty 必须大于 0，rate 或 price_list_rate 不得为负。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+      "items[].item_code":
+        required: conditional
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是已存在、未禁用的 ERPNext Item.item_code。"
+      "items[].schedule_date":
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "行级日期缺省时可继承顶层 schedule_date。"
+      "items[].warehouse":
+        required: conditional
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints:
+          - "如填写，必须是 ERPNext Warehouse.name 全称。"
+
+  erpnext.buying.create_purchase_order_from_material_request_draft:
+    purpose: "L3：从已提交采购类材料申请创建采购订单草稿，保留源单行引用。"
+    expose: agent_visible
+    allowed_roles: ["采购"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Material Request", "Material Request Item", "Purchase Order", "Purchase Order Item"]
+      methods: ["get_document", "create_document"]
+      notes: "先读取 Material Request 并校验 docstatus/type/剩余可订购数量，再创建 Purchase Order 草稿。"
+    audit_fields: ["material_request", "supplier", "transaction_date", "schedule_date", "company", "currency", "selected_items"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "material_request 必须是已提交且类型为 Purchase 的 Material Request。"
+      - "selected_items 为空时默认尝试全部剩余可订购行；指定行时必须避免 item_code 歧义，必要时使用 material_request_item。"
+      - "所选 qty 必须大于 0 且不能超过源材料申请行剩余可订购数量。"
+      - "生成的采购订单仍是草稿，提交需另走 buying.submit_document。"
+    parameters:
+      material_request:
+        required: yes
+        source: "Material Request Resolver"
+        resolver: material_request
+        constraints:
+          - "必须是 ERPNext Material Request.name 全称。"
+          - "必须是 docstatus=1 且 material_request_type=Purchase 的源单。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+      supplier:
+        required: yes
+        source: "Supplier Resolver"
+        resolver: supplier
+        constraints:
+          - "必须是 ERPNext Supplier.name 全称。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      transaction_date:
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+      schedule_date:
+        required: conditional
+        source: "Date Resolver / 源单默认"
+        resolver: date
+        constraints:
+          - "缺省时可继承源 Material Request 的 schedule_date。"
+      company:
+        required: conditional
+        source: "Runtime Context / 源单"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称；缺省时可继承源单 company。"
+        repair: ["inject_context", "resolve_entity"]
+      selected_items:
+        source: "源 Material Request 行选择"
+        resolver: item
+        constraints:
+          - "为空表示尝试全部剩余可订购行。"
+          - "指定 item_code 且匹配多行时，必须改用 material_request_item。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+      "selected_items[].item_code":
+        required: conditional
+        source: "Item Resolver / 源单行"
+        resolver: item
+        constraints:
+          - "如填写，必须匹配源 Material Request 行中的 Item.item_code。"
+      "selected_items[].warehouse":
+        required: conditional
+        source: "Warehouse Resolver / 源单行"
+        resolver: warehouse
+        constraints:
+          - "如覆盖源单仓库，必须是 ERPNext Warehouse.name 全称。"
+
+  erpnext.buying.create_purchase_receipt_draft:
+    purpose: "L3：创建采购收货草稿，不提交库存移动。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "采购"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Purchase Receipt", "Purchase Receipt Item"]
+      methods: ["create_document"]
+    audit_fields: ["supplier", "posting_date", "company", "items"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "创建前必须确认供应商、收货日期、物料、数量和入库仓库。"
+      - "采购收货草稿不提交、不改变库存；提交需另走 buying.submit_document。"
+      - "每行 qty 必须为实际拟收货数量，不能使用模糊数量。"
+      - "默认口径：优先从 Purchase Order 创建采购收货；无源直接收货只允许采购主管/仓库主管在 user_confirm 后创建，并按 Purchase Receipt 元数据补齐必填字段。"
+    parameters:
+      supplier:
+        required: yes
+        source: "Supplier Resolver"
+        resolver: supplier
+        constraints:
+          - "必须是 ERPNext Supplier.name 全称。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      posting_date:
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+        repair: ["ask_clarification", "inject_context"]
+      company:
+        required: conditional
+        source: "Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+        repair: ["inject_context", "resolve_entity"]
+      items:
+        required: yes
+        source: "Item Resolver + 收货编排"
+        resolver: item
+        constraints:
+          - "数组至少 1 行。"
+          - "每行 qty 必须大于 0。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+      "items[].item_code":
+        required: conditional
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是已存在、未禁用的 ERPNext Item.item_code。"
+      "items[].warehouse":
+        required: conditional
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints:
+          - "必须是 ERPNext Warehouse.name 全称。"
+      "items[].purchase_order":
+        required: conditional
+        source: "Purchase Order Resolver / 源单行"
+        resolver: purchase_order
+        constraints:
+          - "如从 PO 收货，必须引用真实 Purchase Order.name。"
+
+  erpnext.buying.create_purchase_receipt_from_purchase_order_draft:
+    purpose: "L3：从已提交采购订单创建采购收货草稿，保留源订单行引用。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "采购"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Purchase Order", "Purchase Order Item", "Purchase Receipt", "Purchase Receipt Item"]
+      methods: ["get_document", "create_document"]
+      notes: "先读取 Purchase Order 并校验 docstatus/status/剩余可收货数量，再创建 Purchase Receipt 草稿。"
+    audit_fields: ["purchase_order", "posting_date", "company", "selected_items"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "purchase_order 必须是已提交且未关闭/未取消的采购订单。"
+      - "selected_items 为空时默认尝试全部剩余可收货行；指定行时必须避免 item_code 歧义，必要时使用 purchase_order_item。"
+      - "所选 qty 必须大于 0 且不能超过源采购订单行剩余可收货数量。"
+      - "生成的采购收货仍是草稿，提交需另走 buying.submit_document。"
+    parameters:
+      purchase_order:
+        required: yes
+        source: "Purchase Order Resolver"
+        resolver: purchase_order
+        constraints:
+          - "必须是 ERPNext Purchase Order.name 全称。"
+          - "必须是 docstatus=1 且状态未关闭/未取消的源单。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+      posting_date:
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+      company:
+        required: conditional
+        source: "Runtime Context / 源订单"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称；缺省时可继承源订单 company。"
+        repair: ["inject_context", "resolve_entity"]
+      selected_items:
+        source: "源 Purchase Order 行选择"
+        resolver: item
+        constraints:
+          - "为空表示尝试全部剩余可收货行。"
+          - "指定 item_code 且匹配多行时，必须改用 purchase_order_item。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+      "selected_items[].item_code":
+        required: conditional
+        source: "Item Resolver / 源订单行"
+        resolver: item
+        constraints:
+          - "如填写，必须匹配源 Purchase Order 行中的 Item.item_code。"
+      "selected_items[].warehouse":
+        required: conditional
+        source: "Warehouse Resolver / 源订单行"
+        resolver: warehouse
+        constraints:
+          - "如覆盖源订单仓库，必须是 ERPNext Warehouse.name 全称。"
+
+  erpnext.buying.record_purchase_receipt_discrepancy:
+    purpose: "L2：在采购收货单上记录到货差异评论，并可选创建跟进 ToDo；不提交、不退货、不改库存。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "采购", "项目经理"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Purchase Receipt", "Comment", "ToDo"]
+      methods: ["get_document", "add_comment", "create_todo"]
+      notes: "会写入审计可追溯评论；prepare_return 只生成退货预览上下文，不创建退货单。"
+    audit_fields: ["purchase_receipt", "description", "discrepancy_type", "severity", "reported_by", "assigned_to", "priority", "due_date", "create_todo", "prepare_return", "full_return", "items"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "必须有明确 description，说明差异事实、预期与实际情况。"
+      - "本工具只写评论和可选 ToDo，不提交收货、不创建退货草稿、不改变库存。"
+      - "涉及具体物料行时必须引用 purchase_receipt_item 或已解析 item_code，并记录数量、原因和仓库。"
+      - "prepare_return/full_return 只能用于返回可退货预览；创建退货草稿必须另走 create_purchase_receipt_return_draft。"
+      - "差异记录必须进入审计字段，便于后续供应商追责或质量处理。"
+    parameters:
+      purchase_receipt:
+        required: yes
+        source: "Purchase Receipt Resolver"
+        resolver: purchase_receipt
+        constraints:
+          - "必须是 ERPNext Purchase Receipt.name 全称。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      description:
+        required: yes
+        source: "用户确认"
+        constraints:
+          - "必须记录清晰差异说明，不能只写“有问题”。"
+        repair: ["ask_clarification"]
+      due_date:
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "如创建 ToDo，必须是 ISO 日期或为空由后端默认。"
+      items:
+        source: "Purchase Receipt 行上下文"
+        resolver: item
+        constraints:
+          - "可为空；非空时每行 qty 必须大于 0。"
+          - "每行应包含 expected/actual/reason 中的有效差异信息。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+      "items[].item_code":
+        required: conditional
+        source: "Item Resolver / 源收货行"
+        resolver: item
+        constraints:
+          - "如填写，必须匹配采购收货单中的物料。"
+      "items[].warehouse":
+        required: conditional
+        source: "Warehouse Resolver / 源收货行"
+        resolver: warehouse
+        constraints:
+          - "如填写，必须是 ERPNext Warehouse.name 全称。"
+
+  erpnext.buying.get_purchase_receipt_return_context:
+    purpose: "L1：预览采购收货单可退货行，供创建供应商退货草稿前校验。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "采购", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Purchase Receipt", "Purchase Receipt Item"]
+      methods: ["get_document"]
+    audit_fields: ["purchase_receipt", "full_return", "items"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "只读退货上下文，不创建退货、不改库存。"
+      - "purchase_receipt 必须是已提交的原始采购收货单，不能是退货单。"
+      - "items 为空或 full_return=true 时预览全部可退货行；指定行时 qty 不能超过可退数量。"
+    parameters:
+      purchase_receipt:
+        required: yes
+        source: "Purchase Receipt Resolver"
+        resolver: purchase_receipt
+        constraints:
+          - "必须是 ERPNext Purchase Receipt.name 全称。"
+          - "必须是 docstatus=1 且不是 is_return 的原始收货单。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+      items:
+        source: "Purchase Receipt 行选择"
+        resolver: item
+        constraints:
+          - "为空表示预览全部可退货行。"
+          - "指定 item_code 且匹配多行时，必须改用 purchase_receipt_item 或 warehouse 缩小范围。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+      "items[].item_code":
+        required: conditional
+        source: "Item Resolver / 源收货行"
+        resolver: item
+        constraints:
+          - "如填写，必须匹配源 Purchase Receipt 行中的 Item.item_code。"
+      "items[].warehouse":
+        required: conditional
+        source: "Warehouse Resolver / 源收货行"
+        resolver: warehouse
+        constraints:
+          - "如用于缩小匹配范围，必须是 ERPNext Warehouse.name 全称。"
+
+  erpnext.buying.create_purchase_receipt_return_draft:
+    purpose: "L3：从已提交采购收货单创建采购退货草稿，不提交。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "采购"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Purchase Receipt", "Purchase Receipt Item"]
+      methods: ["get_document", "create_document"]
+      notes: "复用退货上下文校验，创建 is_return=1 且 return_against 指向原采购收货单的草稿。"
+    audit_fields: ["purchase_receipt", "posting_date", "full_return", "reason", "items"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "purchase_receipt 必须是已提交的原始采购收货单，不能是退货单。"
+      - "创建前必须确认退货原因、退货物料行和退货数量。"
+      - "用户输入 qty 使用正数表达拟退数量；后端创建退货行时转换为负数。"
+      - "生成的退货单仍是 Purchase Receipt 草稿，提交需另走 buying.submit_document。"
+    parameters:
+      purchase_receipt:
+        required: yes
+        source: "Purchase Receipt Resolver"
+        resolver: purchase_receipt
+        constraints:
+          - "必须是 ERPNext Purchase Receipt.name 全称。"
+          - "必须是 docstatus=1 且不是 is_return 的原始收货单。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+      posting_date:
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+      reason:
+        required: conditional
+        source: "用户确认"
+        constraints:
+          - "建议记录退货原因，便于审计。"
+        repair: ["ask_clarification"]
+      items:
+        source: "Purchase Receipt 行选择"
+        resolver: item
+        constraints:
+          - "为空且 full_return=true 时表示全量退货。"
+          - "指定行 qty 必须大于 0 且不能超过可退数量。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+      "items[].item_code":
+        required: conditional
+        source: "Item Resolver / 源收货行"
+        resolver: item
+        constraints:
+          - "如填写，必须匹配源 Purchase Receipt 行中的 Item.item_code。"
+      "items[].warehouse":
+        required: conditional
+        source: "Warehouse Resolver / 源收货行"
+        resolver: warehouse
+        constraints:
+          - "如用于缩小匹配范围，必须是 ERPNext Warehouse.name 全称。"
+
+  erpnext.buying.generate_purchase_suggestions:
+    purpose: "L0：基于后端采购建议逻辑生成低库存或待采购建议。"
+    expose: agent_visible
+    allowed_roles: ["采购", "仓管", "项目经理", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Item", "Bin", "Material Request"]
+      methods: ["agent_bridge.api.generate_purchase_suggestions"]
+      notes: "调用桥接业务逻辑生成建议结果，本工具不创建采购单据。"
+    audit_fields: ["limit"]
+    repair: ["erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "只生成建议，不创建材料申请、询价单或采购订单。"
+      - "建议结果必须由用户确认后，才能进入 create_material_request_draft 或其它创建类工具。"
+      - "实现约定：采购建议算法、库存阈值和排除规则由 agent_bridge.api.generate_purchase_suggestions 后端与配置文件定义，ToolCall 只承诺返回结构和确认边界。"
+    parameters:
+      limit:
+        source: "Runtime 默认值"
+        constraints:
+          - "不得超过 schema 上限，避免一次返回过多建议。"
+
+  erpnext.buying.search_item_suppliers:
+    purpose: "L0：查询物料供应商关系，用于采购寻源和供应商校验。"
+    expose: agent_visible
+    allowed_roles: ["采购", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Item Supplier", "Item", "Supplier"]
+      methods: ["search_documents"]
+    audit_fields: ["item_code", "supplier", "limit"]
+    repair: ["resolve_entity", "present_candidates", "ask_clarification", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "只读 Item Supplier 关系，不改供应商和物料。"
+      - "item_code 和 supplier 可任选其一或同时提供；提供时必须先解析为真实主键。"
+      - "查询结果只能作为采购候选依据，不能自动生成订单。"
+    parameters:
+      item_code:
+        required: conditional
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是 ERPNext Item.item_code。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      supplier:
+        required: conditional
+        source: "Supplier Resolver"
+        resolver: supplier
+        constraints:
+          - "必须是 ERPNext Supplier.name 全称。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      limit:
+        source: "Runtime 默认值"
+        constraints:
+          - "不得超过 schema 上限。"
+
+  erpnext.buying.search_item_prices:
+    purpose: "L0：查询采购 Item Price，用于价格参考和报价/采购订单草稿前校验。"
+    expose: agent_visible
+    allowed_roles: ["采购", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Item Price", "Item", "Supplier"]
+      methods: ["search_documents"]
+    audit_fields: ["item_code", "price_list", "supplier", "currency", "limit"]
+    repair: ["resolve_entity", "present_candidates", "ask_clarification", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "只读采购价格，不创建或修改 Item Price。"
+      - "item_code 必须解析为真实 Item.item_code；supplier 如提供必须解析为真实 Supplier.name。"
+      - "价格结果只能作为建议或预填依据，创建报价/订单草稿仍需用户确认。"
+      - "实现约定：Item Price 检索必须固定 buying=1，并在 handler 中落实 supplier/currency 过滤；若站点字段缺失则返回带 debug 的降级结果。"
+    parameters:
+      item_code:
+        required: conditional
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是 ERPNext Item.item_code。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      supplier:
+        required: conditional
+        source: "Supplier Resolver"
+        resolver: supplier
+        constraints:
+          - "如提供，必须是 ERPNext Supplier.name 全称。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      price_list:
+        source: "Buying Price List Resolver / 用户选择"
+        constraints:
+          - "默认口径：价格表必须通过 Price List resolver 精确命中且 buying=1；无匹配时不填价格表并提示用户选择。"
+      currency:
+        source: "Currency Resolver / 用户选择"
+        constraints:
+          - "默认口径：currency 优先过滤 Item Price.currency；若站点价格表币种与价格行分离，则由 Price List resolver 补充校验。"
+      limit:
+        source: "Runtime 默认值"
+        constraints:
+          - "不得超过 schema 上限。"
+
+  erpnext.buying.get_buying_settings:
+    purpose: "L0：读取 Buying Settings 单例配置。"
+    expose: agent_visible
+    allowed_roles: ["采购", "管理层", "developer"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Buying Settings"]
+      methods: ["get_document"]
+    audit_fields: []
+    repair: ["erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "只读采购设置，不修改系统配置。"
+      - "设置项只能作为解释和后续工具参数校验依据。"
+    parameters: {}
+
+  erpnext.buying.run_purchase_analysis:
+    purpose: "L1：运行采购分析类标准报表，返回只读分析结果。"
+    expose: agent_visible
+    allowed_roles: ["采购", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Purchase Order", "Purchase Receipt", "Supplier", "Item"]
+      methods: ["run_report"]
+      notes: "默认报表为 Purchase Analytics，filters 由报表工具规范化。"
+    audit_fields: ["report_name", "filters"]
+    repair: ["resolve_entity", "ask_clarification", "inject_context", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "只读报表，不创建、不修改采购单据。"
+      - "filters 必须由 Runtime 或报表编排层构造，禁止模型手写不受控 Frappe filter DSL。"
+      - "涉及公司、供应商、物料、日期的 filters 必须先通过对应 resolver。"
+    parameters:
+      report_name:
+        source: "Runtime 默认 / 用户选择"
+        constraints:
+          - "默认 Purchase Analytics；其它报表名需确认 ERPNext 实例存在。"
+      filters:
+        source: "Runtime Report Filter Builder"
+        constraints:
+          - "必须是报表工具可接受的对象。"
+        repair: ["validate_before_execute", "inject_context"]
+      "filters.company":
+        required: conditional
+        source: "Company Resolver / Runtime Context"
+        resolver: company
+        constraints:
+          - "如提供，必须是 ERPNext Company.name 全称。"
+      "filters.supplier":
+        required: conditional
+        source: "Supplier Resolver"
+        resolver: supplier
+        constraints:
+          - "如提供，必须是 ERPNext Supplier.name 全称。"
+      "filters.item_code":
+        required: conditional
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "如提供，必须是 ERPNext Item.item_code。"
+      "filters.from_date":
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "如提供，必须是 ISO 日期。"
+      "filters.to_date":
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "如提供，必须是 ISO 日期。"
+
+  erpnext.buying.compare_supplier_quotations:
+    purpose: "L1：比较供应商报价单总额和明细价格，不授标、不创建采购订单。"
+    expose: agent_visible
+    allowed_roles: ["采购", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Supplier Quotation", "Supplier Quotation Item"]
+      methods: ["get_document"]
+    audit_fields: ["supplier_quotations", "include_drafts"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "至少需要两张 Supplier Quotation 才能比较。"
+      - "比较结果只作为采购决策参考，不自动选择供应商、不创建 PO。"
+      - "include_drafts=true 时必须在结果中提示包含草稿，避免把未提交报价当作正式报价。"
+    parameters:
+      supplier_quotations:
+        required: yes
+        source: "Supplier Quotation Resolver / 用户确认"
+        resolver: supplier_quotation
+        constraints:
+          - "数组至少 2 个 Supplier Quotation.name。"
+          - "每个名称必须能读取到真实 Supplier Quotation。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+      include_drafts:
+        source: "用户选择 / Runtime 默认"
+        constraints:
+          - "默认为 false；包含草稿时必须显式标注。"
+
+  erpnext.buying.submit_document:
+    purpose: "L4：提交采购相关单据，触发正式业务状态变更。"
+    expose: agent_visible
+    allowed_roles: ["采购", "仓管", "管理层"]
+    confirm: submit_confirm
+    backend_mapping:
+      doctypes: ["Material Request", "Request for Quotation", "Supplier Quotation", "Purchase Order", "Purchase Receipt"]
+      methods: ["submit_document"]
+    audit_fields: ["doctype", "name", "confirmation"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "提交前必须已有明确 submit_confirm，confirmation 必须包含 confirmed_by、confirmed_at、confirmation_text 和 reason。"
+      - "只允许提交 schema 枚举中的采购 DocType，不允许提交任意 DocType。"
+      - "提交 Purchase Order 表示正式采购承诺；提交 Purchase Receipt 可能影响库存和财务后续流程。"
+      - "提交前必须向用户复述 doctype、name、关键金额/数量/供应商/公司和下游影响。"
+      - "默认口径：提交前读取目标 DocType 元数据和 Workflow 状态；审批流存在时优先走 apply_workflow，普通提交由 ERPNext 权限和必填字段校验兜底。"
+    parameters:
+      doctype:
+        required: yes
+        source: "Tool enum"
+        constraints:
+          - "只能是 Material Request、Request for Quotation、Supplier Quotation、Purchase Order、Purchase Receipt。"
+        repair: ["validate_before_execute", "ask_clarification"]
+      name:
+        required: yes
+        source: "Doctype-aware Document Resolver"
+        resolver: buying_document
+        constraints:
+          - "必须是所选 doctype 下真实存在的文档 name。"
+          - "当 doctype=Material Request 时必须使用 Material Request Resolver；doctype=Purchase Order 时必须使用 Purchase Order Resolver；doctype=Purchase Receipt 时必须使用 Purchase Receipt Resolver。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+      confirmation:
+        required: yes
+        source: "Submit Confirmation Gate"
+        constraints:
+          - "必须证明用户已明确同意提交，而不是只同意创建草稿。"
+          - "confirmation.confirmed 必须为 true，且 reason 不能为空。"
+        repair: ["ask_clarification", "validate_before_execute"]

@@ -4,7 +4,7 @@ import argparse
 import json
 import sys
 from dataclasses import asdict, dataclass
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +22,8 @@ PARENT_WAREHOUSE = "All Warehouses - SD"
 COST_CENTER = "Main - SD"
 STOCK_ADJUSTMENT_ACCOUNT = "Stock Adjustment - SD"
 SCENARIO_PREFIX = "SCEN-CIVIL"
+BUYING_PRICE_LIST = "Standard Buying"
+CURRENCY = "CNY"
 DEFAULT_REPORT = ROOT / "data" / "scenario" / "civil_company_seed_report.json"
 
 WAREHOUSES = [
@@ -40,6 +42,133 @@ SUPPLIERS = [
     {"supplier_name": f"{SCENARIO_PREFIX} 通达管材", "supplier_group": "原材料"},
     {"supplier_name": f"{SCENARIO_PREFIX} 强盛建材", "supplier_group": "原材料"},
     {"supplier_name": f"{SCENARIO_PREFIX} 恒信电气", "supplier_group": "电气"},
+]
+
+UOMS = ["双", "个", "米", "袋", "卷", "套", "件", "根"]
+
+ITEM_GROUPS = [
+    "劳保用品",
+    "电气材料",
+    "建材",
+    "管材管件",
+    "周转材料",
+]
+
+SUPPLIER_GROUPS = ["经销商", "原材料", "电气"]
+
+SCENARIO_ITEMS = [
+    {
+        "item_code": "SAFE-000005",
+        "item_name": "帆布手套",
+        "item_group": "劳保用品",
+        "stock_uom": "双",
+        "description": "SCEN-CIVIL 沙盘物料：帆布劳保手套。",
+    },
+    {
+        "item_code": "SAFE-000006",
+        "item_name": "安全帽",
+        "item_group": "劳保用品",
+        "stock_uom": "个",
+        "description": "SCEN-CIVIL 沙盘物料：施工安全帽。",
+    },
+    {
+        "item_code": "SAFE-000007",
+        "item_name": "反光背心",
+        "item_group": "劳保用品",
+        "stock_uom": "件",
+        "description": "SCEN-CIVIL 沙盘物料：高可视反光背心。",
+    },
+    {
+        "item_code": "ELEC-000005",
+        "item_name": "PVC电工胶布",
+        "item_group": "电气材料",
+        "stock_uom": "卷",
+        "description": "SCEN-CIVIL 沙盘物料：电气绝缘胶布。",
+    },
+    {
+        "item_code": "ELEC-000002",
+        "item_name": "热缩管",
+        "item_group": "电气材料",
+        "stock_uom": "米",
+        "description": "SCEN-CIVIL 沙盘物料：电气热缩管。",
+    },
+    {
+        "item_code": "ELEC-000001",
+        "item_name": "漏电保护器",
+        "item_group": "电气材料",
+        "stock_uom": "个",
+        "description": "SCEN-CIVIL 沙盘物料：施工临电漏电保护器。",
+    },
+    {
+        "item_code": "ELEC-000006",
+        "item_name": "电缆线",
+        "item_group": "电气材料",
+        "stock_uom": "米",
+        "description": "SCEN-CIVIL 沙盘物料：临电电缆线。",
+    },
+    {
+        "item_code": "ELEC-000007",
+        "item_name": "LED灯管",
+        "item_group": "电气材料",
+        "stock_uom": "根",
+        "description": "SCEN-CIVIL 沙盘物料：施工照明 LED 灯管。",
+    },
+    {
+        "item_code": "MAT-CEM-000004",
+        "item_name": "水泥",
+        "item_group": "建材",
+        "stock_uom": "袋",
+        "description": "SCEN-CIVIL 沙盘物料：袋装普通水泥。",
+    },
+    {
+        "item_code": "PIPE-000415",
+        "item_name": "PVC排水管",
+        "item_group": "管材管件",
+        "stock_uom": "米",
+        "description": "SCEN-CIVIL 沙盘物料：PVC排水管。",
+    },
+    {
+        "item_code": "PIPE-000021",
+        "item_name": "PVC弯头",
+        "item_group": "管材管件",
+        "stock_uom": "个",
+        "description": "SCEN-CIVIL 沙盘物料：PVC管件弯头。",
+    },
+    {
+        "item_code": "PIPE-000019",
+        "item_name": "PVC直接",
+        "item_group": "管材管件",
+        "stock_uom": "个",
+        "description": "SCEN-CIVIL 沙盘物料：PVC管件直接。",
+    },
+    {
+        "item_code": "PIPE-000416",
+        "item_name": "PVC三通",
+        "item_group": "管材管件",
+        "stock_uom": "个",
+        "description": "SCEN-CIVIL 沙盘物料：PVC管件三通。",
+    },
+    {
+        "item_code": "MAT-CAST-000001",
+        "item_name": "球墨铸铁井盖",
+        "item_group": "管材管件",
+        "stock_uom": "套",
+        "description": "SCEN-CIVIL 沙盘物料：排水井球墨铸铁井盖。",
+    },
+    {
+        "item_code": "MAT-000159",
+        "item_name": "移动脚手架",
+        "item_group": "周转材料",
+        "stock_uom": "套",
+        "description": "SCEN-CIVIL 沙盘物料：移动式脚手架。",
+    },
+    {
+        "item_code": "METAL-000001",
+        "item_name": "角钢",
+        "item_group": "建材",
+        "stock_uom": "米",
+        "description": "SCEN-CIVIL 沙盘物料：通用型钢角钢。",
+    },
 ]
 
 USERS = [
@@ -80,6 +209,115 @@ PROJECT_STOCK = [
     {"item_code": "PIPE-000415", "qty": 60, "basic_rate": 18},
 ]
 
+CENTER_STOCK_V2 = [
+    {"item_code": "SAFE-000006", "qty": 80, "basic_rate": 28},
+    {"item_code": "SAFE-000007", "qty": 120, "basic_rate": 18},
+    {"item_code": "ELEC-000007", "qty": 30, "basic_rate": 24},
+    {"item_code": "PIPE-000416", "qty": 20, "basic_rate": 12},
+    {"item_code": "MAT-CAST-000001", "qty": 6, "basic_rate": 420},
+    {"item_code": "METAL-000001", "qty": 80, "basic_rate": 16},
+]
+
+PROJECT_STOCK_V2 = [
+    {"item_code": "SAFE-000006", "qty": 12, "basic_rate": 28},
+    {"item_code": "SAFE-000007", "qty": 20, "basic_rate": 18},
+]
+
+ITEM_PRICES = [
+    {"item_code": "SAFE-000005", "supplier": f"{SCENARIO_PREFIX} 安科劳保用品", "rate": 8, "uom": "双"},
+    {"item_code": "SAFE-000006", "supplier": f"{SCENARIO_PREFIX} 安科劳保用品", "rate": 28, "uom": "个"},
+    {"item_code": "SAFE-000007", "supplier": f"{SCENARIO_PREFIX} 安科劳保用品", "rate": 18, "uom": "件"},
+    {"item_code": "ELEC-000005", "supplier": f"{SCENARIO_PREFIX} 恒信电气", "rate": 4, "uom": "卷"},
+    {"item_code": "ELEC-000002", "supplier": f"{SCENARIO_PREFIX} 恒信电气", "rate": 3, "uom": "米"},
+    {"item_code": "ELEC-000001", "supplier": f"{SCENARIO_PREFIX} 恒信电气", "rate": 380, "uom": "个"},
+    {"item_code": "ELEC-000006", "supplier": f"{SCENARIO_PREFIX} 恒信电气", "rate": 35, "uom": "米"},
+    {"item_code": "ELEC-000007", "supplier": f"{SCENARIO_PREFIX} 恒信电气", "rate": 24, "uom": "根"},
+    {"item_code": "MAT-CEM-000004", "supplier": f"{SCENARIO_PREFIX} 强盛建材", "rate": 35, "uom": "袋"},
+    {"item_code": "PIPE-000415", "supplier": f"{SCENARIO_PREFIX} 通达管材", "rate": 18, "uom": "米"},
+    {"item_code": "PIPE-000021", "supplier": f"{SCENARIO_PREFIX} 通达管材", "rate": 6, "uom": "个"},
+    {"item_code": "PIPE-000019", "supplier": f"{SCENARIO_PREFIX} 通达管材", "rate": 8, "uom": "个"},
+    {"item_code": "PIPE-000416", "supplier": f"{SCENARIO_PREFIX} 通达管材", "rate": 12, "uom": "个"},
+    {"item_code": "MAT-CAST-000001", "supplier": f"{SCENARIO_PREFIX} 通达管材", "rate": 420, "uom": "套"},
+    {"item_code": "MAT-000159", "supplier": f"{SCENARIO_PREFIX} 强盛建材", "rate": 180, "uom": "套"},
+    {"item_code": "METAL-000001", "supplier": f"{SCENARIO_PREFIX} 强盛建材", "rate": 16, "uom": "米"},
+]
+
+BACKGROUND_TODOS = [
+    {
+        "marker": "PREP-MANAGER-LOW-STOCK",
+        "description": "管理层异常：项目仓 LED灯管和漏电保护器库存偏低，可能影响西站配套设施项目明天施工。",
+        "allocated_to": "wang.hai@scen-civil.local",
+        "priority": "High",
+        "reference_type": "Project",
+        "reference_key": "西站配套设施项目",
+    },
+    {
+        "marker": "PREP-PO-DELAY-RISK",
+        "description": "采购异常：通达管材承诺到货的 PVC 管件存在延期风险，需要 16:40 前跟进供应商。",
+        "allocated_to": "yuan.fang@scen-civil.local",
+        "priority": "High",
+        "reference_type": "Supplier",
+        "reference_key": f"{SCENARIO_PREFIX} 通达管材",
+    },
+    {
+        "marker": "PREP-AP-DUE-RISK",
+        "description": "财务异常：强盛建材有一笔历史应付款今日到期，需要财务核对发票和付款安排。",
+        "allocated_to": "liu.min@scen-civil.local",
+        "priority": "Medium",
+        "reference_type": "Supplier",
+        "reference_key": f"{SCENARIO_PREFIX} 强盛建材",
+    },
+    {
+        "marker": "PREP-RETURN-RISK",
+        "description": "质量/退货风险：上周劳保用品曾出现型号与订单不一致，今日收货需仓库和质检重点核对。",
+        "allocated_to": "cao.rui@scen-civil.local",
+        "priority": "Medium",
+        "reference_type": "Supplier",
+        "reference_key": f"{SCENARIO_PREFIX} 安科劳保用品",
+    },
+    {
+        "marker": "PREP-APPROVAL-QUEUE",
+        "description": "审批堆积：项目经理需在 09:10 前统一确认三个项目班组当天材料需求。",
+        "allocated_to": "li.zhiyuan@scen-civil.local",
+        "priority": "Medium",
+        "reference_type": "Project",
+        "reference_key": "城东道路改造项目",
+    },
+]
+
+PROCESS_POLICIES = [
+    {
+        "event": "09:30",
+        "name": "pending_material_request_grouping",
+        "rule": "采购按项目、物料分组、供应商和紧急程度汇总待处理 Material Request。",
+    },
+    {
+        "event": "10:00",
+        "name": "direct_purchase_common_items",
+        "rule": "劳保用品、电气常用耗材、水泥等有固定 Item Price 的低风险物料，可先生成 Purchase Order 草稿。",
+    },
+    {
+        "event": "10:30",
+        "name": "rfq_for_complex_or_price_sensitive_items",
+        "rule": "管材、井盖、钢材等规格复杂或价格波动物料，优先走 RFQ / Supplier Quotation。",
+    },
+    {
+        "event": "13:30",
+        "name": "receipt_from_submitted_po",
+        "rule": "采购收货原则上从已提交 Purchase Order 创建，保留源单据行引用。",
+    },
+    {
+        "event": "14:00",
+        "name": "discrepancy_before_return",
+        "rule": "到货不符先记录 Comment 和 ToDo；只有已提交 Purchase Receipt 才能生成退货草稿。",
+    },
+    {
+        "event": "14:30",
+        "name": "project_material_issue",
+        "rule": "项目领料通过 Stock Entry Material Issue，必须带 Project、源仓库、物料、数量和成本中心。",
+    },
+]
+
 
 @dataclass
 class SeedEvent:
@@ -113,10 +351,14 @@ def main() -> int:
     context: dict[str, Any] = {"company": COMPANY, "warehouses": {}, "projects": {}, "suppliers": {}, "users": {}}
 
     assert_required_records(client)
+    seed_master_data(client, args.apply, context, events)
     seed_warehouses(client, args.apply, context, events)
     seed_projects(client, args.apply, context, events)
     seed_suppliers(client, args.apply, context, events)
     seed_users(client, args.apply, context, events)
+    seed_item_prices(client, args.apply, context, events)
+    seed_background_todos(client, args.apply, context, events)
+    context["process_policies"] = PROCESS_POLICIES
     if not args.skip_stock:
         seed_initial_stock(client, args.apply, context, events)
 
@@ -138,13 +380,104 @@ def assert_required_records(client: ERPNextClient) -> None:
         if not result.ok or not result.data.get("exists"):
             raise RuntimeError(f"Required {doctype} is missing: {name}")
 
-    missing_items = []
-    for row in CENTER_STOCK + PROJECT_STOCK:
-        result = client.document_exists("Item", row["item_code"])
-        if not result.ok or not result.data.get("exists"):
-            missing_items.append(row["item_code"])
-    if missing_items:
-        raise RuntimeError(f"Scenario stock items are missing: {', '.join(sorted(set(missing_items)))}")
+def seed_master_data(client: ERPNextClient, apply: bool, context: dict[str, Any], events: list[SeedEvent]) -> None:
+    context["uoms"] = {}
+    context["item_groups"] = {}
+    context["supplier_groups"] = {}
+    context["items"] = {}
+
+    for uom in UOMS:
+        ensure_simple_master(
+            client,
+            apply,
+            context["uoms"],
+            events,
+            doctype="UOM",
+            name=uom,
+            data={"doctype": "UOM", "uom_name": uom, "enabled": 1},
+        )
+
+    for item_group in ITEM_GROUPS:
+        ensure_simple_master(
+            client,
+            apply,
+            context["item_groups"],
+            events,
+            doctype="Item Group",
+            name=item_group,
+            data={
+                "doctype": "Item Group",
+                "item_group_name": item_group,
+                "parent_item_group": "All Item Groups",
+                "is_group": 0,
+            },
+        )
+
+    for supplier_group in SUPPLIER_GROUPS:
+        ensure_simple_master(
+            client,
+            apply,
+            context["supplier_groups"],
+            events,
+            doctype="Supplier Group",
+            name=supplier_group,
+            data={
+                "doctype": "Supplier Group",
+                "supplier_group_name": supplier_group,
+                "parent_supplier_group": "All Supplier Groups",
+                "is_group": 0,
+            },
+        )
+
+    for item in SCENARIO_ITEMS:
+        ensure_simple_master(
+            client,
+            apply,
+            context["items"],
+            events,
+            doctype="Item",
+            name=item["item_code"],
+            data={
+                "doctype": "Item",
+                "item_code": item["item_code"],
+                "item_name": item["item_name"],
+                "item_group": item["item_group"],
+                "stock_uom": item["stock_uom"],
+                "is_stock_item": 1,
+                "is_purchase_item": 1,
+                "is_sales_item": 0,
+                "include_item_in_manufacturing": 0,
+                "disabled": 0,
+                "description": item["description"],
+            },
+        )
+
+
+def ensure_simple_master(
+    client: ERPNextClient,
+    apply: bool,
+    context_bucket: dict[str, Any],
+    events: list[SeedEvent],
+    *,
+    doctype: str,
+    name: str,
+    data: dict[str, Any],
+) -> None:
+    result = client.document_exists(doctype, name)
+    if result.ok and result.data.get("exists"):
+        context_bucket[name] = name
+        events.append(SeedEvent("skip_existing", doctype, name, True, "already exists"))
+        return
+
+    context_bucket[name] = name
+    if not apply:
+        events.append(SeedEvent("dry_run_create", doctype, name, True, "would create"))
+        return
+
+    result = client.create_document(doctype, data)
+    append_result(events, "create", doctype, name, result)
+    if result.ok and isinstance(result.data, dict):
+        context_bucket[name] = result.data.get("name") or name
 
 
 def seed_warehouses(client: ERPNextClient, apply: bool, context: dict[str, Any], events: list[SeedEvent]) -> None:
@@ -276,6 +609,113 @@ def seed_initial_stock(client: ERPNextClient, apply: bool, context: dict[str, An
 
     create_stock_receipt(client, apply, "CENTER", center_warehouse, CENTER_STOCK, events)
     create_stock_receipt(client, apply, "PROJECT", project_warehouse, PROJECT_STOCK, events)
+    create_stock_receipt(client, apply, "CENTER-V2", center_warehouse, CENTER_STOCK_V2, events)
+    create_stock_receipt(client, apply, "PROJECT-V2", project_warehouse, PROJECT_STOCK_V2, events)
+
+
+def seed_item_prices(client: ERPNextClient, apply: bool, context: dict[str, Any], events: list[SeedEvent]) -> None:
+    context["item_prices"] = {}
+    for row in ITEM_PRICES:
+        key = f"{row['item_code']}::{row['supplier']}"
+        existing = find_one(
+            client,
+            "Item Price",
+            {
+                "item_code": row["item_code"],
+                "price_list": BUYING_PRICE_LIST,
+                "supplier": row["supplier"],
+                "buying": 1,
+            },
+            ["name", "item_code", "supplier", "price_list", "price_list_rate"],
+        )
+        if existing:
+            context["item_prices"][key] = existing["name"]
+            events.append(SeedEvent("skip_existing", "Item Price", existing["name"], True, "already exists"))
+            continue
+
+        name = f"{row['item_code']} {row['supplier']} {BUYING_PRICE_LIST}"
+        context["item_prices"][key] = name
+        if not apply:
+            events.append(SeedEvent("dry_run_create", "Item Price", name, True, "would create buying price"))
+            continue
+
+        result = client.create_document(
+            "Item Price",
+            {
+                "doctype": "Item Price",
+                "item_code": row["item_code"],
+                "price_list": BUYING_PRICE_LIST,
+                "price_list_rate": row["rate"],
+                "currency": CURRENCY,
+                "supplier": row["supplier"],
+                "uom": row["uom"],
+                "buying": 1,
+                "selling": 0,
+                "valid_from": date.today().isoformat(),
+            },
+        )
+        append_result(events, "create", "Item Price", name, result)
+        if result.ok and isinstance(result.data, dict):
+            context["item_prices"][key] = result.data.get("name") or name
+
+
+def seed_background_todos(client: ERPNextClient, apply: bool, context: dict[str, Any], events: list[SeedEvent]) -> None:
+    context["background_todos"] = {}
+    for todo in BACKGROUND_TODOS:
+        marker = f"{SCENARIO_PREFIX}-{todo['marker']}"
+        existing = find_one(
+            client,
+            "ToDo",
+            {"description": ["like", f"%{marker}%"], "status": ["!=", "Closed"]},
+            ["name", "description", "allocated_to", "status"],
+        )
+        if existing:
+            context["background_todos"][marker] = existing["name"]
+            events.append(SeedEvent("skip_existing", "ToDo", existing["name"], True, "already exists"))
+            continue
+
+        reference_name = resolve_background_reference(context, todo)
+        description = f"{marker}：{todo['description']}"
+        context["background_todos"][marker] = description
+        if not apply:
+            events.append(SeedEvent("dry_run_create", "ToDo", marker, True, "would create background exception ToDo"))
+            continue
+
+        result = client.create_todo(
+            description,
+            allocated_to=todo.get("allocated_to"),
+            priority=todo.get("priority", "Medium"),
+            reference_type=todo.get("reference_type"),
+            reference_name=reference_name,
+            date=(date.today() + timedelta(days=1)).isoformat(),
+        )
+        if not result.ok and todo.get("allocated_to"):
+            fallback_result = client.create_todo(
+                f"{description}\n原计划负责人：{todo['allocated_to']}",
+                allocated_to=None,
+                priority=todo.get("priority", "Medium"),
+                reference_type=todo.get("reference_type"),
+                reference_name=reference_name,
+                date=(date.today() + timedelta(days=1)).isoformat(),
+            )
+            append_result(events, "create", "ToDo", marker, fallback_result)
+            if fallback_result.ok and isinstance(fallback_result.data, dict):
+                context["background_todos"][marker] = fallback_result.data.get("name") or marker
+            continue
+
+        append_result(events, "create", "ToDo", marker, result)
+        if result.ok and isinstance(result.data, dict):
+            context["background_todos"][marker] = result.data.get("name") or marker
+
+
+def resolve_background_reference(context: dict[str, Any], todo: dict[str, Any]) -> str | None:
+    reference_type = todo.get("reference_type")
+    reference_key = todo.get("reference_key")
+    if reference_type == "Project" and reference_key:
+        return context.get("projects", {}).get(reference_key)
+    if reference_type == "Supplier" and reference_key:
+        return context.get("suppliers", {}).get(reference_key, reference_key)
+    return None
 
 
 def create_stock_receipt(

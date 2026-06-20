@@ -1,0 +1,1336 @@
+version: 1
+module: stock
+tools:
+  erpnext.stock.get_balance:
+    purpose: "L0：查询库存余额、预计数量和估值快照。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Bin", "Item", "Warehouse"]
+      notes: "主要读取 Bin，必要时关联 Item 与 Warehouse。"
+    audit_fields: ["item_code", "item_query", "warehouse", "item_group", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "permission_denied"]
+    business_contract:
+      - "如果 item_code 缺失且 item_query 缺失，必须追问用户要查哪个物料。"
+      - "如果 item_query 命中多个物料，必须展示候选，不允许强行选择。"
+      - "warehouse 必须解析成 ERPNext Warehouse.name 全称；用户简称只能作为 resolver 输入。"
+      - "用户查询某物料所有仓库库存时，warehouse 可以为空。"
+    parameters:
+      item_code:
+        required: conditional
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "外键：必须是已存在的 ERPNext Item.item_code。"
+          - "禁止模型凭空编物料编码。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      item_query:
+        required: conditional
+        source: "用户原话"
+        resolver: item
+        constraints:
+          - "仅作为检索输入，不能直接当成 item_code 使用。"
+        repair: ["resolve_entity", "present_candidates"]
+      warehouse:
+        required: conditional
+        source: "Warehouse Resolver / 员工默认仓库"
+        resolver: warehouse
+        constraints:
+          - "必须使用 ERPNext Warehouse.name 全称。"
+          - "禁止把中心仓、项目仓等简称直接写入 ToolCall。"
+        repair: ["resolve_entity", "ask_clarification", "inject_context"]
+      specs:
+        source: "Slot Extractor"
+        constraints:
+          - "只用于辅助物料检索，不作为 ERPNext 主键。"
+      item_group:
+        source: "Item Group Resolver"
+        resolver: item_group
+        constraints:
+          - "用于缩小候选范围。"
+      limit:
+        source: "Runtime 默认值"
+        constraints:
+          - "默认由 Runtime 控制，避免一次返回过多库存行。"
+
+  erpnext.stock.get_item_locations:
+    purpose: "L0：查询指定物料在哪些仓库/Bin 有库存。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Bin", "Item", "Warehouse"]
+    audit_fields: ["item_code", "item_query", "selected_item_code", "warehouse", "include_zero", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "permission_denied"]
+    business_contract:
+      - "必须解析到唯一 Item 后才能查询库位；候选不唯一时必须展示候选。"
+      - "selection_confirmed 只能由人工选择或上游策略注入，模型不能自行置 true。"
+      - "include_zero=true 会暴露零库存库位，默认应保持 false，除非用户明确要求。"
+    parameters:
+      item_code:
+        required: conditional
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是已存在且未禁用的 ERPNext Item.item_code。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      item_query:
+        required: conditional
+        source: "用户原话"
+        resolver: item
+        constraints:
+          - "仅作为解析输入，不直接写入 ERPNext 外键。"
+        repair: ["resolve_entity", "present_candidates"]
+      selected_item_code:
+        required: conditional
+        source: "Item Resolver 候选确认"
+        resolver: item
+        constraints:
+          - "必须来自 erpnext.stock.resolve_item 返回的候选。"
+        repair: ["resolve_entity", "present_candidates"]
+      selection_confirmed:
+        source: "用户确认 / Runtime Policy"
+        constraints:
+          - "只有已确认候选时才能为 true。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      item_group:
+        source: "Item Group Resolver"
+        resolver: item_group
+        constraints:
+          - "用于辅助物料解析。"
+      limit:
+        source: "Runtime 默认值"
+        constraints:
+          - "限制返回库位数量。"
+
+  erpnext.stock.get_ledger_entries:
+    purpose: "L0：查询库存流水，用于库存移动审计。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Stock Ledger Entry", "Item", "Warehouse"]
+    audit_fields: ["item_code", "warehouse", "voucher_type", "voucher_no", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "inject_context", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "只读查询，不允许由该工具创建、取消或调整库存流水。"
+      - "按凭证查询时，voucher_type 与 voucher_no 应同时提供。"
+      - "warehouse 如由用户简称给出，必须先解析为 Warehouse.name。"
+    parameters:
+      item_code:
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是 ERPNext Item.item_code。"
+        repair: ["resolve_entity", "present_candidates"]
+      warehouse:
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints:
+          - "必须是 ERPNext Warehouse.name。"
+        repair: ["resolve_entity", "ask_clarification"]
+      voucher_type:
+        source: "用户指定 / Runtime Context"
+        constraints:
+          - "应使用 ERPNext 凭证类型原名。"
+      voucher_no:
+        source: "用户指定 / Runtime Context"
+        constraints:
+          - "必须是已存在业务凭证编号，不能凭空编造。"
+      limit:
+        source: "Runtime 默认值"
+        constraints:
+          - "默认限制返回数量，避免拉取过多流水。"
+
+  erpnext.stock.get_stock_settings:
+    purpose: "L0：读取库存设置单例，用于判断批次、序列号、预留和估值行为。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Stock Settings"]
+    audit_fields: []
+    repair: ["permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只允许读取设置，不允许修改库存控制规则。"
+      - "输出只能作为后续工具的校验上下文，不应直接覆盖用户确认。"
+
+  erpnext.stock.resolve_item:
+    purpose: "L1：解析库存物料候选，不修改 ERPNext。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Item", "Item Group"]
+      notes: "可选使用 PostgreSQL material catalog 召回，再以 ERPNext Item 为最终候选。"
+    audit_fields: ["query", "specs", "item_group", "enabled_only", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "返回候选用于后续 ToolCall，不代表已经获得库存动作授权。"
+      - "只有 ERPNext 候选唯一且可用时，才允许自动带入 selected_item_code。"
+      - "catalog_database_url 只能来自运行时安全上下文，不应从员工自然语言中采纳。"
+    parameters:
+      query:
+        required: yes
+        source: "用户原话"
+        resolver: item
+        constraints:
+          - "必须是物料名称、编码、规格或别名检索词。"
+        repair: ["ask_clarification", "resolve_entity", "present_candidates"]
+      specs:
+        source: "Slot Extractor"
+        constraints:
+          - "只用于辅助召回和消歧。"
+      item_group:
+        source: "Item Group Resolver"
+        resolver: item_group
+        constraints:
+          - "必须解析到 ERPNext Item Group.name 后用于缩小候选。"
+        repair: ["resolve_entity", "present_candidates"]
+      enabled_only:
+        source: "Runtime 默认值"
+        constraints:
+          - "默认 true，避免后续库存动作使用禁用物料。"
+      catalog_database_url:
+        source: "Runtime Secret"
+        constraints:
+          - "禁止由模型或用户文本直接提供连接串。"
+        repair: ["inject_context", "permission_denied"]
+
+  erpnext.stock.create_entry_draft:
+    purpose: "L3：创建 Stock Entry 草稿，用于收料、发料、转移、制造或重包；不提交。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Stock Entry", "Stock Entry Detail", "Item", "Warehouse", "Batch", "Serial No", "UOM"]
+    audit_fields: ["stock_entry_type", "purpose", "company", "posting_date", "items", "remarks"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "采购角色不能创建库存移动草稿。"
+      - "创建前必须确认 stock_entry_type/purpose、公司、日期、每行物料、仓库和数量。"
+      - "items 至少 1 行；每行 item_code 必须来自 Item Resolver 或已确认 selected_item_code。"
+      - "数量必须为正数；涉及批次、序列号、UOM、源/目标仓库时必须先解析主数据。"
+      - "默认口径：按 ERPNext Stock Entry purpose 校验仓库方向：Material Issue 需要 s_warehouse，Material Receipt 需要 t_warehouse，Material Transfer 两者都需要；自定义类型按 Stock Entry Type 元数据校验。"
+    parameters:
+      stock_entry_type:
+        source: "用户选择 / Runtime Policy"
+        constraints:
+          - "应匹配 ERPNext Stock Entry Type。"
+          - "默认口径：允许使用已存在且启用的自定义 Stock Entry Type，但必须由 resolver 精确命中并通过权限校验。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      purpose:
+        source: "用户选择 / Runtime Policy"
+        constraints:
+          - "应与 stock_entry_type 和业务场景一致。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      company:
+        required: conditional
+        source: "Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+        repair: ["inject_context", "resolve_entity"]
+      posting_date:
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+        repair: ["inject_context", "ask_clarification"]
+      remarks:
+        source: "用户说明"
+        constraints:
+          - "库存移动原因、业务单据来源或现场说明应进入 remarks。"
+      items:
+        required: yes
+        source: "Item/Warehouse/Batch/Serial/UOM Resolver + Slot Extractor"
+        constraints:
+          - "数组至少 1 行。"
+          - "每行 qty 必须大于 0。"
+          - "每行 item_code、s_warehouse、t_warehouse、batch_no、serial_no、uom/stock_uom 必须分别经 item、warehouse、batch、serial_no、uom resolver。"
+          - "模型不得凭空编造批次号、序列号或仓库名。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+
+  erpnext.stock.create_reconciliation_draft:
+    purpose: "L3：创建库存盘点/调整草稿，提交后可能改变账面库存和估值。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管"]
+    confirm: supervisor_confirm
+    backend_mapping:
+      doctypes: ["Stock Reconciliation", "Stock Reconciliation Item", "Item", "Warehouse", "Batch", "Serial No"]
+    audit_fields: ["company", "posting_date", "purpose", "items", "remarks"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "采购员、项目经理、班组长不能直接使用。"
+      - "创建草稿前必须记录盘点依据或调整原因。"
+      - "差异数量或估值异常过大时必须升级主管确认。"
+      - "items 每行必须包含真实 item_code、warehouse 和盘点数量；涉及批次/序列号时必须解析主数据。"
+      - "制度配置项：valuation_rate 调整默认需要库存主管确认；单行估值差异超过 1000 或 10% 时升级财务确认，阈值可由站点配置覆盖。"
+    parameters:
+      company:
+        required: conditional
+        source: "Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+        repair: ["inject_context", "resolve_entity"]
+      posting_date:
+        required: conditional
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+        repair: ["inject_context", "ask_clarification"]
+      purpose:
+        source: "用户选择 / Runtime Policy"
+        constraints:
+          - "应明确是盘点、数量调整还是估值调整。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      remarks:
+        required: conditional
+        source: "盘点说明"
+        constraints:
+          - "必须记录盘点依据或调整原因。"
+        repair: ["ask_clarification"]
+      items:
+        required: yes
+        source: "库存盘点表单编排"
+        constraints:
+          - "不允许模型自由拼任意字段。"
+          - "items 每行必须包含真实 item_code、warehouse、盘点数量和差异原因。"
+          - "每行 item_code、warehouse、batch_no、serial_no 必须分别经 item、warehouse、batch、serial_no resolver。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+
+  erpnext.stock.search_batches:
+    purpose: "L0：按物料或批次关键字查询 Batch 追溯记录。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Batch", "Item"]
+    audit_fields: ["item_code", "item_query", "query", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读查询，不允许通过该工具更新批次状态或有效期。"
+      - "按物料查批次时，item_code 必须解析到唯一 Item。"
+      - "query 只能作为批次检索词，不能直接当成确认的 batch_no。"
+    parameters:
+      item_code:
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是 ERPNext Item.item_code。"
+        repair: ["resolve_entity", "present_candidates"]
+      item_query:
+        source: "用户原话"
+        resolver: item
+        constraints:
+          - "仅用于解析 item_code。"
+        repair: ["resolve_entity", "present_candidates"]
+      query:
+        source: "用户原话"
+        resolver: batch
+        constraints:
+          - "批次关键词需经过候选展示后才能作为 batch_no 使用。"
+        repair: ["resolve_entity", "present_candidates"]
+
+  erpnext.stock.list_batch_balances:
+    purpose: "L0：汇总物料批次在仓库中的可用数量和库存流水。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Batch", "Stock Ledger Entry", "Item", "Warehouse"]
+    audit_fields: ["item_code", "item_query", "selected_item_code", "batch_no", "warehouse", "as_of_date", "include_expired", "include_zero"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读查询，不移动库存，不创建保留或拣货。"
+      - "必须先解析 Item；批次不明确时展示候选。"
+      - "include_expired=true 只用于审计/追溯，不应默认用于发料推荐。"
+      - "as_of_date 必须按 ISO 日期解析。"
+    parameters:
+      item_code:
+        required: conditional
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是 ERPNext Item.item_code。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      item_query:
+        required: conditional
+        source: "用户原话"
+        resolver: item
+        constraints:
+          - "仅用于解析 item_code。"
+        repair: ["resolve_entity", "present_candidates"]
+      selected_item_code:
+        required: conditional
+        source: "Item Resolver 候选确认"
+        resolver: item
+        constraints:
+          - "必须来自已确认 Item 候选。"
+        repair: ["resolve_entity", "present_candidates"]
+      batch_no:
+        source: "Batch Resolver"
+        resolver: batch
+        constraints:
+          - "必须是 ERPNext Batch.name 或 batch_id。"
+        repair: ["resolve_entity", "present_candidates"]
+      query:
+        source: "用户原话"
+        resolver: batch
+        constraints:
+          - "作为批次候选检索词使用。"
+        repair: ["resolve_entity", "present_candidates"]
+      warehouse:
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints:
+          - "必须是 ERPNext Warehouse.name。"
+        repair: ["resolve_entity", "ask_clarification"]
+      as_of_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+        repair: ["ask_clarification"]
+
+  erpnext.stock.search_serial_numbers:
+    purpose: "L0：按物料、仓库、状态或序列号关键字查询 Serial No。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Serial No", "Item", "Warehouse"]
+    audit_fields: ["item_code", "item_query", "warehouse", "status", "query", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读查询，不允许更新序列号状态、仓库或关联单据。"
+      - "按物料或仓库过滤时必须先解析外键。"
+      - "query 只能作为序列号检索词，不代表已确认 serial_no。"
+    parameters:
+      item_code:
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是 ERPNext Item.item_code。"
+        repair: ["resolve_entity", "present_candidates"]
+      item_query:
+        source: "用户原话"
+        resolver: item
+        constraints:
+          - "仅用于解析 item_code。"
+        repair: ["resolve_entity", "present_candidates"]
+      warehouse:
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints:
+          - "必须是 ERPNext Warehouse.name。"
+        repair: ["resolve_entity", "ask_clarification"]
+      query:
+        source: "用户原话"
+        resolver: serial_no
+        constraints:
+          - "用于检索 Serial No 候选。"
+        repair: ["resolve_entity", "present_candidates"]
+
+  erpnext.stock.create_batch:
+    purpose: "L3：为已有物料创建 Batch 追溯主数据；不移动库存。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Batch", "Item"]
+    audit_fields: ["data"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "创建前必须确认关联 Item。"
+      - "data.item 或 data.item_code 必须经 item resolver；不能直接采纳未确认物料名称。"
+      - "默认口径：批号优先使用 ERPNext naming series/自动批号；有效期仅对启用保质期或批次有效期的 Item 必填，禁用批次必须给出原因。"
+    parameters:
+      data:
+        required: yes
+        source: "Batch 表单编排"
+        resolver: item
+        constraints:
+          - "必须包含已解析 Item 外键。"
+          - "不允许模型凭空生成业务批号；如需系统自动命名，应遵循 ERPNext 配置。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+
+  erpnext.stock.update_batch:
+    purpose: "L4：更新 Batch 追溯主数据；可能影响已发生库存追溯。"
+    expose: agent_visible
+    allowed_roles: ["仓库主管"]
+    confirm: submit_confirm
+    backend_mapping:
+      doctypes: ["Batch"]
+    audit_fields: ["name", "data", "confirmation"]
+    repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "必须有明确 confirmation，包含确认人、时间、原因和确认文本。"
+      - "已发生库存移动的批次变更必须保留审计说明。"
+      - "制度配置项：有库存流水的 Batch 禁止修改 item/batch_id；expiry_date、disabled、备注和自定义字段可在主管确认后修改，质量/财务字段需对应审批。"
+    parameters:
+      name:
+        required: yes
+        source: "Batch Resolver"
+        resolver: batch
+        constraints:
+          - "必须是已存在的 ERPNext Batch.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      data:
+        required: yes
+        source: "Batch 变更表单"
+        constraints:
+          - "只能包含允许变更的 Batch 字段。"
+          - "涉及 item 时必须经 item resolver。"
+        repair: ["validate_before_execute", "resolve_entity", "ask_clarification"]
+      confirmation:
+        required: yes
+        source: "Confirmation Gate"
+        constraints:
+          - "必须包含 confirmed_by、confirmed_at、confirmation_text 和 reason。"
+        repair: ["ask_clarification", "validate_before_execute", "permission_denied"]
+
+  erpnext.stock.create_serial_no:
+    purpose: "L3：为已有物料创建 Serial No 追溯主数据；不提交库存移动。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Serial No", "Item", "Warehouse"]
+    audit_fields: ["data"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "创建前必须确认关联 Item；涉及仓库时必须解析 Warehouse。"
+      - "data.item_code/item、data.warehouse 必须分别经 item、warehouse resolver。"
+      - "默认口径：序列号优先使用 ERPNext naming series/自动序列；初始仓库在入库场景必填，状态从 Serial No 元数据读取。"
+    parameters:
+      data:
+        required: yes
+        source: "Serial No 表单编排"
+        resolver: serial_no
+        constraints:
+          - "必须包含已解析 Item 外键。"
+          - "不允许模型凭空生成序列号；如需系统自动命名，应遵循 ERPNext 配置。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+
+  erpnext.stock.update_serial_no:
+    purpose: "L4：更新 Serial No 追溯主数据；可能影响库存追溯和资产识别。"
+    expose: agent_visible
+    allowed_roles: ["仓库主管"]
+    confirm: submit_confirm
+    backend_mapping:
+      doctypes: ["Serial No"]
+    audit_fields: ["name", "data", "confirmation"]
+    repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "必须有明确 confirmation，包含确认人、时间、原因和确认文本。"
+      - "已发生库存移动的序列号变更必须保留审计说明。"
+      - "制度配置项：有交易流水的 Serial No 禁止修改 item/serial_no；仓库、状态、备注和自定义字段可按权限修改，质量/资产字段需对应审批。"
+    parameters:
+      name:
+        required: yes
+        source: "Serial No Resolver"
+        resolver: serial_no
+        constraints:
+          - "必须是已存在的 ERPNext Serial No.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      data:
+        required: yes
+        source: "Serial No 变更表单"
+        constraints:
+          - "只能包含允许变更的 Serial No 字段。"
+          - "涉及 item 或 warehouse 时必须分别经 item、warehouse resolver。"
+        repair: ["validate_before_execute", "resolve_entity", "ask_clarification"]
+      confirmation:
+        required: yes
+        source: "Confirmation Gate"
+        constraints:
+          - "必须包含 confirmed_by、confirmed_at、confirmation_text 和 reason。"
+        repair: ["ask_clarification", "validate_before_execute", "permission_denied"]
+
+  erpnext.stock.list_pick_lists:
+    purpose: "L0：查询 Pick List 单据，用于拣货工作流查看。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Pick List"]
+    audit_fields: ["purpose", "status", "customer", "limit"]
+    repair: ["ask_clarification", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读查询，不提交、不取消、不修改拣货单。"
+      - "purpose/status 应使用 ERPNext Pick List 的合法取值或站点配置值。"
+    parameters:
+      purpose:
+        source: "用户选择"
+        constraints:
+          - "应匹配 ERPNext Pick List purpose。"
+      status:
+        source: "用户选择"
+        constraints:
+          - "应匹配 ERPNext Pick List status。"
+      limit:
+        source: "Runtime 默认值"
+        constraints:
+          - "限制返回数量。"
+
+  erpnext.stock.create_pick_list_draft:
+    purpose: "L3：创建 Pick List 草稿，用于交付、转移或生产拣货；不提交。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Pick List", "Pick List Item", "Item", "Warehouse", "Batch", "Serial No", "UOM"]
+    audit_fields: ["purpose", "customer", "work_order", "material_request", "sales_order", "parent_warehouse", "locations"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "创建前必须确认拣货目的、来源单据或 locations 明细。"
+      - "locations 每行 qty 必须为正数，物料、仓库、批次、序列号、UOM 必须经 resolver。"
+      - "parent_warehouse 如有值必须解析为 Warehouse.name。"
+      - "默认口径：Pick List 的 purpose 决定来源凭证，Work Order、Material Request、Sales Order 等来源字段必须互斥且由 resolver 精确命中。"
+    parameters:
+      purpose:
+        source: "用户选择 / Runtime Policy"
+        constraints:
+          - "应匹配 ERPNext Pick List purpose。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      parent_warehouse:
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints:
+          - "必须是 ERPNext Warehouse.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      locations:
+        source: "拣货明细编排"
+        constraints:
+          - "每行 qty 必须大于 0。"
+          - "每行 item_code、warehouse、batch_no、serial_no、stock_uom 必须分别经 item、warehouse、batch、serial_no、uom resolver。"
+          - "selection_confirmed 只能来自人工或上游策略。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+
+  erpnext.stock.list_reservations:
+    purpose: "L0：查询 Stock Reservation Entry 库存预留记录。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Stock Reservation Entry", "Item", "Warehouse"]
+    audit_fields: ["item_code", "item_query", "warehouse", "voucher_type", "voucher_no", "status", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读查询，不创建、不提交、不取消库存预留。"
+      - "按物料或仓库过滤时必须先解析外键。"
+      - "按来源凭证过滤时，voucher_type 与 voucher_no 应同时提供。"
+    parameters:
+      item_code:
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是 ERPNext Item.item_code。"
+        repair: ["resolve_entity", "present_candidates"]
+      item_query:
+        source: "用户原话"
+        resolver: item
+        constraints:
+          - "仅用于解析 item_code。"
+        repair: ["resolve_entity", "present_candidates"]
+      warehouse:
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints:
+          - "必须是 ERPNext Warehouse.name。"
+        repair: ["resolve_entity", "ask_clarification"]
+      voucher_type:
+        source: "用户指定 / Runtime Context"
+        constraints:
+          - "应使用 ERPNext 来源凭证类型原名。"
+      voucher_no:
+        source: "用户指定 / Runtime Context"
+        constraints:
+          - "必须是已存在来源凭证编号。"
+
+  erpnext.stock.create_reservation_draft:
+    purpose: "L3：创建 Stock Reservation Entry 草稿；提交后会影响可用库存。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Stock Reservation Entry", "Item", "Warehouse", "UOM"]
+    audit_fields: ["item_code", "item_query", "selected_item_code", "warehouse", "voucher_type", "voucher_no", "reserved_qty", "company", "stock_uom"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "创建前必须确认物料、仓库、预留数量和来源凭证。"
+      - "reserved_qty 必须大于 0，不接受“若干”等模糊数量。"
+      - "提交预留是 L4 行为，必须另走 erpnext.stock.submit_document。"
+      - "默认口径：voucher_type、voucher_no、voucher_detail_no 必须成组来自同一来源凭证；from_voucher_type 只作为来源迁移上下文，不得与 voucher_type 冲突。"
+    parameters:
+      item_code:
+        required: conditional
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是 ERPNext Item.item_code。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      item_query:
+        required: conditional
+        source: "用户原话"
+        resolver: item
+        constraints:
+          - "仅用于解析 item_code。"
+        repair: ["resolve_entity", "present_candidates"]
+      selected_item_code:
+        required: conditional
+        source: "Item Resolver 候选确认"
+        resolver: item
+        constraints:
+          - "必须来自已确认 Item 候选。"
+        repair: ["resolve_entity", "present_candidates"]
+      selection_confirmed:
+        source: "用户确认 / Runtime Policy"
+        constraints:
+          - "只有已确认候选时才能为 true。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      warehouse:
+        required: yes
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints:
+          - "必须是 ERPNext Warehouse.name。"
+        repair: ["resolve_entity", "ask_clarification"]
+      reserved_qty:
+        required: yes
+        source: "用户数量槽位"
+        constraints:
+          - "必须大于 0。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      company:
+        source: "Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name。"
+        repair: ["inject_context", "resolve_entity"]
+      stock_uom:
+        source: "UOM Resolver / Item 默认"
+        resolver: uom
+        constraints:
+          - "必须是 ERPNext UOM.name。"
+        repair: ["resolve_entity", "inject_context"]
+
+  erpnext.stock.preview_valuation:
+    purpose: "L1：预览库存数量和价值影响，不创建库存单据。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Item", "Warehouse", "Stock Ledger Entry"]
+      notes: "通过 agent_bridge 预览，不写入 Stock Entry 或 Stock Reconciliation。"
+    audit_fields: ["items"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "仅用于预览和决策，不代表允许创建或提交库存调整。"
+      - "items 中物料、仓库、数量、估值率必须明确；不接受模糊数量。"
+      - "默认口径：估值预览只作风险提示，不作为财务记账真值；正式估值以 ERPNext 提交后的 Stock Ledger/GL Entry 为准。"
+    parameters:
+      items:
+        required: yes
+        source: "Item/Warehouse Resolver + Slot Extractor"
+        constraints:
+          - "每行 item_code、warehouse 必须分别经 item、warehouse resolver。"
+          - "qty/qty_delta/required_qty 必须是明确数字。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+
+  erpnext.stock.allocate_shortages:
+    purpose: "L1：预览库存分配与缺料，不创建预留、拣货或采购申请。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Item", "Warehouse", "Bin"]
+      notes: "通过 agent_bridge 计算可用量和短缺量。"
+    audit_fields: ["items"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只做分配和短缺预览，不创建 Stock Reservation Entry、Pick List 或 Material Request。"
+      - "items 中 required_qty 必须明确，仓库如有指定必须解析。"
+      - "默认口径：短缺分配优先本项目仓、其次中心仓、最后采购；保留库存不可占用，跨仓调拨必须生成独立 Stock Entry 候选。"
+    parameters:
+      items:
+        required: yes
+        source: "Item/Warehouse Resolver + 需求明细"
+        constraints:
+          - "每行 item_code、warehouse 必须分别经 item、warehouse resolver。"
+          - "required_qty 必须大于等于 0。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+
+  erpnext.stock.list_delivery_notes:
+    purpose: "L0：查询 Delivery Note，用于库存侧影响复核。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Delivery Note"]
+    audit_fields: ["customer", "status", "docstatus", "limit"]
+    repair: ["ask_clarification", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读边界工具；Delivery Note 草稿和业务流程归销售模块。"
+      - "不允许通过该工具修改、提交或取消发货单。"
+    parameters:
+      docstatus:
+        source: "用户选择 / Runtime Policy"
+        constraints:
+          - "只能是 0、1、2。"
+        repair: ["validate_before_execute"]
+
+  erpnext.stock.list_purchase_receipts:
+    purpose: "L0：查询 Purchase Receipt，用于库存侧收货影响复核。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Purchase Receipt"]
+    audit_fields: ["supplier", "status", "docstatus", "limit"]
+    repair: ["ask_clarification", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读边界工具；Purchase Receipt 草稿和采购业务流程归采购模块。"
+      - "不允许通过该工具修改、提交或取消采购收货单。"
+    parameters:
+      docstatus:
+        source: "用户选择 / Runtime Policy"
+        constraints:
+          - "只能是 0、1、2。"
+        repair: ["validate_before_execute"]
+
+  erpnext.stock.get_document_impact:
+    purpose: "L0：读取 Delivery Note 或 Purchase Receipt 的库存流水影响。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Delivery Note", "Purchase Receipt", "Stock Ledger Entry"]
+    audit_fields: ["doctype", "name", "limit"]
+    repair: ["ask_clarification", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读查询，不编辑跨模块单据。"
+      - "doctype 只能是 Delivery Note 或 Purchase Receipt。"
+      - "name 必须是已存在单据编号，不能凭空编造。"
+    parameters:
+      doctype:
+        required: yes
+        source: "用户指定 / Runtime Context"
+        constraints:
+          - "只能是 Delivery Note 或 Purchase Receipt。"
+        repair: ["validate_before_execute", "ask_clarification"]
+      name:
+        required: yes
+        source: "Document Resolver"
+        constraints:
+          - "必须是已存在业务单据 name。"
+        repair: ["resolve_entity", "ask_clarification"]
+
+  erpnext.stock.list_item_reorders:
+    purpose: "L0：查询 Item Reorder 行，用于查看仓库补货阈值。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Item Reorder", "Item", "Warehouse"]
+    audit_fields: ["item_code", "item_query", "warehouse", "material_request_type", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读查询，不修改物料补货规则。"
+      - "按物料或仓库过滤时必须先解析外键。"
+      - "默认口径：material_request_type 使用 ERPNext 标准 Purchase、Material Transfer、Material Issue、Manufacture、Customer Provided；站点自定义值由元数据 resolver 读取。"
+    parameters:
+      item_code:
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是 ERPNext Item.item_code。"
+        repair: ["resolve_entity", "present_candidates"]
+      item_query:
+        source: "用户原话"
+        resolver: item
+        constraints:
+          - "仅用于解析 item_code。"
+        repair: ["resolve_entity", "present_candidates"]
+      warehouse:
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints:
+          - "必须是 ERPNext Warehouse.name。"
+        repair: ["resolve_entity", "ask_clarification"]
+
+  erpnext.stock.list_quality_inspections:
+    purpose: "L0：查询与收货、发货或过程质检相关的 Quality Inspection。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Quality Inspection", "Item"]
+    audit_fields: ["item_code", "item_query", "reference_type", "reference_name", "inspection_type", "status", "docstatus", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读查询，不创建、不提交或修改质检单。"
+      - "按物料过滤时必须先解析 Item。"
+      - "reference_type/reference_name 应成对出现。"
+      - "站点配置项：inspection_type/status 的合法值必须从 Quality Inspection 元数据 options 或质量模块配置读取。"
+    parameters:
+      item_code:
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是 ERPNext Item.item_code。"
+        repair: ["resolve_entity", "present_candidates"]
+      item_query:
+        source: "用户原话"
+        resolver: item
+        constraints:
+          - "仅用于解析 item_code。"
+        repair: ["resolve_entity", "present_candidates"]
+      docstatus:
+        source: "用户选择 / Runtime Policy"
+        constraints:
+          - "只能是 0、1、2。"
+        repair: ["validate_before_execute"]
+
+  erpnext.stock.create_quality_inspection_draft:
+    purpose: "L3：创建 Quality Inspection 草稿；不提交。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Quality Inspection", "Quality Inspection Reading", "Item"]
+    audit_fields: ["item_code", "item_query", "selected_item_code", "inspection_type", "reference_type", "reference_name", "sample_size", "report_date", "status", "readings"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "创建前必须确认物料、质检类型、来源单据和抽样数量。"
+      - "item_code 必须来自 Item Resolver 或已确认 selected_item_code。"
+      - "readings 不得由模型臆造检测值；必须来自用户输入、设备结果或受控表单。"
+      - "站点配置项：不同 inspection_type 的必填字段、合格状态和提交流程必须从质量模块元数据、模板和 Workflow 读取。"
+    parameters:
+      item_code:
+        required: conditional
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是 ERPNext Item.item_code。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      item_query:
+        required: conditional
+        source: "用户原话"
+        resolver: item
+        constraints:
+          - "仅用于解析 item_code。"
+        repair: ["resolve_entity", "present_candidates"]
+      selected_item_code:
+        required: conditional
+        source: "Item Resolver 候选确认"
+        resolver: item
+        constraints:
+          - "必须来自已确认 Item 候选。"
+        repair: ["resolve_entity", "present_candidates"]
+      selection_confirmed:
+        source: "用户确认 / Runtime Policy"
+        constraints:
+          - "只有已确认候选时才能为 true。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      report_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+        repair: ["ask_clarification", "inject_context"]
+      sample_size:
+        source: "用户数量槽位"
+        constraints:
+          - "必须大于等于 0。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      readings:
+        source: "质检结果表单 / 设备数据"
+        constraints:
+          - "检测值必须来自可追溯来源，不允许模型臆造。"
+        repair: ["ask_clarification", "validate_before_execute"]
+
+  erpnext.stock.verify_purchase_receipt_stock_impact:
+    purpose: "L0：核对已提交 Purchase Receipt 的库存流水和收货数量/价值影响。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Purchase Receipt", "Stock Ledger Entry", "Item", "Warehouse"]
+    audit_fields: ["purchase_receipt", "item_code", "warehouse", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读校验，不修改 Purchase Receipt 或库存流水。"
+      - "purchase_receipt 必须是已存在的采购收货单编号。"
+      - "按物料或仓库过滤时必须先解析外键。"
+    parameters:
+      purchase_receipt:
+        required: yes
+        source: "Document Resolver"
+        constraints:
+          - "必须是已存在 Purchase Receipt.name。"
+        repair: ["resolve_entity", "ask_clarification"]
+      item_code:
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是 ERPNext Item.item_code。"
+        repair: ["resolve_entity", "present_candidates"]
+      warehouse:
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints:
+          - "必须是 ERPNext Warehouse.name。"
+        repair: ["resolve_entity", "ask_clarification"]
+
+  erpnext.stock.get_item_lifecycle_summary:
+    purpose: "L0：汇总物料在采购收货、库存流水、质检、库存移动和采购发票中的生命周期。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Item", "Purchase Receipt Item", "Stock Ledger Entry", "Quality Inspection", "Stock Entry Detail", "Purchase Invoice Item", "Warehouse"]
+    audit_fields: ["item_code", "item_query", "selected_item_code", "project", "warehouse", "from_date", "to_date", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读汇总，不修改任何生命周期相关单据。"
+      - "必须先解析到唯一 Item；日期范围必须是 ISO 日期。"
+      - "warehouse 如指定必须解析为 Warehouse.name。"
+      - "默认口径：project 必须通过 Project resolver 精确命中，并受当前 ERPNext 用户对项目和目标单据的权限共同限制。"
+    parameters:
+      item_code:
+        required: conditional
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是 ERPNext Item.item_code。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      item_query:
+        required: conditional
+        source: "用户原话"
+        resolver: item
+        constraints:
+          - "仅用于解析 item_code。"
+        repair: ["resolve_entity", "present_candidates"]
+      selected_item_code:
+        required: conditional
+        source: "Item Resolver 候选确认"
+        resolver: item
+        constraints:
+          - "必须来自已确认 Item 候选。"
+        repair: ["resolve_entity", "present_candidates"]
+      selection_confirmed:
+        source: "用户确认 / Runtime Policy"
+        constraints:
+          - "只有已确认候选时才能为 true。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      warehouse:
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints:
+          - "必须是 ERPNext Warehouse.name。"
+        repair: ["resolve_entity", "ask_clarification"]
+      from_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+        repair: ["ask_clarification"]
+      to_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期，且不早于 from_date。"
+        repair: ["ask_clarification", "validate_before_execute"]
+
+  erpnext.stock.list_warehouses:
+    purpose: "L0：按公司或名称关键字查询 Warehouse 主数据。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Warehouse", "Company"]
+    audit_fields: ["company", "query", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读查询，不创建或修改仓库。"
+      - "company 如指定必须解析成 ERPNext Company.name。"
+    parameters:
+      company:
+        source: "Company Resolver / Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name。"
+        repair: ["resolve_entity", "inject_context"]
+      query:
+        source: "用户原话"
+        resolver: warehouse
+        constraints:
+          - "仅作为 Warehouse 候选检索词。"
+        repair: ["resolve_entity", "present_candidates"]
+
+  erpnext.stock.create_warehouse:
+    purpose: "L3：创建 Warehouse 主数据；不移动库存。"
+    expose: agent_visible
+    allowed_roles: ["仓库主管"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Warehouse", "Company"]
+    audit_fields: ["data"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "仅仓库主管可创建仓库主数据。"
+      - "data.company、data.parent_warehouse 如存在必须分别经 company、warehouse resolver。"
+      - "不得凭空创建与项目/公司不匹配的仓库。"
+      - "默认口径：仓库按公司缩写后缀和父级树创建；group warehouse 只作父级不参与库存交易，默认账户从公司或父仓配置继承。"
+    parameters:
+      data:
+        required: yes
+        source: "Warehouse 表单编排"
+        resolver: warehouse
+        constraints:
+          - "必须包含明确仓库名称和公司上下文。"
+          - "涉及 company/parent_warehouse 时必须先解析。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+
+  erpnext.stock.update_warehouse:
+    purpose: "L3：更新 Warehouse 主数据；不移动库存。"
+    expose: agent_visible
+    allowed_roles: ["仓库主管"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Warehouse", "Company"]
+    audit_fields: ["name", "data"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "仅仓库主管可更新仓库主数据。"
+      - "name 必须解析为现有 Warehouse.name。"
+      - "data.company、data.parent_warehouse 如存在必须分别经 company、warehouse resolver。"
+      - "制度配置项：有库存或历史流水的 Warehouse 禁止修改 name、company、is_group 等关键字段；仅允许修改展示、联系人和自定义字段并保留审计。"
+    parameters:
+      name:
+        required: yes
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints:
+          - "必须是已存在的 ERPNext Warehouse.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      data:
+        required: yes
+        source: "Warehouse 变更表单"
+        constraints:
+          - "只能包含允许变更的 Warehouse 字段。"
+          - "涉及 company/parent_warehouse 时必须先解析。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute"]
+
+  erpnext.stock.list_item_groups:
+    purpose: "L0：查询 Item Group 主数据。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Item Group"]
+    audit_fields: ["query", "parent_item_group", "is_group", "filters", "fields", "limit", "offset", "order_by"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读查询，不创建或修改物料组。"
+      - "parent_item_group 如指定必须解析到 Item Group.name。"
+      - "filters、fields、order_by 应由 Runtime 控制，避免模型直接拼接任意过滤。"
+    parameters:
+      query:
+        source: "用户原话"
+        resolver: item_group
+        constraints:
+          - "仅作为 Item Group 候选检索词。"
+        repair: ["resolve_entity", "present_candidates"]
+      parent_item_group:
+        source: "Item Group Resolver"
+        resolver: item_group
+        constraints:
+          - "必须是 ERPNext Item Group.name。"
+        repair: ["resolve_entity", "present_candidates"]
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "应由 Runtime 构造，避免模型直接拼 Frappe filter。"
+        repair: ["validate_before_execute"]
+      fields:
+        source: "Runtime Builder"
+        constraints:
+          - "只允许读取安全展示字段。"
+        repair: ["validate_before_execute"]
+
+  erpnext.stock.create_item_group:
+    purpose: "L3：创建 Item Group 主数据；不创建物料、不移动库存。"
+    expose: agent_visible
+    allowed_roles: ["仓库主管"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Item Group"]
+    audit_fields: ["data"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "仅仓库主管可创建物料组主数据。"
+      - "data.parent_item_group 如存在必须经 item_group resolver。"
+      - "默认口径：物料组树遵循物料治理规则；is_group=true 仅作分类父级，实际 Item 必须挂到叶子物料组。"
+    parameters:
+      data:
+        required: yes
+        source: "Item Group 表单编排"
+        resolver: item_group
+        constraints:
+          - "必须包含明确物料组名称。"
+          - "涉及 parent_item_group 时必须解析到 Item Group.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+
+  erpnext.stock.update_item_group:
+    purpose: "L3：更新 Item Group 主数据；不创建物料、不移动库存。"
+    expose: agent_visible
+    allowed_roles: ["仓库主管"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Item Group"]
+    audit_fields: ["name", "data"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "仅仓库主管可更新物料组主数据。"
+      - "name 必须解析为现有 Item Group.name。"
+      - "data.parent_item_group 如存在必须经 item_group resolver。"
+      - "制度配置项：已有物料挂载的 Item Group 禁止随意修改 is_group 和父级；如需调整分类必须先做影响预览并由管理员确认。"
+    parameters:
+      name:
+        required: yes
+        source: "Item Group Resolver"
+        resolver: item_group
+        constraints:
+          - "必须是已存在的 ERPNext Item Group.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      data:
+        required: yes
+        source: "Item Group 变更表单"
+        constraints:
+          - "只能包含允许变更的 Item Group 字段。"
+          - "涉及 parent_item_group 时必须先解析。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute"]
+
+  erpnext.stock.list_uoms:
+    purpose: "L0：查询 UOM 主数据。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["UOM"]
+    audit_fields: ["query", "enabled", "filters", "fields", "limit", "offset", "order_by"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读查询，不创建或修改 UOM。"
+      - "query 只能作为 UOM 候选检索词。"
+      - "filters、fields、order_by 应由 Runtime 控制，避免模型直接拼接任意过滤。"
+    parameters:
+      query:
+        source: "用户原话"
+        resolver: uom
+        constraints:
+          - "仅作为 UOM 候选检索词。"
+        repair: ["resolve_entity", "present_candidates"]
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "应由 Runtime 构造，避免模型直接拼 Frappe filter。"
+        repair: ["validate_before_execute"]
+      fields:
+        source: "Runtime Builder"
+        constraints:
+          - "只允许读取安全展示字段。"
+        repair: ["validate_before_execute"]
+
+  erpnext.stock.create_uom:
+    purpose: "L3：创建 UOM 主数据；不影响既有库存余额。"
+    expose: agent_visible
+    allowed_roles: ["仓库主管"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["UOM"]
+    audit_fields: ["data"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "仅仓库主管可创建 UOM 主数据。"
+      - "创建前必须确认 UOM 名称、启用状态和是否允许小数。"
+      - "默认口径：UOM 使用标准中文名或行业通用符号；是否允许小数由 must_be_whole_number 控制，换算关系通过 UOM Conversion Detail 维护。"
+    parameters:
+      data:
+        required: yes
+        source: "UOM 表单编排"
+        resolver: uom
+        constraints:
+          - "必须包含明确 UOM 名称。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+
+  erpnext.stock.update_uom:
+    purpose: "L3：更新 UOM 主数据；不直接影响既有库存余额。"
+    expose: agent_visible
+    allowed_roles: ["仓库主管"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["UOM"]
+    audit_fields: ["name", "data"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "仅仓库主管可更新 UOM 主数据。"
+      - "name 必须解析为现有 UOM.name。"
+      - "制度配置项：已有库存或交易引用的 UOM 不修改名称和小数策略；需要变化时新增替代 UOM 并维护换算关系。"
+    parameters:
+      name:
+        required: yes
+        source: "UOM Resolver"
+        resolver: uom
+        constraints:
+          - "必须是已存在的 ERPNext UOM.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      data:
+        required: yes
+        source: "UOM 变更表单"
+        constraints:
+          - "只能包含允许变更的 UOM 字段。"
+        repair: ["ask_clarification", "validate_before_execute"]
+
+  erpnext.stock.submit_document:
+    purpose: "L4：提交库存相关单据，可能改变库存、预留或单据状态。"
+    expose: agent_visible
+    allowed_roles: ["仓库主管"]
+    confirm: submit_confirm
+    backend_mapping:
+      doctypes: ["Stock Entry", "Stock Reconciliation", "Delivery Note", "Purchase Receipt", "Pick List", "Stock Reservation Entry"]
+    audit_fields: ["doctype", "name", "confirmation"]
+    repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "必须有明确 confirmation，包含确认人、时间、原因和确认文本。"
+      - "只能提交 schema 枚举中的库存相关单据。"
+      - "Stock Reconciliation、数量调整类 Stock Entry 或影响账面库存的提交必须具备主管审批依据。"
+      - "不得用该工具绕过采购、销售或项目模块对源单据草稿的业务流程。"
+      - "默认口径：库存模块默认只允许提交 Stock Entry 和 Purchase Receipt；Delivery Note 提交属于销售/仓配边界，需单独授予角色策略后才暴露。"
+    parameters:
+      doctype:
+        required: yes
+        source: "Document Type Resolver"
+        constraints:
+          - "只能是 Stock Entry、Stock Reconciliation、Delivery Note、Purchase Receipt、Pick List、Stock Reservation Entry。"
+        repair: ["validate_before_execute", "ask_clarification"]
+      name:
+        required: yes
+        source: "Document Resolver"
+        constraints:
+          - "必须是已存在且处于可提交状态的单据 name。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute"]
+      confirmation:
+        required: yes
+        source: "Confirmation Gate"
+        constraints:
+          - "必须包含 confirmed_by、confirmed_at、confirmation_text 和 reason。"
+          - "库存盘点/数量调整提交应包含 supervisor approval_reference。"
+        repair: ["ask_clarification", "validate_before_execute", "permission_denied"]

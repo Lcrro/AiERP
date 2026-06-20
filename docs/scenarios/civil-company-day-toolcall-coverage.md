@@ -54,13 +54,14 @@
 - 很多能力停留在草稿工具，提交需要确认策略。
 - 从上游单据自动生成下游单据的引用关系还没端到端验收。
 - 管理层日报、待采购工作台、逾期采购跟进仍缺专用业务 wrapper。
-- 已建立可重复执行的 scenario seed 脚本，但尚未建立 scenario run 脚本。
+- 已建立可重复执行的 scenario seed 脚本和第一版 scenario run 脚本；下一步是按时间线做人工确认式端到端验收。
 
 ## 优先补齐清单
 
 | 优先级 | 缺口 | 目标 |
 |---|---|---|
 | P0 | 沙盘基础数据脚本 | 已完成：创建项目、仓库、供应商、测试员工和初始库存，见 [Sandbox 初始化](civil-company-day-seed.md)。 |
+| P0 | 事件流准备度矩阵 | 已完成：记录每个时间点的前置数据和现场生成单据，见 [一天事件流准备度](civil-company-day-readiness.md)。 |
 | P0 | 事件流自动化 runner | 已有第一版：按关键事件执行 ToolCall，默认 dry-run 跳过写入，见 [Sandbox 初始化](civil-company-day-seed.md)。 |
 | P1 | 材料申请转采购订单 wrapper | 已完成：从已提交 Material Request 创建 Purchase Order 草稿，保留源单引用；还需 runner 端到端验收。 |
 | P1 | 待采购工作台 wrapper | 汇总 Pending Material Request，按项目、供应商、紧急程度分组。 |

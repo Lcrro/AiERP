@@ -1,0 +1,25 @@
+{
+  "company": "STEC (Demo)",
+  "current_date": "2026-06-17",
+  "default_schedule_date": "2026-06-18",
+  "project_candidates": [
+    {
+      "name": "PROJ-0001",
+      "label": "城东道路改造项目"
+    }
+  ],
+  "warehouse_candidates": [
+    {
+      "name": "SCEN-CIVIL 项目仓 - SD",
+      "label": "项目仓"
+    }
+  ],
+  "item_candidates": [
+    {
+      "item_code": "SAFE-000005",
+      "item_name": "帆布手套",
+      "stock_uom": "双",
+      "aliases": ["帆布手套", "劳保手套"]
+    }
+  ]
+}

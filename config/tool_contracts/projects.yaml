@@ -1,0 +1,195 @@
+version: 1
+module: projects
+tools:
+  erpnext.projects.get_project_cost_context:
+    purpose: "L0：读取项目成本上下文，汇总 Project、Task、Stock Entry 和 Purchase Receipt 相关记录。"
+    expose: agent_visible
+    allowed_roles: ["项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Project", "Task", "Stock Entry", "Purchase Receipt"]
+    audit_fields: ["project", "company", "from_date", "to_date", "include_tasks", "include_stock_entries", "include_purchase_receipts", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读取项目成本上下文，不创建采购、库存或项目单据。"
+      - "日期范围用于过滤 posting_date；未提供日期时按 Runtime 默认 limit 控制返回量。"
+      - "默认口径：v0.1 项目成本先纳入带 project/cost_center 的 Stock Entry、Purchase Receipt 和 Purchase Invoice；Timesheet、Expense Claim、Sales Invoice 作为 v0.2 扩展口径。"
+    parameters:
+      project:
+        required: yes
+        source: "Project Resolver"
+        resolver: project
+        constraints:
+          - "必须是已存在的 ERPNext Project.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      company:
+        source: "Runtime Context / Company Resolver"
+        resolver: company
+        constraints:
+          - "如填写，必须是已存在的 ERPNext Company.name。"
+      from_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+      to_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+      include_tasks:
+        source: "Runtime 默认值 / 用户选择"
+      include_stock_entries:
+        source: "Runtime 默认值 / 用户选择"
+      include_purchase_receipts:
+        source: "Runtime 默认值 / 用户选择"
+      limit:
+        source: "Runtime 默认值"
+
+  erpnext.projects.get_material_issue_context:
+    purpose: "L0/L1：预览项目领料需求与源仓库存可用量，不创建 Stock Entry。"
+    expose: agent_visible
+    allowed_roles: ["项目经理", "班组长"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Project", "Bin", "Item", "Warehouse"]
+      notes: "读取 Project 并通过库存余额接口检查源仓可用量。"
+    audit_fields: ["project", "source_warehouse", "items"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "仅做领料预览，不创建或提交库存移动。"
+      - "items 每行必须有正数 qty；item_code 缺失时必须通过 item_query/selected_item_code 解析并确认。"
+      - "有缺料时必须展示 shortages，不得默认创建负库存草稿。"
+      - "默认口径：可用库存等于实际库存减保留库存和质量冻结库存；批次/序列号受控物料必须按对应维度进一步过滤。"
+    parameters:
+      project:
+        required: yes
+        source: "Project Resolver"
+        resolver: project
+        constraints:
+          - "必须是已存在的 ERPNext Project.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      source_warehouse:
+        required: yes
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints:
+          - "必须是已存在的 ERPNext Warehouse.name 全称。"
+          - "禁止把中心仓、项目仓等简称直接写入 ToolCall。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      items:
+        required: yes
+        source: "Item Resolver + 项目领料表单编排"
+        resolver: item
+        constraints:
+          - "数组至少 1 行。"
+          - "每行 qty 必须大于 0。"
+          - "每行 item_code 必须是已存在的 ERPNext Item.item_code；如使用 selected_item_code，必须 selection_confirmed=true。"
+          - "每行 cost_center 如填写，必须是已存在的 ERPNext Cost Center.name。"
+          - "每行 task 如填写，必须属于当前 project 或由项目上下文确认。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+
+  erpnext.projects.create_material_issue_draft:
+    purpose: "L3：创建项目领料 Stock Entry 草稿，写入项目和成本中心上下文；不提交库存移动。"
+    expose: agent_visible
+    allowed_roles: ["项目经理", "班组长"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Project", "Stock Entry", "Stock Entry Detail", "Item", "Warehouse", "Cost Center"]
+      methods: ["ERPNextClient.create_stock_entry_draft"]
+    audit_fields: ["project", "source_warehouse", "company", "posting_date", "posting_time", "cost_center", "expense_account", "require_available_stock", "items", "remarks"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "创建前必须确认项目、源仓、物料、数量、成本中心、费用科目和备注。"
+      - "默认 require_available_stock=true；存在缺料时不得创建草稿，除非用户明确允许并完成风险确认。"
+      - "该工具只创建 Stock Entry 草稿，不提交；提交仍由库存/项目相关提交工具处理。"
+      - "items 每行 item_code、source_warehouse、project、cost_center 必须使用 resolver 后的 ERPNext 主键。"
+      - "默认口径：项目领料成本中心优先取项目成本中心，费用科目从 Item/Company 默认账户解析；默认禁止负库存，除非站点允许且用户完成风险确认。"
+    parameters:
+      project:
+        required: yes
+        source: "Project Resolver"
+        resolver: project
+        constraints:
+          - "必须是已存在的 ERPNext Project.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      source_warehouse:
+        required: yes
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints:
+          - "必须是已存在的 ERPNext Warehouse.name 全称。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      company:
+        source: "Runtime Context / Company Resolver"
+        resolver: company
+        constraints:
+          - "如填写，必须是已存在的 ERPNext Company.name。"
+      posting_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+      posting_time:
+        source: "Runtime / 用户选择"
+        constraints:
+          - "如填写，必须是 ERPNext 接受的时间格式。"
+      cost_center:
+        source: "Cost Center Resolver / Project 默认值"
+        resolver: cost_center
+        constraints:
+          - "如填写，必须是已存在的 ERPNext Cost Center.name。"
+      expense_account:
+        source: "Account Resolver / Runtime Context"
+        resolver: account
+        constraints:
+          - "如填写，必须是当前公司可用的费用科目。"
+      remarks:
+        source: "用户确认文本 / Runtime 默认值"
+        constraints:
+          - "必须能说明项目领料原因或用途。"
+      require_available_stock:
+        source: "Runtime 默认值 / 用户确认"
+        constraints:
+          - "默认 true。"
+      items:
+        required: yes
+        source: "Item Resolver + 项目领料表单编排"
+        resolver: item
+        constraints:
+          - "数组至少 1 行。"
+          - "每行 qty 必须大于 0。"
+          - "每行 item_code 必须是已存在的 ERPNext Item.item_code；如使用 selected_item_code，必须 selection_confirmed=true。"
+          - "每行 cost_center 如填写，必须是已存在的 ERPNext Cost Center.name。"
+          - "每行 task 如填写，必须属于当前 project 或由项目上下文确认。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+
+  erpnext.projects.verify_material_issue_cost_impact:
+    purpose: "L0：读取已创建或已提交的项目 Material Issue Stock Entry，核对项目成本行和库存台账影响。"
+    expose: agent_visible
+    allowed_roles: ["项目经理", "班组长", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Stock Entry", "Stock Entry Detail", "Stock Ledger Entry", "Project"]
+    audit_fields: ["stock_entry", "project", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读取并校验项目领料成本影响，不修改库存或项目成本。"
+      - "如果 Stock Entry 未提交，必须提示成本和库存台账影响可能不是最终结果。"
+      - "project 如填写，只核对匹配该项目的 Stock Entry item 行。"
+      - "默认口径：项目成本归集优先使用明细行 project，其次单据 project，成本中心作为辅助维度和财务核对依据。"
+    parameters:
+      stock_entry:
+        required: yes
+        source: "Document Resolver"
+        resolver: docname
+        constraints:
+          - "必须是已存在的 ERPNext Stock Entry.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      project:
+        source: "Project Resolver"
+        resolver: project
+        constraints:
+          - "如填写，必须是已存在的 ERPNext Project.name。"
+      limit:
+        source: "Runtime 默认值"

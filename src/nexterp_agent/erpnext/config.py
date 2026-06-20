@@ -27,7 +27,7 @@ def load_erpnext_settings(profile: str = "remote") -> ERPNextSettings:
     base_url = os.getenv(f"{prefix}_BASE_URL")
     api_key = os.getenv(f"{prefix}_API_KEY")
     api_secret = os.getenv(f"{prefix}_API_SECRET")
-    host_header = os.getenv("NEXTERP_HOST_HEADER") or None
+    host_header = os.getenv(f"{prefix}_HOST_HEADER") or os.getenv("NEXTERP_HOST_HEADER") or None
 
     missing = [
         name
@@ -49,4 +49,3 @@ def load_erpnext_settings(profile: str = "remote") -> ERPNextSettings:
         api_secret=api_secret or "",
         host_header=host_header,
     )
-

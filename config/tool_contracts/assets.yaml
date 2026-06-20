@@ -1,0 +1,432 @@
+version: 1
+module: assets
+tools:
+  erpnext.assets.search_assets:
+    purpose: "L0：查询固定资产主数据，用于按公司、类别、位置、状态、物料、保管人或资产名称检索候选。"
+    expose: agent_visible
+    allowed_roles: ["资产管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Asset"]
+    audit_fields: ["query", "company", "asset_category", "location", "status", "item_code", "custodian", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "查询结果只用于展示候选和上下文，不代表已确认资产。"
+      - "用户只提供简称、位置别名或模糊资产名时，必须展示候选，不允许强行选择。"
+      - "默认口径：Asset.custodian 优先解析 Employee；站点未启用 Employee 或存在自定义字段时，再按站点元数据回退到 User 或自定义主数据。"
+    parameters:
+      query:
+        source: "用户原话"
+        constraints:
+          - "仅作为 asset_name 模糊检索输入。"
+      company:
+        source: "Runtime Context / Company Resolver"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+      asset_category:
+        source: "Asset Category Resolver"
+        resolver: asset_category
+        constraints:
+          - "必须是已存在的 ERPNext Asset Category.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      location:
+        source: "Asset Location Resolver"
+        resolver: asset_location
+        constraints:
+          - "必须是已存在的 ERPNext Asset Location.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      item_code:
+        source: "Item Resolver"
+        resolver: item
+        constraints:
+          - "必须是已存在的 ERPNext Item.item_code。"
+      custodian:
+        source: "Custodian Resolver"
+        resolver: employee
+        constraints:
+          - "必须解析为当前 ERPNext 站点 Asset.custodian 字段接受的真实主键。"
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "禁止模型直接手写任意 Frappe filter DSL。"
+      fields:
+        source: "Field Resolver"
+        resolver: field
+        constraints:
+          - "字段必须存在于 Asset meta。"
+      limit:
+        source: "Runtime 默认值"
+      offset:
+        source: "Runtime 分页"
+      order_by:
+        source: "Runtime / 用户排序意图"
+
+  erpnext.assets.search_asset_categories:
+    purpose: "L0：查询 Asset Category 主数据候选。"
+    expose: agent_visible
+    allowed_roles: ["资产管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Asset Category"]
+    audit_fields: ["query", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "查询结果只用于候选展示；低置信或多候选必须让用户确认。"
+    parameters:
+      query:
+        source: "用户原话"
+        resolver: asset_category
+        constraints:
+          - "仅作为 Asset Category 候选检索输入。"
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "禁止模型直接手写任意 Frappe filter DSL。"
+      fields:
+        source: "Field Resolver"
+        resolver: field
+      limit:
+        source: "Runtime 默认值"
+      offset:
+        source: "Runtime 分页"
+      order_by:
+        source: "Runtime / 用户排序意图"
+
+  erpnext.assets.search_asset_locations:
+    purpose: "L0：查询 Asset Location 主数据候选。"
+    expose: agent_visible
+    allowed_roles: ["资产管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Asset Location"]
+    audit_fields: ["query", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "查询结果只用于候选展示；位置简称或层级路径不明确时必须展示候选。"
+    parameters:
+      query:
+        source: "用户原话"
+        resolver: asset_location
+        constraints:
+          - "仅作为 Asset Location 候选检索输入。"
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "禁止模型直接手写任意 Frappe filter DSL。"
+      fields:
+        source: "Field Resolver"
+        resolver: field
+      limit:
+        source: "Runtime 默认值"
+      offset:
+        source: "Runtime 分页"
+      order_by:
+        source: "Runtime / 用户排序意图"
+
+  erpnext.assets.get_financial_snapshot:
+    purpose: "L0：读取单个资产的采购、财务账簿、折旧计划和价值快照，不创建 GL、不过账折旧、不创建销售或处置单据。"
+    expose: agent_visible
+    allowed_roles: ["资产管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Asset", "Asset Depreciation Schedule"]
+    audit_fields: ["asset", "finance_book", "include_depreciation_schedules", "include_schedule_rows", "schedule_limit"]
+    repair: ["resolve_entity", "ask_clarification", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "仅用于资产财务状态查看，不允许据此自动提交折旧、处置、销售或价值调整。"
+      - "默认口径：finance_book 优先使用公司默认 Finance Book；用户指定时必须通过 Finance Book resolver 精确命中。"
+    parameters:
+      asset:
+        required: yes
+        source: "Asset Resolver"
+        resolver: asset
+        constraints:
+          - "必须是已存在的 ERPNext Asset.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      finance_book:
+        source: "Finance Book Resolver / Runtime Context"
+        resolver: finance_book
+        constraints:
+          - "如填写，必须是当前站点有效的 Finance Book 名称。"
+      include_depreciation_schedules:
+        source: "Runtime 默认值 / 用户选择"
+      include_schedule_rows:
+        source: "Runtime 默认值 / 用户选择"
+      schedule_limit:
+        source: "Runtime 默认值"
+
+  erpnext.assets.get_depreciation_schedule:
+    purpose: "L0：查询资产折旧计划和可选计划行，不过账折旧。"
+    expose: agent_visible
+    allowed_roles: ["资产管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Asset Depreciation Schedule"]
+    audit_fields: ["asset", "finance_book", "status", "include_rows", "only_due_before", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只能读取折旧计划状态；过账折旧或生成财务影响必须使用受控财务/提交流程。"
+      - "站点配置项：折旧计划状态枚举必须从当前 ERPNext Asset Depreciation Schedule 元数据或报表返回值读取。"
+    parameters:
+      asset:
+        required: yes
+        source: "Asset Resolver"
+        resolver: asset
+        constraints:
+          - "必须是已存在的 ERPNext Asset.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      finance_book:
+        source: "Finance Book Resolver / Runtime Context"
+        resolver: finance_book
+      status:
+        source: "用户选择 / Runtime"
+        constraints:
+          - "必须是当前 ERPNext 站点支持的 Asset Depreciation Schedule 状态。"
+      include_rows:
+        source: "Runtime 默认值 / 用户选择"
+      only_due_before:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+      fields:
+        source: "Field Resolver"
+        resolver: field
+      limit:
+        source: "Runtime 默认值"
+      offset:
+        source: "Runtime 分页"
+      order_by:
+        source: "Runtime / 用户排序意图"
+
+  erpnext.assets.create_asset_draft:
+    purpose: "L3：创建 Asset 草稿，不提交、不资本化。"
+    expose: agent_visible
+    allowed_roles: ["资产管理员"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Asset"]
+      methods: ["ERPNextClient.create_document"]
+    audit_fields: ["data"]
+    repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "创建前必须确认资产名称、物料、资产类别、公司、位置、购置金额和可用日期等关键字段。"
+      - "data 中的 item_code、asset_category、location、custodian、cost_center、purchase_date、available_for_use_date 等外键或日期必须来自对应 resolver 或用户明确确认。"
+      - "提交/资本化必须走 erpnext.assets.submit_document，并获得 submit_confirm。"
+      - "默认口径：创建 Asset 草稿前读取 Asset 元数据和 Asset Category 默认值；CWIP/折旧字段由类别、公司和账簿配置补齐，无法补齐时追问。"
+    parameters:
+      data:
+        required: yes
+        source: "资产草稿表单编排"
+        constraints:
+          - "必须是 Asset 的草稿 payload；禁止模型自由拼不属于 Asset meta 的字段。"
+          - "主数据外键必须使用解析后的 ERPNext 主键，不允许使用用户口语简称。"
+          - "金额、日期、折旧相关字段必须来自用户确认或 Runtime 上下文。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute"]
+
+  erpnext.assets.create_movement_draft:
+    purpose: "L3：创建 Asset Movement 草稿，用于资产领用、接收或转移，不提交。"
+    expose: agent_visible
+    allowed_roles: ["资产管理员"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Asset Movement"]
+      methods: ["ERPNextClient.create_document"]
+    audit_fields: ["data"]
+    repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "创建前必须确认移动类型、资产、源/目标位置、保管人和业务原因。"
+      - "data 中涉及 asset、source_location、target_location、from_employee、to_employee、transaction_date 等字段必须由对应 resolver 或用户明确确认。"
+      - "提交移动单必须走 erpnext.assets.submit_document，并获得 submit_confirm。"
+      - "默认口径：Asset Movement 按 movement purpose 和 DocType 元数据动态校验必填字段；源/目标位置或保管人缺失时先追问。"
+    parameters:
+      data:
+        required: yes
+        source: "资产移动草稿表单编排"
+        constraints:
+          - "必须是 Asset Movement 的草稿 payload。"
+          - "资产和位置必须解析成 ERPNext 主键。"
+          - "不得在草稿工具中绕过提交确认。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute"]
+
+  erpnext.assets.create_maintenance_draft:
+    purpose: "L3：创建 Asset Maintenance 计划草稿，不提交。"
+    expose: agent_visible
+    allowed_roles: ["资产管理员"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Asset Maintenance"]
+      methods: ["ERPNextClient.create_document"]
+    audit_fields: ["data"]
+    repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "创建前必须确认资产、维护任务、周期、责任人和计划日期。"
+      - "data 中涉及 asset、asset_category、assign_to、maintenance_team、start_date/end_date 等字段必须由对应 resolver 或用户明确确认。"
+      - "提交维护计划必须走 erpnext.assets.submit_document，并获得 submit_confirm。"
+      - "站点配置项：维护计划子表字段和周期枚举从 Asset Maintenance 元数据读取；未知周期不得由模型自造。"
+    parameters:
+      data:
+        required: yes
+        source: "资产维护计划表单编排"
+        constraints:
+          - "必须是 Asset Maintenance 的草稿 payload。"
+          - "维护任务和责任人不明确时必须追问。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute"]
+
+  erpnext.assets.create_maintenance_log_draft:
+    purpose: "L3：创建 Asset Maintenance Log 草稿，不提交。"
+    expose: agent_visible
+    allowed_roles: ["资产管理员"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Asset Maintenance Log"]
+      methods: ["ERPNextClient.create_document"]
+    audit_fields: ["data"]
+    repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "创建前必须确认资产、维护日期、维护状态、执行人和工作说明。"
+      - "data 中涉及 asset、asset_maintenance、task、maintenance_date、assign_to 等字段必须由对应 resolver 或用户明确确认。"
+      - "提交维护日志必须走 erpnext.assets.submit_document，并获得 submit_confirm。"
+      - "默认口径：维护日志优先关联已解析的 Asset Maintenance/任务；无计划引用时只允许创建独立维护日志草稿并提示人工确认。"
+    parameters:
+      data:
+        required: yes
+        source: "资产维护日志表单编排"
+        constraints:
+          - "必须是 Asset Maintenance Log 的草稿 payload。"
+          - "维护结果和异常说明不能由模型虚构。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute"]
+
+  erpnext.assets.create_repair_draft:
+    purpose: "L3：创建 Asset Repair 草稿，不提交；提交后可能影响资产价值或维修成本。"
+    expose: agent_visible
+    allowed_roles: ["资产管理员"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Asset Repair"]
+      methods: ["ERPNextClient.create_document"]
+    audit_fields: ["data"]
+    repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "创建前必须确认资产、故障/维修说明、维修日期、维修成本和责任人。"
+      - "data 中涉及 asset、failure_date、repair_status、cost_center、warehouse、item_code 等字段必须由对应 resolver 或用户明确确认。"
+      - "提交维修单必须走 erpnext.assets.submit_document，并获得 submit_confirm。"
+      - "制度配置项：维修成本是否资本化、是否影响资产价值必须来自公司财务制度和 ERPNext 资产配置；Agent 只能生成候选处理方式。"
+    parameters:
+      data:
+        required: yes
+        source: "资产维修草稿表单编排"
+        constraints:
+          - "必须是 Asset Repair 的草稿 payload。"
+          - "维修成本、物料、仓库、费用归属必须明确，不能使用模糊描述。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute"]
+
+  erpnext.assets.create_value_adjustment_draft:
+    purpose: "L3：创建 Asset Value Adjustment 草稿，不提交；提交属于高风险财务影响。"
+    expose: agent_visible
+    allowed_roles: ["资产管理员"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Asset Value Adjustment"]
+      methods: ["ERPNextClient.create_document"]
+    audit_fields: ["data"]
+    repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "创建前必须确认资产、调整日期、调整金额/价值、调整原因和财务归属。"
+      - "data 中涉及 asset、finance_book、cost_center、date、current_asset_value、new_asset_value 等字段必须由对应 resolver 或用户明确确认。"
+      - "提交价值调整必须走 erpnext.assets.submit_document，并获得 submit_confirm。"
+      - "制度配置项：价值调整的会计分录、账簿和权限要求以 ERPNext 财务配置为准，提交前必须展示财务影响并获得确认。"
+    parameters:
+      data:
+        required: yes
+        source: "资产价值调整草稿表单编排"
+        constraints:
+          - "必须是 Asset Value Adjustment 的草稿 payload。"
+          - "调整金额和原因必须进入审计日志。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute"]
+
+  erpnext.assets.prepare_disposal_or_sale:
+    purpose: "L5：准备资产报废、处置或销售评审，读取资产并返回后续动作和风险上下文；不创建 GL、不创建发票、不提交处置。"
+    expose: agent_visible
+    allowed_roles: ["资产管理员"]
+    confirm: supervisor_confirm
+    backend_mapping:
+      doctypes: ["Asset"]
+      notes: "该工具只读取 Asset 并准备处置/销售风险上下文，实际过账或销售由财务/销售受控工具处理。"
+    audit_fields: ["asset", "action", "posting_date", "proceeds_amount", "party_type", "party", "reason"]
+    repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "资产处置、报废或销售必须展示资产、原因、日期、预计收入和潜在财务影响并获得主管确认。"
+      - "该工具不能替代财务过账、销售发票或资产提交工具。"
+      - "默认口径：dispose、scrap、sell 均先生成处置准备结果和确认摘要；正式单据链与审批人由资产处置配置 resolver 返回。"
+    parameters:
+      asset:
+        required: yes
+        source: "Asset Resolver"
+        resolver: asset
+        constraints:
+          - "必须是已存在的 ERPNext Asset.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      action:
+        required: yes
+        source: "用户选择"
+        constraints:
+          - "只能是 dispose、scrap、sell。"
+      posting_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+      proceeds_amount:
+        source: "用户确认金额"
+        constraints:
+          - "金额不得为负数。"
+      party_type:
+        source: "DocType Resolver"
+        resolver: doctype
+        constraints:
+          - "销售场景如填写，必须是当前 ERPNext 站点支持的交易方类型。"
+      party:
+        source: "Document Resolver"
+        resolver: docname
+        constraints:
+          - "销售场景如填写，必须是 party_type 下已存在的单据名。"
+      reason:
+        source: "用户确认文本"
+        constraints:
+          - "处置或销售原因必须明确进入审计。"
+
+  erpnext.assets.submit_document:
+    purpose: "L4/L5：提交资产生命周期单据；Asset 和 Asset Value Adjustment 可能产生高风险财务影响。"
+    expose: agent_visible
+    allowed_roles: ["资产管理员"]
+    confirm: submit_confirm
+    backend_mapping:
+      doctypes: ["Asset", "Asset Movement", "Asset Maintenance", "Asset Maintenance Log", "Asset Repair", "Asset Value Adjustment"]
+      methods: ["agent_bridge.api.submit_document"]
+    audit_fields: ["doctype", "name", "confirmation"]
+    repair: ["resolve_entity", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "提交前必须展示单据类型、单据名、资产影响和可能的财务/库存/责任人变化。"
+      - "Asset 和 Asset Value Adjustment 提交属于高风险财务影响，必须由资产管理员显式确认。"
+      - "Asset Movement、Asset Maintenance、Asset Maintenance Log、Asset Repair 提交属于资产生命周期变更，必须显式确认。"
+      - "站点配置项：资产单据提交后的会计、库存或维护状态影响以当前 ERPNext 版本、DocType 元数据和站点自定义为准。"
+    parameters:
+      doctype:
+        required: yes
+        source: "DocType Resolver"
+        resolver: doctype
+        constraints:
+          - "只允许 Asset、Asset Movement、Asset Maintenance、Asset Maintenance Log、Asset Repair、Asset Value Adjustment。"
+      name:
+        required: yes
+        source: "Document Resolver"
+        resolver: docname
+        constraints:
+          - "必须是 doctype 下已存在且可提交的草稿单据名。"
+      confirmation:
+        required: yes
+        source: "Confirmation Policy"
+        constraints:
+          - "必须包含用户对高风险提交动作的显式确认元数据。"

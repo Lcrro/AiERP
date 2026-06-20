@@ -672,6 +672,8 @@ def create_todo(description: str, allocated_to: str | None = None, priority: str
 def setup_item_master() -> dict:
     """Create custom Item fields used by material master v0.1."""
 
+    frappe.only_for("System Manager")
+
     meta = frappe.get_meta("Item")
     existing_fields = {field.fieldname for field in meta.fields}
     created = []

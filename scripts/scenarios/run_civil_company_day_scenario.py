@@ -17,7 +17,7 @@ from nexterp_agent.erpnext import ERPNextAdapter, ERPNextClient, ToolCall
 from nexterp_agent.erpnext.config import load_erpnext_settings
 
 COMPANY = "STEC (Demo)"
-PROJECT_CHENGDONG = "PROJ-0004"
+PROJECT_CHENGDONG = "PROJ-0001"
 CENTER_WAREHOUSE = "SCEN-CIVIL 中心仓 - SD"
 PROJECT_WAREHOUSE = "SCEN-CIVIL 项目仓 - SD"
 SUPPLIER_LABOR = "SCEN-CIVIL 安科劳保用品"
@@ -52,7 +52,7 @@ class ScenarioStepResult:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run the civil company day scenario through ERPNext ToolCalls.")
-    parser.add_argument("--profile", default="local")
+    parser.add_argument("--profile", default="civil")
     parser.add_argument("--apply", action="store_true", help="Execute write ToolCalls that create draft documents.")
     parser.add_argument("--report", type=Path, default=DEFAULT_REPORT)
     args = parser.parse_args()
@@ -91,9 +91,9 @@ def build_steps() -> list[ScenarioStep]:
             id="08-20-search-gloves",
             time="08:20",
             actor="马超，施工班组长",
-            event="城东项目提报帆布手套需求前检索物料",
+            event="城东项目提报劳保用品需求前检索物料",
             tool="erpnext.search_items",
-            arguments={"query": "帆布手套", "limit": 5},
+            arguments={"query": "帆布手套 安全帽 反光背心", "limit": 10},
         ),
         ScenarioStep(
             id="08-20-create-material-request",
@@ -114,6 +114,24 @@ def build_steps() -> list[ScenarioStep]:
                         "warehouse": PROJECT_WAREHOUSE,
                         "project": PROJECT_CHENGDONG,
                         "description": "城东道路改造项目劳保用品需求：帆布手套。",
+                    },
+                    {
+                        "item_code": "SAFE-000006",
+                        "qty": 10,
+                        "uom": "个",
+                        "schedule_date": required_by.isoformat(),
+                        "warehouse": PROJECT_WAREHOUSE,
+                        "project": PROJECT_CHENGDONG,
+                        "description": "城东道路改造项目劳保用品需求：安全帽。",
+                    },
+                    {
+                        "item_code": "SAFE-000007",
+                        "qty": 15,
+                        "uom": "件",
+                        "schedule_date": required_by.isoformat(),
+                        "warehouse": PROJECT_WAREHOUSE,
+                        "project": PROJECT_CHENGDONG,
+                        "description": "城东道路改造项目劳保用品需求：反光背心。",
                     }
                 ],
             },
@@ -144,7 +162,11 @@ def build_steps() -> list[ScenarioStep]:
                 "company": COMPANY,
                 "transaction_date": today.isoformat(),
                 "schedule_date": required_by.isoformat(),
-                "items": [{"item_code": "SAFE-000005", "qty": 20, "uom": "双", "warehouse": CENTER_WAREHOUSE, "rate": 8}],
+                "items": [
+                    {"item_code": "SAFE-000005", "qty": 20, "uom": "双", "warehouse": CENTER_WAREHOUSE, "rate": 8},
+                    {"item_code": "SAFE-000006", "qty": 10, "uom": "个", "warehouse": CENTER_WAREHOUSE, "rate": 28},
+                    {"item_code": "SAFE-000007", "qty": 15, "uom": "件", "warehouse": CENTER_WAREHOUSE, "rate": 18},
+                ],
             },
             writes=True,
             expected_gap="MR 到 PO wrapper 已实现；runner 仍需支持读取上一步 MR、提交后再用 wrapper 生成 PO。",
@@ -167,7 +189,11 @@ def build_steps() -> list[ScenarioStep]:
                 "supplier": SUPPLIER_LABOR,
                 "company": COMPANY,
                 "posting_date": today.isoformat(),
-                "items": [{"item_code": "SAFE-000005", "qty": 20, "uom": "双", "warehouse": CENTER_WAREHOUSE, "rate": 8}],
+                "items": [
+                    {"item_code": "SAFE-000005", "qty": 20, "uom": "双", "warehouse": CENTER_WAREHOUSE, "rate": 8},
+                    {"item_code": "SAFE-000006", "qty": 10, "uom": "个", "warehouse": CENTER_WAREHOUSE, "rate": 28},
+                    {"item_code": "SAFE-000007", "qty": 15, "uom": "件", "warehouse": CENTER_WAREHOUSE, "rate": 18},
+                ],
             },
             writes=True,
             expected_gap="PR 草稿未从已提交 PO 自动生成，PO 到 PR 引用关系需要后续 wrapper 验收。",

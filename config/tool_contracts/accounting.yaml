@@ -1,0 +1,1020 @@
+version: 1
+module: accounting
+tools:
+  erpnext.accounting.search_accounts:
+    purpose: "L0：查询会计科目主数据，用于报表筛选、凭证草稿编排和科目解析。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Account"]
+      notes: "只读 search_documents；默认按 lft asc 返回科目树。"
+    audit_fields: ["company", "account_type", "filters", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "仅用于读取 Account，不创建或修改科目。"
+      - "company 必须解析成 ERPNext Company.name 全称；不能把用户简称直接写入 ToolCall。"
+      - "filters、fields、order_by 必须由 Runtime 生成或校验，禁止模型直接拼接未校验的 Frappe filter DSL。"
+    parameters:
+      company:
+        source: "Company Resolver / Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+        repair: ["inject_context", "resolve_entity"]
+      account_type:
+        source: "用户选择 / Runtime 枚举"
+        constraints:
+          - "用于缩小 Account.account_type，不应作为科目主键。"
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "必须由编排层生成或白名单校验。"
+        repair: ["validate_before_execute"]
+      fields:
+        source: "Runtime 默认 / Field Resolver"
+        resolver: field
+        constraints:
+          - "字段必须存在于 Account meta。"
+        repair: ["validate_before_execute"]
+      limit:
+        source: "Runtime 默认值"
+        constraints:
+          - "默认由 Runtime 控制，避免一次返回过多科目。"
+
+  erpnext.accounting.search_cost_centers:
+    purpose: "L0：查询成本中心主数据，用于报表筛选、预算和单据草稿编排。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Cost Center"]
+      notes: "只读 search_documents；默认按 lft asc 返回成本中心树。"
+    audit_fields: ["company", "filters", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "仅用于读取 Cost Center，不创建或修改成本中心。"
+      - "company 和 cost_center 相关筛选必须先解析，不允许使用简称直接作为 ERPNext 主键。"
+      - "filters、fields、order_by 必须由 Runtime 生成或校验。"
+    parameters:
+      company:
+        source: "Company Resolver / Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+        repair: ["inject_context", "resolve_entity"]
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "如果包含 name/parent_cost_center/company，必须来自 resolver 或已校验上下文。"
+        repair: ["validate_before_execute", "resolve_entity"]
+      fields:
+        source: "Runtime 默认 / Field Resolver"
+        resolver: field
+        constraints:
+          - "字段必须存在于 Cost Center meta。"
+        repair: ["validate_before_execute"]
+      limit:
+        source: "Runtime 默认值"
+
+  erpnext.accounting.search_budgets:
+    purpose: "L0：查询预算单据，用于预算状态核对和预算草稿更新前定位。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Budget"]
+    audit_fields: ["company", "fiscal_year", "filters", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "仅用于读取 Budget，不创建、不更新、不提交预算。"
+      - "company、fiscal_year 必须解析为 ERPNext 主数据全称。"
+      - "filters、fields、order_by 必须由 Runtime 生成或校验。"
+    parameters:
+      company:
+        source: "Company Resolver / Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+        repair: ["inject_context", "resolve_entity"]
+      fiscal_year:
+        source: "Fiscal Year Resolver / 用户选择"
+        resolver: fiscal_year
+        constraints:
+          - "必须是 ERPNext Fiscal Year.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "预算维度筛选必须由编排层生成或白名单校验。"
+        repair: ["validate_before_execute"]
+      fields:
+        source: "Runtime 默认 / Field Resolver"
+        resolver: field
+        constraints:
+          - "字段必须存在于 Budget meta。"
+        repair: ["validate_before_execute"]
+
+  erpnext.accounting.search_fiscal_years:
+    purpose: "L0：查询会计年度主数据，用于报表、预算和期间类单据编排。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Fiscal Year"]
+    audit_fields: ["year", "disabled", "filters", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "仅用于读取 Fiscal Year，不创建或修改会计年度。"
+      - "用户说本年、上年、本会计年度时，必须由日期/会计年度 resolver 转换为 Fiscal Year.name。"
+      - "filters、fields、order_by 必须由 Runtime 生成或校验。"
+    parameters:
+      year:
+        source: "Fiscal Year Resolver / Date Resolver"
+        resolver: fiscal_year
+        constraints:
+          - "可作为 Fiscal Year 检索输入，不能凭空编造会计年度名称。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      disabled:
+        source: "用户选择 / Runtime 默认"
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "必须由编排层生成或白名单校验。"
+        repair: ["validate_before_execute"]
+      fields:
+        source: "Runtime 默认 / Field Resolver"
+        resolver: field
+        constraints:
+          - "字段必须存在于 Fiscal Year meta。"
+        repair: ["validate_before_execute"]
+
+  erpnext.accounting.search_accounting_periods:
+    purpose: "L0：查询会计期间，用于报表日期范围和关账草稿编排前检查。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Accounting Period"]
+    audit_fields: ["company", "from_date", "to_date", "filters", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "仅用于读取 Accounting Period，不创建或修改期间。"
+      - "日期范围必须是明确 ISO 日期，不接受本月左右、近期等模糊表达直接入参。"
+      - "company 必须来自 resolver 或 Runtime 上下文。"
+    parameters:
+      company:
+        source: "Company Resolver / Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+        repair: ["inject_context", "resolve_entity"]
+      from_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+        repair: ["ask_clarification", "inject_context"]
+      to_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+          - "不得早于 from_date。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "必须由编排层生成或白名单校验。"
+        repair: ["validate_before_execute"]
+
+  erpnext.accounting.search_payment_terms:
+    purpose: "L0：查询付款条件或付款条件模板，用于发票草稿编排。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Payment Term", "Payment Terms Template"]
+    audit_fields: ["doctype", "query", "filters", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "仅用于读取付款条件主数据，不创建或修改付款条件。"
+      - "doctype 只能是 Payment Term 或 Payment Terms Template。"
+      - "query 只能作为检索输入；命中多个模板时必须展示候选。"
+    parameters:
+      doctype:
+        source: "Runtime 默认 / 用户选择"
+        constraints:
+          - "默认 Payment Term；只能使用 schema 枚举值。"
+        repair: ["validate_before_execute"]
+      query:
+        source: "用户原话"
+        resolver: payment_terms
+        constraints:
+          - "仅作为检索输入，不能直接当成 ERPNext 主键。"
+        repair: ["resolve_entity", "present_candidates"]
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "必须由编排层生成或白名单校验。"
+        repair: ["validate_before_execute"]
+      fields:
+        source: "Runtime 默认 / Field Resolver"
+        resolver: field
+        constraints:
+          - "字段必须存在于目标 DocType meta。"
+        repair: ["validate_before_execute"]
+
+  erpnext.accounting.search_tax_templates:
+    purpose: "L0：查询销售/采购税费模板，用于发票税行准备。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]
+    audit_fields: ["template_type", "query", "company", "tax_category", "disabled", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "仅用于读取税费模板，不创建或修改税费模板。"
+      - "template_type 必须与目标发票类型一致；销售发票使用 sales，采购发票使用 purchase。"
+      - "company 必须解析成 ERPNext Company.name 全称。"
+      - "命中多个税费模板时必须展示候选，不允许模型自行选择。"
+    parameters:
+      template_type:
+        source: "发票类型 / Runtime 推断"
+        constraints:
+          - "只能使用 schema 枚举值。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      query:
+        source: "用户原话"
+        resolver: tax_template
+        constraints:
+          - "仅作为检索输入，不能直接当成税费模板主键。"
+        repair: ["resolve_entity", "present_candidates"]
+      company:
+        source: "Company Resolver / Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+        repair: ["inject_context", "resolve_entity"]
+      tax_category:
+        source: "Tax Category Resolver / 用户选择"
+        resolver: tax_category
+        constraints:
+          - "如作为筛选条件，必须来自 ERPNext 主数据或已校验上下文。"
+        repair: ["resolve_entity", "present_candidates"]
+      disabled:
+        source: "用户选择 / Runtime 默认"
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "必须由编排层生成或白名单校验。"
+        repair: ["validate_before_execute"]
+
+  erpnext.accounting.get_report_filters:
+    purpose: "L0：读取标准财务报表的过滤器契约，不运行报表。"
+    expose: agent_visible
+    allowed_roles: ["财务", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Report"]
+      reports: ["General Ledger", "Accounts Receivable", "Accounts Payable", "Trial Balance", "Balance Sheet", "Profit and Loss Statement", "Cash Flow"]
+    audit_fields: ["report_name"]
+    repair: ["ask_clarification", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读取报表过滤器契约，不运行报表、不读取财务数据行。"
+      - "report_name 必须使用 schema 枚举值。"
+      - "用于在运行报表前收集 company、date、fiscal_year、account、party 等 resolver 结果。"
+    parameters:
+      report_name:
+        required: yes
+        source: "用户选择 / Runtime 枚举"
+        constraints:
+          - "只能使用 schema 枚举值。"
+        repair: ["ask_clarification", "validate_before_execute"]
+
+  erpnext.accounting.general_ledger:
+    purpose: "L0：运行 General Ledger 只读报表。"
+    expose: agent_visible
+    allowed_roles: ["财务", "管理层"]
+    confirm: none
+    backend_mapping:
+      reports: ["General Ledger"]
+      notes: "run_report 只读；必填 company。"
+    audit_fields: ["company", "from_date", "to_date", "account", "party_type", "party"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读运行总账报表，不创建、不修改、不提交任何财务单据。"
+      - "company 必填且必须由 Company Resolver 或 Runtime Context 提供。"
+      - "from_date/to_date 必须是明确 ISO 日期；to_date 不得早于 from_date。"
+      - "account、party 必须解析为 ERPNext 主键；命中多个候选时必须展示候选。"
+    parameters:
+      company:
+        required: yes
+        source: "Company Resolver / Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+        repair: ["inject_context", "resolve_entity"]
+      from_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+        repair: ["ask_clarification", "inject_context"]
+      to_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+          - "不得早于 from_date。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      account:
+        source: "Account Resolver"
+        resolver: account
+        constraints:
+          - "必须是 ERPNext Account.name 全称。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      party_type:
+        source: "用户选择 / Runtime 推断"
+        constraints:
+          - "使用 ERPNext 支持的 party_type；当前 schema 未枚举，执行前需校验。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      party:
+        source: "Party Resolver"
+        resolver: party
+        constraints:
+          - "必须与 party_type 匹配，解析为 Customer/Supplier 等 ERPNext 主键。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "可包含 voucher_no、cost_center、project 等已校验筛选；禁止模型直接拼 filter DSL。"
+          - "如果包含 cost_center，必须来自 Cost Center Resolver。"
+        repair: ["validate_before_execute", "resolve_entity"]
+
+  erpnext.accounting.accounts_receivable:
+    purpose: "L0：运行 Accounts Receivable 只读报表。"
+    expose: agent_visible
+    allowed_roles: ["财务", "管理层"]
+    confirm: none
+    backend_mapping:
+      reports: ["Accounts Receivable"]
+      notes: "run_report 只读；必填 company。"
+    audit_fields: ["company", "from_date", "to_date", "party"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读运行应收账款报表，不创建、不修改、不提交任何财务单据。"
+      - "company 必填且必须由 Company Resolver 或 Runtime Context 提供。"
+      - "party 如填写，必须解析为 ERPNext Customer.name。"
+      - "默认口径：ToolCall 统一接收 from_date/to_date；应收报表执行时用 to_date 映射 ERPNext report_date，并把 from_date 作为账龄/期间过滤上下文。"
+    parameters:
+      company:
+        required: yes
+        source: "Company Resolver / Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+        repair: ["inject_context", "resolve_entity"]
+      from_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期；日期口径需与报表 filter spec 对齐。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      to_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期；日期口径需与报表 filter spec 对齐。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      party:
+        source: "Customer Resolver"
+        resolver: customer
+        constraints:
+          - "必须是 ERPNext Customer.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "可包含 customer、customer_group、payment_terms_template 等已校验筛选。"
+          - "禁止模型直接拼 filter DSL。"
+        repair: ["validate_before_execute", "resolve_entity"]
+
+  erpnext.accounting.accounts_payable:
+    purpose: "L0：运行 Accounts Payable 只读报表。"
+    expose: agent_visible
+    allowed_roles: ["财务", "管理层"]
+    confirm: none
+    backend_mapping:
+      reports: ["Accounts Payable"]
+      notes: "run_report 只读；必填 company。"
+    audit_fields: ["company", "from_date", "to_date", "party"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读运行应付账款报表，不创建、不修改、不提交任何财务单据。"
+      - "company 必填且必须由 Company Resolver 或 Runtime Context 提供。"
+      - "party 如填写，必须解析为 ERPNext Supplier.name。"
+      - "默认口径：ToolCall 统一接收 from_date/to_date；应付报表执行时用 to_date 映射 ERPNext report_date，并把 from_date 作为账龄/期间过滤上下文。"
+    parameters:
+      company:
+        required: yes
+        source: "Company Resolver / Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+        repair: ["inject_context", "resolve_entity"]
+      from_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期；日期口径需与报表 filter spec 对齐。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      to_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期；日期口径需与报表 filter spec 对齐。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      party:
+        source: "Supplier Resolver"
+        resolver: supplier
+        constraints:
+          - "必须是 ERPNext Supplier.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "可包含 supplier、supplier_group、payment_terms_template 等已校验筛选。"
+          - "禁止模型直接拼 filter DSL。"
+        repair: ["validate_before_execute", "resolve_entity"]
+
+  erpnext.accounting.financial_report:
+    purpose: "L0：运行 Trial Balance、Balance Sheet、Profit and Loss Statement 或 Cash Flow 只读报表。"
+    expose: agent_visible
+    allowed_roles: ["财务", "管理层"]
+    confirm: none
+    backend_mapping:
+      reports: ["Trial Balance", "Balance Sheet", "Profit and Loss Statement", "Cash Flow"]
+      notes: "run_report 只读；必填 company。"
+    audit_fields: ["report_name", "company", "from_date", "to_date", "fiscal_year"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读运行财务报表，不创建、不修改、不提交任何财务单据。"
+      - "company 必填且必须由 Company Resolver 或 Runtime Context 提供。"
+      - "report_name 必须使用 schema 枚举值。"
+      - "fiscal_year、日期和 filters 中的 cost_center 必须来自 resolver 或已校验上下文。"
+      - "默认口径：财务报表 ToolCall 统一接收 from_date/to_date，报表适配层负责映射为 ERPNext 所需的 period_start_date/period_end_date、from_fiscal_year/to_fiscal_year 或 filters 字段。"
+    parameters:
+      report_name:
+        required: yes
+        source: "用户选择 / Runtime 枚举"
+        constraints:
+          - "只能使用 schema 枚举值。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      company:
+        required: yes
+        source: "Company Resolver / Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+        repair: ["inject_context", "resolve_entity"]
+      from_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期；具体映射需与报表 filter spec 对齐。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      to_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期；具体映射需与报表 filter spec 对齐。"
+          - "不得早于 from_date。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      fiscal_year:
+        source: "Fiscal Year Resolver / Date Resolver"
+        resolver: fiscal_year
+        constraints:
+          - "必须是 ERPNext Fiscal Year.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "可包含 finance_book、cost_center、project、periodicity 等已校验筛选。"
+          - "如果包含 cost_center，必须来自 Cost Center Resolver。"
+          - "禁止模型直接拼 filter DSL。"
+        repair: ["validate_before_execute", "resolve_entity"]
+
+  erpnext.accounting.create_journal_entry_draft:
+    purpose: "L3：创建 Journal Entry 草稿，不提交。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Journal Entry", "Journal Entry Account"]
+    audit_fields: ["data"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只创建 docstatus=0 的草稿；提交必须另行使用 submit_financial_document 并经过 financial_confirm。"
+      - "创建前必须让用户确认凭证日期、公司、分录科目、借贷方向、金额和业务说明。"
+      - "data 中的 company、posting_date、accounts.account、accounts.cost_center、party 必须由 resolver 或已校验上下文生成。"
+      - "默认口径：执行前必须做借贷平衡和基础科目状态预检；冻结期间、禁用科目和期间锁定最终由 ERPNext 服务端再次拦截。"
+    parameters:
+      data:
+        required: yes
+        source: "财务凭证表单编排"
+        constraints:
+          - "必须是 Journal Entry draft payload；docstatus 会被服务端强制为 0。"
+          - "data.company 必须来自 Company Resolver。"
+          - "data.posting_date 必须来自 Date Resolver。"
+          - "accounts[].account 必须来自 Account Resolver。"
+          - "accounts[].cost_center 必须来自 Cost Center Resolver。"
+          - "accounts[].party 必须来自 Party Resolver 并与 party_type 匹配。"
+          - "完整 payload 必须进入审计日志。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "erpnext_validation_error"]
+
+  erpnext.accounting.create_payment_entry_draft:
+    purpose: "L3：创建 Payment Entry 草稿，不提交。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Payment Entry", "Payment Entry Reference"]
+    audit_fields: ["data"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只创建 docstatus=0 的草稿；提交必须另行使用 submit_financial_document 并经过 financial_confirm。"
+      - "创建前必须确认收/付款类型、公司、往来方、金额、付款账户、收款账户、引用发票和分配金额。"
+      - "data 中的 company、party、posting_date、paid_from、paid_to、references[].reference_name 必须由 resolver 或已校验上下文生成。"
+      - "建议先使用 prepare_payment_allocation 生成发票分配候选。"
+      - "制度配置项：汇兑损益、手续费、差额账户和跨币种付款规则必须来自公司财务制度或 ERPNext Payment Entry 配置，Agent 不得自行推断。"
+    parameters:
+      data:
+        required: yes
+        source: "付款分配结果 + 财务表单编排"
+        constraints:
+          - "必须是 Payment Entry draft payload；docstatus 会被服务端强制为 0。"
+          - "data.company 必须来自 Company Resolver。"
+          - "data.posting_date 必须来自 Date Resolver。"
+          - "data.party 必须来自 Customer/Supplier Resolver 并与 party_type 匹配。"
+          - "data.paid_from/data.paid_to 必须来自 Account Resolver 或 Bank Account Resolver。"
+          - "references[].reference_name 必须来自 Invoice Resolver。"
+          - "完整 payload 必须进入审计日志。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "erpnext_validation_error"]
+
+  erpnext.accounting.create_sales_invoice_draft:
+    purpose: "L3：创建 Sales Invoice 草稿，不提交。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Sales Invoice", "Sales Invoice Item", "Sales Taxes and Charges"]
+    audit_fields: ["data"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只创建 docstatus=0 的草稿；提交必须另行使用 submit_financial_document 并经过 financial_confirm。"
+      - "创建前必须确认客户、公司、日期、明细、数量、价格、税费模板或税行、收入科目和成本中心。"
+      - "data.customer 必须来自 Customer Resolver；data.company、posting_date、due_date、items[].income_account、items[].cost_center 必须由对应 resolver 或已校验上下文生成。"
+      - "制度配置项：价格来源、税费计算、收入确认和库存影响规则以公司财务制度、ERPNext 税费模板和服务端校验为准，Agent 只能使用解析出的模板或用户确认值。"
+    parameters:
+      data:
+        required: yes
+        source: "销售发票表单编排"
+        constraints:
+          - "必须是 Sales Invoice draft payload；docstatus 会被服务端强制为 0。"
+          - "data.customer 必须来自 Customer Resolver。"
+          - "data.company 必须来自 Company Resolver。"
+          - "data.posting_date/data.due_date 必须来自 Date Resolver。"
+          - "items[].income_account 必须来自 Account Resolver。"
+          - "items[].cost_center 必须来自 Cost Center Resolver。"
+          - "完整 payload 必须进入审计日志。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "erpnext_validation_error"]
+
+  erpnext.accounting.create_purchase_invoice_draft:
+    purpose: "L3：创建 Purchase Invoice 草稿，不提交。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Purchase Invoice", "Purchase Invoice Item", "Purchase Taxes and Charges"]
+    audit_fields: ["data"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只创建 docstatus=0 的草稿；提交必须另行使用 submit_financial_document 并经过 financial_confirm。"
+      - "创建前必须确认供应商、公司、发票日期、供应商发票号、明细、数量、价格、税费模板或税行、费用科目和成本中心。"
+      - "data.supplier 必须来自 Supplier Resolver；data.company、posting_date、bill_date、items[].expense_account、items[].cost_center 必须由对应 resolver 或已校验上下文生成。"
+      - "如从采购收货生成，优先使用 create_purchase_invoice_from_purchase_receipt_draft 保留来源行引用。"
+      - "制度配置项：价税差异、费用归集和应付账款科目规则以公司财务制度、ERPNext 税费模板和服务端校验为准，Agent 只能使用解析出的模板或用户确认值。"
+    parameters:
+      data:
+        required: yes
+        source: "采购发票表单编排"
+        constraints:
+          - "必须是 Purchase Invoice draft payload；docstatus 会被服务端强制为 0。"
+          - "data.supplier 必须来自 Supplier Resolver。"
+          - "data.company 必须来自 Company Resolver。"
+          - "data.posting_date/data.bill_date 必须来自 Date Resolver。"
+          - "items[].expense_account 必须来自 Account Resolver。"
+          - "items[].cost_center 必须来自 Cost Center Resolver。"
+          - "完整 payload 必须进入审计日志。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "erpnext_validation_error"]
+
+  erpnext.accounting.create_purchase_invoice_from_purchase_receipt_draft:
+    purpose: "L3：从已提交 Purchase Receipt 创建 Purchase Invoice 草稿，不提交。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Purchase Receipt", "Purchase Receipt Item", "Purchase Invoice", "Purchase Invoice Item"]
+      notes: "先读取 Purchase Receipt，校验可开票数量，再创建 Purchase Invoice 草稿。"
+    audit_fields: ["purchase_receipt", "posting_date", "bill_no", "bill_date", "company", "selected_items"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只创建 docstatus=0 的采购发票草稿；提交必须另行使用 submit_financial_document 并经过 financial_confirm。"
+      - "purchase_receipt 必须是已提交、非退货的 Purchase Receipt。"
+      - "selected_items 如填写，必须能唯一匹配来源收货行；数量必须大于 0 且不超过可开票数量。"
+      - "posting_date、bill_date 必须是明确 ISO 日期；bill_no 由供应商发票原文提供。"
+      - "默认口径：有供应商发票原件时 bill_no/bill_date 视为必填；缺失时只能建草稿并提示补录，重复供应商发票号必须前置查询并由 ERPNext 再校验。"
+    parameters:
+      purchase_receipt:
+        required: yes
+        source: "Purchase Receipt Resolver"
+        resolver: purchase_receipt
+        constraints:
+          - "必须是 ERPNext Purchase Receipt.name。"
+          - "必须是已提交且非退货单。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "erpnext_validation_error"]
+      posting_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+        repair: ["ask_clarification", "inject_context"]
+      bill_no:
+        source: "供应商发票原文 / 用户确认"
+        constraints:
+          - "不应由模型编造。"
+        repair: ["ask_clarification"]
+      bill_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+        repair: ["ask_clarification", "inject_context"]
+      company:
+        source: "Company Resolver / Purchase Receipt Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称；默认可来自收货单。"
+        repair: ["inject_context", "resolve_entity"]
+      selected_items:
+        source: "收货行选择 / Runtime Builder"
+        constraints:
+          - "数组每行 qty 必须大于 0。"
+          - "purchase_receipt_item 必须来自 Purchase Receipt Item Resolver，或 item_code 唯一匹配来源行。"
+          - "rate 如填写必须大于等于 0。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+
+  erpnext.accounting.create_period_closing_voucher_draft:
+    purpose: "L3：创建 Period Closing Voucher 草稿，不提交。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Period Closing Voucher"]
+    audit_fields: ["data"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只创建 docstatus=0 的期末结转草稿；提交必须另行使用 submit_financial_document 并经过 financial_confirm。"
+      - "创建前必须确认公司、会计期间、结转日期、损益科目和目标结转科目。"
+      - "data.company、posting_date、fiscal_year、closing_account_head、cost_center 必须由 resolver 或已校验上下文生成。"
+      - "制度配置项：期末结转允许的账户范围、期间冻结规则和多公司场景必须来自公司财务制度和 ERPNext 会计期间配置。"
+    parameters:
+      data:
+        required: yes
+        source: "期末结转表单编排"
+        constraints:
+          - "必须是 Period Closing Voucher draft payload；docstatus 会被服务端强制为 0。"
+          - "data.company 必须来自 Company Resolver。"
+          - "data.posting_date 必须来自 Date Resolver。"
+          - "data.fiscal_year 必须来自 Fiscal Year Resolver。"
+          - "data.closing_account_head 必须来自 Account Resolver。"
+          - "data.cost_center 如填写必须来自 Cost Center Resolver。"
+          - "完整 payload 必须进入审计日志。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "erpnext_validation_error"]
+
+  erpnext.accounting.prepare_payment_allocation:
+    purpose: "L1：准备 Payment Entry 引用发票分配，不创建、不提交付款单。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Sales Invoice", "Purchase Invoice"]
+      notes: "读取已提交且未结清的发票，返回分配建议。"
+    audit_fields: ["party_type", "party", "payment_type", "invoice_doctype", "invoice_names", "company", "paid_amount"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只准备付款分配候选，不创建 Payment Entry，不触发财务过账。"
+      - "party_type 必须是 Customer 或 Supplier；party 必须解析为对应 Customer/Supplier 主键。"
+      - "invoice_names 如填写，必须来自 Invoice Resolver；每张发票应为已提交且有未结清金额。"
+      - "paid_amount 必须大于等于 0；allocations 不得超过发票未结清金额。"
+      - "制度配置项：部分核销、预收预付、折扣和差额处理策略必须来自公司财务制度；Agent 只能按已解析规则生成候选分配。"
+    parameters:
+      party_type:
+        required: yes
+        source: "用户选择 / Runtime 推断"
+        constraints:
+          - "只能是 Customer 或 Supplier。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      party:
+        required: yes
+        source: "Customer/Supplier Resolver"
+        resolver: party
+        constraints:
+          - "必须与 party_type 匹配。"
+          - "Customer 场景必须是 ERPNext Customer.name；Supplier 场景必须是 ERPNext Supplier.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      payment_type:
+        source: "Runtime 推断 / 用户确认"
+        constraints:
+          - "Customer 默认 Receive，Supplier 默认 Pay；与 party_type 不一致时必须追问。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      invoice_doctype:
+        source: "Runtime 推断 / 用户确认"
+        constraints:
+          - "Customer 通常对应 Sales Invoice，Supplier 通常对应 Purchase Invoice。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      invoice_names:
+        source: "Invoice Resolver / 用户选择"
+        resolver: invoice
+        constraints:
+          - "每个值必须是 ERPNext Sales Invoice.name 或 Purchase Invoice.name。"
+          - "必须与 invoice_doctype 和 party 匹配。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      company:
+        source: "Company Resolver / Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+        repair: ["inject_context", "resolve_entity"]
+      paid_amount:
+        source: "用户确认金额 / Runtime 计算"
+        constraints:
+          - "必须大于等于 0。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      allocations:
+        source: "Runtime Builder / 用户确认"
+        constraints:
+          - "键必须对应已解析 invoice_names 或候选发票。"
+          - "分配金额不得为负。"
+        repair: ["validate_before_execute", "ask_clarification"]
+
+  erpnext.accounting.prepare_invoice_taxes:
+    purpose: "L1：准备销售/采购发票税行，不创建发票。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]
+      notes: "可读取税费模板并根据输入明细准备 taxes 行；最终总额仍由 ERPNext 草稿创建校验。"
+    audit_fields: ["invoice_type", "taxes_and_charges", "items", "taxes", "net_total"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只准备税行，不创建、不修改、不提交发票。"
+      - "invoice_type 必须与后续发票类型一致。"
+      - "taxes_and_charges 如填写，必须来自税费模板 resolver，不能使用未确认的模板名。"
+      - "显式 taxes 行必须来自用户确认或受控模板展开，不能由模型任意拼税率和科目。"
+      - "制度配置项：税率、含税/未税、进项/销项税科目和四舍五入口径必须来自公司财务制度与 ERPNext 税费模板，禁止模型自行编造税行。"
+    parameters:
+      invoice_type:
+        required: yes
+        source: "用户选择 / Runtime 推断"
+        constraints:
+          - "只能使用 schema 枚举值。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      taxes_and_charges:
+        source: "Tax Template Resolver"
+        resolver: tax_template
+        constraints:
+          - "必须是对应销售/采购税费模板的 ERPNext name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      items:
+        source: "发票明细编排"
+        constraints:
+          - "用于计算税基；物料、科目、成本中心等外键必须已解析。"
+        repair: ["validate_before_execute", "resolve_entity"]
+      taxes:
+        source: "用户确认 / 模板展开"
+        constraints:
+          - "显式税行必须经过财务确认或模板展开；不得由模型自由编造税率、科目。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      net_total:
+        source: "Runtime 计算 / 用户确认"
+        constraints:
+          - "必须大于等于 0。"
+        repair: ["validate_before_execute"]
+
+  erpnext.accounting.prepare_bank_reconciliation:
+    purpose: "L1：准备银行流水与 Payment Entry 候选匹配，不执行核销。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Bank Transaction", "Payment Entry"]
+      notes: "只读读取 Bank Transaction 与已提交 Payment Entry 候选。"
+    audit_fields: ["company", "bank_account", "status", "from_date", "to_date", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只准备银行对账候选，不匹配、不替换、不过账。"
+      - "company、bank_account 必须来自 resolver 或已校验上下文。"
+      - "日期范围必须是明确 ISO 日期；to_date 不得早于 from_date。"
+      - "apply_bank_reconciliation 前必须由财务复核具体 Bank Transaction 和 Payment Entry 匹配关系。"
+    parameters:
+      company:
+        source: "Company Resolver / Runtime Context"
+        resolver: company
+        constraints:
+          - "必须是 ERPNext Company.name 全称。"
+        repair: ["inject_context", "resolve_entity"]
+      bank_account:
+        source: "Bank Account Resolver"
+        resolver: bank_account
+        constraints:
+          - "必须是 ERPNext Bank Account.name 或系统认可的银行账户主键。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      status:
+        source: "用户选择 / Runtime 默认"
+        constraints:
+          - "用于筛选 Bank Transaction.status；当前 schema 未枚举，执行前需校验。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      from_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+        repair: ["ask_clarification", "inject_context"]
+      to_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints:
+          - "必须是 ISO 日期。"
+          - "不得早于 from_date。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      limit:
+        source: "Runtime 默认值"
+        constraints:
+          - "默认由 Runtime 控制，避免一次返回过多候选。"
+
+  erpnext.accounting.apply_bank_reconciliation:
+    purpose: "L5_FINANCIAL：在明确财务确认后应用银行核销匹配。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: financial_confirm
+    backend_mapping:
+      doctypes: ["Bank Transaction", "Payment Entry"]
+      methods: ["agent_bridge.api.reconcile_bank_transaction"]
+    audit_fields: ["bank_transaction", "matches", "replace_existing", "remarks", "confirmation"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "必须带 financial_confirm；禁止在缺少确认元数据时执行。"
+      - "只匹配既有 Payment Entry 到一个 Bank Transaction；不创建新的 Payment Entry 或 Journal Entry。"
+      - "bank_transaction 必须来自 Bank Transaction Resolver。"
+      - "matches[].payment_entry 必须来自 Payment Entry Resolver；allocated_amount 必须大于 0。"
+      - "replace_existing=true 会替换既有匹配，必须在确认摘要中明确说明。"
+      - "执行前应展示银行流水、付款单、分配金额和替换策略供财务确认。"
+    parameters:
+      bank_transaction:
+        required: yes
+        source: "Bank Transaction Resolver"
+        resolver: bank_transaction
+        constraints:
+          - "必须是 ERPNext Bank Transaction.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      matches:
+        required: yes
+        source: "prepare_bank_reconciliation 候选 + 财务确认"
+        resolver: payment_entry
+        constraints:
+          - "数组至少 1 行。"
+          - "matches[].payment_entry 必须是 ERPNext Payment Entry.name。"
+          - "matches[].payment_document 必须与 payment_entry 指向同一付款文档。"
+          - "matches[].allocated_amount 必须大于 0。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute"]
+      replace_existing:
+        source: "财务确认"
+        constraints:
+          - "默认为 false；true 时必须在确认摘要中说明替换原因。"
+        repair: ["ask_clarification"]
+      remarks:
+        source: "财务说明"
+        constraints:
+          - "建议记录核销依据或对账说明。"
+      confirmation:
+        required: yes
+        source: "Financial Confirmation"
+        constraints:
+          - "必须包含财务确认元数据，且确认摘要覆盖 bank_transaction、matches 和 replace_existing。"
+        repair: ["ask_clarification", "permission_denied", "validate_before_execute"]
+
+  erpnext.accounting.create_budget_draft:
+    purpose: "L3：创建 Budget 草稿，不提交预算控制。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Budget", "Budget Account"]
+    audit_fields: ["data"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只创建 docstatus=0 的预算草稿；预算提交或启用控制必须另行确认。"
+      - "创建前必须确认公司、会计年度、预算维度、预算账户/金额和控制动作。"
+      - "data.company、data.fiscal_year、accounts[].account、cost_center/project 等预算维度必须由 resolver 或已校验上下文生成。"
+      - "制度配置项：预算 against 维度、月度分解、超预算动作和提交流程必须来自公司财务制度与 ERPNext Budget 配置。"
+    parameters:
+      data:
+        required: yes
+        source: "预算表单编排"
+        constraints:
+          - "必须是 Budget draft payload；docstatus 会被服务端强制为 0。"
+          - "data.company 必须来自 Company Resolver。"
+          - "data.fiscal_year 必须来自 Fiscal Year Resolver。"
+          - "accounts[].account 必须来自 Account Resolver。"
+          - "cost_center 如填写必须来自 Cost Center Resolver。"
+          - "完整 payload 必须进入审计日志。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "erpnext_validation_error"]
+
+  erpnext.accounting.update_budget_draft:
+    purpose: "L3：更新 Budget 草稿，保持 docstatus=0，不提交预算控制。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Budget", "Budget Account"]
+    audit_fields: ["name", "data"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只能更新 Budget 草稿；服务端会强制 docstatus=0。"
+      - "更新前必须明确预算单名称、变更字段、变更原因和影响范围。"
+      - "name 必须来自预算查询结果或 Budget Resolver，不允许模型编造。"
+      - "data 中的 company、fiscal_year、account、cost_center 等外键必须由 resolver 或已校验上下文生成。"
+      - "默认口径：该工具不得把已提交预算回写为草稿；已提交预算调整应走取消/修订或专门预算调整流程，并受 ERPNext 权限限制。"
+    parameters:
+      name:
+        required: yes
+        source: "Budget Resolver / search_budgets 结果"
+        resolver: budget
+        constraints:
+          - "必须是 ERPNext Budget.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      data:
+        required: yes
+        source: "预算变更表单编排"
+        constraints:
+          - "必须是 Budget draft update payload；docstatus 会被服务端强制为 0。"
+          - "data.company 必须来自 Company Resolver。"
+          - "data.fiscal_year 必须来自 Fiscal Year Resolver。"
+          - "accounts[].account 必须来自 Account Resolver。"
+          - "cost_center 如填写必须来自 Cost Center Resolver。"
+          - "完整 payload 必须进入审计日志。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "erpnext_validation_error"]
+
+  erpnext.accounting.submit_financial_document:
+    purpose: "L5_FINANCIAL：提交会影响总账或财务状态的财务单据。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: financial_confirm
+    backend_mapping:
+      doctypes: ["Journal Entry", "Payment Entry", "Sales Invoice", "Purchase Invoice", "Period Closing Voucher"]
+      notes: "仅提交白名单财务 DocType。"
+    audit_fields: ["doctype", "name", "confirmation"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "必须带 financial_confirm；禁止在缺少确认元数据时执行。"
+      - "只允许提交 schema 枚举中的财务 DocType。"
+      - "提交前必须展示单据类型、单据号、金额/影响摘要、公司、日期和关键外键供财务确认。"
+      - "name 必须来自对应 DocType 的 resolver 或刚创建的草稿结果；不能由模型编造。"
+      - "Journal Entry、Payment Entry、Sales Invoice、Purchase Invoice、Period Closing Voucher 提交后可能产生或改变总账影响。"
+      - "默认口径：财务提交前必须运行可用的 GL 影响预览、税额复核和审批流状态检查；缺少自动校验能力时升级为财务人工确认。"
+    parameters:
+      doctype:
+        required: yes
+        source: "Runtime 枚举 / 草稿上下文"
+        constraints:
+          - "只能使用 schema 枚举值。"
+        repair: ["ask_clarification", "validate_before_execute"]
+      name:
+        required: yes
+        source: "Financial Document Resolver / 草稿创建结果"
+        resolver: financial_document
+        constraints:
+          - "必须是 doctype 对应的 ERPNext 文档 name。"
+          - "Sales Invoice/Purchase Invoice 必须来自 Invoice Resolver。"
+          - "Payment Entry 必须来自 Payment Entry Resolver。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      confirmation:
+        required: yes
+        source: "Financial Confirmation"
+        constraints:
+          - "必须包含财务确认元数据，且确认摘要覆盖 doctype、name 和财务影响。"
+        repair: ["ask_clarification", "permission_denied", "validate_before_execute"]

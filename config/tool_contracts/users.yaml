@@ -1,0 +1,567 @@
+version: 1
+module: users
+tools:
+  erpnext.users.list_users:
+    purpose: "L0：查询 ERPNext User 安全身份和状态字段。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["User"]
+    audit_fields: ["query", "enabled", "user_type", "role_profile_name", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只返回用户身份、启用状态、用户类型、角色配置和登录活动等安全摘要字段。"
+      - "查询结果不得直接作为新增、停用或改权限依据；写操作必须重新展示并确认目标用户。"
+    parameters:
+      query:
+        source: "用户原话"
+        resolver: user
+        constraints:
+          - "仅作为 User.full_name 模糊检索输入。"
+      enabled:
+        source: "用户筛选条件"
+      user_type:
+        source: "用户筛选条件"
+      role_profile_name:
+        source: "Role Profile Resolver"
+        resolver: role_profile
+        constraints:
+          - "如填写，必须是已存在的 ERPNext Role Profile.name。"
+      limit:
+        source: "Runtime 默认值"
+      offset:
+        source: "Runtime 分页"
+
+  erpnext.users.get_user_access_summary:
+    purpose: "L0：读取单个用户的启用状态、角色、角色配置和直接 User Permission 摘要。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["User", "User Permission"]
+    audit_fields: ["user", "include_permissions"]
+    repair: ["resolve_entity", "ask_clarification", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读访问摘要；不会创建、删除、启停用户或分配角色。"
+      - "直接 User Permission 只代表限制/默认维度之一，不等同完整运行时权限判定。"
+    parameters:
+      user:
+        required: yes
+        source: "User Resolver"
+        resolver: user
+        constraints:
+          - "必须是已存在的 ERPNext User.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      include_permissions:
+        source: "Runtime 默认值 / 用户选择"
+
+  erpnext.users.list_roles:
+    purpose: "L0：查询 ERPNext Role 主数据候选。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Role"]
+    audit_fields: ["query", "disabled", "desk_access", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "查询结果只用于候选展示；角色分配必须使用 erpnext.users.assign_roles 并获得 admin_confirm。"
+    parameters:
+      query:
+        source: "用户原话"
+        resolver: role
+        constraints:
+          - "仅作为 Role.role_name 模糊检索输入。"
+      disabled:
+        source: "用户筛选条件"
+      desk_access:
+        source: "用户筛选条件"
+      limit:
+        source: "Runtime 默认值"
+      offset:
+        source: "Runtime 分页"
+
+  erpnext.users.list_role_profiles:
+    purpose: "L0：查询 ERPNext Role Profile 主数据候选。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Role Profile"]
+    audit_fields: ["query", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "查询结果只用于候选展示；将角色配置写入 User 必须通过创建/更新用户的管理员确认流程。"
+    parameters:
+      query:
+        source: "用户原话"
+        resolver: role_profile
+        constraints:
+          - "仅作为 Role Profile 候选检索输入。"
+      limit:
+        source: "Runtime 默认值"
+      offset:
+        source: "Runtime 分页"
+
+  erpnext.users.preview_role_profile_roles:
+    purpose: "L0：预览一个 Role Profile 会展开出的角色列表，不写入 User。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Role Profile", "Role"]
+    audit_fields: ["role_profile"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "仅预览角色配置包含的角色；不会分配给任何用户。"
+      - "角色配置预览结果用于后续人工确认，不能自动触发 assign_roles。"
+    parameters:
+      role_profile:
+        required: yes
+        source: "Role Profile Resolver"
+        resolver: role_profile
+        constraints:
+          - "必须是已存在的 ERPNext Role Profile.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+
+  erpnext.users.list_user_permissions:
+    purpose: "L0：按用户、允许 DocType、允许值或适用 DocType 查询 User Permission 行。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["User Permission"]
+    audit_fields: ["user", "allow", "for_value", "applicable_for", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读 User Permission 行；新增或删除必须使用对应 admin_confirm 工具。"
+      - "默认口径：for_value 的目标 DocType 必须由 allow 字段决定；解析时必须先解析 allow，再用对应 DocType resolver 解析 for_value。"
+    parameters:
+      user:
+        source: "User Resolver"
+        resolver: user
+        constraints:
+          - "如填写，必须是已存在的 ERPNext User.name。"
+      allow:
+        source: "DocType Resolver"
+        resolver: doctype
+        constraints:
+          - "如填写，必须是 User Permission.allow 支持的 DocType。"
+      for_value:
+        source: "Document Resolver"
+        resolver: docname
+        constraints:
+          - "如填写，必须是 allow 对应 DocType 下已存在的单据名。"
+      applicable_for:
+        source: "DocType Resolver"
+        resolver: doctype
+        constraints:
+          - "如填写，必须是已存在的 ERPNext DocType.name。"
+      limit:
+        source: "Runtime 默认值"
+      offset:
+        source: "Runtime 分页"
+
+  erpnext.users.list_shared_documents:
+    purpose: "L0：查询 DocShare 共享文档行。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["DocShare"]
+    audit_fields: ["user", "share_doctype", "share_name", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读共享记录，不创建或移除共享。"
+      - "默认口径：DocShare 使用 Frappe 标准 read/write/share/submit/everyone 标志；write、share、submit 必须进入管理员确认摘要。"
+    parameters:
+      user:
+        source: "User Resolver"
+        resolver: user
+        constraints:
+          - "如填写，必须是已存在的 ERPNext User.name。"
+      share_doctype:
+        source: "DocType Resolver"
+        resolver: doctype
+        constraints:
+          - "如填写，必须是已存在的 ERPNext DocType.name。"
+      share_name:
+        source: "Document Resolver"
+        resolver: docname
+        constraints:
+          - "如填写，必须是 share_doctype 下已存在的单据名。"
+      limit:
+        source: "Runtime 默认值"
+      offset:
+        source: "Runtime 分页"
+
+  erpnext.users.list_access_logs:
+    purpose: "L0：查询 Access Log 审计记录。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Access Log"]
+    audit_fields: ["user", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读访问日志，不修改用户或权限。"
+      - "日志保留期和字段完整性取决于当前站点配置。"
+    parameters:
+      user:
+        source: "User Resolver"
+        resolver: user
+        constraints:
+          - "如填写，必须是已存在的 ERPNext User.name。"
+      limit:
+        source: "Runtime 默认值"
+      offset:
+        source: "Runtime 分页"
+
+  erpnext.users.list_activity_logs:
+    purpose: "L0：查询 Activity Log 审计记录。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Activity Log"]
+    audit_fields: ["user", "subject", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读活动日志，不修改用户或权限。"
+      - "subject 仅作为日志主题筛选，不应当作权限判断依据。"
+    parameters:
+      user:
+        source: "User Resolver"
+        resolver: user
+        constraints:
+          - "如填写，必须是已存在的 ERPNext User.name。"
+      subject:
+        source: "用户筛选条件"
+      limit:
+        source: "Runtime 默认值"
+      offset:
+        source: "Runtime 分页"
+
+  erpnext.users.get_permission_metadata:
+    purpose: "L0：读取某个 DocType 的 DocPerm/Custom DocPerm 风格权限元数据。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["DocType Meta"]
+      methods: ["ERPNextClient.get_doctype_schema"]
+    audit_fields: ["doctype"]
+    repair: ["resolve_entity", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读权限元数据；不会修改 DocPerm 或 Custom DocPerm。"
+      - "权限元数据不等同服务器运行时最终判定，必要时使用 check_server_permission。"
+    parameters:
+      doctype:
+        required: yes
+        source: "DocType Resolver"
+        resolver: doctype
+        constraints:
+          - "必须是已存在的 ERPNext DocType.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+
+  erpnext.users.preview_effective_permissions:
+    purpose: "L0：基于用户角色、DocType 权限元数据和直接 User Permission 预览用户权限，不写入 ERPNext。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["User", "DocType Meta", "User Permission"]
+    audit_fields: ["user", "doctype", "include_user_permissions"]
+    repair: ["resolve_entity", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "这是元数据层预览，不是完整服务器运行时权限判定。"
+      - "预览结果不能自动触发角色分配、用户权限增删或 DocPerm 修改。"
+    parameters:
+      user:
+        required: yes
+        source: "User Resolver"
+        resolver: user
+        constraints:
+          - "必须是已存在的 ERPNext User.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      doctype:
+        required: yes
+        source: "DocType Resolver"
+        resolver: doctype
+        constraints:
+          - "必须是已存在的 ERPNext DocType.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      include_user_permissions:
+        source: "Runtime 默认值 / 用户选择"
+
+  erpnext.users.check_server_permission:
+    purpose: "L0：调用后端权限检查能力，对比服务器运行时权限和元数据预览。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["User", "DocType Meta"]
+      methods: ["agent_bridge.api.check_user_permission"]
+    audit_fields: ["user", "doctype", "docname", "action", "debug"]
+    repair: ["resolve_entity", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只检查权限，不修改任何用户、角色或共享记录。"
+      - "docname 如填写，必须与 doctype 一起解析，不能脱离 DocType 单独猜测。"
+      - "默认口径：权限检查必须以当前 API 用户身份执行，不允许用系统管理员身份绕过；返回结果应包含执行用户和 Frappe 版本调试信息。"
+    parameters:
+      user:
+        required: yes
+        source: "User Resolver"
+        resolver: user
+        constraints:
+          - "必须是已存在的 ERPNext User.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      doctype:
+        required: yes
+        source: "DocType Resolver"
+        resolver: doctype
+        constraints:
+          - "必须是已存在的 ERPNext DocType.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      docname:
+        source: "Document Resolver"
+        resolver: docname
+        constraints:
+          - "如填写，必须是 doctype 下已存在的单据名。"
+      action:
+        required: yes
+        source: "权限动作枚举"
+        constraints:
+          - "只能使用 schema 枚举中的 Frappe 权限动作。"
+      debug:
+        source: "Runtime / 管理员选择"
+
+  erpnext.users.preview_permission_policy_change:
+    purpose: "L5_ADMIN 预览：模拟 DocPerm 风格权限策略变更的前后差异，不写入 ERPNext。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["DocType Meta"]
+    audit_fields: ["doctype", "changes"]
+    repair: ["resolve_entity", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "该工具只做预览，不创建、更新或删除 DocPerm/Custom DocPerm。"
+      - "changes 中涉及的 role、permlevel、match.name 和权限位必须来自明确输入或现有元数据。"
+      - "真正修改权限策略需要单独的 L5_ADMIN 写工具和 admin_confirm；当前 schema 未提供写工具。"
+      - "默认口径：运行期权限修改优先写 Custom DocPerm；变更后刷新权限缓存，迁移/fixtures 由开发流程处理，不由 Agent 自动执行。"
+    parameters:
+      doctype:
+        required: yes
+        source: "DocType Resolver"
+        resolver: doctype
+        constraints:
+          - "必须是已存在的 ERPNext DocType.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      changes:
+        required: yes
+        source: "权限策略预览表单编排"
+        resolver: role
+        constraints:
+          - "数组至少 1 行。"
+          - "operation 只能是 add、update、remove。"
+          - "role 必须解析为已存在的 ERPNext Role.name。"
+          - "remove/update 的 match.name 如填写，必须来自读取到的现有权限行。"
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute"]
+
+  erpnext.users.create_user_draft:
+    purpose: "L5_ADMIN：创建 User 主数据草稿式记录，默认禁用且不发送欢迎邮件。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: admin_confirm
+    backend_mapping:
+      doctypes: ["User", "Role"]
+      methods: ["ERPNextClient.create_document"]
+    audit_fields: ["email", "first_name", "last_name", "user_type", "role_profile_name", "roles", "enabled", "send_welcome_email", "confirmation"]
+    repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "创建前必须展示邮箱、姓名、用户类型、是否启用、是否发送欢迎邮件、角色配置和角色列表。"
+      - "默认应保持 enabled=false、send_welcome_email=false，除非管理员明确确认。"
+      - "roles 中每个角色必须来自 Role Resolver；role_profile_name 必须来自 Role Profile Resolver。"
+      - "默认口径：Agent 不设置明文初始密码；SSO、欢迎邮件和员工关联按站点安全策略执行，Employee 关联必须 resolver 命中并经管理员确认。"
+    parameters:
+      email:
+        required: yes
+        source: "用户确认邮箱"
+        constraints:
+          - "通常作为 ERPNext User.name；必须进入管理员确认摘要。"
+      first_name:
+        required: yes
+        source: "用户确认姓名"
+      last_name:
+        source: "用户确认姓名"
+      user_type:
+        source: "用户选择 / Runtime 默认值"
+      role_profile_name:
+        source: "Role Profile Resolver"
+        resolver: role_profile
+        constraints:
+          - "如填写，必须是已存在的 ERPNext Role Profile.name。"
+      roles:
+        source: "Role Resolver"
+        resolver: role
+        constraints:
+          - "每个元素必须是已存在的 ERPNext Role.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      enabled:
+        source: "管理员确认"
+        constraints:
+          - "默认 false；启用新用户必须明确说明。"
+      send_welcome_email:
+        source: "管理员确认"
+        constraints:
+          - "默认 false；发送欢迎邮件必须明确说明。"
+      confirmation:
+        required: yes
+        source: "Admin Confirmation Policy"
+
+  erpnext.users.set_user_enabled:
+    purpose: "L5_ADMIN：启用或停用 ERPNext User。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: admin_confirm
+    backend_mapping:
+      doctypes: ["User"]
+      methods: ["ERPNextClient.update_document"]
+    audit_fields: ["user", "enabled", "confirmation"]
+    repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "执行前必须展示目标用户、当前状态和目标状态。"
+      - "停用系统集成账号、管理员账号或当前会话用户必须升级人工复核。"
+      - "默认口径：禁止通过 ToolCall 启停 Administrator、Guest、集成用户和 API 用户；这类账号必须由系统管理员在后台人工处理。"
+    parameters:
+      user:
+        required: yes
+        source: "User Resolver"
+        resolver: user
+        constraints:
+          - "必须是已存在的 ERPNext User.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      enabled:
+        required: yes
+        source: "管理员确认"
+      confirmation:
+        required: yes
+        source: "Admin Confirmation Policy"
+
+  erpnext.users.assign_roles:
+    purpose: "L5_ADMIN：对一个 User 执行角色 replace、add 或 remove。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: admin_confirm
+    backend_mapping:
+      doctypes: ["User", "Role"]
+      methods: ["ERPNextClient.update_document"]
+    audit_fields: ["user", "mode", "roles", "confirmation"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "执行前必须展示目标用户、操作模式、当前角色、目标角色和差异。"
+      - "replace 模式会覆盖用户现有角色，必须特别提示。"
+      - "roles 中每个角色必须是已存在 Role.name，禁止凭空创造角色。"
+      - "默认口径：System Manager、Administrator 等高权限角色授权必须 admin_confirm，并在确认摘要中单独列出高权限风险。"
+    parameters:
+      user:
+        required: yes
+        source: "User Resolver"
+        resolver: user
+        constraints:
+          - "必须是已存在的 ERPNext User.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      mode:
+        required: yes
+        source: "管理员选择"
+        constraints:
+          - "只能是 replace、add、remove。"
+      roles:
+        required: yes
+        source: "Role Resolver"
+        resolver: role
+        constraints:
+          - "数组至少 1 行。"
+          - "每个元素必须是已存在的 ERPNext Role.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      confirmation:
+        required: yes
+        source: "Admin Confirmation Policy"
+
+  erpnext.users.create_user_permission:
+    purpose: "L5_ADMIN：创建 User Permission 行。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: admin_confirm
+    backend_mapping:
+      doctypes: ["User Permission", "User"]
+      methods: ["ERPNextClient.create_document"]
+    audit_fields: ["user", "allow", "for_value", "applicable_for", "is_default", "hide_descendants", "confirmation"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "执行前必须展示目标用户、允许 DocType、允许值、适用 DocType、是否默认和是否隐藏子级。"
+      - "allow 与 for_value 必须一起解析；for_value 不能脱离 allow 单独猜测。"
+      - "默认口径：User Permission 先按 allow 解析层级语义；is_default 冲突必须前置查询，hide_descendants 仅在目标 DocType 支持树结构时可用。"
+    parameters:
+      user:
+        required: yes
+        source: "User Resolver"
+        resolver: user
+        constraints:
+          - "必须是已存在的 ERPNext User.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      allow:
+        required: yes
+        source: "DocType Resolver"
+        resolver: doctype
+        constraints:
+          - "必须是 User Permission.allow 支持的 DocType。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      for_value:
+        required: yes
+        source: "Document Resolver"
+        resolver: docname
+        constraints:
+          - "必须是 allow 对应 DocType 下已存在的单据名。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      applicable_for:
+        source: "DocType Resolver"
+        resolver: doctype
+        constraints:
+          - "如填写，必须是已存在的 ERPNext DocType.name。"
+      is_default:
+        source: "管理员确认"
+      hide_descendants:
+        source: "管理员确认"
+      confirmation:
+        required: yes
+        source: "Admin Confirmation Policy"
+
+  erpnext.users.delete_user_permission:
+    purpose: "L5_ADMIN：按名称删除 User Permission 行。"
+    expose: agent_visible
+    allowed_roles: ["系统管理员"]
+    confirm: admin_confirm
+    backend_mapping:
+      doctypes: ["User Permission"]
+      methods: ["ERPNextClient.delete_document"]
+    audit_fields: ["name", "confirmation"]
+    repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "删除前必须读取并展示 User Permission 行的 user、allow、for_value、applicable_for 等字段。"
+      - "删除动作不可仅凭用户描述执行，必须确认精确 User Permission.name。"
+      - "默认口径：删除 User Permission 后必须刷新权限缓存并记录审计；无法自动刷新时返回 user_message 提醒管理员重新登录或清缓存。"
+    parameters:
+      name:
+        required: yes
+        source: "Document Resolver"
+        resolver: docname
+        constraints:
+          - "必须是已存在的 User Permission.name。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      confirmation:
+        required: yes
+        source: "Admin Confirmation Policy"

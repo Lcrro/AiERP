@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DeepSeek 材料申请 ToolCall 预览</title>
+    <style>
+      :root {
+        font-family: Inter, Arial, "Microsoft YaHei", sans-serif;
+        color: #1b1b1f;
+        background: #f6f7f9;
+      }
+
+      body {
+        margin: 0;
+      }
+
+      .wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 28px;
+      }
+
+      .top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 18px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .ok {
+        background: #e9f8ef;
+        color: #176b36;
+      }
+
+      .warn {
+        background: #fff3d6;
+        color: #8a5a00;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 0.95fr 1.05fr;
+        gap: 16px;
+      }
+
+      .panel {
+        background: #fff;
+        border: 1px solid #e4e7ec;
+        border-radius: 10px;
+        padding: 18px;
+        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+      }
+
+      h1 {
+        font-size: 24px;
+        margin: 0 0 8px;
+      }
+
+      h2 {
+        font-size: 16px;
+        margin: 0 0 14px;
+      }
+
+      .muted {
+        color: #667085;
+      }
+
+      .input {
+        font-size: 18px;
+        line-height: 1.65;
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 14px;
+      }
+
+      .kv {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 10px 14px;
+        font-size: 14px;
+      }
+
+      .kv b {
+        color: #475467;
+      }
+
+      .item {
+        border-top: 1px solid #edf0f5;
+        margin-top: 14px;
+        padding-top: 14px;
+      }
+
+      .json {
+        white-space: pre-wrap;
+        background: #111827;
+        color: #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        font-size: 13px;
+        line-height: 1.55;
+        overflow: auto;
+        max-height: 520px;
+      }
+
+      .issue {
+        border-left: 4px solid #f59e0b;
+        background: #fffbeb;
+        padding: 12px 14px;
+        border-radius: 8px;
+        margin-top: 14px;
+      }
+
+      .issue strong {
+        color: #92400e;
+      }
+
+      .assumptions {
+        margin: 8px 0 0;
+        padding-left: 20px;
+      }
+
+      .assumptions li {
+        margin: 6px 0;
+      }
+
+      .footer {
+        margin-top: 16px;
+        color: #667085;
+        font-size: 13px;
+      }
+
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <div class="top">
+        <div>
+          <h1>DeepSeek 材料申请 ToolCall 预览</h1>
+          <div class="muted">Dry-run：没有写入 ERPNext，只展示模型生成的候选调用。</div>
+        </div>
+        <div>
+          <span class="badge ok">needs_confirmation</span>
+          <span class="badge warn">日期需修正</span>
+        </div>
+      </div>
+
+      <div class="grid">
+        <section class="panel">
+          <h2>用户原话</h2>
+          <div class="input">城东项目道路班组明天需要帆布手套100双，送到城东项目仓，用于劳保补充。</div>
+
+          <div class="issue">
+            <strong>发现问题：</strong>今天是 2026-06-17，用户说“明天”，应是 2026-06-18；DeepSeek 输出了 2026-06-19。
+            这说明日期解析需要由 Runtime 固化，而不能完全交给模型自由判断。
+          </div>
+
+          <div class="item">
+            <h2>DeepSeek 摘要</h2>
+            <div>为城东项目申请100双帆布手套，送至城东项目仓，需求日期2026-06-19，用于劳保补充。</div>
+          </div>
+
+          <div class="item">
+            <h2>关键字段</h2>
+            <div class="kv">
+              <b>工具</b><span>erpnext.buying.create_material_request_draft</span>
+              <b>公司</b><span>STEC (Demo)</span>
+              <b>项目</b><span>SCEN-CIVIL-CHENGDONG</span>
+              <b>物料</b><span>SAFE-000005 / 帆布手套</span>
+              <b>数量</b><span>100 双</span>
+              <b>仓库</b><span>SCEN-CIVIL 城东项目仓 - SD</span>
+              <b>置信度</b><span>0.95</span>
+            </div>
+          </div>
+
+          <div class="item">
+            <h2>模型假设</h2>
+            <ul class="assumptions">
+              <li>默认材料申请类型为Purchase</li>
+              <li>默认公司为STEC (Demo)</li>
+              <li>默认需求日期为明天（2026-06-19）</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>候选 ToolCall JSON</h2>
+          <pre class="json">{
+  "tool": "erpnext.buying.create_material_request_draft",
+  "arguments": {
+    "material_request_type": "Purchase",
+    "company": "STEC (Demo)",
+    "schedule_date": "2026-06-19",
+    "items": [
+      {
+        "item_code": "SAFE-000005",
+        "qty": 100,
+        "uom": "双",
+        "warehouse": "SCEN-CIVIL 城东项目仓 - SD",
+        "schedule_date": "2026-06-19",
+        "project": "SCEN-CIVIL-CHENGDONG"
+      }
+    ]
+  }
+}</pre>
+          <div class="footer">下一步建议：把日期解析从模型提示词里拿出来，作为 Runtime 的确定性预处理/校验；修正为 2026-06-18 后再允许执行。</div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

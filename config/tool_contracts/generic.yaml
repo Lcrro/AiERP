@@ -1,0 +1,446 @@
+version: 1
+module: generic
+tools:
+  erpnext.search_documents:
+    purpose: "L0：通用底层 DocType 查询，用于 Resolver、报表编排和内部状态检查。"
+    expose: runtime_internal
+    allowed_roles: ["Runtime"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["任意 DocType"]
+    audit_fields: ["doctype", "filters", "fields", "limit", "order_by"]
+    repair: ["validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "员工 Agent 不能直接请求该工具。"
+      - "必须由 Runtime 构造 filters，禁止模型直接手写 Frappe filter DSL。"
+    parameters:
+      doctype:
+        required: yes
+        source: "DocType Resolver"
+        resolver: doctype
+        constraints:
+          - "必须是 ERPNext 已存在 DocType。"
+        repair: ["resolve_entity", "validate_before_execute"]
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "必须由编排层生成，不能由模型直接拼。"
+        repair: ["validate_before_execute"]
+      fields:
+        source: "Field Resolver"
+        resolver: field
+        constraints:
+          - "字段必须存在于目标 DocType meta。"
+        repair: ["validate_before_execute"]
+
+  erpnext.create_document:
+    purpose: "L3：裸创建任意 DocType，开发和迁移时使用。"
+    expose: developer_only
+    allowed_roles: ["developer"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["任意 DocType"]
+    audit_fields: ["doctype", "data"]
+    repair: ["permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "员工 Agent 永不直接使用该工具。"
+      - "如果业务需要新增单据，优先新增专用 ToolCall。"
+      - "仅本地开发、迁移、调试或受控专家模式可以使用。"
+    parameters:
+      doctype:
+        required: yes
+        source: "Developer"
+        resolver: doctype
+        constraints:
+          - "必须是 ERPNext 已存在 DocType。"
+      data:
+        required: yes
+        source: "Developer"
+        constraints:
+          - "完整 payload 必须进入审计日志。"
+
+  erpnext.update_document:
+    purpose: "L3：裸更新任意 DocType，开发、迁移和受控维护时使用。"
+    expose: developer_only
+    allowed_roles: ["developer"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["任意 DocType"]
+    audit_fields: ["doctype", "name", "data"]
+    repair: ["permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "员工 Agent 永不直接使用该工具。"
+      - "业务更新应优先通过专用 ToolCall 或业务 wrapper。"
+    parameters:
+      doctype:
+        required: yes
+        source: "Developer"
+        resolver: doctype
+        constraints:
+          - "必须是 ERPNext 已存在 DocType。"
+      name:
+        required: yes
+        source: "Developer"
+        resolver: docname
+        constraints:
+          - "必须是目标 DocType 下已存在的单据名。"
+      data:
+        required: yes
+        source: "Developer"
+        constraints:
+          - "完整更新 payload 必须进入审计日志。"
+
+  erpnext.delete_document:
+    purpose: "L4：裸删除任意 DocType，开发和受控维护时使用。"
+    expose: developer_only
+    allowed_roles: ["developer"]
+    confirm: submit_confirm
+    backend_mapping:
+      doctypes: ["任意 DocType"]
+    audit_fields: ["doctype", "name"]
+    repair: ["permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "员工 Agent 永不直接使用该工具。"
+      - "删除动作必须有明确确认和审计原因。"
+    parameters:
+      doctype:
+        required: yes
+        source: "Developer"
+        resolver: doctype
+        constraints:
+          - "必须是 ERPNext 已存在 DocType。"
+      name:
+        required: yes
+        source: "Developer"
+        resolver: docname
+        constraints:
+          - "必须是目标 DocType 下已存在的单据名。"
+
+  erpnext.call_method:
+    purpose: "L1：调用已白名单允许的 Frappe 方法；有专用 ToolCall 时禁止直接使用。"
+    expose: developer_only
+    allowed_roles: ["developer"]
+    confirm: user_confirm
+    backend_mapping:
+      methods: ["任意已允许 Frappe Method"]
+    audit_fields: ["method", "args", "http_method", "confirmation"]
+    repair: ["permission_denied", "validate_before_execute", "erpnext_validation_error"]
+    business_contract:
+      - "员工 Agent 永不直接使用该工具。"
+      - "业务动作必须优先沉淀为专用 ToolCall。"
+      - "method 必须在 Adapter/后端白名单范围内。"
+    parameters:
+      method:
+        required: yes
+        source: "Developer"
+        constraints:
+          - "必须是允许调用的 Frappe 方法。"
+      args:
+        source: "Developer"
+        constraints:
+          - "参数结构必须进入审计日志。"
+      http_method:
+        source: "Developer"
+        constraints:
+          - "只允许 GET 或 POST。"
+
+  erpnext.count_documents:
+    purpose: "L0：统计某个 DocType 的记录数量，供 Runtime 和 Resolver 使用。"
+    expose: runtime_internal
+    allowed_roles: ["Runtime"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["任意 DocType"]
+      methods: ["frappe.client.get_count"]
+    audit_fields: ["doctype", "filters"]
+    repair: ["validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "员工 Agent 不直接手写 filters。"
+    parameters:
+      doctype:
+        required: yes
+        source: "DocType Resolver"
+        resolver: doctype
+        constraints:
+          - "必须是 ERPNext 已存在 DocType。"
+      filters:
+        source: "Runtime Builder"
+        constraints:
+          - "必须由编排层生成。"
+
+  erpnext.get_document:
+    purpose: "L0：按 DocType 和单据名读取一张 ERPNext 单据。"
+    expose: runtime_internal
+    allowed_roles: ["Runtime"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["任意 DocType"]
+    audit_fields: ["doctype", "name"]
+    repair: ["resolve_entity", "validate_before_execute", "permission_denied"]
+    business_contract:
+      - "用于 Runtime 读取上下文，员工 Agent 通常不直接请求。"
+    parameters:
+      doctype:
+        required: yes
+        source: "DocType Resolver"
+        resolver: doctype
+      name:
+        required: yes
+        source: "Document Resolver"
+        resolver: docname
+
+  erpnext.document_exists:
+    purpose: "L0：检查某张 ERPNext 单据是否存在。"
+    expose: runtime_internal
+    allowed_roles: ["Runtime"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["任意 DocType"]
+    audit_fields: ["doctype", "name"]
+    repair: ["resolve_entity", "validate_before_execute"]
+    parameters:
+      doctype:
+        required: yes
+        source: "DocType Resolver"
+        resolver: doctype
+      name:
+        required: yes
+        source: "Document Resolver"
+        resolver: docname
+
+  erpnext.resolve_link:
+    purpose: "L0：为 Link 字段查找候选关联单据。"
+    expose: runtime_internal
+    allowed_roles: ["Runtime"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["任意 Link 目标 DocType"]
+    audit_fields: ["doctype", "query", "search_field", "limit"]
+    repair: ["resolve_entity", "present_candidates", "validate_before_execute"]
+    parameters:
+      doctype:
+        required: yes
+        source: "Link Field Meta"
+        resolver: doctype
+      query:
+        required: yes
+        source: "用户原话 / Runtime"
+        constraints:
+          - "仅作为候选检索输入。"
+      search_field:
+        source: "Field Resolver"
+        resolver: field
+      limit:
+        source: "Runtime 默认值"
+
+  erpnext.validate_fields:
+    purpose: "L0：执行 ToolCall 前校验字段名是否存在于目标 DocType。"
+    expose: runtime_internal
+    allowed_roles: ["Runtime"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["DocType Meta"]
+    audit_fields: ["doctype", "fields"]
+    repair: ["validate_before_execute"]
+    parameters:
+      doctype:
+        required: yes
+        source: "DocType Resolver"
+        resolver: doctype
+      fields:
+        required: yes
+        source: "Runtime Builder"
+        resolver: field
+
+  erpnext.get_doctype_schema:
+    purpose: "L0：读取 ERPNext DocType 元数据和字段结构。"
+    expose: runtime_internal
+    allowed_roles: ["Runtime"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["DocType Meta"]
+    audit_fields: ["doctype"]
+    repair: ["resolve_entity", "permission_denied"]
+    parameters:
+      doctype:
+        required: yes
+        source: "DocType Resolver"
+        resolver: doctype
+
+  erpnext.submit_document:
+    purpose: "L4：通过 ERPNext 服务端规则提交一张可提交单据。"
+    expose: runtime_internal
+    allowed_roles: ["Runtime"]
+    confirm: submit_confirm
+    backend_mapping:
+      doctypes: ["任意可提交 DocType"]
+      methods: ["agent_bridge.api.submit_document"]
+    audit_fields: ["doctype", "name", "confirmation"]
+    repair: ["validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "员工 Agent 不直接调用通用提交；应通过模块专用 submit 工具或业务流程节点。"
+    parameters:
+      doctype:
+        required: yes
+        resolver: doctype
+      name:
+        required: yes
+        resolver: docname
+      confirmation:
+        required: conditional
+        source: "Confirmation Policy"
+
+  erpnext.cancel_document:
+    purpose: "L4：通过 ERPNext 服务端规则取消一张已提交单据。"
+    expose: runtime_internal
+    allowed_roles: ["Runtime"]
+    confirm: submit_confirm
+    backend_mapping:
+      doctypes: ["任意可取消 DocType"]
+      methods: ["agent_bridge.api.cancel_document"]
+    audit_fields: ["doctype", "name", "confirmation"]
+    repair: ["validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    parameters:
+      doctype:
+        required: yes
+        resolver: doctype
+      name:
+        required: yes
+        resolver: docname
+      confirmation:
+        required: conditional
+        source: "Confirmation Policy"
+
+  erpnext.apply_workflow:
+    purpose: "L4：对某张 ERPNext 单据执行工作流动作。"
+    expose: runtime_internal
+    allowed_roles: ["Runtime"]
+    confirm: submit_confirm
+    backend_mapping:
+      methods: ["frappe.model.workflow.apply_workflow"]
+    audit_fields: ["doctype", "name", "action"]
+    repair: ["validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    parameters:
+      doctype:
+        required: yes
+        resolver: doctype
+      name:
+        required: yes
+        resolver: docname
+      action:
+        required: yes
+        source: "Workflow Action Resolver"
+        constraints:
+          - "必须来自 erpnext.get_workflow_actions 返回的可执行动作。"
+
+  erpnext.search_items:
+    purpose: "L0：检索标准化 ERPNext Item 主数据，返回候选和追问信息。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "采购", "项目经理", "班组长", "财务", "资产管理员", "管理层", "系统管理员"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Item"]
+    audit_fields: ["query", "specs", "item_group", "enabled_only", "limit"]
+    repair: ["present_candidates", "ask_clarification"]
+    business_contract:
+      - "检索结果不等于最终选择；低置信或多候选必须让用户确认。"
+    parameters:
+      query:
+        required: yes
+        source: "用户原话"
+        resolver: item
+      specs:
+        source: "Slot Extractor"
+      item_group:
+        source: "Item Group Resolver"
+        resolver: item_group
+      enabled_only:
+        source: "Runtime 默认值"
+      limit:
+        source: "Runtime 默认值"
+
+  erpnext.create_todo:
+    purpose: "L2：创建跟进任务。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "采购", "项目经理", "班组长", "财务", "资产管理员", "管理层", "系统管理员"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["ToDo"]
+    audit_fields: ["description", "allocated_to", "reference_type", "reference_name", "date"]
+    repair: ["ask_clarification", "permission_denied", "erpnext_validation_error"]
+    parameters:
+      description:
+        required: yes
+        source: "用户确认文本"
+      allocated_to:
+        source: "User Resolver / 当前用户"
+        resolver: user
+      reference_type:
+        source: "DocType Resolver"
+        resolver: doctype
+      reference_name:
+        source: "Document Resolver"
+        resolver: docname
+      date:
+        source: "Date Resolver"
+        resolver: date
+
+  erpnext.add_comment:
+    purpose: "L2：给 ERPNext 单据添加评论。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "采购", "项目经理", "班组长", "财务", "资产管理员", "管理层", "系统管理员"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Comment"]
+      methods: ["frappe.desk.form.utils.add_comment"]
+    audit_fields: ["reference_doctype", "reference_name", "content"]
+    repair: ["resolve_entity", "ask_clarification", "permission_denied", "erpnext_validation_error"]
+    parameters:
+      reference_doctype:
+        required: yes
+        resolver: doctype
+      reference_name:
+        required: yes
+        resolver: docname
+      content:
+        required: yes
+        source: "用户确认文本"
+
+  erpnext.assign_to:
+    purpose: "L2：把 ERPNext 单据分配给一个或多个用户。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "采购", "项目经理", "班组长", "财务", "资产管理员", "管理层", "系统管理员"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["ToDo"]
+      methods: ["frappe.desk.form.assign_to.add"]
+    audit_fields: ["doctype", "name", "assign_to", "description", "date"]
+    repair: ["resolve_entity", "ask_clarification", "permission_denied", "erpnext_validation_error"]
+    parameters:
+      doctype:
+        required: yes
+        resolver: doctype
+      name:
+        required: yes
+        resolver: docname
+      assign_to:
+        required: yes
+        resolver: user
+      date:
+        resolver: date
+
+  erpnext.delete_attachment:
+    purpose: "L4：删除一个 ERPNext File 附件。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "采购", "项目经理", "班组长", "财务", "资产管理员", "系统管理员"]
+    confirm: submit_confirm
+    backend_mapping:
+      doctypes: ["File"]
+    audit_fields: ["file_name"]
+    repair: ["resolve_entity", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "删除附件必须展示文件名和关联单据并获得确认。"
+    parameters:
+      file_name:
+        required: yes
+        resolver: file

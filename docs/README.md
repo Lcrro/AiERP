@@ -26,6 +26,7 @@ scenarios     业务沙盘、角色、流程样例
 - [架构路线图](architecture/roadmap.md)
 - [项目结构与解耦边界](architecture/project-structure.md)
 - [DocType 索引与 Agent 上下文](architecture/doctype-index.md)
+- [ToolCall 参数编排层设计](architecture/toolcall-parameter-orchestration.md)
 
 架构文档回答“系统应该长什么样，以及为什么这样设计”。
 
@@ -50,6 +51,11 @@ scenarios     业务沙盘、角色、流程样例
 - [小型土木公司一日运转模拟：时间顺序事件流](scenarios/civil-company-day-events.md)
 - [小型土木公司一日运转模拟：ToolCall 覆盖矩阵](scenarios/civil-company-day-toolcall-coverage.md)
 - [小型土木公司一日运转模拟：Sandbox 初始化](scenarios/civil-company-day-seed.md)
+- [小型土木公司一日运转模拟：一天事件流准备度](scenarios/civil-company-day-readiness.md)
+- [小型土木公司一日运转模拟：执行记录](scenarios/civil-company-day-execution-log.md)
+- [Wizard of Oz ToolCall 手动测试](scenarios/wizard-of-oz-testing.md)
+- [DeepSeek 材料申请 ToolCall 试验](scenarios/deepseek-material-request-trial.md)
+- [DeepSeek 材料申请试验输入输出记录](scenarios/deepseek-material-request-io-log.md)
 
 业务场景文档回答“系统要服务哪些人、他们在真实业务中怎么协作”。
 
@@ -63,6 +69,7 @@ scenarios     业务沙盘、角色、流程样例
 - [物料主数据 SKU 草案 v0.3](reference/material-item-master-draft-v0.3.md)
 - [物料目录 PostgreSQL 层](reference/material-catalog-postgres.md)
 - [当前 ToolCall 清单](reference/toolcall-current-inventory.md)
+- [ToolCall Data Dictionary 设计稿](reference/toolcall-data-dictionary.md)
 - [ToolCall 用户与权限](reference/toolcall-users-permissions.md)
 - [ToolCall 五大模块控制矩阵](reference/toolcall-five-module-control-matrix.md)
 - [ToolCall 资产](reference/toolcall-assets.md)

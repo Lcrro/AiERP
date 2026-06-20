@@ -4,7 +4,8 @@
 
 ```powershell
 python scripts/smoke_erpnext.py --profile local --check auth
-python scripts/run_civil_company_day_scenario.py --profile local
+python scripts/run_civil_company_day_scenario.py --profile civil
+python scripts/wizard_workbench.py --profile civil --port 8787
 .\scripts\start_wsl_sandbox.ps1
 ```
 

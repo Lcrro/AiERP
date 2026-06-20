@@ -7,6 +7,7 @@
 | 文件 | 用途 |
 |---|---|
 | `material_catalog_viewer.html` | 查看物料目录、治理结果和 SKU 草案的本地静态页面。 |
+| `wizard_of_oz_workbench.html` | 手动选择和执行 ToolCall 的 Wizard of Oz 测试工作台。 |
 
 规则：
 
