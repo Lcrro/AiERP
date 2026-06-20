@@ -17,6 +17,7 @@ scenarios     业务沙盘、角色、流程样例
 
 - [项目 README](../README.md)：项目根目录的简短入口。
 - [项目状态](project-status.md)：当前分支、覆盖数量、测试状态和下一步队列。
+- [当前 Codex 对话压缩上下文](project-thread-context-2026-06-20.md)：本轮长期对话的关键决策、实现状态和下一步建议。
 - [架构路线图](architecture/roadmap.md)：分阶段架构目标。
 - [Tool Layer v0.1 清单](planning/tool-layer-v0.1.md)：后端工具层工作队列。
 - [物料主数据与检索 v0.1 计划](planning/item-master-search-v0.1.md)：物料表和检索工作队列。
