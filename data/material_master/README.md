@@ -1,14 +1,40 @@
 # 物料主数据
 
-这个目录用于保存当前项目的唯一权威物料主数据表。
+这个目录保存物料主数据的来源、治理中间表、浏览数据和发布版。
 
-## 当前主表
+当前业务开发优先使用发布版 v0.3：
+
+```text
+data/material_master/release_v0_3/material_master_release_v0_3.tsv
+```
+
+它是给采购员浏览、给 Agent Resolver 检索、后续导入 ERPNext sandbox 的当前入口。
+
+## 目录分层
+
+| 路径 | 定位 | 是否作为当前入口 |
+|---|---|---|
+| `release_v0_3/` | 当前发布版物料表、浏览器数据和摘要 | 是 |
+| `governance_v0_2/` | 二级族、三级名称、螺丝等人工治理工作区 | 否 |
+| `reclassification/` | 旧物料名按新类目重分类的工作区 | 否 |
+| `governance/` | 手套等早期专项治理样板 | 否 |
+| `purchase_2024/` | 采购清单导入后的物料处理过程数据 | 否 |
+| 根目录 `material_master.tsv` | 早期标准主表，保留用于对照和旧脚本兼容 | 否 |
+
+使用原则：
+
+- 新开发优先读取 `release_v0_3/material_master_release_v0_3.tsv`。
+- 过程文件不直接作为 Agent Resolver 或 ERPNext 导入入口。
+- 历史预览和专项治理文件保留可追溯性，不在本轮整理中搬家，避免破坏旧脚本路径。
+- `outputs/` 是本地批处理缓存，已加入 `.gitignore`，不提交。
+
+## 早期主表
 
 ```text
 material_master.tsv
 ```
 
-主表由当前 SKU 草案生成：
+早期主表由 SKU 草案生成，目前主要用于对照和旧脚本兼容：
 
 ```text
 data/material_purchase_2024/standard_item_master_draft.tsv
@@ -44,9 +70,10 @@ python scripts\build_material_master_browser_data.py
 | `governance_note` | 内部治理备注，不建议展示给普通员工。 |
 | `updated_at` | 生成或最近治理日期。 |
 
-## 使用原则
+## 早期主表使用原则
 
-- ERPNext 导入、物料检索和 Agent Resolver 后续都应优先读取这张主表。
+- 旧脚本和历史对照可以读取这张主表。
+- 新的 ERPNext 导入、物料检索和 Agent Resolver 应优先读取发布版 v0.3。
 - 采购清单、治理队列、批处理结果都视为过程文件，不作为最终主数据入口。
 - 缺失规格和合并依据保留在 `governance_note`，不要塞进 ERPNext 普通描述字段。
 
@@ -66,11 +93,13 @@ data/material_master/release_v0_3/material_master_release_v0_3_summary.json
 python scripts\material_master\build_material_master_release_v0_3.py
 ```
 
-来源：
+发布版构建默认输入：
 
 ```text
-outputs/material_master/sku_governance/batch_all_sku_governance_20260703/unique_all.tsv
+data/material_master/release_v0_3/sku_governance_unique_all.tsv
 ```
+
+这个文件来自 DeepSeek SKU 治理批处理结果，已复制进发布目录作为可复现输入。原始 `outputs/` 目录只保留本地缓存，不作为项目依赖。
 
 发布版字段口径：
 

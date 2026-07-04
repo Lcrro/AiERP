@@ -18,6 +18,12 @@ python scripts/wizard_workbench.py --profile civil --port 8787
 | `material_master/` | 物料采购清单处理、标准物料候选、治理、检索评估 |
 | `scenarios/` | 业务沙盘 seed、runner、ToolCall 覆盖校验 |
 
+物料脚本较多，具体分组见：
+
+```text
+scripts/material_master/README.md
+```
+
 常用物料主数据命令：
 
 ```powershell

@@ -11,6 +11,7 @@ dist/
 build/
 *.egg-info/
 logs/
+outputs/
 data/runtime/logs/*
 data/runtime/sessions/*
 !data/runtime/logs/.gitkeep
