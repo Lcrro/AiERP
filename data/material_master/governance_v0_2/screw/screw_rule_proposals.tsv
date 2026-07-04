@@ -1,0 +1,10 @@
+rule_type	priority	automation_level	match_terms	exclude_terms	recommended_action	target_family	explanation	examples
+longest_match_first	P0	auto_safe	膨胀螺丝；膨胀钩	膨胀止水条；膨胀剂；膨胀管材	move_to_expansion_anchor	膨胀锚栓	膨胀螺丝是锚固件，必须先于普通螺丝命中。	FAST-000001 膨胀螺丝；FAST-000002 膨胀螺丝；FAST-000004 膨胀螺丝；FAST-000008 膨胀螺丝；FAST-000009 膨胀螺丝；FAST-000011 膨胀螺丝
+longest_match_first	P0	auto_safe	花篮螺丝；花兰螺丝；花篮螺栓；花兰扣	普通螺丝；普通螺栓	move_to_turnbuckle	花篮螺丝	花篮/花兰类用于索具拉紧，归吊装索具，不归普通紧固螺丝。	FAST-000005 花篮螺丝；FAST-000010 花篮螺丝；FAST-000060 花篮螺栓；FAST-000061 花篮螺栓；FAST-000088 花兰螺丝；FAST-000121 镀锌花兰螺丝
+exclude_tool	P0	auto_safe	螺丝刀；十字螺丝刀；一字螺丝刀；绝缘螺丝刀；螺丝取出器；断丝取出器	螺丝；螺栓；螺丝套件	move_to_tool	工具	螺丝刀和取出器是工具，不能被螺丝关键词吞掉。	TOOL-000125 敲击螺丝刀；TOOL-000138 螺丝取出器；TOOL-000154 断丝取出器；TOOL-000169 十字螺丝刀；TOOL-000170 一字螺丝刀；TOOL-000239 十字螺丝刀
+sibling_family	P0	auto_safe	螺杆；通丝螺杆；丝杆	螺杆泵；泵水封；泵电机套装	move_to_screw_rod	螺杆	紧固用螺杆/通丝归螺杆族，螺杆泵语义必须排除。	FAST-000017 螺杆；FAST-000018 螺杆；FAST-000020 螺杆；FAST-000029 螺杆；FAST-000040 螺杆；FAST-000071 通丝螺杆
+sibling_family	P0	auto_safe	螺母；防松螺母；不锈钢螺母；高强度螺母	气管接头螺母；接头螺母	move_to_nut	螺母	螺母独立成族；接头部件螺母按对应接头族复核。	FAST-000019 螺母；FAST-000021 螺母；FAST-000031 螺母；FAST-000041 螺母；FAST-000050 防松螺母；FAST-000056 螺母
+sibling_family	P0	review_required	平垫片；弹簧垫片；垫圈；垫片；平垫；弹垫	法兰垫片；四氟垫片；橡胶垫片；异形垫片；定制垫片	move_to_washer	垫圈	标准平垫/弹垫归垫圈；密封、法兰、定制垫片进入人工确认。	FAST-000003 平垫片；FAST-000006 平垫片；FAST-000007 平垫片；FAST-000030 垫片；FAST-000049 垫片；FAST-000057 垫片
+kit_review	P0	owner_policy_required	螺丝套件；螺丝组件；螺栓组件；成套；包含；平垫+弹垫；螺母	电钻套装；劳动车轮胎套件；螺杆泵电机套装；接地桩套件	keep_as_kit_review	螺丝	成套 SKU 先保留成套属性并进入人工确认，不轻易拆成普通螺丝。	FAST-000013 六角螺栓组件；FAST-000015 螺丝组件；FAST-000022 螺丝组件；FAST-000032 螺丝组件；FAST-000033 螺丝组件；FAST-000035 螺丝组件
+base_screw	P1	review_required	螺丝；螺栓；自攻螺丝；钻尾螺丝；鱼尾螺丝；骑马螺丝；内六角螺丝；六角螺丝；十字螺丝	膨胀螺丝；花篮螺丝；花兰螺丝；螺丝刀；取出器；螺杆；螺母；垫片；垫圈；套件；组件	keep_screw	螺丝	排除 P0 长词后，普通螺丝/螺栓统一到螺丝族；头型、强度、材质和表面处理进入规格。	FAST-000016 高强度螺丝；FAST-000025 内六角螺丝；FAST-000027 内六角螺丝；FAST-000034 内六角螺丝；FAST-000043 螺丝；FAST-000044 内六角螺丝
+attribute_extract	P1	review_required	内六角；六角；十字；圆头；T型；自攻；钻尾；全牙；高强度；不锈钢；镀锌	扳手；套筒；批头；直接；接头	keep_screw	螺丝	这些词在螺丝族内作为头型/驱动、类型、螺纹形式、材质或表面处理属性，不单独建族。	FAST-000075 内六角螺栓；FAST-000104 钻尾螺丝；FAST-000108 高强度全牙螺丝

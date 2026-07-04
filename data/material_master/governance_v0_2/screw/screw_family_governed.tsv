@@ -1,0 +1,85 @@
+scope_type	source_reason	item_code	current_item_name	current_family	recommended_family	recommended_item_name	required_specs_normalized	optional_specs_normalized	stock_uom	action	confidence	reason	needs_owner_decision
+in_family	current_family_is_screw	FAST-000013	六角螺栓组件	螺丝	螺丝	螺丝套件	规格：M22*100；成套：是；头型/驱动：六角		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000015	螺丝组件	螺丝	螺丝	螺丝套件	规格：M8*25；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000022	螺丝组件	螺丝	螺丝	螺丝套件	规格：M6*25；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000032	螺丝组件	螺丝	螺丝	螺丝套件	规格：M20*35；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000033	螺丝组件	螺丝	螺丝	螺丝套件	规格：M20*40；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000035	螺丝组件	螺丝	螺丝	螺丝套件	规格：M4*15；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000036	螺丝组件	螺丝	螺丝	螺丝套件	规格：M5*15；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000037	螺丝组件	螺丝	螺丝	螺丝套件	规格：M6*15；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000038	螺丝组件	螺丝	螺丝	螺丝套件	规格：M8*15；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000039	螺丝组件	螺丝	螺丝	螺丝套件	规格：M10*15；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000045	螺丝组件	螺丝	螺丝	螺丝套件	规格：M16*70；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000046	螺丝组件	螺丝	螺丝	螺丝套件	规格：M10*40；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000047	螺丝组件	螺丝	螺丝	螺丝套件	规格：M12*40；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000054	螺丝组件	螺丝	螺丝	螺丝套件	规格：M10*55；表面处理：镀锌；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000068	T型螺丝套件	螺丝	螺丝	螺丝套件	规格：M16*50；套件组成：平垫+弹垫+螺母；类型：T型；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000069	T型螺丝套件	螺丝	螺丝	螺丝套件	规格：M16*100；套件组成：平垫+弹垫+螺母；类型：T型；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000074	螺丝套件	螺丝	螺丝	螺丝套件	规格：M8*20；类型：螺丝；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000084	螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M10*80；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000087	镀锌螺丝套件	螺丝	螺丝	螺丝套件	表面处理：镀锌；规格：M12*30；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000090	螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M16*70；表面处理：镀锌；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000091	螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M16*130；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000093	螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M16*60；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000094	螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M20*60；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000095	内六角螺丝套件	螺丝	螺丝	螺丝套件	材质：不锈钢；头型/驱动：内六角；规格：M5*30；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000096	内六角螺丝套件	螺丝	螺丝	螺丝套件	材质：不锈钢；头型/驱动：内六角；规格：M5*10；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000097	内六角螺丝套件	螺丝	螺丝	螺丝套件	材质：不锈钢；头型/驱动：内六角；规格：M5*16；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000098	不锈钢螺丝套件	螺丝	螺丝	螺丝套件	材质：不锈钢；规格：M6*20；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000100	螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M20*200；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000105	内六角螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；头型/驱动：内六角；规格：M10*50；套件组成：螺母；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000116	螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M16*50；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000117	螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M16*120；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000119	高强度全螺纹螺丝套件	螺丝	螺丝	螺丝套件	强度等级：12.9；规格：M24*60；螺纹形式：全螺纹；套件组成：平垫+弹垫；成套：是	强度描述：高强度	套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000122	圆头螺丝套件	螺丝	螺丝	螺丝套件	头型/驱动：圆头；规格：M5*70；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000123	高强度螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M16*70；套件组成：平垫+弹垫；成套：是	强度描述：高强度	套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000016	高强度螺丝	螺丝	螺丝	螺丝	规格：M5*95；强度等级：12.9	强度描述：高强度	套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000025	内六角螺丝	螺丝	螺丝	螺丝	规格：M8*45；头型/驱动：内六角		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000027	内六角螺丝	螺丝	螺丝	螺丝	规格：M8*40；头型/驱动：内六角		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000034	内六角螺丝	螺丝	螺丝	螺丝	规格：M6*40；头型/驱动：内六角		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000043	螺丝	螺丝	螺丝	螺丝	规格：M48*120		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000044	内六角螺丝	螺丝	螺丝	螺丝	规格：M14*120；头型/驱动：内六角		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000048	螺丝	螺丝	螺丝	螺丝	规格：M24*230		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000051	螺丝	螺丝	螺丝	螺丝	规格：M20*30		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000052	螺丝	螺丝	螺丝	螺丝	规格：M20*35		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000053	螺丝	螺丝	螺丝	螺丝	规格：M20*130		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000055	螺丝	螺丝	螺丝	螺丝	规格：M27*100		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000058	加长六角螺丝	螺丝	螺丝	螺丝	规格：M27*100；头型/驱动：六角	定制：是；特征：加长	个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000064	高强度螺丝	螺丝	螺丝	螺丝	规格：M30*100；强度等级：12.9	强度描述：高强度	个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000067	高强度螺丝	螺丝	螺丝	螺丝	规格：M30*80；强度等级：10.8	强度描述：高强度	个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000073	自攻螺丝	螺丝	螺丝	螺丝	规格：M4*10；类型：自攻		盒	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000075	内六角螺栓	螺丝	螺丝	螺丝	强度等级：10.9；规格：M12*100；头型/驱动：内六角		只	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000082	高强度全牙螺丝	螺丝	螺丝	螺丝	强度等级：12.9；规格：M30*250；螺纹形式：全牙	强度描述：高强度	套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000103	自攻螺丝	螺丝	螺丝	螺丝	规格：M4；类型：自攻		只	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000104	钻尾螺丝	螺丝	螺丝	螺丝	规格：M5.5*80；类型：钻尾	包装：大盒	盒	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000106	自攻螺丝	螺丝	螺丝	螺丝	长度：60mm；类型：自攻		盒	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000107	钻尾螺丝	螺丝	螺丝	螺丝	长度：60mm；类型：钻尾		盒	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000108	高强度全牙螺丝	螺丝	螺丝	螺丝	强度等级：12.9级；规格：M27*100；螺纹形式：全牙	强度描述：高强度	套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000115	十字螺丝	螺丝	螺丝	螺丝	头型/驱动：十字；规格：Φ5*60		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	METAL-000070	不锈钢螺丝	螺丝	螺丝	螺丝	规格：M5.5*32；材质：不锈钢		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000014	螺丝	螺丝	螺丝	螺丝	规格：16*50		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000015	螺丝	螺丝	螺丝	螺丝	规格：14*50		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000016	螺丝	螺丝	螺丝	螺丝	规格：8*250		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000017	螺丝	螺丝	螺丝	螺丝	规格：8*30		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000018	螺丝	螺丝	螺丝	螺丝	规格：16*30		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000019	螺丝	螺丝	螺丝	螺丝	规格：12*60		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000020	螺丝	螺丝	螺丝	螺丝	规格：12*50		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000026	鱼尾螺丝	螺丝	螺丝	螺丝	规格：M10*60；类型：鱼尾		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000027	鱼尾螺丝	螺丝	螺丝	螺丝	规格：M14*70；类型：鱼尾		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000028	鱼尾螺丝	螺丝	螺丝	螺丝	规格：M16*90；类型：鱼尾		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000029	骑马螺丝	螺丝	螺丝	螺丝	规格：14*75；类型：骑马		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000031	内六角螺丝	螺丝	螺丝	螺丝	规格：10*40；头型/驱动：内六角		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000032	内六角螺丝	螺丝	螺丝	螺丝	规格：16*50；头型/驱动：内六角		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000034	螺丝	螺丝	螺丝	螺丝	规格：M20*120		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000042	高强度螺丝	螺丝	螺丝	螺丝	强度等级：12.9级；规格：10*150	强度描述：高强度	套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000045	六角螺丝	螺丝	螺丝	螺丝	规格：10*40；头型/驱动：六角		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000048	螺丝	螺丝	螺丝	螺丝	规格：14*180		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000061	六角自攻螺丝	螺丝	螺丝	螺丝	规格：6；类型：六角自攻；头型/驱动：六角		盒	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000065	螺丝	螺丝	螺丝	螺丝	规格：M30*100		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000068	螺丝	螺丝	螺丝	螺丝	规格：M27*120		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000071	螺丝	螺丝	螺丝	螺丝	规格：12*40		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000075	螺丝	螺丝	螺丝	螺丝	规格：M20*130		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000076	螺丝	螺丝	螺丝	螺丝	规格：M20*35		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000077	螺丝	螺丝	螺丝	螺丝	规格：M20*40		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000079	螺丝	螺丝	螺丝	螺丝	规格：22*100		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000082	螺丝	螺丝	螺丝	螺丝	规格：16*160		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes

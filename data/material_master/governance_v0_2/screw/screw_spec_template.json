@@ -1,0 +1,250 @@
+{
+  "generated_at": "2026-07-03",
+  "scope": "material_family == 螺丝 plus screw boundary samples",
+  "standard_name_policy": {
+    "family_name": "螺丝",
+    "standard_item_name": "螺丝",
+    "kit_item_name": "螺丝套件",
+    "policy": "普通螺丝/螺栓统一用螺丝作为标准名称；自攻、钻尾、鱼尾、骑马、六角、内六角、十字、圆头、高强度、全牙等进入规格属性或别名。膨胀螺丝、花篮/花兰螺丝、螺丝刀、取出器、螺杆、螺母、垫片/垫圈不归普通螺丝。",
+    "keep_original_name_as_alias": true
+  },
+  "required_fields": [
+    {
+      "field": "规格",
+      "description": "优先使用 M径*长度 或 直径*长度；原始 8*30 等需确认是否为 M8*30。",
+      "current_key_examples": [
+        "规格",
+        "螺丝规格"
+      ]
+    },
+    {
+      "field": "头型/驱动",
+      "description": "如六角、内六角、十字、一字、圆头、T型；当前数据常写在名称或 类型/头型 字段。",
+      "current_key_examples": [
+        "类型",
+        "头型"
+      ]
+    },
+    {
+      "field": "材质",
+      "description": "如碳钢、不锈钢、304不锈钢等；当前大量缺失。",
+      "current_key_examples": [
+        "材质"
+      ]
+    },
+    {
+      "field": "强度等级",
+      "description": "如 8.8、10.9、12.9；普通螺丝缺失时会影响替代判断。",
+      "current_key_examples": [
+        "强度等级"
+      ]
+    },
+    {
+      "field": "表面处理",
+      "description": "如镀锌、发黑、本色；高强度或户外使用场景建议必填。",
+      "current_key_examples": [
+        "表面",
+        "表面处理"
+      ]
+    }
+  ],
+  "conditional_required_fields": [
+    {
+      "field": "螺纹形式",
+      "when": "全牙、半牙、全螺纹等在名称或采购描述中出现",
+      "current_key_examples": [
+        "螺纹",
+        "螺纹形式"
+      ]
+    },
+    {
+      "field": "套件组成",
+      "when": "item_name/aliases/stock_uom/规格中出现套件、组件、成套、包含、单位=套",
+      "current_key_examples": [
+        "套件组成",
+        "成套",
+        "包含"
+      ]
+    },
+    {
+      "field": "包装数量",
+      "when": "stock_uom 为盒、包、套但不是成套实物",
+      "current_key_examples": [
+        "包装"
+      ]
+    },
+    {
+      "field": "是否定制/图纸号",
+      "when": "名称或规格含加长、定制、加工",
+      "current_key_examples": [
+        "定制",
+        "加工",
+        "特征"
+      ]
+    }
+  ],
+  "optional_fields": [
+    "类型",
+    "螺纹形式",
+    "包装数量",
+    "执行标准",
+    "品牌",
+    "用途/适配场景",
+    "是否定制",
+    "图纸号",
+    "备注"
+  ],
+  "field_synonym_map": {
+    "规格": [
+      "规格",
+      "螺丝规格",
+      "尺寸",
+      "型号/规格"
+    ],
+    "头型/驱动": [
+      "类型",
+      "头型",
+      "槽型",
+      "驱动",
+      "六角",
+      "内六角",
+      "十字",
+      "一字",
+      "圆头",
+      "T型"
+    ],
+    "材质": [
+      "材质",
+      "不锈钢",
+      "304不锈钢",
+      "碳钢"
+    ],
+    "强度等级": [
+      "强度等级",
+      "等级",
+      "高强度",
+      "8.8",
+      "10.9",
+      "12.9"
+    ],
+    "表面处理": [
+      "表面",
+      "表面处理",
+      "镀锌",
+      "发黑",
+      "本色"
+    ],
+    "螺纹形式": [
+      "螺纹",
+      "螺纹形式",
+      "全牙",
+      "全螺纹",
+      "半牙"
+    ],
+    "套件组成": [
+      "套件组成",
+      "成套",
+      "包含",
+      "配置",
+      "平垫",
+      "弹垫",
+      "螺母"
+    ],
+    "包装数量": [
+      "包装",
+      "每盒数量",
+      "每包数量"
+    ]
+  },
+  "standard_uom_recommendation": {
+    "ordinary_screw": "个/只作为最小实物单位；现有“套”需确认是成套还是包装单位。",
+    "screw_kit": "套，仅在明确包含螺母/平垫/弹垫等组合件时使用。",
+    "boxed_screw": "盒可以保留为采购单位，但必须补包装数量或转换关系。"
+  },
+  "fields_not_safe_to_auto_decide": [
+    "原始 8*30、10*40 是否等同 M8*30、M10*40",
+    "单位“套”是包装单位还是包含垫片/螺母的成套 SKU",
+    "套件是否包含螺母、平垫、弹垫及数量",
+    "材质缺失时是否可默认为碳钢",
+    "强度等级缺失时是否可按历史常用等级处理",
+    "不锈钢是否需要细分 201/304/316",
+    "加长、定制类是否需要图纸号或加工标准"
+  ],
+  "current_screw_spec_key_counts": {
+    "规格": 80,
+    "强度等级": 18,
+    "套件组成": 15,
+    "成套": 14,
+    "头型": 12,
+    "类型": 6,
+    "材质": 5,
+    "包含": 3,
+    "螺丝规格": 2,
+    "表面": 2,
+    "长度": 2,
+    "螺纹": 2,
+    "表面处理": 1,
+    "定制": 1,
+    "特征": 1,
+    "螺纹形式": 1,
+    "包装": 1
+  },
+  "related_existing_family_rules": [
+    {
+      "candidate_term": "螺丝",
+      "decision": "split",
+      "suggested_family": "螺丝；膨胀锚栓；花篮螺丝；螺丝刀；螺杆；定制金属加工件",
+      "split_rule": "按实物功能和长词优先拆分；先识别膨胀、花篮/花兰、螺杆、螺丝刀、取出器、定制加工，再落普通螺丝",
+      "family_attributes": "材质；规格；直径；长度；头型；槽型；螺纹形式；强度等级；表面处理；套件组成；包装"
+    },
+    {
+      "candidate_term": "自攻螺丝",
+      "decision": "solidify",
+      "suggested_family": "螺丝",
+      "split_rule": "自攻丝、自攻螺丝归螺丝族，自攻作为类型属性",
+      "family_attributes": "材质；规格；直径；长度；头型；槽型；表面处理；包装"
+    },
+    {
+      "candidate_term": "螺栓",
+      "decision": "split",
+      "suggested_family": "螺丝；花篮螺丝",
+      "split_rule": "普通六角/内六角螺栓按螺丝族；花篮螺栓按吊装索具拉紧器",
+      "family_attributes": "材质；规格；直径；长度；头型；螺纹形式；强度等级；表面处理；套件组成"
+    },
+    {
+      "candidate_term": "钻尾丝",
+      "decision": "solidify",
+      "suggested_family": "螺丝",
+      "split_rule": "钻尾丝、钻尾螺丝按螺丝族命中，钻尾作为类型属性",
+      "family_attributes": "材质；规格；直径；长度；头型；钻尾形式；表面处理；包装"
+    },
+    {
+      "candidate_term": "六角",
+      "decision": "attribute_only",
+      "suggested_family": "扳手；套筒；螺丝；直接",
+      "split_rule": "六角是头型、截面或连接形制属性，按本体归族",
+      "family_attributes": "头型；规格；驱动规格；连接方式"
+    },
+    {
+      "candidate_term": "十字",
+      "decision": "attribute_only",
+      "suggested_family": "批头；螺丝刀；螺丝",
+      "split_rule": "十字是头型或槽型属性，需按本体归族",
+      "family_attributes": "头型；规格；长度；是否绝缘；材质"
+    },
+    {
+      "candidate_term": "六角",
+      "decision": "attribute_only",
+      "suggested_family": "螺丝",
+      "split_rule": "仅在六角螺丝、内六角螺丝、六角螺栓等紧固件词组中作为头型/槽型属性；命中扳手、套筒、直接时排除",
+      "family_attributes": "头型；槽型；规格；材质；强度等级"
+    },
+    {
+      "candidate_term": "套件",
+      "decision": "attribute_only",
+      "suggested_family": "螺丝",
+      "split_rule": "仅螺丝套件、螺栓组件等归螺丝族并记录组成；其他设备/工具套装按各自实物族处理",
+      "family_attributes": "套件组成；规格；材质；强度等级；表面处理；包装"
+    }
+  ]
+}

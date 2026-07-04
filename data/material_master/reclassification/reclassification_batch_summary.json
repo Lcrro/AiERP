@@ -1,0 +1,19 @@
+{
+  "source": "data\\material_master\\material_master.tsv",
+  "group_count": 1242,
+  "sku_count": 2328,
+  "batch_sizes": [
+    249,
+    249,
+    248,
+    248,
+    248
+  ],
+  "output_files": [
+    "item_name_groups_batch_01.tsv",
+    "item_name_groups_batch_02.tsv",
+    "item_name_groups_batch_03.tsv",
+    "item_name_groups_batch_04.tsv",
+    "item_name_groups_batch_05.tsv"
+  ]
+}

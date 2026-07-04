@@ -1,0 +1,1250 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>物料主数据浏览器</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f6f8;
+      --panel: #ffffff;
+      --panel-soft: #f9fafb;
+      --line: #dde3ea;
+      --line-strong: #b9c3cf;
+      --text: #1f2933;
+      --muted: #64707d;
+      --muted-2: #8a96a3;
+      --accent: #0f766e;
+      --accent-2: #2563eb;
+      --ok-bg: #dcfce7;
+      --ok: #166534;
+      --warn-bg: #fef3c7;
+      --warn: #92400e;
+      --bad-bg: #fee2e2;
+      --bad: #991b1b;
+      --blue-bg: #dbeafe;
+      --blue: #1d4ed8;
+      --shadow: 0 12px 32px rgba(20, 31, 45, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+    }
+
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      padding: 18px 22px 14px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+      font-weight: 720;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .source {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(110px, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      min-height: 68px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-soft);
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) 130px 130px 150px 150px 110px;
+      gap: 10px;
+      padding: 12px 22px;
+      background: #eef2f5;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .control {
+      height: 38px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: var(--panel);
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .control svg {
+      flex: 0 0 auto;
+      width: 17px;
+      height: 17px;
+      margin-left: 10px;
+      color: var(--muted);
+    }
+
+    input, select {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--text);
+      padding: 0 10px;
+      min-width: 0;
+    }
+
+    button {
+      height: 38px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    main {
+      min-height: 0;
+      padding: 14px 22px 22px;
+      display: grid;
+      grid-template-columns: 260px minmax(260px, 0.8fr) minmax(280px, 0.85fr) minmax(560px, 1.55fr);
+      gap: 14px;
+    }
+
+    .panel {
+      min-height: 0;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-head {
+      flex: 0 0 auto;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfd;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    .count {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .scroll {
+      overflow: auto;
+      min-height: 0;
+    }
+
+    .category-list,
+    .name-list,
+    .material-list,
+    .sku-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .category,
+    .name-row,
+    .material-row,
+    .sku-row {
+      width: 100%;
+      min-height: 54px;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 0;
+      padding: 10px 12px;
+      text-align: left;
+      display: grid;
+      gap: 4px;
+    }
+
+    .category:hover,
+    .name-row:hover,
+    .material-row:hover,
+    .sku-row:hover {
+      background: #f1f8f7;
+      color: var(--text);
+      border-color: var(--line);
+    }
+
+    .category.active,
+    .name-row.active,
+    .material-row.active,
+    .sku-row.active {
+      background: #e7f4f1;
+      box-shadow: inset 3px 0 0 var(--accent);
+    }
+
+    .row-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-weight: 660;
+    }
+
+    .row-title small {
+      color: var(--muted);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .row-meta {
+      color: var(--muted);
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 20px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #eef2f6;
+      color: #475569;
+      font-size: 12px;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .chip.ok { background: var(--ok-bg); color: var(--ok); }
+    .chip.warn { background: var(--warn-bg); color: var(--warn); }
+    .chip.bad { background: var(--bad-bg); color: var(--bad); }
+    .chip.blue { background: var(--blue-bg); color: var(--blue); }
+
+    .detail-body {
+      padding: 14px;
+      overflow: auto;
+      min-height: 0;
+    }
+
+    .empty {
+      padding: 28px 18px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .sku-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: start;
+      margin-bottom: 14px;
+    }
+
+    .sku-code {
+      font-weight: 760;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .sku-name {
+      margin-top: 4px;
+      font-size: 15px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr);
+      border: 1px solid var(--line);
+      border-bottom: 0;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .detail-label,
+    .detail-value {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--line);
+      min-height: 38px;
+    }
+
+    .detail-label {
+      background: #f8fafc;
+      color: var(--muted);
+      font-weight: 650;
+    }
+
+    .detail-value {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .sku-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .sku-table th,
+    .sku-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .sku-table th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #f8fafc;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .sku-table tr {
+      cursor: pointer;
+    }
+
+    .sku-table tr:hover {
+      background: #f8fbfa;
+    }
+
+    .sku-table tr.active {
+      background: #e7f4f1;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    @media (max-width: 1180px) {
+      .metrics {
+        grid-template-columns: repeat(3, minmax(110px, 1fr));
+      }
+
+      main {
+        grid-template-columns: 250px minmax(280px, 1fr);
+      }
+
+      .detail {
+        grid-column: 1 / -1;
+        min-height: 420px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .title-row,
+      .source {
+        text-align: left;
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      main {
+        grid-template-columns: 1fr;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title-row">
+        <div>
+          <h1>物料主数据浏览器</h1>
+          <div class="subtitle">按类目、物料族、物料名称和 SKU 四级查看；当前页面只读，不写 ERPNext。</div>
+        </div>
+        <div class="source" id="sourceInfo">加载中...</div>
+      </div>
+      <div class="metrics" id="metrics"></div>
+    </header>
+
+    <section class="toolbar">
+      <label class="control" title="按编码、名称、规格、分组、别名搜索">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-3.5-3.5"></path>
+        </svg>
+        <input id="searchInput" type="search" placeholder="搜索物料，例如：手套、M10、帆布、PVC 弯头">
+      </label>
+      <label class="control">
+        <select id="viewMode" title="浏览方式">
+          <option value="materials">物料视图</option>
+          <option value="rules">规则审查</option>
+        </select>
+      </label>
+      <label class="control">
+        <select id="categoryMode" title="分类视图">
+          <option value="release_v0_3">发布版 v0.3</option>
+          <option value="third_layer">三级名称人工预览</option>
+          <option value="screw_bolt_third">螺丝三级预览</option>
+          <option value="manual_family">二级族人工预览</option>
+          <option value="screw_governed">螺丝治理预览</option>
+          <option value="reclassified">新分类</option>
+          <option value="original">旧分类</option>
+        </select>
+      </label>
+      <label class="control">
+        <select id="statusFilter" title="状态">
+          <option value="">全部状态</option>
+          <option value="active">active</option>
+          <option value="candidate">candidate</option>
+          <option value="disabled">disabled</option>
+        </select>
+      </label>
+      <label class="control">
+        <select id="qualityFilter" title="质量等级">
+          <option value="">全部质量</option>
+          <option value="standard">standard</option>
+          <option value="usable">usable</option>
+          <option value="needs_review">needs_review</option>
+          <option value="blocked">blocked</option>
+        </select>
+      </label>
+      <button id="resetButton">重置</button>
+    </section>
+
+    <main>
+      <section class="panel">
+        <div class="panel-head">
+          <h2 id="categoryPanelTitle">初始物料清单</h2>
+          <span class="count" id="categoryCount"></span>
+        </div>
+        <div class="scroll category-list" id="categoryList"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2 id="namePanelTitle">物料族</h2>
+          <span class="count" id="nameCount"></span>
+        </div>
+        <div class="scroll name-list" id="nameList"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2 id="materialPanelTitle">物料名称</h2>
+          <span class="count" id="materialCount"></span>
+        </div>
+        <div class="scroll material-list" id="materialList"></div>
+      </section>
+
+      <section class="panel detail">
+        <div class="panel-head">
+          <h2 id="skuPanelTitle">SKU 明细</h2>
+          <span class="count" id="skuCount"></span>
+        </div>
+        <div class="detail-body" id="detailBody"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const DATA_URLS = {
+      release_v0_3: "../data/material_master/release_v0_3/material_master_release_v0_3_browser_data.json",
+      original: "../data/material_master/material_master_browser_data.json",
+      reclassified: "../data/material_master/reclassification/material_master_browser_data_reclassified.json",
+      screw_governed: "../data/material_master/governance_v0_2/screw/material_master_screw_governed_preview.json",
+      manual_family: "../data/material_master/governance_v0_2/manual_family_mapping/material_master_manual_family_preview.json",
+      third_layer: "../data/material_master/governance_v0_2/manual_third_layer_mapping/material_master_third_layer_preview.json",
+      screw_bolt_third: "../data/material_master/governance_v0_2/manual_third_layer_mapping/material_master_screw_bolt_third_layer_preview.json",
+    };
+
+    const VIEW_LABELS = {
+      release_v0_3: "发布版 v0.3",
+      original: "旧分类",
+      reclassified: "新分类",
+      screw_governed: "螺丝治理预览",
+      manual_family: "二级族人工预览",
+      third_layer: "三级名称人工预览",
+      screw_bolt_third: "螺丝三级预览",
+    };
+
+    const state = {
+      dataSets: {},
+      data: null,
+      view: "materials",
+      mode: "release_v0_3",
+      query: "",
+      status: "",
+      quality: "",
+      topGroup: "",
+      ruleKey: "",
+      itemName: "",
+      materialName: "",
+      itemCode: "",
+    };
+
+    const els = {
+      sourceInfo: document.getElementById("sourceInfo"),
+      metrics: document.getElementById("metrics"),
+      searchInput: document.getElementById("searchInput"),
+      viewMode: document.getElementById("viewMode"),
+      categoryMode: document.getElementById("categoryMode"),
+      statusFilter: document.getElementById("statusFilter"),
+      qualityFilter: document.getElementById("qualityFilter"),
+      resetButton: document.getElementById("resetButton"),
+      categoryPanelTitle: document.getElementById("categoryPanelTitle"),
+      categoryList: document.getElementById("categoryList"),
+      categoryCount: document.getElementById("categoryCount"),
+      namePanelTitle: document.getElementById("namePanelTitle"),
+      nameList: document.getElementById("nameList"),
+      nameCount: document.getElementById("nameCount"),
+      materialPanelTitle: document.getElementById("materialPanelTitle"),
+      materialList: document.getElementById("materialList"),
+      materialCount: document.getElementById("materialCount"),
+      skuPanelTitle: document.getElementById("skuPanelTitle"),
+      skuCount: document.getElementById("skuCount"),
+      detailBody: document.getElementById("detailBody"),
+    };
+
+    const fieldLabels = {
+      item_code: "物料编码",
+      sku_name: "SKU名称",
+      material_family: "物料族",
+      item_name: "标准名称",
+      required_specs: "必填规格",
+      optional_specs: "辅助规格",
+      item_group: "标准分组",
+      top_group: "一级分类",
+      sub_group: "二级分类",
+      stock_uom: "库存单位",
+      purchase_uom: "采购单位",
+      conversion_factor: "换算关系",
+      aliases: "别名/土名",
+      search_keywords: "检索关键词",
+      brand: "品牌",
+      model: "型号",
+      status: "状态",
+      quality_level: "质量等级",
+      agent_use_policy: "Agent 使用策略",
+      source_refs: "来源",
+      source_item_codes: "来源物料编码",
+      merged_count: "合并数量",
+      governance_note: "治理备注",
+      updated_at: "更新时间",
+      family_rule: "物料族规则",
+      family_note: "物料族说明",
+      family_type: "族内类型",
+      family_material: "族内材质",
+      family_use: "适配/用途",
+      family_connection: "连接/接口",
+      family_surface: "表面/等级",
+      family_attributes: "族内属性模板",
+      family_split_candidates: "拆分候选族",
+      family_attribute_terms: "属性词",
+      drill_material: "钻头材质",
+      drill_use_type: "钻头类型/用途",
+      drill_shank: "钻头柄型",
+    };
+
+    function fmt(n) {
+      return Number(n || 0).toLocaleString("zh-CN");
+    }
+
+    function classFor(value) {
+      if (["active", "standard", "auto_select_allowed"].includes(value)) return "ok";
+      if (["candidate", "usable", "confirm_before_use"].includes(value)) return "warn";
+      if (["needs_review", "clarify_specs_before_use", "disabled", "blocked"].includes(value)) return "bad";
+      return "blue";
+    }
+
+    function chip(value) {
+      if (!value) return "";
+      return `<span class="chip ${classFor(value)}">${escapeHtml(value)}</span>`;
+    }
+
+    function skuDisplayName(row) {
+      return row.sku_name || row.item_name || "";
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function groupBy(rows, fn) {
+      const map = new Map();
+      for (const row of rows) {
+        const key = fn(row);
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push(row);
+      }
+      return map;
+    }
+
+    function unique(values) {
+      return Array.from(new Set(values.filter(Boolean)));
+    }
+
+    function ruleTokens(row) {
+      return String(row.family_rule || "")
+        .split(/[；;]/)
+        .map(token => token.trim())
+        .filter(Boolean);
+    }
+
+    function describeRuleToken(token) {
+      if (token.startsWith("family_rule_v0.2:")) {
+        return { decision: "solidify", candidate: token.split(":").slice(1).join(":") };
+      }
+      if (token.startsWith("family_split_rule_v0.2:")) {
+        return { decision: "split", candidate: token.split(":").slice(1).join(":") };
+      }
+      if (token.endsWith("_family_v0.1")) {
+        return { decision: "legacy", candidate: token.replace("_family_v0.1", "") };
+      }
+      return { decision: "other", candidate: token };
+    }
+
+    function ruleTitle(token) {
+      const info = describeRuleToken(token);
+      return `${info.candidate} / ${info.decision}`;
+    }
+
+    function matchesQuery(row, query) {
+      const q = query.trim().toLowerCase();
+      if (!q) return true;
+      const tokens = q.split(/\s+/).filter(Boolean);
+      return tokens.every(token => {
+        if (token === "手套") {
+          return row.is_likely_hand_glove === "yes";
+        }
+        return row.search_text.includes(token);
+      });
+    }
+
+    function baseFilteredRows({ includeCategory = true } = {}) {
+      let rows = state.data.rows;
+      if (state.status) rows = rows.filter(row => row.status === state.status);
+      if (state.quality) rows = rows.filter(row => row.quality_level === state.quality);
+      if (state.query) rows = rows.filter(row => matchesQuery(row, state.query));
+      if (includeCategory && state.topGroup) rows = rows.filter(row => row.top_group === state.topGroup);
+      return rows;
+    }
+
+    function renderMetrics() {
+      const summary = state.data.summary;
+      const metrics = [
+        ["SKU", summary.sku_count],
+        ["物料族", summary.material_family_count || summary.item_name_count],
+        ["一级分类", summary.top_group_count],
+        ["细分分类", summary.item_group_count],
+        ["standard", summary.quality_counts.standard || 0],
+        ["needs_review", summary.quality_counts.needs_review || 0],
+      ];
+      els.metrics.innerHTML = metrics.map(([label, value]) => `
+        <div class="metric">
+          <strong>${fmt(value)}</strong>
+          <span>${escapeHtml(label)}</span>
+        </div>
+      `).join("");
+      const ruleText = state.data.family_rules_count ? `｜规则 ${fmt(state.data.family_rules_count)} 条` : "";
+      els.sourceInfo.textContent = `${VIEW_LABELS[state.mode]}｜数据生成：${state.data.generated_at}${ruleText}｜${state.data.source.split(/[\\\\/]/).pop()}`;
+    }
+
+    function renderCategories() {
+      if (state.view === "rules") {
+        renderRuleCategories();
+        return;
+      }
+      els.categoryPanelTitle.textContent = "初始物料清单";
+      const rows = baseFilteredRows({ includeCategory: false });
+      const grouped = groupBy(rows, row => row.top_group);
+      const categories = Array.from(grouped.entries())
+        .map(([name, items]) => ({
+          name,
+          skuCount: items.length,
+          nameCount: unique(items.map(row => row.material_family || row.item_name)).length,
+          quality: countBy(items, row => row.quality_level),
+        }))
+        .sort((a, b) => b.skuCount - a.skuCount || a.name.localeCompare(b.name, "zh-Hans-CN"));
+
+      els.categoryCount.textContent = `${fmt(categories.length)} 类`;
+
+      const allActive = !state.topGroup;
+      const allButton = `
+        <button class="category ${allActive ? "active" : ""}" data-group="">
+          <div class="row-title"><span>全部物料</span><small>${fmt(rows.length)} SKU</small></div>
+          <div class="row-meta">${fmt(unique(rows.map(row => row.material_family || row.item_name)).length)} 个物料族</div>
+        </button>
+      `;
+
+      els.categoryList.innerHTML = allButton + categories.map(category => `
+        <button class="category ${state.topGroup === category.name ? "active" : ""}" data-group="${escapeHtml(category.name)}">
+          <div class="row-title">
+            <span>${escapeHtml(category.name)}</span>
+            <small>${fmt(category.skuCount)} SKU</small>
+          </div>
+          <div class="row-meta">${fmt(category.nameCount)} 个物料族</div>
+          <div class="chips">
+            ${category.quality.standard ? `<span class="chip ok">standard ${fmt(category.quality.standard)}</span>` : ""}
+            ${category.quality.usable ? `<span class="chip warn">usable ${fmt(category.quality.usable)}</span>` : ""}
+            ${category.quality.needs_review ? `<span class="chip bad">needs_review ${fmt(category.quality.needs_review)}</span>` : ""}
+          </div>
+        </button>
+      `).join("");
+
+      els.categoryList.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", () => {
+          state.topGroup = button.dataset.group || "";
+          state.itemName = "";
+          state.materialName = "";
+          state.itemCode = "";
+          render();
+        });
+      });
+    }
+
+    function renderRuleCategories() {
+      els.categoryPanelTitle.textContent = "规则清单";
+      const rows = baseFilteredRows({ includeCategory: false });
+      const grouped = new Map();
+      for (const row of rows) {
+        for (const token of ruleTokens(row)) {
+          if (!grouped.has(token)) grouped.set(token, []);
+          grouped.get(token).push(row);
+        }
+      }
+      const rules = Array.from(grouped.entries()).map(([key, items]) => {
+        const info = describeRuleToken(key);
+        return {
+          key,
+          decision: info.decision,
+          candidate: info.candidate,
+          items,
+          skuCount: items.length,
+          familyCount: unique(items.map(row => row.material_family)).length,
+          qualities: countBy(items, row => row.quality_level),
+          topGroups: unique(items.map(row => row.top_group)).slice(0, 4),
+        };
+      }).sort((a, b) => b.skuCount - a.skuCount || a.key.localeCompare(b.key, "zh-Hans-CN"));
+
+      if (!state.ruleKey && rules.length) state.ruleKey = rules[0].key;
+      if (state.ruleKey && !rules.some(rule => rule.key === state.ruleKey)) {
+        state.ruleKey = rules[0]?.key || "";
+        state.itemName = "";
+        state.materialName = "";
+        state.itemCode = "";
+      }
+
+      els.categoryCount.textContent = `${fmt(rules.length)} 条`;
+      if (!rules.length) {
+        els.categoryList.innerHTML = `<div class="empty">没有命中的规则。</div>`;
+        return;
+      }
+
+      els.categoryList.innerHTML = rules.map(rule => `
+        <button class="category ${state.ruleKey === rule.key ? "active" : ""}" data-rule="${escapeHtml(rule.key)}">
+          <div class="row-title">
+            <span>${escapeHtml(rule.candidate)}</span>
+            <small>${fmt(rule.skuCount)} SKU</small>
+          </div>
+          <div class="row-meta">${escapeHtml(rule.decision)}｜${fmt(rule.familyCount)} 个物料族</div>
+          <div class="row-meta">${escapeHtml(rule.topGroups.join(" / "))}</div>
+          <div class="chips">
+            ${rule.qualities.standard ? `<span class="chip ok">standard ${fmt(rule.qualities.standard)}</span>` : ""}
+            ${rule.qualities.usable ? `<span class="chip warn">usable ${fmt(rule.qualities.usable)}</span>` : ""}
+            ${rule.qualities.needs_review ? `<span class="chip bad">needs_review ${fmt(rule.qualities.needs_review)}</span>` : ""}
+          </div>
+        </button>
+      `).join("");
+
+      els.categoryList.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", () => {
+          state.ruleKey = button.dataset.rule || "";
+          state.itemName = "";
+          state.materialName = "";
+          state.itemCode = "";
+          render();
+        });
+      });
+    }
+
+    function countBy(rows, fn) {
+      const result = {};
+      for (const row of rows) {
+        const key = fn(row) || "";
+        result[key] = (result[key] || 0) + 1;
+      }
+      return result;
+    }
+
+    function renderNames() {
+      if (state.view === "rules") {
+        renderRuleNames();
+        return;
+      }
+      const rows = baseFilteredRows();
+      const grouped = groupBy(rows, row => row.material_family || row.item_name);
+      const groups = Array.from(grouped.entries()).map(([name, items]) => {
+        const subGroups = unique(items.map(row => row.item_group));
+        const itemNames = unique(items.map(row => row.item_name));
+        const familyRules = unique(items.map(row => row.family_rule));
+        return {
+          name,
+          items,
+          skuCount: items.length,
+          groups: subGroups,
+          itemNames,
+          familyRules,
+          statuses: countBy(items, row => row.status),
+          qualities: countBy(items, row => row.quality_level),
+          sampleAliases: unique(items.flatMap(row => row.aliases.split(/[；;]/).map(part => part.trim()))).slice(0, 4),
+        };
+      }).sort((a, b) => b.skuCount - a.skuCount || a.name.localeCompare(b.name, "zh-Hans-CN"));
+
+      if (!state.itemName && groups.length) {
+        state.itemName = groups[0].name;
+        state.materialName = "";
+      }
+      if (state.itemName && !groups.some(group => group.name === state.itemName)) {
+        state.itemName = groups[0]?.name || "";
+        state.materialName = "";
+        state.itemCode = "";
+      }
+
+      els.namePanelTitle.textContent = state.topGroup ? `${state.topGroup} / 物料族` : "物料族";
+      els.nameCount.textContent = `${fmt(groups.length)} 项`;
+
+      if (!groups.length) {
+        els.nameList.innerHTML = `<div class="empty">没有匹配的物料族。</div>`;
+        return;
+      }
+
+      els.nameList.innerHTML = groups.map(group => `
+        <button class="name-row ${state.itemName === group.name ? "active" : ""}" data-name="${escapeHtml(group.name)}">
+          <div class="row-title">
+            <span>${escapeHtml(group.name)}</span>
+            <small>${fmt(group.skuCount)} SKU</small>
+          </div>
+          <div class="row-meta">${escapeHtml(group.groups.join(" / "))}</div>
+          <div class="row-meta">包含名称：${escapeHtml(group.itemNames.slice(0, 6).join("；"))}${group.itemNames.length > 6 ? "..." : ""}</div>
+          <div class="chips">
+            ${group.qualities.standard ? `<span class="chip ok">standard ${fmt(group.qualities.standard)}</span>` : ""}
+            ${group.qualities.usable ? `<span class="chip warn">usable ${fmt(group.qualities.usable)}</span>` : ""}
+            ${group.qualities.needs_review ? `<span class="chip bad">needs_review ${fmt(group.qualities.needs_review)}</span>` : ""}
+          </div>
+          <div class="row-meta">${escapeHtml(group.sampleAliases.join("；"))}</div>
+        </button>
+      `).join("");
+
+      els.nameList.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", () => {
+          state.itemName = button.dataset.name || "";
+          state.materialName = "";
+          state.itemCode = "";
+          renderMaterialNames();
+          renderDetail();
+          renderNames();
+        });
+      });
+    }
+
+    function rowsForSelectedRule() {
+      if (!state.ruleKey) return [];
+      return baseFilteredRows({ includeCategory: false }).filter(row => ruleTokens(row).includes(state.ruleKey));
+    }
+
+    function renderRuleNames() {
+      const rows = rowsForSelectedRule();
+      const grouped = groupBy(rows, row => row.material_family || row.item_name);
+      const groups = Array.from(grouped.entries()).map(([name, items]) => ({
+        name,
+        items,
+        skuCount: items.length,
+        groups: unique(items.map(row => row.item_group)),
+        itemNames: unique(items.map(row => row.item_name)),
+        qualities: countBy(items, row => row.quality_level),
+        sampleCodes: items.slice(0, 4).map(row => row.item_code),
+      })).sort((a, b) => b.skuCount - a.skuCount || a.name.localeCompare(b.name, "zh-Hans-CN"));
+
+      if (!state.itemName && groups.length) {
+        state.itemName = groups[0].name;
+        state.materialName = "";
+      }
+      if (state.itemName && !groups.some(group => group.name === state.itemName)) {
+        state.itemName = groups[0]?.name || "";
+        state.materialName = "";
+        state.itemCode = "";
+      }
+
+      els.namePanelTitle.textContent = state.ruleKey ? `${ruleTitle(state.ruleKey)} / 物料族` : "规则命中物料族";
+      els.nameCount.textContent = `${fmt(groups.length)} 项`;
+
+      if (!groups.length) {
+        els.nameList.innerHTML = `<div class="empty">请选择一条规则查看命中物料。</div>`;
+        return;
+      }
+
+      els.nameList.innerHTML = groups.map(group => `
+        <button class="name-row ${state.itemName === group.name ? "active" : ""}" data-name="${escapeHtml(group.name)}">
+          <div class="row-title">
+            <span>${escapeHtml(group.name)}</span>
+            <small>${fmt(group.skuCount)} SKU</small>
+          </div>
+          <div class="row-meta">${escapeHtml(group.groups.join(" / "))}</div>
+          <div class="row-meta">名称：${escapeHtml(group.itemNames.slice(0, 6).join("；"))}${group.itemNames.length > 6 ? "..." : ""}</div>
+          <div class="row-meta">样例：${escapeHtml(group.sampleCodes.join("；"))}</div>
+          <div class="chips">
+            ${group.qualities.standard ? `<span class="chip ok">standard ${fmt(group.qualities.standard)}</span>` : ""}
+            ${group.qualities.usable ? `<span class="chip warn">usable ${fmt(group.qualities.usable)}</span>` : ""}
+            ${group.qualities.needs_review ? `<span class="chip bad">needs_review ${fmt(group.qualities.needs_review)}</span>` : ""}
+          </div>
+        </button>
+      `).join("");
+
+      els.nameList.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", () => {
+          state.itemName = button.dataset.name || "";
+          state.materialName = "";
+          state.itemCode = "";
+          renderMaterialNames();
+          renderDetail();
+          renderNames();
+        });
+      });
+    }
+
+    function rowsForSelectedFamily() {
+      const rows = state.view === "rules" ? rowsForSelectedRule() : baseFilteredRows();
+      if (!state.itemName) return [];
+      return rows.filter(row => (row.material_family || row.item_name) === state.itemName);
+    }
+
+    function renderMaterialNames() {
+      const rows = rowsForSelectedFamily();
+      const grouped = groupBy(rows, row => row.item_name);
+      const groups = Array.from(grouped.entries()).map(([name, items]) => ({
+        name,
+        items,
+        skuCount: items.length,
+        groups: unique(items.map(row => row.item_group)),
+        specs: unique(items.map(row => row.required_specs)).slice(0, 4),
+        aliases: unique(items.flatMap(row => row.aliases.split(/[；;]/).map(part => part.trim()))).slice(0, 4),
+        qualities: countBy(items, row => row.quality_level),
+      })).sort((a, b) => b.skuCount - a.skuCount || a.name.localeCompare(b.name, "zh-Hans-CN"));
+
+      if (!state.materialName && groups.length) {
+        state.materialName = groups[0].name;
+      }
+      if (state.materialName && !groups.some(group => group.name === state.materialName)) {
+        state.materialName = groups[0]?.name || "";
+        state.itemCode = "";
+      }
+
+      els.materialPanelTitle.textContent = state.itemName ? `${state.itemName} / 物料名称` : "物料名称";
+      els.materialCount.textContent = `${fmt(groups.length)} 项`;
+
+      if (!groups.length) {
+        els.materialList.innerHTML = `<div class="empty">请选择一个物料族查看物料名称。</div>`;
+        return;
+      }
+
+      els.materialList.innerHTML = groups.map(group => `
+        <button class="material-row ${state.materialName === group.name ? "active" : ""}" data-material="${escapeHtml(group.name)}">
+          <div class="row-title">
+            <span>${escapeHtml(group.name)}</span>
+            <small>${fmt(group.skuCount)} SKU</small>
+          </div>
+          <div class="row-meta">${escapeHtml(group.groups.join(" / "))}</div>
+          <div class="row-meta">规格：${escapeHtml(group.specs.join("；"))}${group.specs.length >= 4 ? "..." : ""}</div>
+          <div class="chips">
+            ${group.qualities.standard ? `<span class="chip ok">standard ${fmt(group.qualities.standard)}</span>` : ""}
+            ${group.qualities.usable ? `<span class="chip warn">usable ${fmt(group.qualities.usable)}</span>` : ""}
+            ${group.qualities.needs_review ? `<span class="chip bad">needs_review ${fmt(group.qualities.needs_review)}</span>` : ""}
+          </div>
+          <div class="row-meta">${escapeHtml(group.aliases.join("；"))}</div>
+        </button>
+      `).join("");
+
+      els.materialList.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", () => {
+          state.materialName = button.dataset.material || "";
+          state.itemCode = "";
+          renderMaterialNames();
+          renderDetail();
+        });
+      });
+    }
+
+    function selectedRows() {
+      const rows = rowsForSelectedFamily();
+      return rows
+        .filter(row => row.item_name === state.materialName)
+        .sort((a, b) => a.item_code.localeCompare(b.item_code, "zh-Hans-CN"));
+    }
+
+    function renderDetail() {
+      const rows = selectedRows();
+      els.skuPanelTitle.textContent = state.materialName ? `${state.materialName} / SKU 明细` : "SKU 明细";
+      els.skuCount.textContent = `${fmt(rows.length)} SKU`;
+
+      if (!rows.length) {
+        els.detailBody.innerHTML = `<div class="empty">请选择一个物料名称查看 SKU。</div>`;
+        return;
+      }
+
+      if (!state.itemCode || !rows.some(row => row.item_code === state.itemCode)) {
+        state.itemCode = rows[0].item_code;
+      }
+      const selected = rows.find(row => row.item_code === state.itemCode) || rows[0];
+
+      els.detailBody.innerHTML = `
+        <div class="sku-header">
+          <div>
+            <div class="sku-code">${escapeHtml(selected.item_code)}</div>
+            <div class="sku-name">${escapeHtml(skuDisplayName(selected))}</div>
+          </div>
+          <div class="chips">
+            ${chip(selected.status)}
+            ${chip(selected.quality_level)}
+            ${chip(selected.agent_use_policy)}
+          </div>
+        </div>
+
+        <table class="sku-table">
+          <thead>
+            <tr>
+              <th style="width: 132px;">编码</th>
+              <th style="width: 190px;">SKU名称</th>
+              <th>必填规格</th>
+              <th style="width: 130px;">分组</th>
+              <th style="width: 64px;">单位</th>
+              <th style="width: 110px;">质量</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(row => `
+              <tr class="${row.item_code === selected.item_code ? "active" : ""}" data-code="${escapeHtml(row.item_code)}">
+                <td><strong>${escapeHtml(row.item_code)}</strong></td>
+                <td>${escapeHtml(skuDisplayName(row))}</td>
+                <td>${escapeHtml(row.required_specs)}</td>
+                <td>${escapeHtml(row.item_group)}</td>
+                <td>${escapeHtml(row.stock_uom)}</td>
+                <td>${chip(row.quality_level)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+
+        <h3 style="font-size: 15px; margin: 18px 0 10px;">字段明细</h3>
+        <div class="detail-grid">
+          ${detailRows(selected).map(([label, value]) => `
+            <div class="detail-label">${escapeHtml(label)}</div>
+            <div class="detail-value">${value ? escapeHtml(value) : '<span class="muted">空</span>'}</div>
+          `).join("")}
+        </div>
+      `;
+
+      els.detailBody.querySelectorAll("tbody tr").forEach(rowEl => {
+        rowEl.addEventListener("click", () => {
+          state.itemCode = rowEl.dataset.code || "";
+          renderDetail();
+        });
+      });
+    }
+
+    function detailRows(row) {
+      const ordered = [
+        "item_code", "sku_name", "material_family", "item_name", "required_specs", "optional_specs", "item_group",
+        "top_group", "sub_group", "stock_uom", "purchase_uom", "conversion_factor",
+        "aliases", "brand", "model", "status", "quality_level", "agent_use_policy",
+        "family_rule", "family_note", "family_type", "family_material", "family_use",
+        "family_connection", "family_surface", "family_attributes", "family_split_candidates",
+        "family_attribute_terms", "drill_use_type", "drill_material", "drill_shank",
+        "source_refs", "source_item_codes", "merged_count", "governance_note", "updated_at", "search_keywords",
+      ];
+      return ordered.map(key => [fieldLabels[key] || key, row[key] || ""]);
+    }
+
+    function render() {
+      renderMetrics();
+      renderCategories();
+      renderNames();
+      renderMaterialNames();
+      renderDetail();
+    }
+
+    function reset() {
+      state.query = "";
+      state.status = "";
+      state.quality = "";
+      state.topGroup = "";
+      state.ruleKey = "";
+      state.itemName = "";
+      state.materialName = "";
+      state.itemCode = "";
+      els.searchInput.value = "";
+      els.statusFilter.value = "";
+      els.qualityFilter.value = "";
+      render();
+    }
+
+    async function init() {
+      try {
+        const entries = await Promise.all(Object.entries(DATA_URLS).map(async ([key, url]) => {
+          try {
+            const response = await fetch(url);
+            if (!response.ok) return null;
+            return [key, await response.json()];
+          } catch {
+            return null;
+          }
+        }));
+        state.dataSets = Object.fromEntries(entries.filter(Boolean));
+        if (!state.dataSets[state.mode]) {
+          const firstMode = Object.keys(state.dataSets)[0];
+          if (!firstMode) throw new Error("没有可用的物料浏览数据");
+          state.mode = firstMode;
+          els.categoryMode.value = firstMode;
+        }
+        state.data = state.dataSets[state.mode];
+        Array.from(els.categoryMode.options).forEach(option => {
+          option.disabled = !state.dataSets[option.value];
+        });
+        els.searchInput.addEventListener("input", event => {
+          state.query = event.target.value;
+          state.ruleKey = "";
+          state.itemName = "";
+          state.materialName = "";
+          state.itemCode = "";
+          render();
+        });
+        els.viewMode.addEventListener("change", event => {
+          state.view = event.target.value;
+          state.topGroup = "";
+          state.ruleKey = "";
+          state.itemName = "";
+          state.materialName = "";
+          state.itemCode = "";
+          render();
+        });
+        els.categoryMode.addEventListener("change", event => {
+          state.mode = event.target.value;
+          state.data = state.dataSets[state.mode];
+          state.topGroup = "";
+          state.ruleKey = "";
+          state.itemName = "";
+          state.materialName = "";
+          state.itemCode = "";
+          render();
+        });
+        els.statusFilter.addEventListener("change", event => {
+          state.status = event.target.value;
+          state.ruleKey = "";
+          state.itemName = "";
+          state.materialName = "";
+          state.itemCode = "";
+          render();
+        });
+        els.qualityFilter.addEventListener("change", event => {
+          state.quality = event.target.value;
+          state.ruleKey = "";
+          state.itemName = "";
+          state.materialName = "";
+          state.itemCode = "";
+          render();
+        });
+        els.resetButton.addEventListener("click", reset);
+        render();
+      } catch (error) {
+        els.sourceInfo.textContent = "加载失败";
+        document.body.innerHTML = `<div class="empty">无法加载物料浏览数据<br>${escapeHtml(error.message)}<br>请通过本地 HTTP 服务打开本页面。</div>`;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+{
+  "input": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_master\\material_master.tsv",
+  "governance_output": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_master\\governance\\glove_governance.tsv",
+  "sample_output": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_master\\governance\\glove_material_master_sample.tsv",
+  "source_glove_rows": 23,
+  "canonical_glove_rows": 16,
+  "merged_rows": 7,
+  "kept_or_updated_rows": 16,
+  "decision_counts": {
+    "keep_update": 16,
+    "merge_to": 7
+  },
+  "quality_level_counts": {
+    "standard": 4,
+    "usable": 8,
+    "needs_review": 4
+  },
+  "agent_use_policy_counts": {
+    "auto_select_allowed": 4,
+    "confirm_before_use": 8,
+    "clarify_specs_before_use": 4
+  },
+  "canonical_codes": [
+    "SAFE-000001",
+    "SAFE-000005",
+    "SAFE-000006",
+    "SAFE-000007",
+    "SAFE-000016",
+    "SAFE-000022",
+    "SAFE-000054",
+    "SAFE-000055",
+    "SAFE-000059",
+    "SAFE-000062",
+    "SAFE-000091",
+    "SAFE-000096",
+    "SAFE-000097",
+    "SAFE-000100",
+    "SAFE-000113",
+    "SAFE-000141"
+  ]
+}

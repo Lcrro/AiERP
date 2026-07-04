@@ -1,0 +1,249 @@
+group_id	item_name	sku_count	old_groups	stock_uoms	quality_levels	agent_use_policies	sample_skus_specs_aliases
+IMG-0995	透明钢丝软管	1	管材/软管	米	usable:1	confirm_before_use:1	PIPE-000134 | 公称直径：50；特征：加厚、透明、钢丝增强 | 50加厚透明钢丝管
+IMG-0996	通丝螺杆	1	建筑施工耗材/紧固件	只	needs_review:1	clarify_specs_before_use:1	FAST-000071 | 规格：14*700；类型：通丝 | 通丝14*700
+IMG-0997	速凝型堵漏剂	1	建材/堵漏材料	箱	needs_review:1	clarify_specs_before_use:1	CHEM-000149 | 品牌：牛元；特性：速凝型 | 牛元速凝型堵漏剂
+IMG-0998	遮阳伞	1	行政后勤/生活用品	把	needs_review:1	clarify_specs_before_use:1	MAT-000226 | 类型：大遮阳伞；规格：2.2m | 大遮阳伞2.2m
+IMG-0999	遮阳网	1	安全设施/防护网	平方	needs_review:1	clarify_specs_before_use:1	SAFE-000041 | 特征：密 | 密遮阳网
+IMG-1000	配电箱壳体	1	电气/配电箱壳体	只	needs_review:1	clarify_specs_before_use:1	ELEC-000153 | 材质：不锈钢；安装环境：室外；尺寸：500*600*300 | 不锈钢室外箱500*600*300
+IMG-1001	重型六联管夹	1	管夹/管路固定件	组	needs_review:1	clarify_specs_before_use:1	PIPE-000384 | 联数：6联；类型：重型 | 重型6联管夹
+IMG-1002	重型平口钳	1	工具/夹持工具	台	usable:1	confirm_before_use:1	TOOL-000198 | 规格：5寸；特征：重型 | 5寸重型平口钳
+IMG-1003	重型梅花敲击扳手	3	工具/手动工具	支	usable:3	confirm_before_use:3	TOOL-000148 | 规格：36；类型：梅花敲击；特征：重型 | 36重型梅花敲击扳手 || TOOL-000149 | 规格：46；类型：梅花敲击；特征：重型 | 46重型梅花敲击扳手 || TOOL-000150 | 规格：55；类型：梅花敲击；特征：重型 | 55重型梅花敲击扳手
+IMG-1004	重型矿井卡箍	1	管夹/卡箍	只	needs_review:1	clarify_specs_before_use:1	PIPE-000376 | 品牌：迈克；规格：DN150；类型：重型矿井卡箍 | 迈克重型矿井卡箍DN150
+IMG-1005	重型管卡	1	工程材料/管道辅材	个	standard:1	auto_select_allowed:1	PIPE-000037 | 规格：135；类型：重型 | 135重型管卡
+IMG-1006	重型管夹	1	管夹/管路固定件	只	needs_review:1	clarify_specs_before_use:1	PIPE-000383 | 规格：36；类型：重型管夹 | 重型管夹36
+IMG-1007	重型管夹加工件	1	定制件/管夹卡箍	只	needs_review:1	clarify_specs_before_use:1	PIPE-000359 | 加工：是；类型：重型管夹；规格：60 | 加工重型管夹60
+IMG-1008	重型高压接头	1	液压/高压管路	只	needs_review:1	clarify_specs_before_use:1	PIPE-000357 | 规格：36*2；类型：重型 | 重型高压接头36*2
+IMG-1009	重油污清洗剂	3	化工耗材/清洗剂；清洁用品/清洁剂	KG；公斤	standard:1；usable:2	auto_select_allowed:1；confirm_before_use:2	ADMIN-000007 | 品牌：宝雅；用途：重油污 | 宝雅重油污清洗剂 || ADMIN-000010 | 用途：去重油污 | 去重油污清洗剂 || CHEM-000016 | 用途：重油污清洗 | 重油污清洗剂
+IMG-1010	量杯	2	工具耗材/计量工具	个	needs_review:2	clarify_specs_before_use:2	TOOL-000211 | 容量：5L | 5L量杯 || TOOL-000217 | 容量：2000ml | 2000毫升量杯
+IMG-1011	金刚磨片	1	工具器具/磨切耗材	个	needs_review:1	clarify_specs_before_use:1	TOOL-000061 | 类型：金刚磨片 | 金刚磨片
+IMG-1012	金属测绳	2	工具/测量工具；工具器具/测量工具	米	needs_review:2	clarify_specs_before_use:2	TOOL-000065 | 材质：金属；类型：测绳 | 金属测绳 || TOOL-000219 | 材质：金属；类型：测绳 | 金属测绳
+IMG-1013	金属漆	1	油漆涂料/金属漆	桶	needs_review:1	clarify_specs_before_use:1	CHEM-000135 | 品牌：立邦；包装：18KG；用途：金属 | 立邦金属漆18KG
+IMG-1014	金属电缆防水接头	1	电气/电缆接头	只	needs_review:1	clarify_specs_before_use:1	ELEC-000195 | 材质：金属；螺纹：M50*1.5；特性：防水 | 金属电缆防水接头M50*1.5
+IMG-1015	金属软管	3	工程材料/水暖五金	个；根	needs_review:2；usable:1	clarify_specs_before_use:2；confirm_before_use:1	PIPE-000025 | 材质：金属；长度：80公分 | 80公分金属软管 || PIPE-000026 | 材质：金属；长度：40公分 | 40公分金属软管 || PIPE-000038 | 规格：4分；长度：60 | 4分*60金属软管
+IMG-1016	钉锤	1	工具/手动工具	支	needs_review:1	clarify_specs_before_use:1	TOOL-000164 | 规格：大号 | 大钉锤
+IMG-1017	钢丝刷	4	工具/清理工具；工具器具/打磨工具；工具器具/清洁工具；涂装工具/刷子	个；支	standard:1；needs_review:3	auto_select_allowed:1；clarify_specs_before_use:3	TOOL-000024 | 类型：刀型 | 刀型钢丝刷 || TOOL-000092 | 类型：钢丝刷 | 钢丝刷 || TOOL-000185 | 类型：钢丝刷 | 钢丝刷 || TOOL-000286 | 柄材质：铁柄；类型：钢丝刷 | 铁柄钢丝刷
+IMG-1018	钢丝增强管	1	工程材料/软管	米	needs_review:1	clarify_specs_before_use:1	PIPE-000086 | 规格：1寸；结构：钢丝增强 | 1寸钢丝增强管
+IMG-1019	钢丝球	2	劳保耗材/清洁用品；清洁耗材/清洁工具	个	standard:1；usable:1	auto_select_allowed:1；confirm_before_use:1	SAFE-000043 | 类型：钢丝球 | 钢丝球 || TOOL-000250 | 类型：钢丝球 | 钢丝球
+IMG-1020	钢丝绳	8	吊装索具/钢丝绳；定制件/吊装索具	根；米	needs_review:8	clarify_specs_before_use:8	METAL-000023 | 直径：6mm | 6MM钢丝绳 || METAL-000036 | 直径：16mm | 16厘钢丝绳 || METAL-000091 | 直径：10厘 | 10厘钢丝绳 || METAL-000093 | 规格：50；长度：6米 | 50*6米钢丝绳 || METAL-000095 | 定制：是；规格：50；长度：4米 | 定做50*4米钢丝绳 || METAL-000101 | 加工：扣压；直径/规格：50；长度：3.6米 | 扣压钢丝绳50*3.6米 || METAL-000102 | 加工：扣压；直径/规格：47.5；长度：9米 | 扣压钢丝绳47.5*9米 || METAL-000167 | 直径：Φ20；长度：6m | 钢丝绳Φ20*6m
+IMG-1021	钢丝绳专用剂	1	化工耗材/润滑防护剂	桶	needs_review:1	clarify_specs_before_use:1	METAL-000096 | 进口：是；包装：5kg；用途：钢丝绳 | 进口5KG钢丝绳专用剂
+IMG-1022	钢丝绳卡扣	1	吊装索具/钢丝绳配件	个	needs_review:1	clarify_specs_before_use:1	METAL-000024 | 适配直径：6mm | 6MM钢丝绳扣子
+IMG-1023	钢丝绳夹	1	吊装索具/钢丝绳夹	个	needs_review:1	clarify_specs_before_use:1	METAL-000092 | 规格：10厘 | 10厘卡扣；钢丝绳卡扣
+IMG-1024	钢丝绳夹头	1	吊装索具/钢丝绳配件	个	usable:1	confirm_before_use:1	METAL-000037 | 规格：M10 | M10钢丝绳夹头
+IMG-1025	钢丝绳润滑脂	1	油品/润滑脂	瓶	needs_review:1	clarify_specs_before_use:1	METAL-000103 | 品牌：伍尔特；用途：钢丝绳；容量：500mL | 伍尔特钢丝绳黄油500mL
+IMG-1026	钢丝绳铝扣	1	吊装索具/钢丝绳配件	个	needs_review:1	clarify_specs_before_use:1	METAL-000042 | 材质：铝；用途：钢丝绳扣压 | 钢丝绳铝扣
+IMG-1027	钢丝轮	1	磨具磨料/钢丝轮	只	needs_review:1	clarify_specs_before_use:1	METAL-000107 | 用途：打磨；类型：钢丝轮 | 打磨钢丝轮
+IMG-1028	钢丝软管	3	液压/高压管路；管材/软管	米	usable:1；needs_review:2	confirm_before_use:1；clarify_specs_before_use:2	PIPE-000195 | 公称直径：25；结构：钢丝增强 | 25钢丝管 || PIPE-000231 | 规格：38；结构：钢丝增强 | 38钢丝管 || PIPE-000311 | 规格：25；结构：钢丝增强 | 25钢丝管
+IMG-1029	钢丝钳	2	工具/手动工具；手动工具/钳类	个；把	needs_review:1；usable:1	clarify_specs_before_use:1；confirm_before_use:1	TOOL-000168 | 品牌：世达 | 世达老虎钳；老虎钳 || TOOL-000348 | 规格：7寸 | 老虎钳7寸；老虎钳
+IMG-1030	钢制铭牌	1	定制件/标识铭牌	件	needs_review:1	clarify_specs_before_use:1	METAL-000108 | 定制：是；材质：钢制 | 定制铭牌钢制
+IMG-1031	钢刷	2	涂装工具/刷子	只；把	needs_review:2	clarify_specs_before_use:2	TOOL-000245 | 材质：钢丝；类型：钢刷 | 钢刷 || TOOL-000251 | 材质：钢丝；类型：钢刷 | 钢刷
+IMG-1032	钢卷尺	5	工具/测量工具	只；把	usable:5	confirm_before_use:5	TOOL-000256 | 品牌：雄狮；长度：100m；材质：钢 | 雄狮钢卷尺100m || TOOL-000298 | 品牌：得力；长度：3m | 得力钢卷尺3m || TOOL-000299 | 品牌：得力；长度：5m | 得力钢卷尺5m || TOOL-000300 | 品牌：得力；长度：7.5m | 得力钢卷尺7.5m || TOOL-000301 | 品牌：得力；长度：10m | 得力钢卷尺10m
+IMG-1033	钢圈	2	加工件/金属加工件	个	needs_review:2	clarify_specs_before_use:2	SPARE-000009 | 材质：钢；规格：100*108*5；加工：是 | 加工100*108*5钢圈 || SPARE-000010 | 材质：钢；规格：100*110*10；加工：是 | 加工100*110*10钢圈
+IMG-1034	钢板加工件	1	定制件/金属加工件	块	needs_review:1	clarify_specs_before_use:1	SPARE-000035 | 加工：是；尺寸：300*270*16 | 加工300*270*16钢板
+IMG-1035	钢板起重钳	2	吊装索具/钢板夹	个	needs_review:2	clarify_specs_before_use:2	METAL-000076 | 额定载荷：2T | 2T钢板夹 || METAL-000077 | 额定载荷：3.2T | 3.2T钢板夹
+IMG-1036	钢板镂空字体	1	定制件/标识模板	套	needs_review:1	clarify_specs_before_use:1	CONST-000027 | 定制：是；材质：钢板；工艺：线切割；字符：01-50 | 原始:漏空 | 线切割钢板漏空字体01-50
+IMG-1037	钢格板	1	定制件/金属加工件	块	needs_review:1	clarify_specs_before_use:1	SPARE-000072 | 定制：是；尺寸：1.3-1.5米 | 定做1.3-1.5米钢格板
+IMG-1038	钢焊接件	1	定制件/金属加工件	个	needs_review:1	clarify_specs_before_use:1	SPARE-000088 | 定制：是；尺寸：80*200；材质：钢；工艺：焊接 | 定做80*200钢焊接
+IMG-1039	钢直尺	1	工具/测量工具	把	usable:1	confirm_before_use:1	TOOL-000262 | 长度：200mm；材质：钢 | 200mm钢直尺
+IMG-1040	钢筋加工件	3	定制件/钢筋加工件	个	needs_review:3	clarify_specs_before_use:3	METAL-000038 | 加工：是；钢筋规格：12；长度：1.6米 | 加工12钢筋1.6米 || METAL-000039 | 加工：是；钢筋规格：12；长度：11.93米 | 加工12钢筋11.93米 || METAL-000040 | 加工：是；钢筋规格：12；长度：12.94米 | 加工12钢筋12.94米
+IMG-1041	钢筋扎丝	1	五金备件/金属丝材	件	needs_review:1	clarify_specs_before_use:1	SPARE-000052 | 长度：50cm；包装：5kg | 50CM*5kg钢筋扎丝
+IMG-1042	钢筋接驳器	1	建筑材料/钢筋连接件	个	needs_review:1	clarify_specs_before_use:1	METAL-000087 | 适配钢筋直径：22 | 22钢筋接驳器
+IMG-1043	钢筋方形箍	1	定制件/钢筋加工件	个	needs_review:1	clarify_specs_before_use:1	METAL-000041 | 加工：是；钢筋规格：12；形状：方形箍 | 加工12钢筋方形箍
+IMG-1044	钢管	1	原材料/钢管	米	needs_review:1	clarify_specs_before_use:1	PIPE-000120 | 规格：32*4.5 | 32*4.5钢管
+IMG-1045	钢管抱箍	2	定制件/管路接头	个	needs_review:2	clarify_specs_before_use:2	PIPE-000102 | 加工：是；规格：159；适用：钢管 | 159加工钢管抱箍 || PIPE-000103 | 加工：是；规格：89；适用：钢管 | 加工89钢管抱箍
+IMG-1046	钢箱	1	定制件/金属加工件	个	needs_review:1	clarify_specs_before_use:1	SPARE-000051 | 加工定做：是；容量：4立方；材质：钢 | 加工定做4立方钢箱
+IMG-1047	钢钉	1	紧固件/钉	盒	needs_review:1	clarify_specs_before_use:1	METAL-000116 | 长度：25mm；材质：钢 | 钢钉25mm
+IMG-1048	钢钉线卡	1	电气材料/电气辅材	个	standard:1	auto_select_allowed:1	ELEC-000021 | 规格：20 | 20钢钉线卡
+IMG-1049	钢销	1	紧固件/销	根	needs_review:1	clarify_specs_before_use:1	METAL-000115 | 直径：14mm；长度：1m；材质：钢 | 钢销14mm*1m
+IMG-1050	钨钢钻头	4	工具器具/工具配件	支	standard:4	auto_select_allowed:4	TOOL-000048 | 材质：钨钢；直径：8mm | 钨钢钻头8厘 || TOOL-000049 | 材质：钨钢；直径：10mm | 钨钢钻头10厘 || TOOL-000050 | 材质：钨钢；直径：12mm | 钨钢钻头12厘 || TOOL-000051 | 材质：钨钢；直径：16mm | 钨钢钻头16厘
+IMG-1051	钳形万用表	1	仪表/电气仪表	只	usable:1	confirm_before_use:1	ELEC-000240 | 品牌：世达；类型：钳形万用表 | 世达钳型万用表
+IMG-1052	钳形电流表	1	仪表/电气仪表	个	needs_review:1	clarify_specs_before_use:1	ELEC-000227 | 精度描述：高精度；量程：1000A | 高精度钳流表1000A
+IMG-1053	钳形表	1	工具/电工仪表	个	needs_review:1	clarify_specs_before_use:1	TOOL-000161 | 量程：2000A | 2000A钳形表
+IMG-1054	钻头	28	工具/钻头；工具器具/工具配件；工具耗材/钻头	个；只；支	needs_review:19；usable:9	clarify_specs_before_use:19；confirm_before_use:9	TOOL-000066 | 规格：16*100 | 16*100钻头 || TOOL-000087 | 规格：5.0；材质/用途：不锈钢 | 5.0不锈钢钻头 || TOOL-000121 | 规格：4.0 | 4.0钻头 || TOOL-000122 | 规格：5.0 | 5.0钻头 || TOOL-000123 | 规格：5.5 | 5.5钻头 || TOOL-000208 | 规格：3.5；材质：钨钢 | 3.5钨钢钻头 || TOOL-000209 | 规格：3.0；材质：钨钢 | 3.0钨钢钻头 || TOOL-000221 | 直径：10mm；长度：200mm | 10*200钻头
+IMG-1055	钻尾螺丝	2	紧固件/钻尾螺丝	盒	needs_review:2	clarify_specs_before_use:2	FAST-000104 | 规格：M5.5*80；包装：大盒 | 钻尾螺丝M5.5*80大盒 || FAST-000107 | 长度：60mm | 钻尾螺丝60mm
+IMG-1056	铁丝	8	五金备件/金属丝材；五金耗材/金属丝；金属材料/铁丝	KG；kg	needs_review:4；usable:4	clarify_specs_before_use:4；confirm_before_use:4	SPARE-000024 | 规格：12号 | 12号铁丝；12铁丝 || SPARE-000025 | 规格：14号 | 14号铁丝；14铁丝 || SPARE-000038 | 规格：12# | 12#铁丝 || SPARE-000039 | 规格：14# | 14#铁丝 || METAL-000067 | 材质：铁 | 铁丝 || METAL-000111 | 规格：14#；材质：铁 | 铁丝14# || METAL-000163 | 材质：铁；规格：12# | 铁丝12# || METAL-000166 | 材质：铁；规格：14# | 铁丝14#
+IMG-1057	铁合页	1	五金建材/门窗五金	付	usable:1	confirm_before_use:1	METAL-000088 | 规格：6；材质：铁；工艺：焊接 | 6焊接铁合页
+IMG-1058	铁圈卡扣	1	定制件/管路接头	个	needs_review:1	clarify_specs_before_use:1	PIPE-000121 | 加工：是；规格：168；类型：铁圈卡扣 | 加工168铁圈卡扣
+IMG-1059	铁扎丝	1	建筑材料/绑扎材料	卷	needs_review:1	clarify_specs_before_use:1	METAL-000098 | 规格原文：500；材质：铁 | 500铁扎丝
+IMG-1060	铁钉	2	五金备件/紧固件	KG；斤	standard:1；usable:1	auto_select_allowed:1；confirm_before_use:1	SPARE-000001 | 长度：2寸 | 2寸铁钉 || SPARE-000053 | 规格：3寸 | 3寸铁钉
+IMG-1061	铁锤	1	工具/手动工具	个	needs_review:1	clarify_specs_before_use:1	TOOL-000152 | 规格：大号；材质：铁 | 大铁锤
+IMG-1062	铁锹	1	工具/手动工具	支	needs_review:1	clarify_specs_before_use:1	TOOL-000197 | 规格：待补 | 铁锹
+IMG-1063	铁锹柄	3	工具器具/工具配件；工具备件/手动工具配件	个；支	standard:1；needs_review:2	auto_select_allowed:1；clarify_specs_before_use:2	TOOL-000107 | 适用：铁锹 | 铁锹柄 || TOOL-000173 | 部件：柄；适用：铁锹 | 铁锹柄 || TOOL-000196 | 部件：柄；适用：铁锹 | 铁锹柄
+IMG-1064	铅笔	1	办公用品/书写工具	支	usable:1	confirm_before_use:1	ADMIN-000061 | 规格：2B | 2B铅笔
+IMG-1065	铜内丝管接	1	管件/铜管件	只	needs_review:1	clarify_specs_before_use:1	PIPE-000448 | 材质：铜；连接：内丝；规格：20 | 铜内丝管接20
+IMG-1066	铜头铝合金夹	2	液压/高压管路	个	usable:2	confirm_before_use:2	PIPE-000207 | 规格：80；组成：铜头、铝合金夹 | 80铜头铝合金夹 || PIPE-000218 | 规格：50；组成：铜头、铝扣 | 铜头铝套组件；50铜头铝扣
+IMG-1067	铜头铝套组件	1	液压/高压管路	个	needs_review:1	clarify_specs_before_use:1	PIPE-000184 | 规格：80；组成：铜头、铝扣；特征：加厚 | 80加厚铜头铝扣
+IMG-1068	铜导电嘴	1	焊接耗材/焊机配件	个	needs_review:1	clarify_specs_before_use:1	WELD-000010 | 材质：铜；规格：45*12 | 铜导电嘴45*12
+IMG-1069	铜挂锁	1	五金建材/锁具	把	needs_review:1	clarify_specs_before_use:1	HW-LOCK-000010 | 材质：铜 | 铜锁
+IMG-1070	铜接头	6	液压/高压管路；电气/接线端子	个；只	usable:2；needs_review:4	confirm_before_use:2；clarify_specs_before_use:4	PIPE-000246 | 规格：DN80；材质：铜；特征：加厚 | DN80厚铜头；加厚铜接头 || PIPE-000247 | 规格：DN50；材质：铜；特征：加厚 | DN50厚铜头；加厚铜接头 || ELEC-000247 | 材质：铜；适配线径：150平方 | 铜接头150平方 || ELEC-000248 | 材质：铜；适配线径：120平方 | 铜接头120平方 || ELEC-000249 | 材质：铜；适配线径：95平方 | 铜接头95平方 || ELEC-000250 | 材质：铜；适配线径：70平方 | 铜接头70平方
+IMG-1071	铜接线端子	4	电气/接线端子；电气材料/接线端子	个；只	needs_review:4	clarify_specs_before_use:4	ELEC-000102 | 截面积：4平方；材质：铜 | 4平方铜接线端子 || ELEC-000103 | 截面积：6平方；材质：铜 | 6平方铜接线端子 || ELEC-000174 | 材质：铜；额定电流：100A | 俗称:铜鼻子 | 100A铜鼻子 || ELEC-000216 | 材质：铜；适配线径：185平方 | 铜接头185平方
+IMG-1072	铜止回阀	2	工程材料/阀门	个	standard:2	auto_select_allowed:2	PIPE-000030 | 品牌：埃美柯；材质：铜；规格：32；类型：止回阀 | 32埃美柯铜止回阀 || PIPE-000036 | 品牌：埃美柯；材质：铜；规格：25；类型：止回阀 | 25埃美柯铜止回阀
+IMG-1073	铜球阀	1	工程材料/阀门	个	usable:1	confirm_before_use:1	PIPE-000111 | 品牌：埃美柯；规格：4分；材质：铜 | 埃美柯4分铜球阀
+IMG-1074	铜鼻子	4	电气材料/接线端子；电气材料/电缆附件	个	standard:2；usable:2	auto_select_allowed:2；confirm_before_use:2	ELEC-000031 | 规格：100A；材质：铜 | 100A铜鼻子 || ELEC-000032 | 规格：200A；材质：铜 | 200A铜鼻子 || ELEC-000091 | 电流：300A；材质：铜 | 300A铜鼻子 || ELEC-000092 | 电流：200A；材质：铜 | 200A铜鼻子
+IMG-1075	铝合金快速接头	1	管件/快速接头	套	needs_review:1	clarify_specs_before_use:1	PIPE-000489 | 材质：铝合金；公称通径：DN50 | 铝合金快速接头DN50
+IMG-1076	铝合金扣	2	液压/高压管路	个	usable:2	confirm_before_use:2	PIPE-000296 | 规格：50；材质：铝合金；特征：加厚 | 50加厚铝合金扣 || PIPE-000297 | 规格：80；材质：铝合金；特征：加厚 | 80加厚铝合金扣
+IMG-1077	铝合金抱箍	2	管道紧固/抱箍	个	usable:2	confirm_before_use:2	PIPE-000280 | 规格：50；材质：铝合金 | 50铝合金抱箍 || PIPE-000281 | 规格：80；材质：铝合金 | 80铝合金抱箍
+IMG-1078	铝合金枪头	1	注浆设备/配件	套	needs_review:1	clarify_specs_before_use:1	METAL-000099 | 规格：65；材质：铝合金；部件：枪头 | 65铝合金枪头
+IMG-1079	铝合金梯	1	安全防护/登高工具	部	needs_review:1	clarify_specs_before_use:1	SAFE-000132 | 材质：铝合金；特征：加厚；高度：4m | 加厚铝合金梯子4m
+IMG-1080	铝合金梯子	4	定制件/工具治具；工具/登高工具	个；台	needs_review:4	clarify_specs_before_use:4	TOOL-000153 | 长度：4米；型式：B型；材质：铝合金 | 4米B型铝合金梯子 || TOOL-000172 | 定制：是；长度：4米；规格：5.2；材质：铝合金；特征：加厚 | 定做4米*5.2加厚铝合金梯子 || TOOL-000191 | 长度：2.5米；材质：铝合金；特征：加厚 | 加厚2.5米铝合金梯子 || TOOL-000194 | 定制：是；长度：4米；材质：铝合金；特征：加厚 | 定做4米加厚铝合金梯子
+IMG-1081	铝合金窗	1	定制件/门窗制品	套	needs_review:1	clarify_specs_before_use:1	METAL-000046 | 定制：是；材质：铝合金 | 定做铝合金窗
+IMG-1082	铣刀钻头	2	工具/钻铣刀具	支	needs_review:2	clarify_specs_before_use:2	TOOL-000284 | 适用材质：不锈钢；直径：4mm | 不锈钢铣刀钻头4mm || TOOL-000285 | 适用材质：不锈钢；直径：10mm | 不锈钢铣刀钻头10mm
+IMG-1083	铭牌	1	定制件/标识铭牌	只	needs_review:1	clarify_specs_before_use:1	MAT-000178 | 定制：是；尺寸：70*40 | 订制铭牌70*40；定制铭牌70*40
+IMG-1084	铲刀	1	工具/手动工具	把	needs_review:1	clarify_specs_before_use:1	TOOL-000252 | 类型：铲刀 | 铲刀
+IMG-1085	链条扳手	1	工具器具/手动工具	个	needs_review:1	clarify_specs_before_use:1	TOOL-000039 | 类型：链条扳手 | 链条扳手
+IMG-1086	锁扣	1	五金/锁具配件	套	needs_review:1	clarify_specs_before_use:1	HW-LOCK-000015 | 材质：不锈钢；用途：外门；类型：锁扣 | 不锈钢外门锁扣
+IMG-1087	锂电手电钻套装	1	电动工具/手电钻	台	needs_review:1	clarify_specs_before_use:1	TOOL-000292 | 品牌：东成；供电：锂电；配置：二电一充 | 东成锂电手电钻二电一充
+IMG-1088	锂电池电钻	1	工具器具/电动工具	台	standard:1	auto_select_allowed:1	TOOL-000026 | 品牌：大艺；电压：21V；动力：锂电池 | 21V大艺锂电池电钻
+IMG-1089	锂电池角磨机	1	工具器具/电动工具	台	needs_review:1	clarify_specs_before_use:1	TOOL-000027 | 品牌：大艺；动力：锂电池 | 大艺锂电池角磨机
+IMG-1090	锂电电钻套装	1	电动工具/手电钻	台	needs_review:1	clarify_specs_before_use:1	TOOL-000337 | 品牌：东成；供电：锂电；配置：带螺丝刀套装 | 东成锂电电钻带螺丝刀套装
+IMG-1091	锂电角磨机	1	工具器具/电动工具	台	needs_review:1	clarify_specs_before_use:1	TOOL-000040 | 品牌：大艺；供电：锂电池 | 大艺锂电池角磨机
+IMG-1092	锂电角磨机套装	1	电动工具/角磨机	台	needs_review:1	clarify_specs_before_use:1	TOOL-000254 | 品牌：东成；供电：锂电；配置：二电一充 | 东成锂电角磨机二电一充
+IMG-1093	锂电钻	1	工具器具/电动工具	台	needs_review:1	clarify_specs_before_use:1	TOOL-000099 | 特征：大功率；供电：锂电池 | 大功率锂电钻
+IMG-1094	锰钢链条	1	吊装索具/链条	米	needs_review:1	clarify_specs_before_use:1	METAL-000130 | 材质：锰钢；规格：22mm | 锰钢链条22mm
+IMG-1095	镀锌三通	5	管件/镀锌管件	个；只	needs_review:4；usable:1	clarify_specs_before_use:4；confirm_before_use:1	PIPE-000139 | 公称直径：50；材质/表面：镀锌 | 50镀锌三通 || PIPE-000242 | 公称直径：DN80；表面：镀锌；类型：三通 | DN80镀锌三通 || PIPE-000433 | 表面：镀锌；规格：2寸；类型：三通 | 镀锌三通2寸 || PIPE-000477 | 表面处理：镀锌；规格：3寸；类型：三通 | 镀锌三通3寸 || PIPE-000487 | 表面处理：镀锌；规格：6分；类型：三通 | 镀锌三通6分
+IMG-1096	镀锌内丝弯头	3	管件/镀锌管件	只	needs_review:3	clarify_specs_before_use:3	PIPE-000434 | 表面：镀锌；连接：内丝；规格：2寸；类型：弯头 | 镀锌内丝弯头2寸 || PIPE-000435 | 表面：镀锌；连接：内丝；规格：3寸；类型：弯头 | 镀锌内丝弯头3寸 || PIPE-000440 | 表面：镀锌；连接：内丝；规格：4分；类型：弯头 | 镀锌内丝弯头4分
+IMG-1097	镀锌内丝直接	5	管件/镀锌管件	只	needs_review:3；usable:2	clarify_specs_before_use:3；confirm_before_use:2	PIPE-000412 | 规格：4寸；表面：镀锌；连接：内丝；类型：直接 | 4寸镀锌内丝直接 || PIPE-000413 | 规格：3寸；表面：镀锌；连接：内丝；类型：直接 | 3寸镀锌内丝直接；镀锌内丝直接头3寸 || PIPE-000430 | 表面：镀锌；连接：内丝；规格：2寸；类型：直接 | 镀锌内丝直接头2寸；镀锌内丝直接2寸 || PIPE-000484 | 表面处理：镀锌；连接：内丝；规格：2寸 | 镀锌内丝直接2寸 || PIPE-000486 | 表面处理：镀锌；连接：内丝；规格：6分 | 镀锌内丝直接6分
+IMG-1098	镀锌变径接头	1	管件/镀锌管件	只	needs_review:1	clarify_specs_before_use:1	PIPE-000456 | 表面：镀锌；规格：1寸/6分；类型：大小头/变径 | 镀锌大小头1寸/6分
+IMG-1099	镀锌堵头	1	工程材料/管件	个	needs_review:1	clarify_specs_before_use:1	PIPE-000077 | 规格：25；表面：镀锌；类型：堵头 | 25镀锌堵头
+IMG-1100	镀锌外丝六角直接	1	管件/镀锌管件	只	usable:1	confirm_before_use:1	PIPE-000483 | 表面处理：镀锌；连接：外丝；结构：六角；规格：2寸 | 镀锌外丝六角直接2寸
+IMG-1101	镀锌外丝接头	2	管件/镀锌管件	个	usable:2	confirm_before_use:2	PIPE-000140 | 规格：50*40；连接：外丝；表面：镀锌 | 50*40镀锌外丝 || PIPE-000243 | 公称直径：DN80；连接：外丝；表面处理：镀锌 | DN80镀锌外丝
+IMG-1102	镀锌外丝直接	6	管件/镀锌管件	只	needs_review:6	clarify_specs_before_use:6	PIPE-000428 | 表面：镀锌；连接：外丝；规格：3寸；类型：直接 | 镀锌外丝直接头3寸 || PIPE-000429 | 表面：镀锌；连接：外丝；规格：2寸；类型：直接 | 镀锌外丝直接头2寸；镀锌外丝直接2寸 || PIPE-000439 | 表面：镀锌；连接：外丝；规格：4分；类型：直接 | 镀锌外丝直接4分 || PIPE-000442 | 表面：镀锌；连接：外丝；规格：2寸；长度：150mm；类型：直接 | 镀锌外丝直接2寸/150mm || PIPE-000451 | 表面：镀锌；连接：外丝；规格：6分；长度：100mm | 镀锌外丝直接6分*100mm || PIPE-000455 | 表面：镀锌；连接：外丝；规格：1寸；长度：100mm | 镀锌外丝直接1寸*100mm
+IMG-1103	镀锌外接头	1	管件/镀锌管件	个	usable:1	confirm_before_use:1	PIPE-000142 | 公称直径：50；连接：外接；表面：镀锌 | 50镀锌外接
+IMG-1104	镀锌平垫	1	紧固件/垫圈	只	usable:1	confirm_before_use:1	FAST-000085 | 表面：镀锌；规格：M8；类型：平垫 | 镀锌平垫m8
+IMG-1105	镀锌异径接头	1	管件/镀锌管件	个	needs_review:1	clarify_specs_before_use:1	PIPE-000153 | 规格：100*50；表面：镀锌；类型：大小头 | 100*50镀锌大小头
+IMG-1106	镀锌弯头	3	管件/镀锌管件	个；只	needs_review:3	clarify_specs_before_use:3	PIPE-000208 | 规格：80；表面：镀锌；类型：弯头 | 80镀锌弯头 || PIPE-000478 | 表面处理：镀锌；规格：2寸；类型：弯头 | 镀锌弯头2寸 || PIPE-000485 | 表面处理：镀锌；规格：6分；类型：弯头 | 镀锌弯头6分
+IMG-1107	镀锌方管	1	钢材/型材	米	usable:1	confirm_before_use:1	METAL-000089 | 规格：3*3*3；表面：镀锌 | 镀锌方管3*3*3
+IMG-1108	镀锌方钢	1	钢材/型材	米	needs_review:1	clarify_specs_before_use:1	METAL-000081 | 规格：6*6*5；表面：镀锌 | 6*6*5镀锌方钢
+IMG-1109	镀锌板剪刀	1	工具/剪切工具	把	needs_review:1	clarify_specs_before_use:1	TOOL-000283 | 材质：合金钢；用途：镀锌板；规格：20寸 | 合金钢镀锌板剪刀20寸
+IMG-1110	镀锌水管加工件	1	定制件/管路加工件	根	needs_review:1	clarify_specs_before_use:1	PIPE-000469 | 加工：是；表面处理：镀锌；规格：4分；连接：两端丝；长度：3米 | 加工4分镀锌两端丝水管3米
+IMG-1111	镀锌活接	1	管件/镀锌管件	个	needs_review:1	clarify_specs_before_use:1	PIPE-000169 | 公称直径：50；表面：镀锌；类型：活接 | 50镀锌活接
+IMG-1112	镀锌电线架	1	电气材料/电气辅材	个	standard:1	auto_select_allowed:1	ELEC-000022 | 材质：镀锌；位数：4位 | 4位镀锌电线架
+IMG-1113	镀锌直通	1	管件/镀锌管件	个	needs_review:1	clarify_specs_before_use:1	PIPE-000141 | 公称直径：50；表面：镀锌 | 50镀锌直通
+IMG-1114	镀锌管	1	原材料/钢管	米	needs_review:1	clarify_specs_before_use:1	PIPE-000089 | 规格：DN20；表面：镀锌 | DN20镀锌管
+IMG-1115	镀锌膨胀钩	1	紧固件/膨胀件	只	usable:1	confirm_before_use:1	FAST-000120 | 表面处理：镀锌；规格：M16*130 | 镀锌膨胀钩M16*130
+IMG-1116	镀锌花兰扣	1	紧固件/拉紧件	只	needs_review:1	clarify_specs_before_use:1	MAT-000244 | 表面处理：镀锌；规格：M14 | 镀锌花兰扣m14
+IMG-1117	镀锌花兰螺丝	1	紧固件/拉紧件	只	usable:1	confirm_before_use:1	FAST-000121 | 表面处理：镀锌；规格：M14*350 | 镀锌花兰螺丝m14*350
+IMG-1118	镀锌螺丝套件	1	紧固件/螺丝套件	套	needs_review:1	clarify_specs_before_use:1	FAST-000087 | 表面：镀锌；规格：M12*30 | 镀锌螺丝M12*30
+IMG-1119	镀锌补心	1	管件/镀锌管件	个	needs_review:1	clarify_specs_before_use:1	PIPE-000298 | 规格：80*65；表面处理：镀锌；类型：补心 | 80*65镀锌补心
+IMG-1120	镀锌角钢	3	金属材料/型材；钢材/型材	根；米	needs_review:2；usable:1	clarify_specs_before_use:2；confirm_before_use:1	METAL-000078 | 规格：4*4；表面：镀锌 | 4*4镀锌角钢 || METAL-000090 | 规格：4*4*0.5；表面：镀锌 | 4*4*0.5镀锌角铁 || METAL-000169 | 表面处理：镀锌；规格：40*40 | 镀锌角铁40*40
+IMG-1121	镀锌角铁	1	金属材料/型材	米	usable:1	confirm_before_use:1	METAL-000003 | 材质/表面：镀锌；规格：4*4*0.5 | 4*4*0.5镀锌角铁
+IMG-1122	镀锌钢丝绳	1	吊装索具/钢丝绳	米	needs_review:1	clarify_specs_before_use:1	METAL-000164 | 表面处理：镀锌；直径：Φ12 | 镀锌钢丝绳Φ12
+IMG-1123	镀锌钢管	2	定制件/钢管加工件；金属材料/管材	条；米	standard:1；needs_review:1	auto_select_allowed:1；clarify_specs_before_use:1	PIPE-000034 | 规格：DN25；标准：国标；表面：镀锌 | DN25国标镀锌钢管 || PIPE-000110 | 定制：是；规格：48；表面：镀锌 | 定做48镀锌钢管
+IMG-1124	镀锌铁皮	1	原材料/板材	米	needs_review:1	clarify_specs_before_use:1	CONST-000015 | 厚度：1.2；表面：镀锌 | 1.2镀锌铁皮
+IMG-1125	镀锌骑马卡	1	管夹/管路固定件	个	needs_review:1	clarify_specs_before_use:1	PIPE-000459 | 表面：镀锌；规格：Φ200；类型：骑马卡 | 镀锌骑马卡Φ200
+IMG-1126	镂空数字喷涂模板	1	涂装工具/喷涂模板	套	needs_review:1	clarify_specs_before_use:1	CONST-000026 | 字符：0-9；类型：镂空数字模板 | 镂空数字漆模0-9
+IMG-1127	镂空标识字牌	1	定制件/标识铭牌	件	needs_review:1	clarify_specs_before_use:1	METAL-000120 | 定制：是；材质：不锈钢；类型：标识字牌 | 原始:漏空 | 订制不锈钢漏空标识字牌
+IMG-1128	长螺杆	1	五金备件/紧固件	套	usable:1	confirm_before_use:1	SPARE-000057 | 规格：14*200；类型：长螺杆 | 14*200长螺杆
+IMG-1129	长销加工件	1	定制件/金属加工件	件	needs_review:1	clarify_specs_before_use:1	SPARE-000093 | 加工：是；规格：20*340 | 加工长销20*340
+IMG-1130	门吸	1	五金/门窗五金	付	needs_review:1	clarify_specs_before_use:1	METAL-000129 | 材质：304不锈钢；类型：门柱吸/门吸 | 304不锈钢门柱吸
+IMG-1131	门插销	1	五金/门窗五金	套	needs_review:1	clarify_specs_before_use:1	METAL-000128 | 材质：不锈钢；用途：门；类型：插销 | 不锈钢门插销
+IMG-1132	门板插销	1	五金/门窗五金	付	needs_review:1	clarify_specs_before_use:1	CONST-000041 | 材质：不锈钢；用途：门板；类型：插销 | 不锈钢门板插销
+IMG-1133	门锁	3	五金/锁具；五金备件/锁具；五金备件/门锁锁具	个；套；把	needs_review:3	clarify_specs_before_use:3	HW-LOCK-000001 | 用途：办公室门 | 办公室门锁 || HW-LOCK-000008 | 用途：大门 | 大门锁 || HW-LOCK-000016 | 材质：铝合金；适配对象：断桥铝门；类型：门锁 | 铝合金断桥铝门锁
+IMG-1134	闪光蜂鸣器	1	电气材料/报警器	套	needs_review:1	clarify_specs_before_use:1	ELEC-000149 | 功能：闪光、蜂鸣 | 闪光蜂鸣器
+IMG-1135	闭门器	3	五金备件/门窗五金；五金建材/门窗五金	个；套	usable:2；needs_review:1	confirm_before_use:2；clarify_specs_before_use:1	SPARE-000006 | 规格：大 | 闭门器大 || SPARE-000043 | 规格：大号 | 闭门器大 || MAT-000115 | 品类：闭门器 | 闭门器
+IMG-1136	防冻保温棉	1	保温材料/保温棉	根	needs_review:1	clarify_specs_before_use:1	MAT-000236 | 特性：防冻；规格：Φ50 | 防冻保温棉Φ50
+IMG-1137	防坠器	1	安全防护/高处防护	个	usable:1	confirm_before_use:1	SAFE-000074 | 承重：300kg；长度：30米；锁具：双锁 | 300KG30米防坠器双锁
+IMG-1138	防坠安全网	1	定制件/安全防护	平方	needs_review:1	clarify_specs_before_use:1	SAFE-000031 | 定制：是；用途：防坠 | 定做防坠安全网
+IMG-1139	防尘网	1	安全设施/防护网	平方	usable:1	confirm_before_use:1	SAFE-000042 | 规格：10针 | 10针防尘网
+IMG-1140	防尘面罩	1	劳保耗材/呼吸防护	只	needs_review:1	clarify_specs_before_use:1	SAFE-000098 | 品牌：3M；类型：防尘面罩 | 3M防尘面罩
+IMG-1141	防尘面罩过滤芯	1	劳保耗材/呼吸防护	只	needs_review:1	clarify_specs_before_use:1	SAFE-000099 | 品牌：3M；适配：防尘面罩；部件：过滤芯 | 3M防尘面罩过滤芯
+IMG-1142	防护安全网	1	安全设施/防护网	件	needs_review:1	clarify_specs_before_use:1	SAFE-000025 | 规格：3000；特征：加厚 | 加厚3000防护安全网
+IMG-1143	防护服	1	劳保耗材/防护服	套	needs_review:1	clarify_specs_before_use:1	SAFE-000093 | 特征：加厚；款式：连体 | 加厚连体裤
+IMG-1144	防护眼镜	2	劳保耗材/眼面防护	个；付	standard:2	auto_select_allowed:2	SAFE-000002 | 用途：打磨 | 打磨眼镜 || SAFE-000008 | 颜色：透明 | 透明防护眼镜
+IMG-1145	防护罩加工件	1	定制件/防护罩	件	needs_review:1	clarify_specs_before_use:1	SAFE-000119 | 定制：是；尺寸：1.2m*2.7m*0.8m | 加工防护罩1.2米*2.7米*0.8米
+IMG-1146	防撞条	1	安全设施/防撞防护	米	needs_review:1	clarify_specs_before_use:1	SAFE-000037 | 特征：背胶；类型：防撞条 | 背胶防撞条
+IMG-1147	防松螺母	1	紧固件/螺母	个	needs_review:1	clarify_specs_before_use:1	FAST-000050 | 规格：M24；类型：防松 | 24防松螺母
+IMG-1148	防水乳胶漆	2	油漆涂料/乳胶漆	桶	needs_review:2	clarify_specs_before_use:2	CHEM-000141 | 品牌：立邦；特性：防水；包装：18KG | 立邦防水乳胶漆18KG || CHEM-000142 | 品牌：立邦；颜色：白色；特性：防水；包装：18KG | 立邦白色防水乳胶漆18KG
+IMG-1149	防水电工胶布	1	电气材料/绝缘材料	卷	needs_review:1	clarify_specs_before_use:1	ELEC-000134 | 宽度：25mm；功能：防水 | 25mm电工防水胶布
+IMG-1150	防水网线接头	1	电气材料/弱电材料	个	standard:1	auto_select_allowed:1	ELEC-000043 | 功能：防水；用途：网线连接 | 防水网线接头连接
+IMG-1151	防水网线连接器	1	弱电安防/网络配件	套	needs_review:1	clarify_specs_before_use:1	PIPE-000420 | 适用环境：户外；特性：防水；类型：网线接头连接器 | 户外防水网线接头连接器
+IMG-1152	防滑橡胶垫	1	劳保耗材/地面防护	平方	needs_review:1	clarify_specs_before_use:1	SAFE-000063 | 功能：防滑；材质：橡胶 | 防滑胶垫
+IMG-1153	防火棉	1	建筑材料/保温防火材料	平方	needs_review:1	clarify_specs_before_use:1	MAT-000069 | 特性：阻燃；类型：防火棉 | 阻燃防火棉
+IMG-1154	防火涂层测厚仪	1	工具器具/检测仪器	台	needs_review:1	clarify_specs_before_use:1	TOOL-000074 | 用途：防火涂层测厚 | 防火涂层测厚仪
+IMG-1155	防爆耐磨水带	1	安全消防/水带	米	needs_review:1	clarify_specs_before_use:1	SAFE-000131 | 特性：防爆耐磨；公称通径：DN50 | 防爆耐磨水带DN50
+IMG-1156	防盗门锁	1	五金备件/锁具	个	needs_review:1	clarify_specs_before_use:1	HW-LOCK-000009 | 材质：不锈钢；用途：防盗门 | 防盗门锁不锈钢
+IMG-1157	防锈润滑剂	5	化工耗材/润滑剂；化工耗材/润滑防锈	支；瓶	usable:1；needs_review:4	confirm_before_use:1；clarify_specs_before_use:4	CHEM-000006 | 品牌/型号：WD-40；容量：500 | WD-40500防锈润滑剂 || CHEM-000054 | 品牌/型号：WD-40 | WD40润滑剂 || CHEM-000059 | 品牌/型号：WD-40；功能：除锈润滑 | WD40除锈润滑剂 || CHEM-000061 | 品牌/型号：WD-40；功能：除锈 | WD-40除锈剂 || CHEM-000085 | 型号：DM40；功能：防锈润滑 | DM40防锈润滑剂
+IMG-1158	防锈漆	10	化工耗材/涂料；油漆涂料/防锈漆	桶	needs_review:1；usable:9	clarify_specs_before_use:1；confirm_before_use:9	CHEM-000011 | 颜色：铁红；类型：防锈漆 | 铁红防锈漆 || CHEM-000102 | 品牌：立邦；颜色：白色；包装：18KG | 立邦白色防锈漆18KG || CHEM-000108 | 品牌：立邦；颜色：桔黄色；包装：18kg | 立邦桔黄色防锈漆18kg || CHEM-000110 | 品牌：立邦；颜色：深黄；包装：18KG | 立邦深黄防锈漆18KG || CHEM-000111 | 品牌：立邦；颜色：黑色；包装：18KG | 立邦黑色防锈漆18KG || CHEM-000112 | 品牌：立邦；颜色：大红；包装：18KG | 立邦大红防锈漆18KG || CHEM-000113 | 品牌：立邦；颜色：淡黄灰；包装：18KG | 立邦淡黄灰防锈漆18KG || CHEM-000114 | 品牌：立邦；颜色：桔红；包装：18KG | 立邦桔红防锈漆18KG
+IMG-1159	阻燃地板革	1	建筑装饰材料/地板革	㎡	needs_review:1	clarify_specs_before_use:1	CONST-000028 | 特性：阻燃；尺寸：6m*2.5m | 阻燃地板革6m*2.5m
+IMG-1160	阻燃挤塑板	2	保温材料/挤塑板	平方	needs_review:2	clarify_specs_before_use:2	CONST-000029 | 特性：阻燃；尺寸：2.2m*0.6m*0.1m | 数量描述:116块 | 阻燃挤塑板2.2m*0.6m*0.1m*116块 || CONST-000030 | 特性：阻燃；尺寸：2.2m*0.6m*0.05m | 数量描述:64块 | 阻燃挤塑板2.2m*0.6m*0.05m*64块
+IMG-1161	除污剂	1	清洁化学品/除污剂	桶	needs_review:1	clarify_specs_before_use:1	ADMIN-000050 | 用途：重油污；包装：30KG | 重油污除污剂30KG；重油污除污剂
+IMG-1162	除甲醛机	1	行政后勤/办公设备	个	needs_review:1	clarify_specs_before_use:1	ADMIN-000021 | 用途：办公室；功能：除甲醛 | 办公室除甲醛机
+IMG-1163	除胶剂	2	化工耗材/清洗剂；清洁化学品/除胶剂	支；瓶	standard:1；needs_review:1	auto_select_allowed:1；clarify_specs_before_use:1	CHEM-000004 | 品牌：得力；容量：500ML | 得力500ML除胶剂 || CHEM-000154 | 类型：除胶剂 | 除胶剂
+IMG-1164	除锈剂	3	化工耗材/除锈润滑剂	瓶	usable:3	confirm_before_use:3	CHEM-000134 | 品牌：WD40；容量：500mL | WD40除锈剂500ML || CHEM-000137 | 品牌：陶喜；容量：450mL | 陶喜除锈剂450mL || CHEM-000146 | 品牌：WD40；容量：350mL | WD40除锈剂350ML
+IMG-1165	隔环加工件	1	定制件/机械加工件	个	needs_review:1	clarify_specs_before_use:1	SPARE-000118 | 加工：是；型号/规格：2350；部件：隔环 | 加工隔环2350
+IMG-1166	集装袋	1	包装材料/集装袋	个	needs_review:1	clarify_specs_before_use:1	MAT-000077 | 载重：1.5T | 1.5T吨袋；吨袋
+IMG-1167	雨棚	2	定制件/遮雨棚；行政后勤/临时设施	个；套	needs_review:2	clarify_specs_before_use:2	MAT-000068 | 尺寸：4*4米；特征：加厚 | 定制:是 | 加厚4*4米雨棚 || MAT-000112 | 尺寸：3*4.5m；规格：大 | 3*4.5m大雨棚
+IMG-1168	雨衣	2	劳保耗材/雨具	套	usable:1；needs_review:1	confirm_before_use:1；clarify_specs_before_use:1	SAFE-000027 | 类型：一次性 | 一次性雨衣 || SAFE-000047 | 特征：加厚 | 加厚雨衣
+IMG-1169	雨衣套装	1	劳保耗材/雨具	套	needs_review:1	clarify_specs_before_use:1	SAFE-000058 | 套装：是；特征：加厚 | 加厚雨衣套装
+IMG-1170	雨鞋	5	劳保耗材/足部防护；劳保耗材/雨具	双	needs_review:4；usable:1	clarify_specs_before_use:4；confirm_before_use:1	SAFE-000050 | 品牌：回力；特征：厚底 | 回力厚底雨鞋 || SAFE-000067 | 品牌：回力；类型：雨鞋 | 回力雨鞋 || SAFE-000077 | 品牌：回力；特征：加厚 | 回力加厚雨鞋 || SAFE-000083 | 品牌：回力 | 回力雨鞋 || SAFE-000128 | 品牌：回力；尺码：41码；配置：带衬里 | 41码回力雨鞋带衬里
+IMG-1171	雾化喷头	1	工程材料/喷淋配件	个	needs_review:1	clarify_specs_before_use:1	MAT-000057 | 用途：加湿；类型：雾化喷头 | 加湿雾化喷头
+IMG-1172	雾炮机	1	设备/环保喷淋设备	台	needs_review:1	clarify_specs_before_use:1	MAT-000058 | 功率：3kW；控制：全自动 | 3千瓦全自动雾炮机
+IMG-1173	鞋垫	1	劳保耗材/足部防护	双	needs_review:1	clarify_specs_before_use:1	SAFE-000052 | 类型：鞋垫 | 鞋垫
+IMG-1174	顶托	2	建筑材料/脚手架配件	套；支	usable:2	confirm_before_use:2	CONST-000008 | 规格：30*500；特征：厚 | 30*500厚顶托 || CONST-000009 | 规格：38*600；特征：厚 | 38*600厚顶托
+IMG-1175	风镐	1	工具器具/气动工具	台	usable:1	confirm_before_use:1	TOOL-000067 | 型号：G150 | G150风镐
+IMG-1176	马夹袋	1	包装材料/塑料袋	条	needs_review:1	clarify_specs_before_use:1	MAT-000170 | 类型：马夹袋 | 马夹袋
+IMG-1177	马路切割片	1	工具器具/磨切耗材	块	needs_review:1	clarify_specs_before_use:1	TOOL-000083 | 规格：400；用途：马路切割 | 400马路切片
+IMG-1178	骑马卡	2	定制件/管夹卡箍；管道紧固/骑马卡	个；件	needs_review:2	clarify_specs_before_use:2	PIPE-000294 | 公称直径：DN200；材质：不锈钢 | DN200不锈钢骑马卡 || PIPE-000332 | 定制：是；规格：36；材质：不锈钢；厚度/螺纹：36*2.0 | 订制36不锈钢骑马卡36*2.0
+IMG-1179	骑马螺丝	1	五金备件/紧固件	套	needs_review:1	clarify_specs_before_use:1	SPARE-000029 | 规格：14*75 | 14*75骑马螺丝
+IMG-1180	高压内丝接头	1	液压/高压管路	只	needs_review:1	clarify_specs_before_use:1	PIPE-000365 | 规格：36*2H；连接形式：内丝 | 高压内丝接头36*2H
+IMG-1181	高压内外牙弯头	1	定制件/液压接头	个	needs_review:1	clarify_specs_before_use:1	PIPE-000238 | 定制：是；规格：52；连接：内外牙；类型：弯头 | 定做52高压内外牙弯头
+IMG-1182	高压内接头	4	定制件/液压接头	个	needs_review:4	clarify_specs_before_use:4	PIPE-000234 | 定制：是；型号/规格：52H42；类型：内接高压 | 定做52H42内接高压 || PIPE-000235 | 定制：是；型号/规格：36H28；类型：内接高压 | 定做36H28内接高压 || PIPE-000236 | 定制：是；型号/规格：30H20；类型：内接高压 | 定做30H20内接高压 || PIPE-000237 | 定制：是；型号/规格：26H20；类型：内接高压 | 定做26H20内接高压
+IMG-1183	高压加厚接头	1	定制件/液压接头	个	needs_review:1	clarify_specs_before_use:1	PIPE-000046 | 定制：是；规格：52；特征：加厚 | 定做52高压加厚接头
+IMG-1184	高压卡箍双丝牙接头	1	定制件/管路接头	个	needs_review:1	clarify_specs_before_use:1	PIPE-000059 | 定制：是；规格：52；特征：高压加厚；连接：卡箍+双丝牙 | 定做高压加厚52米卡箍双丝牙
+IMG-1185	高压变径接头	1	定制件/液压接头	个	needs_review:1	clarify_specs_before_use:1	PIPE-000078 | 定制：是；规格：36*3+36；类型：变头 | 定做36*3+36高压变头
+IMG-1186	高压堵头	7	液压/高压管路	个	needs_review:7	clarify_specs_before_use:7	PIPE-000173 | 规格：1/2英寸；类型：堵头 | 1/2高压堵头 || PIPE-000174 | 规格：3/4英寸；类型：堵头 | 3/4高压堵头 || PIPE-000175 | 规格：1英寸；类型：堵头 | 1高压堵头 || PIPE-000176 | 规格：1.5寸；类型：堵头 | 1.5寸高压堵头 || PIPE-000177 | 规格：2寸；类型：堵头 | 2寸高压堵头 || PIPE-000315 | 螺纹：M36*2；连接：内丝 | M36*2高压内丝堵头 || PIPE-000316 | 螺纹：M36*2；连接：外丝 | M36*2高压外丝堵头
+IMG-1187	高压外丝变径接头	1	定制件/液压接头	个	needs_review:1	clarify_specs_before_use:1	PIPE-000079 | 定制：是；规格：M36变1寸；连接：外丝 | 定做M36变1寸高压外丝
+IMG-1188	高压外丝堵头	1	液压/高压管路	个	needs_review:1	clarify_specs_before_use:1	PIPE-000305 | 规格：25；连接：外丝；类型：堵头 | 25高压外丝堵头
+IMG-1189	高压外丝接头	1	液压/高压管路	个	needs_review:1	clarify_specs_before_use:1	PIPE-000164 | 螺纹：M36*2A；类型：外丝 | M36*2A高压外丝
+IMG-1190	高压外接头	1	液压/高压管路	个	needs_review:1	clarify_specs_before_use:1	PIPE-000137 | 公称直径：50；连接类型：外接 | 50高压外接
+IMG-1191	高压对丝	1	液压/高压管路	个	needs_review:1	clarify_specs_before_use:1	PIPE-000307 | 规格：20；类型：对丝 | 20高压对丝
+IMG-1192	高压对丝接头	5	液压/高压管路	只	needs_review:5	clarify_specs_before_use:5	PIPE-000352 | 螺纹：20*1.5 | 高压接头20*1.5对丝 || PIPE-000353 | 螺纹：24*1.5 | 高压接头24*1.5对丝 || PIPE-000354 | 螺纹：30*2；连接形式：对丝 | 高压接头30*2对丝 || PIPE-000355 | 螺纹：36*2；连接形式：对丝 | 高压接头36*2对丝 || PIPE-000356 | 螺纹：52*2；连接形式：对丝 | 高压接头52*2对丝
+IMG-1193	高压弯头	11	定制件/液压接头；液压/高压管路	个；只	needs_review:11	clarify_specs_before_use:11	PIPE-000051 | 定制：是；规格：6x1.5；类型：弯头 | 定做 6x1.5高压弯头 || PIPE-000052 | 定制：是；规格：10x1.5；类型：弯头 | 定做 10x1.5高压弯头 || PIPE-000053 | 定制：是；规格：13x1.5；类型：弯头 | 定做 13x1.5高压弯头 || PIPE-000054 | 定制：是；规格：16x1.5；类型：弯头 | 定做 16x1.5高压弯头 || PIPE-000055 | 定制：是；规格：19x1.5；类型：弯头 | 定做 19x1.5高压弯头 || PIPE-000056 | 定制：是；规格：25x1.5；类型：弯头 | 定做 25x1.5高压弯头 || PIPE-000057 | 定制：是；规格：32x1.5；类型：弯头 | 定做 32x1.5高压弯头 || PIPE-000058 | 定制：是；规格：38x1.5；类型：弯头 | 定做 38x1.5高压弯头
+IMG-1194	高压接头	4	液压/高压管路	个	needs_review:4	clarify_specs_before_use:4	PIPE-000156 | 型号/规格：36/25S | 36/25s高压接头 || PIPE-000157 | 型号/规格：33/25S | 33/25s高压接头 || PIPE-000158 | 型号/规格：36/28S | 36/28s高压接头 || PIPE-000300 | 规格：100；类型：接头 | 100高压接头
+IMG-1195	高压枪头	1	工具备件/喷枪配件	个	needs_review:1	clarify_specs_before_use:1	TOOL-000147 | 特征：加长；类型：高压枪头 | 加长高压枪头
+IMG-1196	高压树脂管	1	液压/高压管路	米	needs_review:1	clarify_specs_before_use:1	PIPE-000197 | 规格：8厘；材质：树脂；类型：高压管 | 8厘高压树脂管
+IMG-1197	高压水带	1	管材/高压水带	米	needs_review:1	clarify_specs_before_use:1	PIPE-000475 | 直径：Φ80；类型：高压水带 | 高压水带Φ80
+IMG-1198	高压水枪	1	工具器具/清洗工具	支	needs_review:1	clarify_specs_before_use:1	TOOL-000044 | 材质：金属；类型：高压水枪 | 金属高压水枪
+IMG-1199	高压水枪滤芯	1	设备备件/滤芯	个	needs_review:1	clarify_specs_before_use:1	SPARE-000022 | 适用设备：高压水枪；类型：滤芯 | 高压水枪滤芯
+IMG-1200	高压水枪过滤总成	1	设备备件/清洗设备配件	套	needs_review:1	clarify_specs_before_use:1	SPARE-000021 | 适用设备：高压水枪；类型：过滤总成 | 高压水枪过滤总成
+IMG-1201	高压水管	1	液压/高压管路	米	needs_review:1	clarify_specs_before_use:1	PIPE-000308 | 规格：100；用途：高压水 | 100高压水管
+IMG-1202	高压油压表	1	仪表/压力仪表	个	needs_review:1	clarify_specs_before_use:1	MAT-000100 | 介质：油；类型：高压表 | 高压油表
+IMG-1203	高压油管	7	定制件/液压管路；液压/高压管路	条；根；米	needs_review:5；usable:2	clarify_specs_before_use:5；confirm_before_use:2	PIPE-000035 | 规格：DN25*4；类型：高压油管 | DN25*4高压油管 || PIPE-000040 | 规格：DN51；等级：4SH | DN51*4SH高压油管 || PIPE-000041 | 规格：DN32；等级：4SH | DN32*4SH高压油管 || PIPE-000135 | 公称直径：50 | 50高压油管；50高压管 || PIPE-000182 | 公称直径：80 | 80高压管；80高压油管 || PIPE-000255 | 规格：76*4 | 76*4高压油管 || PIPE-000293 | 定制：是；规格：19；压力：420公斤 | 定做19*420公斤高压油管
+IMG-1204	高压油管接头	1	液压/高压管路	个	needs_review:1	clarify_specs_before_use:1	PIPE-000136 | 公称直径：50；类型：接头 | 50高压接头
+IMG-1205	高压注浆机	1	设备/注浆设备	台	needs_review:1	clarify_specs_before_use:1	MAT-000155 | 类型：高压注浆机 | 高压注浆机
+IMG-1206	高压清洗喷枪	1	清洗设备/高压清洗机配件	把	needs_review:1	clarify_specs_before_use:1	MAT-000131 | 用途：高压清洗；类型：喷枪 | 高压清洗喷枪
+IMG-1207	高压清洗机	1	清洗设备/高压清洗机	套	needs_review:1	clarify_specs_before_use:1	MAT-000106 | 品牌：黑马；电压：380V；功率：5.5kW | 黑马380V*5.5千瓦高压清洗机
+IMG-1208	高压清洗机喷嘴	1	清洗设备/清洗机配件	只	needs_review:1	clarify_specs_before_use:1	MAT-000253 | 角度：0度 | 高压清洗机喷咀0度；喷咀
+IMG-1209	高压清洗机滤网	1	清洗设备/高压清洗机配件	个	needs_review:1	clarify_specs_before_use:1	CHEM-000091 | 规格：25mm；部件：滤网 | 25MM高压清洗剂滤网
+IMG-1210	高压球阀	3	阀门/球阀	个；只	needs_review:3	clarify_specs_before_use:3	PIPE-000306 | 品牌：埃美柯；规格：20；类型：高压球阀 | 20埃美柯高压球阀 || PIPE-000310 | 品牌：埃美柯；规格：25；类型：高压球阀 | 25埃美柯高压球阀 || PIPE-000367 | 材质：不锈钢；用途：液压高压；规格：1寸 | 不锈钢液压高压球阀1寸
+IMG-1211	高压直接	1	液压/高压管路	只	needs_review:1	clarify_specs_before_use:1	PIPE-000348 | 螺纹：M32*2；连接：内丝 | m32*2高压内丝直接
+IMG-1212	高压管总成	1	液压/高压管路	根	needs_review:1	clarify_specs_before_use:1	PIPE-000438 | 直径：Φ13；长度：50m；配置：两端接头 | 高压管带两端接头Φ13-50m
+IMG-1213	高压胶水带	1	液压/高压管路	米	needs_review:1	clarify_specs_before_use:1	PIPE-000304 | 规格：65；颜色：蓝色；特征：加厚 | 65加厚蓝色胶水带
+IMG-1214	高压胶管	2	液压/高压管路	米	needs_review:1；usable:1	clarify_specs_before_use:1；confirm_before_use:1	PIPE-000299 | 规格：100；形态：胶管 | 100高压胶管 || PIPE-000313 | 规格：50；结构等级：4SH | 50*4SH高压胶管
+IMG-1215	高压转换接头	3	液压/高压管路	套	needs_review:3	clarify_specs_before_use:3	PIPE-000349 | 螺纹：36*2；形式：外丝转内丝 | 高压接头36*2外丝转内丝 || PIPE-000350 | 螺纹：52*2；形式：外丝转内丝 | 高压接头52*2外丝转内丝 || PIPE-000351 | 螺纹：24*1.5/36*2 | 高压接头24*1.5/36*2
+IMG-1216	高压钢丝管	1	液压/高压管路	米	needs_review:1	clarify_specs_before_use:1	PIPE-000217 | 公称直径：50；结构：钢丝增强 | 50高压钢丝管
+IMG-1217	高压钢丝软管	1	液压气动/高压软管	米	needs_review:1	clarify_specs_before_use:1	PIPE-000490 | 直径：Φ25；结构：钢丝增强 | 高压钢丝管Φ25
+IMG-1218	高压铜球阀	1	工程材料/阀门	个	standard:1	auto_select_allowed:1	PIPE-000039 | 规格：DN20；压力：350kg；材质：铜；类型：球阀 | DN20*350kg高压铜球阀
+IMG-1219	高压防水自粘带	1	电气耗材/绝缘胶带	卷	needs_review:1	clarify_specs_before_use:1	ELEC-000217 | 品牌：3M；特性：高压防水；类型：自粘带 | 3M高压防水自粘带
+IMG-1220	高帮劳保鞋	1	劳保耗材/足部防护	双	needs_review:1	clarify_specs_before_use:1	SAFE-000024 | 特征：进口、高帮 | 进口高帮劳保鞋
+IMG-1221	高强度全牙螺丝	2	紧固件/螺丝	套	needs_review:2	clarify_specs_before_use:2	FAST-000082 | 强度等级：12.9；规格：M30*250；螺纹形式：全牙 | 原始:全芽 | 12.9级m30*250全芽螺丝 || FAST-000108 | 强度等级：12.9级；规格：M27*100；螺纹：全牙 | 12.9级M27*100全芽螺丝
+IMG-1222	高强度全牙螺杆	1	紧固件/螺杆	根	usable:1	confirm_before_use:1	FAST-000080 | 强度等级：12.9；规格：M30*1m；螺纹形式：全牙 | 原始:全芽 | 12.9级全芽螺杆m30*1m
+IMG-1223	高强度全螺纹螺丝套件	1	紧固件/螺丝套件	套	needs_review:1	clarify_specs_before_use:1	FAST-000119 | 强度等级：12.9；规格：M24*60；螺纹：全螺纹；包含：平垫+弹垫 | 12.9级M24*60全芽螺丝带平弹垫
+IMG-1224	高强度螺丝	4	五金备件/紧固件；紧固件/螺丝	个；套	needs_review:4	clarify_specs_before_use:4	SPARE-000042 | 强度等级：12.9级；规格：10*150 | 12.9级 10*150螺丝 || FAST-000016 | 规格：M5*95；强度等级：12.9 | M5*95 12.9螺丝 || FAST-000064 | 规格：M30*100；强度等级：12.9 | M30*100/12.9级螺丝 || FAST-000067 | 规格：M30*80；强度等级：10.8 | M30*80/10.8级螺丝
+IMG-1225	高强度螺丝套件	1	紧固件/螺丝套件	套	needs_review:1	clarify_specs_before_use:1	FAST-000123 | 强度等级：8.8；规格：M16*70；套件组成：平垫+弹垫 | 8.8级m16*70螺丝带平 弹垫
+IMG-1226	高强度螺母	1	紧固件/螺母	只	needs_review:1	clarify_specs_before_use:1	FAST-000081 | 强度等级：12.9；规格：M30 | 12.9级螺母M30
+IMG-1227	高温润滑脂	1	油品/润滑脂	桶	needs_review:1	clarify_specs_before_use:1	CHEM-000136 | 类型：高温黄油；包装：16KG | 高温黄油16KG
+IMG-1228	高筒雨鞋	1	劳保耗材/足部防护	双	needs_review:1	clarify_specs_before_use:1	SAFE-000049 | 品牌：回力；筒高：高筒 | 回力雨鞋高筒
+IMG-1229	高粱扫把	2	劳保耗材/清洁工具；清洁工具/扫把	把；支	standard:1；usable:1	auto_select_allowed:1；confirm_before_use:1	TOOL-000046 | 材质：高粱 | 高粱扫把 || TOOL-000249 | 材质：高粱；类型：扫把 | 高粱扫把
+IMG-1230	鱼尾螺丝	3	五金备件/紧固件	套	needs_review:3	clarify_specs_before_use:3	SPARE-000026 | 规格：M10*60 | M10*60鱼尾螺丝 || SPARE-000027 | 规格：M14*70 | M14*70鱼尾螺丝 || SPARE-000028 | 规格：M16*90 | M16*90鱼尾螺丝
+IMG-1231	鸭嘴吊具	2	吊装索具/吊具	个	usable:2	confirm_before_use:2	MAT-000072 | 额定载荷：20T；类型：鸭嘴吊具 | 20T鸭嘴吊具 || MAT-000108 | 额定载荷：20T；型式：鸭嘴；功能：万能 | 20T鸭嘴万能吊具
+IMG-1232	麻花钻头	1	工具耗材/钻头	支	needs_review:1	clarify_specs_before_use:1	TOOL-000201 | 规格：9厘；类型：麻花钻 | 9厘麻花钻头
+IMG-1233	麻袋	2	包装材料/袋类；包装材料/麻袋	个；条	needs_review:2	clarify_specs_before_use:2	MAT-000080 | 尺寸：70*100 | 70*100麻袋 || MAT-000223 | 规格：大号；类型：麻袋 | 大麻袋
+IMG-1234	黄油嘴	15	润滑系统/黄油嘴；润滑配件/黄油嘴；设备润滑/黄油嘴	个；只	needs_review:15	clarify_specs_before_use:15	CHEM-000072 | 螺纹：M10*1.5 | 10*1.5黄油嘴 || CHEM-000073 | 螺纹：M12*1.5 | 12*1.5黄油嘴 || CHEM-000074 | 螺纹：M14*1.5 | 14*1.5黄油嘴 || CHEM-000075 | 螺纹：M16*1.5 | 16*1.5黄油嘴 || CHEM-000076 | 螺纹：M18*1.5 | 18*1.5黄油嘴 || CHEM-000077 | 螺纹：M20*1.5 | 20*1.5黄油嘴 || CHEM-000138 | 材质：纯铜；规格：M10 | 纯铜黄油咀M10 || CHEM-000159 | 螺纹：M6 | 黄油嘴M6
+IMG-1235	黄油枪	1	润滑工具/黄油枪	把	needs_review:1	clarify_specs_before_use:1	CHEM-000167 | 结构：双柱 | 双柱黄油枪
+IMG-1236	黄砂	2	建材/砂石；建材/砂石料	吨	needs_review:2	clarify_specs_before_use:2	MAT-CEM-000013 | 类型：黄砂 | 黄砂 || MAT-CEM-000016 | 类型：黄砂 | 黄砂
+IMG-1237	黑模板	2	建筑材料/模板木方	张	usable:1；needs_review:1	confirm_before_use:1；clarify_specs_before_use:1	CONST-000006 | 尺寸：1.22*2.44；厚度：3.0；颜色：黑 | 1.22*2.44*3.0黑模板 || CONST-000014 | 厚度：3.0；颜色：黑色 | 黑模板3.0厚
+IMG-1238	鼓风机	1	设备备件/风机	个	needs_review:1	clarify_specs_before_use:1	SPARE-000100 | 功率：2.2kW | 2.2千瓦鼓风机
+IMG-1239	鼓风机滤芯	1	备品备件/过滤件	个	needs_review:1	clarify_specs_before_use:1	SPARE-000115 | 规格：2寸；适用设备：鼓风机 | 2寸鼓风机滤芯
+IMG-1240	鼠标	2	行政后勤/办公用品	个	needs_review:2	clarify_specs_before_use:2	ADMIN-000018 | 品牌：小米；类型：鼠标 | 小米鼠标 || ADMIN-000019 | 类型：无线鼠标 | 无线鼠标
+IMG-1241	齿轮油	3	化工耗材/润滑油；油品/润滑油	升；桶	usable:1；needs_review:2	confirm_before_use:1；clarify_specs_before_use:2	CHEM-000037 | 型号：HL-20 | HL-20齿轮油 || CHEM-000067 | 类型：齿轮油；包装：20L | 20L齿轮油 || CHEM-000095 | 品牌：长城；包装：18L | 长城齿轮油18L
+IMG-1242	齿轮泵	1	设备备件/泵	台	needs_review:1	clarify_specs_before_use:1	SPARE-000119 | 功率：2.2kW；类型：齿轮泵 | 2.2千瓦齿轮泵

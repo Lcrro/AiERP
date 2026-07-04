@@ -27,6 +27,7 @@ scenarios     业务沙盘、角色、流程样例
 - [架构路线图](architecture/roadmap.md)
 - [项目结构与解耦边界](architecture/project-structure.md)
 - [DocType 索引与 Agent 上下文](architecture/doctype-index.md)
+- [Agent 使用 ToolCall 的统一方案](architecture/agent-toolcall-usage-strategy.md)
 - [ToolCall 参数编排层设计](architecture/toolcall-parameter-orchestration.md)
 
 架构文档回答“系统应该长什么样，以及为什么这样设计”。
@@ -54,6 +55,7 @@ scenarios     业务沙盘、角色、流程样例
 - [小型土木公司一日运转模拟：Sandbox 初始化](scenarios/civil-company-day-seed.md)
 - [小型土木公司一日运转模拟：一天事件流准备度](scenarios/civil-company-day-readiness.md)
 - [小型土木公司一日运转模拟：执行记录](scenarios/civil-company-day-execution-log.md)
+- [材料申请 ToolCall 示例](scenarios/material-request-toolcall-example.md)
 - [Wizard of Oz ToolCall 手动测试](scenarios/wizard-of-oz-testing.md)
 - [DeepSeek 材料申请 ToolCall 试验](scenarios/deepseek-material-request-trial.md)
 - [DeepSeek 材料申请试验输入输出记录](scenarios/deepseek-material-request-io-log.md)
@@ -68,6 +70,12 @@ scenarios     业务沙盘、角色、流程样例
 - [采购清单物料标准化归档](reference/purchase-material-standardization.md)
 - [采购清单整理后的标准物料目录](reference/standard-item-catalog-from-review.md)
 - [物料主数据 SKU 草案 v0.3](reference/material-item-master-draft-v0.3.md)
+- [物料主数据目录说明](../data/material_master/README.md)
+- [物料标准类目表 v0.1](reference/material-category-taxonomy-v0.1.md)
+- [物料族候选词清单](reference/material-family-candidate-terms.md)
+- [物料三级名称治理规定 v0.1](reference/material-third-layer-governance-v0.1.md)
+- [物料 SKU 治理提示词 v0.3](reference/material-sku-governance-prompt-v0.3.md)
+- 物料主数据浏览器当前支持四级查看：`一级类目 -> 物料族 -> 物料名称 -> SKU 明细`。三级名称人工预览由 `scripts/material_master/build_third_layer_mapping_preview.py` 生成；批量治理工作包由 `scripts/material_master/build_third_layer_work_batches.py` 生成，队列在 `data/material_master/governance_v0_2/third_layer_work_queue.tsv`。
 - [物料目录 PostgreSQL 层](reference/material-catalog-postgres.md)
 - [当前 ToolCall 清单](reference/toolcall-current-inventory.md)
 - [ToolCall Data Dictionary 设计稿](reference/toolcall-data-dictionary.md)

@@ -1,0 +1,214 @@
+scope_type	source_reason	item_code	current_item_name	current_family	recommended_family	recommended_item_name	required_specs_normalized	optional_specs_normalized	stock_uom	action	confidence	reason	needs_owner_decision
+in_family	current_family_is_screw	FAST-000013	六角螺栓组件	螺丝	螺丝	螺丝套件	规格：M22*100；成套：是；头型/驱动：六角		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000015	螺丝组件	螺丝	螺丝	螺丝套件	规格：M8*25；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000022	螺丝组件	螺丝	螺丝	螺丝套件	规格：M6*25；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000032	螺丝组件	螺丝	螺丝	螺丝套件	规格：M20*35；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000033	螺丝组件	螺丝	螺丝	螺丝套件	规格：M20*40；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000035	螺丝组件	螺丝	螺丝	螺丝套件	规格：M4*15；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000036	螺丝组件	螺丝	螺丝	螺丝套件	规格：M5*15；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000037	螺丝组件	螺丝	螺丝	螺丝套件	规格：M6*15；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000038	螺丝组件	螺丝	螺丝	螺丝套件	规格：M8*15；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000039	螺丝组件	螺丝	螺丝	螺丝套件	规格：M10*15；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000045	螺丝组件	螺丝	螺丝	螺丝套件	规格：M16*70；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000046	螺丝组件	螺丝	螺丝	螺丝套件	规格：M10*40；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000047	螺丝组件	螺丝	螺丝	螺丝套件	规格：M12*40；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000054	螺丝组件	螺丝	螺丝	螺丝套件	规格：M10*55；表面处理：镀锌；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000068	T型螺丝套件	螺丝	螺丝	螺丝套件	规格：M16*50；套件组成：平垫+弹垫+螺母；类型：T型；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000069	T型螺丝套件	螺丝	螺丝	螺丝套件	规格：M16*100；套件组成：平垫+弹垫+螺母；类型：T型；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000074	螺丝套件	螺丝	螺丝	螺丝套件	规格：M8*20；类型：螺丝；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000084	螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M10*80；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000087	镀锌螺丝套件	螺丝	螺丝	螺丝套件	表面处理：镀锌；规格：M12*30；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000090	螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M16*70；表面处理：镀锌；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000091	螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M16*130；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000093	螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M16*60；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000094	螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M20*60；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000095	内六角螺丝套件	螺丝	螺丝	螺丝套件	材质：不锈钢；头型/驱动：内六角；规格：M5*30；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000096	内六角螺丝套件	螺丝	螺丝	螺丝套件	材质：不锈钢；头型/驱动：内六角；规格：M5*10；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000097	内六角螺丝套件	螺丝	螺丝	螺丝套件	材质：不锈钢；头型/驱动：内六角；规格：M5*16；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000098	不锈钢螺丝套件	螺丝	螺丝	螺丝套件	材质：不锈钢；规格：M6*20；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000100	螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M20*200；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000105	内六角螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；头型/驱动：内六角；规格：M10*50；套件组成：螺母；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000116	螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M16*50；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000117	螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M16*120；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000119	高强度全螺纹螺丝套件	螺丝	螺丝	螺丝套件	强度等级：12.9；规格：M24*60；螺纹形式：全螺纹；套件组成：平垫+弹垫；成套：是	强度描述：高强度	套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000122	圆头螺丝套件	螺丝	螺丝	螺丝套件	头型/驱动：圆头；规格：M5*70；套件组成：平垫+弹垫；成套：是		套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000123	高强度螺丝套件	螺丝	螺丝	螺丝套件	强度等级：8.8；规格：M16*70；套件组成：平垫+弹垫；成套：是	强度描述：高强度	套	keep_as_kit_review	medium	成套/组件 SKU 可能包含螺母、平垫、弹垫，不应轻易拆成普通螺丝。	yes
+in_family	current_family_is_screw	FAST-000016	高强度螺丝	螺丝	螺丝	螺丝	规格：M5*95；强度等级：12.9	强度描述：高强度	套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000025	内六角螺丝	螺丝	螺丝	螺丝	规格：M8*45；头型/驱动：内六角		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000027	内六角螺丝	螺丝	螺丝	螺丝	规格：M8*40；头型/驱动：内六角		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000034	内六角螺丝	螺丝	螺丝	螺丝	规格：M6*40；头型/驱动：内六角		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000043	螺丝	螺丝	螺丝	螺丝	规格：M48*120		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000044	内六角螺丝	螺丝	螺丝	螺丝	规格：M14*120；头型/驱动：内六角		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000048	螺丝	螺丝	螺丝	螺丝	规格：M24*230		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000051	螺丝	螺丝	螺丝	螺丝	规格：M20*30		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000052	螺丝	螺丝	螺丝	螺丝	规格：M20*35		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000053	螺丝	螺丝	螺丝	螺丝	规格：M20*130		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000055	螺丝	螺丝	螺丝	螺丝	规格：M27*100		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000058	加长六角螺丝	螺丝	螺丝	螺丝	规格：M27*100；头型/驱动：六角	定制：是；特征：加长	个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000064	高强度螺丝	螺丝	螺丝	螺丝	规格：M30*100；强度等级：12.9	强度描述：高强度	个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000067	高强度螺丝	螺丝	螺丝	螺丝	规格：M30*80；强度等级：10.8	强度描述：高强度	个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000073	自攻螺丝	螺丝	螺丝	螺丝	规格：M4*10；类型：自攻		盒	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000075	内六角螺栓	螺丝	螺丝	螺丝	强度等级：10.9；规格：M12*100；头型/驱动：内六角		只	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000082	高强度全牙螺丝	螺丝	螺丝	螺丝	强度等级：12.9；规格：M30*250；螺纹形式：全牙	强度描述：高强度	套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000103	自攻螺丝	螺丝	螺丝	螺丝	规格：M4；类型：自攻		只	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000104	钻尾螺丝	螺丝	螺丝	螺丝	规格：M5.5*80；类型：钻尾	包装：大盒	盒	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000106	自攻螺丝	螺丝	螺丝	螺丝	长度：60mm；类型：自攻		盒	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000107	钻尾螺丝	螺丝	螺丝	螺丝	长度：60mm；类型：钻尾		盒	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000108	高强度全牙螺丝	螺丝	螺丝	螺丝	强度等级：12.9级；规格：M27*100；螺纹形式：全牙	强度描述：高强度	套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	FAST-000115	十字螺丝	螺丝	螺丝	螺丝	头型/驱动：十字；规格：Φ5*60		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	METAL-000070	不锈钢螺丝	螺丝	螺丝	螺丝	规格：M5.5*32；材质：不锈钢		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000014	螺丝	螺丝	螺丝	螺丝	规格：16*50		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000015	螺丝	螺丝	螺丝	螺丝	规格：14*50		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000016	螺丝	螺丝	螺丝	螺丝	规格：8*250		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000017	螺丝	螺丝	螺丝	螺丝	规格：8*30		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000018	螺丝	螺丝	螺丝	螺丝	规格：16*30		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000019	螺丝	螺丝	螺丝	螺丝	规格：12*60		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000020	螺丝	螺丝	螺丝	螺丝	规格：12*50		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000026	鱼尾螺丝	螺丝	螺丝	螺丝	规格：M10*60；类型：鱼尾		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000027	鱼尾螺丝	螺丝	螺丝	螺丝	规格：M14*70；类型：鱼尾		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000028	鱼尾螺丝	螺丝	螺丝	螺丝	规格：M16*90；类型：鱼尾		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000029	骑马螺丝	螺丝	螺丝	螺丝	规格：14*75；类型：骑马		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000031	内六角螺丝	螺丝	螺丝	螺丝	规格：10*40；头型/驱动：内六角		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000032	内六角螺丝	螺丝	螺丝	螺丝	规格：16*50；头型/驱动：内六角		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000034	螺丝	螺丝	螺丝	螺丝	规格：M20*120		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000042	高强度螺丝	螺丝	螺丝	螺丝	强度等级：12.9级；规格：10*150	强度描述：高强度	套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000045	六角螺丝	螺丝	螺丝	螺丝	规格：10*40；头型/驱动：六角		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000048	螺丝	螺丝	螺丝	螺丝	规格：14*180		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000061	六角自攻螺丝	螺丝	螺丝	螺丝	规格：6；类型：六角自攻；头型/驱动：六角		盒	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000065	螺丝	螺丝	螺丝	螺丝	规格：M30*100		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000068	螺丝	螺丝	螺丝	螺丝	规格：M27*120		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000071	螺丝	螺丝	螺丝	螺丝	规格：12*40		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000075	螺丝	螺丝	螺丝	螺丝	规格：M20*130		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000076	螺丝	螺丝	螺丝	螺丝	规格：M20*35		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000077	螺丝	螺丝	螺丝	螺丝	规格：M20*40		套	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000079	螺丝	螺丝	螺丝	螺丝	规格：22*100		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+in_family	current_family_is_screw	SPARE-000082	螺丝	螺丝	螺丝	螺丝	规格：16*160		个	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+boundary_sample	name_contains_screw_keyword:螺丝	PIPE-000261	管片螺丝	管片螺丝	螺丝	螺丝	用途：管片	定制：是	根	keep_screw	medium	普通螺丝/螺栓统一保留在螺丝族，头型、强度、材质等进入规格。	yes
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000001	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：14*120		支	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000002	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：10*70；类型：膨胀螺丝		个	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000004	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：M12*80		个	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000008	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：M20*140		个	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000009	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：M22*140		个	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000011	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：8*60		个	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000012	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：6厘		个	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000014	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：6厘		个	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000023	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：M14*100		套	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000024	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：M10*80		套	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000026	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：M14*100		个	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000028	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：M14*150		个	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000042	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：M24*150		个	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000059	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：M20*150		个	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000062	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：M10*60		个	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000063	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：M14*70		个	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000072	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：M12*100		支	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀钩	FAST-000089	膨胀钩	膨胀锚栓	膨胀锚栓	膨胀锚栓	表面处理：镀锌；规格：M12*125；类型：膨胀钩		只	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000102	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：Φ10		支	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000109	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：Φ10*80		支	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000110	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：Φ10*110		支	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000111	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：Φ12*80		支	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000112	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：Φ8*70		支	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000113	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：Φ8*90		支	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀螺丝	FAST-000114	膨胀螺丝	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：Φ12*110		支	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀钩	FAST-000120	镀锌膨胀钩	膨胀锚栓	膨胀锚栓	膨胀锚栓	表面处理：镀锌；规格：M16*130		只	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	longest_match_boundary_term:膨胀钩	SPARE-000073	膨胀钩	膨胀锚栓	膨胀锚栓	膨胀锚栓	规格：10厘		个	move_to_expansion_anchor	high	膨胀螺丝/膨胀钩是锚固件，长词优先于普通螺丝。	no
+boundary_sample	name_contains_screw_keyword:螺母	FAST-000019	螺母	螺母	螺母	螺母	规格：M20		个	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	name_contains_screw_keyword:螺母	FAST-000021	螺母	螺母	螺母	螺母	规格：M16		个	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	name_contains_screw_keyword:螺母	FAST-000031	螺母	螺母	螺母	螺母	规格：M10		个	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	name_contains_screw_keyword:螺母	FAST-000041	螺母	螺母	螺母	螺母	规格：M48		个	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	longest_match_boundary_term:防松螺母	FAST-000050	防松螺母	螺母	螺母	螺母	规格：M24；类型：防松		个	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	name_contains_screw_keyword:螺母	FAST-000056	螺母	螺母	螺母	螺母	规格：M27		个	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	name_contains_screw_keyword:螺母	FAST-000065	螺母	螺母	螺母	螺母	规格：M30		个	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	name_contains_screw_keyword:螺母	FAST-000076	不锈钢螺母	螺母	螺母	螺母	材质：304不锈钢；规格：M6		只	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	longest_match_boundary_term:防松螺母	FAST-000079	不锈钢防松螺母	螺母	螺母	螺母	规格：M20；材质：不锈钢；类型：防松螺母		只	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	name_contains_screw_keyword:螺母	FAST-000081	高强度螺母	螺母	螺母	螺母	强度等级：12.9；规格：M30	强度描述：高强度	只	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	name_contains_screw_keyword:螺母	METAL-000154	不锈钢螺母	螺母	螺母	螺母	材质：不锈钢；规格：M5		只	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	name_contains_screw_keyword:螺母	SPARE-000040	螺母	螺母	螺母	螺母	规格：M4		个	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	name_contains_screw_keyword:螺母	SPARE-000041	螺母	螺母	螺母	螺母	规格：M5		个	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	name_contains_screw_keyword:螺母	SPARE-000049	螺母	螺母	螺母	螺母	规格：14		个	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	name_contains_screw_keyword:螺母	SPARE-000056	螺母	螺母	螺母	螺母	规格：16		个	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	name_contains_screw_keyword:螺母	SPARE-000066	螺母	螺母	螺母	螺母	规格：M30		个	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	name_contains_screw_keyword:螺母	SPARE-000069	螺母	螺母	螺母	螺母	规格：M27		个	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	name_contains_screw_keyword:螺母	SPARE-000080	螺母	螺母	螺母	螺母	规格：22		个	move_to_nut	high	螺母独立成族，不归普通螺丝。	no
+boundary_sample	name_contains_screw_keyword:螺杆	FAST-000017	螺杆	螺杆	螺杆	螺杆	规格：M20*70		套	move_to_screw_rod	high	螺杆/通丝是独立紧固件族，和普通螺丝分开。	no
+boundary_sample	name_contains_screw_keyword:螺杆	FAST-000018	螺杆	螺杆	螺杆	螺杆	规格：M20*50		套	move_to_screw_rod	high	螺杆/通丝是独立紧固件族，和普通螺丝分开。	no
+boundary_sample	name_contains_screw_keyword:螺杆	FAST-000020	螺杆	螺杆	螺杆	螺杆	规格：M16*60		个	move_to_screw_rod	high	螺杆/通丝是独立紧固件族，和普通螺丝分开。	no
+boundary_sample	name_contains_screw_keyword:螺杆	FAST-000029	螺杆	螺杆	螺杆	螺杆	规格：M10*50		个	move_to_screw_rod	high	螺杆/通丝是独立紧固件族，和普通螺丝分开。	no
+boundary_sample	name_contains_screw_keyword:螺杆	FAST-000040	螺杆	螺杆	螺杆	螺杆	规格：M48*120		支	move_to_screw_rod	high	螺杆/通丝是独立紧固件族，和普通螺丝分开。	no
+boundary_sample	longest_match_boundary_term:通丝螺杆	FAST-000071	通丝螺杆	螺杆	螺杆	螺杆	规格：14*700；类型：通丝		只	move_to_screw_rod	high	螺杆/通丝是独立紧固件族，和普通螺丝分开。	no
+boundary_sample	name_contains_screw_keyword:螺杆	FAST-000080	高强度全牙螺杆	螺杆	螺杆	螺杆	强度等级：12.9；规格：M30*1m；螺纹形式：全牙	强度描述：高强度	根	move_to_screw_rod	high	螺杆/通丝是独立紧固件族，和普通螺丝分开。	no
+boundary_sample	name_contains_screw_keyword:螺丝	FAST-000118	螺丝杆	螺杆	螺杆	螺杆	强度等级：8.8；规格：M10*30		套	move_to_screw_rod	high	螺杆/通丝是独立紧固件族，和普通螺丝分开。	no
+boundary_sample	name_contains_screw_keyword:螺杆	SPARE-000057	长螺杆	螺杆	螺杆	螺杆	规格：14*200；类型：长螺杆		套	move_to_screw_rod	high	螺杆/通丝是独立紧固件族，和普通螺丝分开。	no
+boundary_sample	longest_match_boundary_term:螺丝刀	TOOL-000125	敲击螺丝刀	敲击螺丝刀	螺丝刀	螺丝刀	长度：400mm		个	move_to_tool	high	螺丝刀/取出器是工具，必须排除出螺丝族。	no
+boundary_sample	longest_match_boundary_term:螺丝取出器	TOOL-000138	螺丝取出器	螺丝取出器	螺丝取出器	螺丝取出器	类型：螺丝取出器		套	move_to_tool	high	螺丝刀/取出器是工具，必须排除出螺丝族。	no
+boundary_sample	longest_match_boundary_term:断丝取出器	TOOL-000154	断丝取出器	断丝取出器	螺丝取出器	螺丝取出器	规格范围：待补		盒	move_to_tool	high	螺丝刀/取出器是工具，必须排除出螺丝族。	no
+boundary_sample	longest_match_boundary_term:螺丝刀	TOOL-000169	十字螺丝刀	十字螺丝刀	螺丝刀	螺丝刀	规格：6*250；头型/驱动：十字		个	move_to_tool	high	螺丝刀/取出器是工具，必须排除出螺丝族。	no
+boundary_sample	longest_match_boundary_term:螺丝刀	TOOL-000170	一字螺丝刀	一字螺丝刀	螺丝刀	螺丝刀	规格：6*250；头型/驱动：一字		个	move_to_tool	high	螺丝刀/取出器是工具，必须排除出螺丝族。	no
+boundary_sample	longest_match_boundary_term:螺丝刀	TOOL-000239	十字螺丝刀	十字螺丝刀	螺丝刀	螺丝刀	品牌：世达；头型/驱动：十字		把	move_to_tool	high	螺丝刀/取出器是工具，必须排除出螺丝族。	no
+boundary_sample	longest_match_boundary_term:螺丝刀	TOOL-000279	一字螺丝刀	一字螺丝刀	螺丝刀	螺丝刀	头型/驱动：一字		把	move_to_tool	high	螺丝刀/取出器是工具，必须排除出螺丝族。	no
+boundary_sample	longest_match_boundary_term:螺丝刀	TOOL-000280	十字螺丝刀	十字螺丝刀	螺丝刀	螺丝刀	头型/驱动：十字		把	move_to_tool	high	螺丝刀/取出器是工具，必须排除出螺丝族。	no
+boundary_sample	longest_match_boundary_term:螺丝刀	TOOL-000290	一字螺丝刀	一字螺丝刀	螺丝刀	螺丝刀	品牌：得力；头型/驱动：一字		把	move_to_tool	high	螺丝刀/取出器是工具，必须排除出螺丝族。	no
+boundary_sample	longest_match_boundary_term:螺丝刀	TOOL-000314	绝缘十字螺丝刀	绝缘十字螺丝刀	螺丝刀	螺丝刀	头型/驱动：十字；规格：4*100；特性：绝缘		把	move_to_tool	high	螺丝刀/取出器是工具，必须排除出螺丝族。	no
+boundary_sample	longest_match_boundary_term:螺丝刀	TOOL-000315	绝缘十字螺丝刀	绝缘十字螺丝刀	螺丝刀	螺丝刀	头型/驱动：十字；规格：5*125；特性：绝缘		把	move_to_tool	high	螺丝刀/取出器是工具，必须排除出螺丝族。	no
+boundary_sample	longest_match_boundary_term:螺丝刀	TOOL-000316	绝缘一字螺丝刀	绝缘一字螺丝刀	螺丝刀	螺丝刀	头型/驱动：一字；规格：3*75；特性：绝缘		把	move_to_tool	high	螺丝刀/取出器是工具，必须排除出螺丝族。	no
+boundary_sample	longest_match_boundary_term:螺丝刀	TOOL-000337	锂电电钻套装	电钻	螺丝刀	螺丝刀	品牌：东成；供电：锂电；配置：带螺丝刀套装		台	move_to_tool	high	螺丝刀/取出器是工具，必须排除出螺丝族。	no
+boundary_sample	longest_match_boundary_term:花篮螺丝	FAST-000005	花篮螺丝	花篮螺丝	花篮螺丝	花篮螺丝	规格：M20；类型：花篮		个	move_to_turnbuckle	high	花篮/花兰类是索具拉紧器，不归普通螺丝。	no
+boundary_sample	longest_match_boundary_term:花篮螺丝	FAST-000010	花篮螺丝	花篮螺丝	花篮螺丝	花篮螺丝	规格：10厘		个	move_to_turnbuckle	high	花篮/花兰类是索具拉紧器，不归普通螺丝。	no
+boundary_sample	longest_match_boundary_term:花篮螺栓	FAST-000060	花篮螺栓	花篮螺丝	花篮螺丝	花篮螺丝	规格：14*200		个	move_to_turnbuckle	high	花篮/花兰类是索具拉紧器，不归普通螺丝。	no
+boundary_sample	longest_match_boundary_term:花篮螺栓	FAST-000061	花篮螺栓	花篮螺丝	花篮螺丝	花篮螺丝	规格：10厘		套	move_to_turnbuckle	high	花篮/花兰类是索具拉紧器，不归普通螺丝。	no
+boundary_sample	longest_match_boundary_term:花兰螺丝	FAST-000088	花兰螺丝	花篮螺丝	花篮螺丝	花篮螺丝	规格：M14*200；类型：花兰螺丝		只	move_to_turnbuckle	high	花篮/花兰类是索具拉紧器，不归普通螺丝。	no
+boundary_sample	longest_match_boundary_term:花兰螺丝	FAST-000121	镀锌花兰螺丝	花篮螺丝	花篮螺丝	花篮螺丝	表面处理：镀锌；规格：M14*350		只	move_to_turnbuckle	high	花篮/花兰类是索具拉紧器，不归普通螺丝。	no
+boundary_sample	longest_match_boundary_term:花兰扣	MAT-000244	镀锌花兰扣	花篮螺丝	花篮螺丝	花篮螺丝	表面处理：镀锌；规格：M14		只	move_to_turnbuckle	high	花篮/花兰类是索具拉紧器，不归普通螺丝。	no
+boundary_sample	longest_match_boundary_term:平垫片	FAST-000003	平垫片	垫圈	垫圈	垫圈	规格：14		个	move_to_washer	high	标准平垫/弹垫/垫圈应从普通螺丝分开。	no
+boundary_sample	longest_match_boundary_term:平垫片	FAST-000006	平垫片	垫圈	垫圈	垫圈	规格：M30		个	move_to_washer	high	标准平垫/弹垫/垫圈应从普通螺丝分开。	no
+boundary_sample	longest_match_boundary_term:平垫片	FAST-000007	平垫片	垫圈	垫圈	垫圈	规格：M27		个	move_to_washer	high	标准平垫/弹垫/垫圈应从普通螺丝分开。	no
+boundary_sample	name_contains_screw_keyword:垫片	FAST-000030	垫片	垫圈/垫片	垫圈	垫圈	规格：M10		个	move_to_washer	high	标准平垫/弹垫/垫圈应从普通螺丝分开。	no
+boundary_sample	name_contains_screw_keyword:垫片	FAST-000049	垫片	垫圈/垫片	垫圈	垫圈	规格：M24	特征：加厚	个	move_to_washer	high	标准平垫/弹垫/垫圈应从普通螺丝分开。	no
+boundary_sample	name_contains_screw_keyword:垫片	FAST-000057	垫片	垫圈/垫片	垫圈	垫圈	规格：M27		个	move_to_washer	high	标准平垫/弹垫/垫圈应从普通螺丝分开。	no
+boundary_sample	name_contains_screw_keyword:垫片	FAST-000066	垫片	垫圈/垫片	垫圈	垫圈	规格：M30		个	move_to_washer	high	标准平垫/弹垫/垫圈应从普通螺丝分开。	no
+boundary_sample	name_contains_screw_keyword:垫片	FAST-000070	加厚垫片	垫圈/垫片	垫圈	垫圈	规格：M18*50*60mm	特征：加厚	只	move_to_washer	high	标准平垫/弹垫/垫圈应从普通螺丝分开。	no
+boundary_sample	name_contains_screw_keyword:垫片	FAST-000077	加厚垫片	垫圈/垫片	垫圈	垫圈	材质：304不锈钢；规格：M6	特征：加厚	只	move_to_washer	high	标准平垫/弹垫/垫圈应从普通螺丝分开。	no
+boundary_sample	name_contains_screw_keyword:平垫	FAST-000085	镀锌平垫	垫圈	垫圈	垫圈	表面处理：镀锌；规格：M8；类型：平垫		只	move_to_washer	high	标准平垫/弹垫/垫圈应从普通螺丝分开。	no
+boundary_sample	name_contains_screw_keyword:垫片	SPARE-000023	垫片	垫圈/垫片	垫圈	垫圈	规格：12*600*5	定制：是	个	move_to_washer	high	标准平垫/弹垫/垫圈应从普通螺丝分开。	no
+boundary_sample	longest_match_boundary_term:弹簧垫片	SPARE-000050	弹簧垫片	垫圈	垫圈	垫圈	规格：14		个	move_to_washer	high	标准平垫/弹垫/垫圈应从普通螺丝分开。	no
+boundary_sample	longest_match_boundary_term:弹簧垫片	SPARE-000067	弹簧垫片	垫圈	垫圈	垫圈	规格：M30		个	move_to_washer	high	标准平垫/弹垫/垫圈应从普通螺丝分开。	no
+boundary_sample	longest_match_boundary_term:弹簧垫片	SPARE-000070	弹簧垫片	垫圈	垫圈	垫圈	规格：M27		个	move_to_washer	high	标准平垫/弹垫/垫圈应从普通螺丝分开。	no
+boundary_sample	name_contains_screw_keyword:套装	ELEC-000181	航空插头插座套装	航空插头插座套装	航空插头插座套装	航空插头插座套装	安装方式：明装；芯数：3芯；额定电流：16A		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	ELEC-000203	继电器套装	继电器套装	继电器套装	继电器套装	品牌：施耐德；电压：220V；电流：5A；配置：带底座		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:螺丝|套件	ELEC-000235	接地桩套件	接地桩套件	接地桩套件	接地桩套件	表面处理：镀锌；规格：18*1m；配置：带螺丝		根	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	longest_match_boundary_term:橡胶垫片	FAST-000078	橡胶垫片	垫圈/垫片	垫圈/垫片	橡胶垫片	材质：橡胶；规格：200		只	needs_manual_review	medium	垫片跨标准垫圈、密封垫、法兰垫和定制件，需要按用途人工确认。	yes
+boundary_sample	longest_match_boundary_term:四氟垫片	FAST-000083	四氟垫片	四氟垫片	四氟垫片	四氟垫片	材质：四氟；规格：Φ450*440*2	定制：是	件	needs_manual_review	medium	垫片跨标准垫圈、密封垫、法兰垫和定制件，需要按用途人工确认。	yes
+boundary_sample	name_contains_screw_keyword:膨胀	FAST-000086	膨胀止水条	膨胀止水条	膨胀止水条	膨胀止水条	类型：膨胀止水条；规格：5mm*30mm		米	needs_manual_review	medium	包含膨胀但为止水条，必须作为膨胀锚栓规则排除。	yes
+boundary_sample	longest_match_boundary_term:异形垫片	FAST-000092	异形垫片	异形垫片	异形垫片	异形垫片	规格：330*260*5	定制：是	个	needs_manual_review	medium	垫片跨标准垫圈、密封垫、法兰垫和定制件，需要按用途人工确认。	yes
+boundary_sample	longest_match_boundary_term:橡胶垫片	FAST-000101	橡胶垫片	垫圈/垫片	垫圈/垫片	橡胶垫片	材质：橡胶；规格：50		个	needs_manual_review	medium	垫片跨标准垫圈、密封垫、法兰垫和定制件，需要按用途人工确认。	yes
+boundary_sample	name_contains_screw_keyword:套装	MAT-000005	水龙头花洒套装	水龙头花洒套装	水龙头花洒套装	水龙头花洒套装	组合：水龙头+花洒		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	MAT-000161	桶装水抽水器套装	桶装水抽水器套装	桶装水抽水器套装	桶装水抽水器套装	品牌：子路；套件组成：抽水器+充电器		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	MAT-000163	太阳能4G监控套装	监控套装	监控套装	太阳能4G监控套装	供电：太阳能；通信：4G；套装：三件套		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	METAL-000140	不锈钢C式自锁接头套装	气动接头	气动接头	不锈钢C式自锁接头套装	材质：不锈钢；类型：C式自锁；型号组合：SM40+PM40		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	longest_match_boundary_term:法兰垫片	PIPE-000131	法兰垫片	法兰	法兰	法兰垫片	规格：DN325；材质：胶		个	needs_manual_review	medium	垫片跨标准垫圈、密封垫、法兰垫和定制件，需要按用途人工确认。	yes
+boundary_sample	name_contains_screw_keyword:组件	PIPE-000184	铜头铝套组件	液压接头	液压接头	铜头铝套组件	规格：80；组成：铜头、铝扣	特征：加厚	个	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:组件	PIPE-000218	铜头铝合金夹	液压接头	液压接头	铜头铝合金夹	规格：50；组成：铜头、铝扣		个	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:组件	PIPE-000227	PE管卡箍组件	定制管路接头	定制管路接头	PE管卡箍组件	长度：1.5m；材质：PE；带卡箍：是	定制：是	套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:螺母	PIPE-000230	自锁气管接头螺母	气动接头	气动接头	自锁气管接头螺母	类型：自锁；部件：螺母		个	needs_manual_review	medium	螺母是气动接头部件，不应自动转普通螺母。	yes
+boundary_sample	name_contains_screw_keyword:套装	PIPE-000370	注浆管套装	管材	管材	注浆管套装	长度：5米；套装：含配件		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	SAFE-000058	雨衣套装	雨衣套装	雨衣套装	雨衣套装	套装：是	特征：加厚	套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套件	SAFE-000134	消防枪头管接头套件	消防接头	消防接头	消防枪头管接头套件	材质：铝合金；规格：80型；套件组成：消防枪头+管接头		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套件	SAFE-000135	消防枪头管接头套件	消防接头	消防接头	消防枪头管接头套件	材质：铝合金；规格：65型；套件组成：消防枪头+管接头		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:垫片	SPARE-000011	垫片	垫圈/垫片	垫圈/垫片	垫片	规格：110*100*5	加工：是	个	needs_manual_review	medium	垫片跨标准垫圈、密封垫、法兰垫和定制件，需要按用途人工确认。	yes
+boundary_sample	longest_match_boundary_term:四氟垫片	SPARE-000098	四氟垫片	四氟垫片	四氟垫片	四氟垫片	规格：55；材质：四氟/PTFE		个	needs_manual_review	medium	垫片跨标准垫圈、密封垫、法兰垫和定制件，需要按用途人工确认。	yes
+boundary_sample	longest_match_boundary_term:螺杆泵	SPARE-000110	螺杆泵电机套装	螺杆泵电机套装	螺杆泵电机套装	螺杆泵电机套装	功率：2.2kW；材质：不锈钢；组成：螺杆泵+电机		套	needs_manual_review	medium	螺杆泵是设备/备件语义，不应按螺杆或螺丝自动归类。	yes
+boundary_sample	longest_match_boundary_term:螺杆泵	SPARE-000111	螺杆泵水封	螺杆泵水封	螺杆泵水封	螺杆泵水封	品牌：耐驰；原装：是；适用设备：螺杆泵		个	needs_manual_review	medium	螺杆泵是设备/备件语义，不应按螺杆或螺丝自动归类。	yes
+boundary_sample	name_contains_screw_keyword:套装	SPARE-000117	振动电机套装	振动电机套装	振动电机套装	振动电机套装	进口：是；类型：振动电机；配置：整套		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	SPARE-000120	O型圈套装	O型圈套装	O型圈套装	O型圈套装	品牌：派克；套装：ABC		盒	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	TOOL-000131	内六角扳手套装	扳手	扳手	内六角扳手套装	品牌：世达；类型：六角扳手套装；头型/驱动：内六角		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	TOOL-000155	液压扳手套装	扳手	扳手	液压扳手套装	品牌：恩耐克；类型：液压扳手套装		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	TOOL-000187	内六角扳手套装	扳手	扳手	内六角扳手套装	品牌：世达；规格范围：1.5-10；头型/驱动：内六角		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	TOOL-000188	开口梅花扳手套装	扳手	扳手	开口梅花扳手套装	品牌：世达；规格范围：8-24		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	TOOL-000254	锂电角磨机套装	角磨机	角磨机	锂电角磨机套装	品牌：东成；供电：锂电；配置：二电一充		台	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	TOOL-000266	十字批头套装	批头	批头	十字批头套装	品牌：世达；类型：十字批头；配置：套装；头型/驱动：十字		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	TOOL-000272	碳弧气刨枪套装	碳弧气刨枪套装	碳弧气刨枪套装	碳弧气刨枪套装	类型：碳弧气刨枪；线长：2米		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	TOOL-000292	锂电手电钻套装	电钻	电钻	锂电手电钻套装	品牌：东成；供电：锂电；配置：二电一充		台	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	TOOL-000313	T型套筒扳手套装	扳手	扳手	T型套筒扳手套装	类型：T型套筒；规格范围：8-19；件数：6件		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	TOOL-000318	冲凿套装	冲凿套装	冲凿套装	冲凿套装	品牌：上匠；件数：12件		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套件	TOOL-000340	劳动车轮胎套件	劳动车轮胎套件	劳动车轮胎套件	劳动车轮胎套件	适配对象：劳动车；套件组成：车轮+实心车胎		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	WELD-000026	电焊机套装	电焊机套装	电焊机套装	电焊机套装	配置：含焊线		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes
+boundary_sample	name_contains_screw_keyword:套装	WELD-000047	焊枪线缆套装	焊枪线缆套装	焊枪线缆套装	焊枪线缆套装	型号：500型；线长：5米；套件组成：焊枪		套	needs_manual_review	medium	非螺丝套件/组件只作为边界排除样本，不能按螺丝套件处理。	yes

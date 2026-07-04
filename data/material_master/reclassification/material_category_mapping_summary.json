@@ -1,0 +1,42 @@
+{
+  "source_group_count": 1242,
+  "mapping_count": 1242,
+  "batch_counts": {
+    "category_mapping_batch_01.tsv": 249,
+    "category_mapping_batch_02.tsv": 249,
+    "category_mapping_batch_03.tsv": 248,
+    "category_mapping_batch_04.tsv": 248,
+    "category_mapping_batch_05.tsv": 248
+  },
+  "category_counts": {
+    "管材管件阀门": 156,
+    "电气电料": 142,
+    "工具量具": 124,
+    "清洁办公后勤": 96,
+    "定制加工件": 93,
+    "紧固件与连接件": 81,
+    "化工胶粘涂料": 74,
+    "液压气动": 64,
+    "劳保防护": 51,
+    "建筑材料": 45,
+    "焊接切割": 42,
+    "设备备件": 37,
+    "吊装索具": 37,
+    "工具耗材": 35,
+    "包装覆盖周转": 33,
+    "安全消防": 32,
+    "金属材料": 30,
+    "施工机具设备": 30,
+    "电动气动工具": 24,
+    "弱电安防": 16
+  },
+  "confidence_counts": {
+    "high": 1030,
+    "medium": 210,
+    "low": 2
+  },
+  "needs_split_counts": {
+    "no": 1235,
+    "yes": 7
+  }
+}

@@ -1,0 +1,359 @@
+{
+  "generated_at": "2026-07-03",
+  "source_files": {
+    "tsv": "data\\material_master\\reclassification\\material_master_reclassified.tsv",
+    "browser_json": "data\\material_master\\reclassification\\material_master_browser_data_reclassified.json",
+    "family_rules": "data\\material_master\\reclassification\\family_governance\\material_family_rules.tsv"
+  },
+  "total_sku_count": 2328,
+  "browser_row_count": 2328,
+  "quality_level_counts": {
+    "needs_review": 1640,
+    "standard": 157,
+    "usable": 531
+  },
+  "agent_use_policy_counts": {
+    "clarify_specs_before_use": 1640,
+    "auto_select_allowed": 157,
+    "confirm_before_use": 531
+  },
+  "issue_type_counts": {
+    "clarify_specs_policy_concentration": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 1640
+    },
+    "family_scope_cable": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 22
+    },
+    "family_scope_drill_bit": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 57
+    },
+    "family_scope_hose_assembly": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 34
+    },
+    "family_scope_hydraulic_connector": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 73
+    },
+    "family_scope_pipe_connector": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 63
+    },
+    "family_scope_screw": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 125
+    },
+    "name_embeds_form_factor": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 51
+    },
+    "name_embeds_material": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 205
+    },
+    "name_embeds_pressure_or_strength": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 98
+    },
+    "quality_review_concentration": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 1640
+    },
+    "required_template_inconsistent": {
+      "issue_row_count": 6,
+      "affected_sku_mentions": 325
+    },
+    "required_template_missing": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 947
+    },
+    "review_concentration_by_family": {
+      "issue_row_count": 10,
+      "affected_sku_mentions": 385
+    },
+    "synonym_cable": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 32
+    },
+    "synonym_connector": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 181
+    },
+    "synonym_lifting_sling": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 27
+    },
+    "synonym_screw": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 126
+    },
+    "synonym_spray_paint": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 21
+    },
+    "uom_area_alias": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 32
+    },
+    "uom_pair_alias": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 66
+    },
+    "uom_weight_alias": {
+      "issue_row_count": 1,
+      "affected_sku_mentions": 34
+    }
+  },
+  "top_10_priority_material_families": [
+    {
+      "material_family": "螺丝",
+      "sku_count": 84,
+      "needs_review_count": 83,
+      "clarify_specs_before_use_count": 83,
+      "split_candidate_count": 78,
+      "missing_specs_note_count": 84,
+      "family_attributes_blank_count": 0,
+      "unique_item_name_count": 24,
+      "priority_score": 508
+    },
+    {
+      "material_family": "液压接头",
+      "sku_count": 73,
+      "needs_review_count": 59,
+      "clarify_specs_before_use_count": 59,
+      "split_candidate_count": 41,
+      "missing_specs_note_count": 73,
+      "family_attributes_blank_count": 10,
+      "unique_item_name_count": 40,
+      "priority_score": 377
+    },
+    {
+      "material_family": "定制管路接头",
+      "sku_count": 60,
+      "needs_review_count": 60,
+      "clarify_specs_before_use_count": 60,
+      "split_candidate_count": 29,
+      "missing_specs_note_count": 60,
+      "family_attributes_blank_count": 25,
+      "unique_item_name_count": 37,
+      "priority_score": 355
+    },
+    {
+      "material_family": "直接/接头",
+      "sku_count": 63,
+      "needs_review_count": 41,
+      "clarify_specs_before_use_count": 41,
+      "split_candidate_count": 45,
+      "missing_specs_note_count": 56,
+      "family_attributes_blank_count": 2,
+      "unique_item_name_count": 38,
+      "priority_score": 304
+    },
+    {
+      "material_family": "弯头",
+      "sku_count": 39,
+      "needs_review_count": 30,
+      "clarify_specs_before_use_count": 30,
+      "split_candidate_count": 38,
+      "missing_specs_note_count": 35,
+      "family_attributes_blank_count": 1,
+      "unique_item_name_count": 12,
+      "priority_score": 209
+    },
+    {
+      "material_family": "管材",
+      "sku_count": 31,
+      "needs_review_count": 24,
+      "clarify_specs_before_use_count": 24,
+      "split_candidate_count": 9,
+      "missing_specs_note_count": 28,
+      "family_attributes_blank_count": 7,
+      "unique_item_name_count": 21,
+      "priority_score": 141
+    },
+    {
+      "material_family": "胶管总成",
+      "sku_count": 34,
+      "needs_review_count": 34,
+      "clarify_specs_before_use_count": 34,
+      "split_candidate_count": 0,
+      "missing_specs_note_count": 34,
+      "family_attributes_blank_count": 0,
+      "unique_item_name_count": 2,
+      "priority_score": 136
+    },
+    {
+      "material_family": "管卡",
+      "sku_count": 29,
+      "needs_review_count": 16,
+      "clarify_specs_before_use_count": 16,
+      "split_candidate_count": 18,
+      "missing_specs_note_count": 26,
+      "family_attributes_blank_count": 3,
+      "unique_item_name_count": 21,
+      "priority_score": 129
+    },
+    {
+      "material_family": "三通",
+      "sku_count": 27,
+      "needs_review_count": 14,
+      "clarify_specs_before_use_count": 14,
+      "split_candidate_count": 27,
+      "missing_specs_note_count": 24,
+      "family_attributes_blank_count": 0,
+      "unique_item_name_count": 13,
+      "priority_score": 128
+    },
+    {
+      "material_family": "阀门",
+      "sku_count": 30,
+      "needs_review_count": 24,
+      "clarify_specs_before_use_count": 24,
+      "split_candidate_count": 0,
+      "missing_specs_note_count": 25,
+      "family_attributes_blank_count": 12,
+      "unique_item_name_count": 23,
+      "priority_score": 127
+    }
+  ],
+  "recommended_next_governance_sequence": [
+    {
+      "order": 1,
+      "material_family": "螺丝",
+      "why": "84 条中 83 条 needs_review，且螺丝/组件/套件/膨胀/花篮/螺丝刀语义交叉，先治理能显著降低紧固件误选风险。",
+      "target_outputs": [
+        "长词优先拆分规则",
+        "螺丝规格模板",
+        "成套/套件人工判定清单"
+      ]
+    },
+    {
+      "order": 2,
+      "material_family": "液压接头",
+      "why": "73 条中 59 条 needs_review，和高压、油管、对丝、铜接头、弯头/三通边界重叠，错误选型风险高。",
+      "target_outputs": [
+        "液压系统判定词表",
+        "接头规格模板",
+        "疑似非液压接头复核清单"
+      ]
+    },
+    {
+      "order": 3,
+      "material_family": "直接/接头",
+      "why": "63 条且 45 条带 family_split_candidates，是水暖、管件、液压、气动、消防、电缆接头交叉的核心宽族。",
+      "target_outputs": [
+        "标准管件归并规则",
+        "材质/连接/口径模板",
+        "需转出到液压/气动/消防/电缆的候选表"
+      ]
+    },
+    {
+      "order": 4,
+      "material_family": "定制管路接头",
+      "why": "60 条全部偏人工判定，需在标准接头边界明确后再治理，避免把标准件误留在定制族。",
+      "target_outputs": [
+        "定制判定标准",
+        "图纸/加工/非标规格模板",
+        "可回流标准族候选"
+      ]
+    },
+    {
+      "order": 5,
+      "material_family": "胶管总成",
+      "why": "34 条全部 needs_review，规格唯一性依赖长度、层数、两端螺纹，适合做专门模板治理。",
+      "target_outputs": [
+        "胶管总成必填模板",
+        "两端接头字段规范",
+        "缺失端口规格复核清单"
+      ]
+    }
+  ],
+  "source_summary": {
+    "sku_count": 2328,
+    "item_name_count": 1242,
+    "material_family_count": 825,
+    "top_group_count": 20,
+    "item_group_count": 162,
+    "status_counts": {
+      "candidate": 2171,
+      "active": 157
+    },
+    "quality_counts": {
+      "needs_review": 1640,
+      "usable": 531,
+      "standard": 157
+    },
+    "agent_use_policy_counts": {
+      "clarify_specs_before_use": 1640,
+      "confirm_before_use": 531,
+      "auto_select_allowed": 157
+    },
+    "top_repeated_names": {
+      "胶管总成": 33,
+      "钻头": 28,
+      "膨胀螺丝": 24,
+      "螺丝": 23,
+      "自喷漆": 19,
+      "卸扣": 16,
+      "黄油嘴": 15,
+      "不锈钢球阀": 13,
+      "螺母": 13,
+      "螺丝组件": 13,
+      "焊接弯头": 12,
+      "垃圾袋": 11,
+      "高压弯头": 11,
+      "扁平吊装带": 11,
+      "羊毛刷": 10,
+      "槽钢": 10,
+      "防锈漆": 10,
+      "油布": 10,
+      "电缆": 9,
+      "记号笔": 9,
+      "卷尺": 9,
+      "焊条": 9,
+      "尼龙扎带": 9,
+      "螺丝套件": 9,
+      "吊装带": 9,
+      "五孔插座": 8,
+      "漏电保护器": 8,
+      "铁丝": 8,
+      "钢丝绳": 8,
+      "建筑模板": 8
+    },
+    "top_repeated_name_groups": {
+      "胶管总成 | 液压气动/高压管路": 33,
+      "钻头 | 工具耗材/钻头": 28,
+      "膨胀螺丝 | 紧固件与连接件/膨胀锚栓": 24,
+      "螺丝 | 紧固件与连接件/螺丝": 23,
+      "自喷漆 | 化工胶粘涂料/涂料": 19,
+      "卸扣 | 吊装索具/卸扣": 16,
+      "黄油嘴 | 设备备件/通用机械备件": 15,
+      "不锈钢球阀 | 管材管件阀门/阀门": 13,
+      "螺母 | 紧固件与连接件/螺母": 13,
+      "螺丝组件 | 紧固件与连接件/螺丝": 13,
+      "焊接弯头 | 管材管件阀门/弯头": 12,
+      "垃圾袋 | 清洁办公后勤/清洁耗材": 11,
+      "高压弯头 | 定制加工件/管路接头": 11,
+      "扁平吊装带 | 吊装索具/吊带": 11,
+      "羊毛刷 | 工具耗材/刷具": 10,
+      "槽钢 | 金属材料/型钢": 10,
+      "防锈漆 | 化工胶粘涂料/涂料": 10,
+      "油布 | 包装覆盖周转/覆盖材料": 10,
+      "电缆 | 电气电料/电线电缆": 9,
+      "记号笔 | 清洁办公后勤/办公用品": 9,
+      "卷尺 | 工具量具/测量工具": 9,
+      "焊条 | 焊接切割/焊接耗材": 9,
+      "尼龙扎带 | 电气电料/电气辅材": 9,
+      "螺丝套件 | 紧固件与连接件/螺丝": 9,
+      "吊装带 | 吊装索具/吊带": 9,
+      "五孔插座 | 电气电料/插头插座": 8,
+      "漏电保护器 | 电气电料/低压电器": 8,
+      "铁丝 | 金属材料/金属丝材": 8,
+      "钢丝绳 | 吊装索具/钢丝绳": 8,
+      "建筑模板 | 建筑材料/模板木方": 8
+    }
+  }
+}

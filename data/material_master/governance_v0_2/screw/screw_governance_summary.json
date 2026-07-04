@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-07-03",
+  "source_files": {
+    "material_master_reclassified": "data\\material_master\\reclassification\\material_master_reclassified.tsv",
+    "browser_json": "data\\material_master\\reclassification\\material_master_browser_data_reclassified.json",
+    "family_rules": "data\\material_master\\reclassification\\family_governance\\material_family_rules.tsv",
+    "issue_inventory": "data\\material_master\\governance_v0_2\\material_governance_issue_inventory.tsv",
+    "governance_summary": "data\\material_master\\governance_v0_2\\material_governance_summary.json"
+  },
+  "input_sku_count": 84,
+  "input_screw_family_rows": 84,
+  "boundary_sample_count": 213,
+  "boundary_sample_rows": 129,
+  "candidate_row_count": 213,
+  "total_candidate_rows": 213,
+  "manual_review_row_count": 125,
+  "manual_review_rows": 125,
+  "action_counts": {
+    "keep_as_kit_review": 34,
+    "keep_screw": 51,
+    "move_to_expansion_anchor": 27,
+    "move_to_nut": 18,
+    "move_to_screw_rod": 9,
+    "move_to_tool": 13,
+    "move_to_turnbuckle": 7,
+    "move_to_washer": 14,
+    "needs_manual_review": 40
+  },
+  "scope_counts": {
+    "in_family": 84,
+    "boundary_sample": 129
+  },
+  "confidence_distribution": {
+    "medium": 125,
+    "high": 88
+  },
+  "needs_owner_decision_count": 125,
+  "owner_decision_rows": 125,
+  "focus_screw_needs_owner_decision_count": 84,
+  "safe_auto_rule_candidate_count": 88,
+  "safe_auto_rule_count": 88,
+  "safe_auto_rule_candidate_ratio": 0.4131,
+  "safe_auto_rule_ratio": 0.4131,
+  "estimated_can_promote_to_usable_after_rule_and_owner_confirmation": 50,
+  "estimated_can_promote_to_standard_without_more_specs": 0,
+  "remaining_manual_review_count": 125,
+  "top_manual_review_actions": {
+    "keep_screw": 51,
+    "needs_manual_review": 40,
+    "keep_as_kit_review": 34
+  },
+  "recommended_first_application_sequence": [
+    "先把 P0 长词排除规则固化为候选规则：膨胀螺丝、花篮/花兰螺丝、螺丝刀/取出器、螺杆、螺母、垫片/垫圈。",
+    "再处理普通螺丝/螺栓的标准名称统一：标准名称=螺丝，头型/强度/材质/表面处理进入规格。",
+    "最后由业务确认所有套件/组件和单位为套的记录，决定是保留成套 SKU 还是拆分/换单位。"
+  ]
+}

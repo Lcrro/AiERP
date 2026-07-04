@@ -18,6 +18,19 @@ python scripts/wizard_workbench.py --profile civil --port 8787
 | `material_master/` | 物料采购清单处理、标准物料候选、治理、检索评估 |
 | `scenarios/` | 业务沙盘 seed、runner、ToolCall 覆盖校验 |
 
+常用物料主数据命令：
+
+```powershell
+python scripts/build_material_master.py
+python scripts/build_glove_governance_sample.py
+python scripts/build_material_master_browser_data.py
+python scripts\material_master\build_material_master_release_v0_3.py
+python scripts/build_material_family_candidate_terms.py
+python scripts/merge_category_mapping_batches.py
+python scripts/apply_category_mapping.py
+python scripts/merge_family_rule_batches.py
+```
+
 ## 规则
 
 - 新脚本优先放入对应子目录。
