@@ -8,6 +8,7 @@
 |---|---|
 | `material_catalog_viewer.html` | 查看物料目录、治理结果和 SKU 草案的本地静态页面。 |
 | `material_master_browser.html` | 按 `类目 -> 物料族 -> 物料名称 -> SKU` 四级查看物料主数据，默认读取发布版 v0.3。 |
+| `project_module_map.html` | 用圆形节点和连线查看 Runtime、ToolCall、ERPNext、物料主数据、沙盘和工程治理之间的关系。 |
 | `wizard_of_oz_workbench.html` | 手动选择和执行 ToolCall 的 Wizard of Oz 测试工作台。 |
 
 规则：
