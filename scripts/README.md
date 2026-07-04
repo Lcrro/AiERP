@@ -31,6 +31,14 @@ python scripts/apply_category_mapping.py
 python scripts/merge_family_rule_batches.py
 ```
 
+常用 Agent Runtime 试验命令：
+
+```powershell
+python scripts\dev\deepseek_material_request_trial.py --use-runtime-resolver --context-json .\data\scenario\deepseek_material_request_context.sample.json
+```
+
+`--use-runtime-resolver` 表示 DeepSeek 只抽取业务意图，由本地发布版物料表 Resolver 和材料申请编排器生成候选 ToolCall。
+
 ## 规则
 
 - 新脚本优先放入对应子目录。

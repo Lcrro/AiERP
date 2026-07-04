@@ -115,6 +115,51 @@ def build_material_request_messages(user_text: str, *, context: dict[str, Any] |
     return [system_prompt, developer_prompt, user_prompt]
 
 
+def build_material_request_intent_messages(
+    user_text: str,
+    *,
+    context: dict[str, Any] | None = None,
+) -> list[dict[str, str]]:
+    runtime_context = context or {}
+    system_prompt = {
+        "role": "system",
+        "content": (
+            "你是 ERPNext 材料申请的业务意图抽取器，只负责把员工自然语言抽成结构化草稿。"
+            "你不能选择 item_code，不能编造仓库、项目、物料编码或 ERPNext 单号。"
+            "物料只填写 raw_item_text、数量、单位和用户明确说出的规格。"
+            "如果日期可以根据 runtime_context.current_date 或 default_schedule_date 明确推断，输出 YYYY-MM-DD；否则保留 schedule_text 并提出问题。"
+            "只输出 JSON object，不要 Markdown，不要解释正文。"
+        ),
+    }
+    developer_prompt = {
+        "role": "system",
+        "content": json.dumps(
+            {
+                "output_schema": {
+                    "intent": "create_material_request | unknown",
+                    "project_text": "用户口头项目名或空",
+                    "warehouse_text": "用户口头仓库名或空",
+                    "schedule_text": "用户口头需求日期或空",
+                    "schedule_date": "YYYY-MM-DD 或空",
+                    "items": [
+                        {
+                            "raw_item_text": "用户说的物料名称，不要改成编码",
+                            "qty": 1,
+                            "uom": "用户说的单位或空",
+                            "specs": {"规格字段": "用户明确说出的规格值"},
+                        }
+                    ],
+                    "questions": ["缺失关键业务信息时要问的问题"],
+                    "confidence": 0.0,
+                },
+                "runtime_context": runtime_context,
+            },
+            ensure_ascii=False,
+        ),
+    }
+    return [system_prompt, developer_prompt, {"role": "user", "content": user_text}]
+
+
 def call_deepseek_json(
     messages: list[dict[str, str]],
     *,
@@ -153,6 +198,17 @@ def plan_material_request_with_deepseek(
     plan = call_deepseek_json(messages, settings=settings)
     plan = normalize_material_request_plan(plan, context=context)
     return validate_material_request_plan(plan)
+
+
+def extract_material_request_intent_with_deepseek(
+    user_text: str,
+    *,
+    context: dict[str, Any] | None = None,
+    settings: DeepSeekSettings | None = None,
+) -> dict[str, Any]:
+    messages = build_material_request_intent_messages(user_text, context=context)
+    intent = call_deepseek_json(messages, settings=settings)
+    return validate_material_request_intent(intent)
 
 
 def parse_json_object(content: str) -> dict[str, Any]:
@@ -273,6 +329,28 @@ def validate_material_request_plan(plan: dict[str, Any]) -> dict[str, Any]:
             raise ValueError(f"items[{index}].schedule_date is required")
 
     return plan
+
+
+def validate_material_request_intent(intent: dict[str, Any]) -> dict[str, Any]:
+    status = intent.get("intent")
+    if status not in {"create_material_request", "unknown"}:
+        raise ValueError("material request intent must be create_material_request or unknown")
+    items = intent.get("items")
+    if status == "create_material_request":
+        if not isinstance(items, list) or not items:
+            raise ValueError("create_material_request intent must include non-empty items")
+        for index, item in enumerate(items, start=1):
+            if not isinstance(item, dict):
+                raise ValueError(f"items[{index}] must be an object")
+            if not item.get("raw_item_text"):
+                raise ValueError(f"items[{index}].raw_item_text is required")
+            qty = item.get("qty")
+            if qty is not None and (not isinstance(qty, (int, float)) or qty <= 0):
+                raise ValueError(f"items[{index}].qty must be a positive number when provided")
+            specs = item.get("specs")
+            if specs is not None and not isinstance(specs, dict):
+                raise ValueError(f"items[{index}].specs must be an object when provided")
+    return intent
 
 
 def _single_candidate(candidates: Any) -> dict[str, Any] | None:

@@ -10,19 +10,26 @@ from .tool_contracts import ToolContract, build_tool_contracts, get_tool_contrac
 from .tool_gateway import ToolGateway, ToolSession
 from .deepseek_material_request import (
     DeepSeekSettings,
+    build_material_request_intent_messages,
     build_material_request_messages,
+    extract_material_request_intent_with_deepseek,
     plan_material_request_with_deepseek,
 )
+from .material_request_orchestrator import MaterialRequestRuntimeConfig, compose_material_request_tool_call
 
 __all__ = [
     "DeepSeekSettings",
+    "MaterialRequestRuntimeConfig",
     "ToolAccessPolicy",
     "ToolContract",
     "ToolExposure",
     "ToolGateway",
     "ToolSession",
+    "build_material_request_intent_messages",
     "build_material_request_messages",
     "build_tool_contracts",
+    "compose_material_request_tool_call",
+    "extract_material_request_intent_with_deepseek",
     "filter_tool_schemas_for_policy",
     "get_tool_contract",
     "make_tool_access_policy",

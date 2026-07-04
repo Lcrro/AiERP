@@ -12,7 +12,11 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from nexterp_agent.agent_runtime import ToolGateway, ToolSession, make_tool_access_policy
-from nexterp_agent.agent_runtime.deepseek_material_request import plan_material_request_with_deepseek
+from nexterp_agent.agent_runtime.deepseek_material_request import (
+    extract_material_request_intent_with_deepseek,
+    plan_material_request_with_deepseek,
+)
+from nexterp_agent.agent_runtime.material_request_orchestrator import compose_material_request_tool_call
 from nexterp_agent.erpnext.adapter import ERPNextAdapter
 from nexterp_agent.erpnext.client import ERPNextClient
 from nexterp_agent.erpnext.config import load_erpnext_settings
@@ -29,21 +33,32 @@ def main() -> int:
         help="Optional JSON context containing resolved company/project/warehouse/item candidates.",
     )
     parser.add_argument("--execute", action="store_true", help="Execute the proposed ToolCall through ToolGateway.")
+    parser.add_argument(
+        "--use-runtime-resolver",
+        action="store_true",
+        help="Ask DeepSeek for intent only, then let Runtime resolve materials and compose ToolCall.",
+    )
     parser.add_argument("--erpnext-profile", default="civil", help="ERPNext env profile used when --execute is set.")
     parser.add_argument("--agent-profile", default="采购员", help="Tool access profile used by ToolGateway.")
     parser.add_argument("--expected-user", help="Expected ERPNext API user; enables identity verification when set.")
     args = parser.parse_args()
 
     context = _load_context(args.context_json)
-    plan = plan_material_request_with_deepseek(args.text, context=context)
-    print(json.dumps({"deepseek_plan": plan}, ensure_ascii=False, indent=2))
+    if args.use_runtime_resolver:
+        intent = extract_material_request_intent_with_deepseek(args.text, context=context)
+        plan = compose_material_request_tool_call(intent, context=context)
+        print(json.dumps({"deepseek_intent": intent, "runtime_plan": plan}, ensure_ascii=False, indent=2))
+    else:
+        plan = plan_material_request_with_deepseek(args.text, context=context)
+        print(json.dumps({"deepseek_plan": plan}, ensure_ascii=False, indent=2))
 
     if not args.execute:
         print("\n[dry-run] 未执行 ERPNext 写入。确认候选 ToolCall 后可追加 --execute。", file=sys.stderr)
         return 0
 
-    if plan.get("status") != "needs_confirmation":
-        print("\n[blocked] DeepSeek 认为信息不足，需要先追问，不执行。", file=sys.stderr)
+    executable_statuses = {"needs_confirmation", "ready"}
+    if plan.get("status") not in executable_statuses:
+        print("\n[blocked] 当前计划还没有可执行 ToolCall，需要先追问、选物料或新建物料。", file=sys.stderr)
         return 1
 
     gateway = _build_gateway(args.erpnext_profile, args.agent_profile, args.expected_user)
