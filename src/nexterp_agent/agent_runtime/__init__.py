@@ -16,15 +16,24 @@ from .deepseek_material_request import (
     plan_material_request_with_deepseek,
 )
 from .material_request_orchestrator import MaterialRequestRuntimeConfig, compose_material_request_tool_call
+from .civil_runtime import CivilAgentRuntime, RuntimeTurnResult
+from .resolvers import EntityResolverRegistry, ResolutionResult
+from .session import RuntimeSessionState, RuntimeSessionStore
 
 __all__ = [
     "DeepSeekSettings",
+    "CivilAgentRuntime",
+    "EntityResolverRegistry",
     "MaterialRequestRuntimeConfig",
     "ToolAccessPolicy",
     "ToolContract",
     "ToolExposure",
     "ToolGateway",
     "ToolSession",
+    "ResolutionResult",
+    "RuntimeSessionState",
+    "RuntimeSessionStore",
+    "RuntimeTurnResult",
     "build_material_request_intent_messages",
     "build_material_request_messages",
     "build_tool_contracts",

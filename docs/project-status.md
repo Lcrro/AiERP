@@ -7,7 +7,7 @@
 - 当前整理版本：`civil-agent-v1.0-foundation`
 - 当前分支：`codex/project-structure-cleanup-v0.3`
 - 整理基线：`996ae1e`
-- 本轮状态：工程结构和 150 个 ToolCall 基线已经稳定；权威物料发布版 v1.0 已冻结为 1,979 个 SKU；基础主数据和测试价格已通过幂等导入器写入独立 `fac.localhost` 账套。当前开始自然语言 CLI Agent Runtime，并准备按员工身份重新执行完整一天事件流。
+- 本轮状态：工程结构和 150 个 ToolCall 基线已经稳定；权威物料发布版 v1.0 和基础主数据已写入独立账套；自然语言 CLI Agent Runtime 已完成首条真实材料申请闭环。下一步扩展采购、收货退货、库存、财务和项目成本编排，并按员工身份重新执行完整一天事件流。
 
 ## 当前结构
 
@@ -66,7 +66,7 @@ python -m pytest -q
 
 ```text
 注册表一致性：150 schemas / 150 handlers / missing=[] / extra=[]
-当前全量测试：184 passed, 3 skipped
+当前全量测试：190 passed, 3 skipped
 加载本地 sandbox .env 全量测试：本轮未运行；上一轮为 100 passed
 土木公司 ToolCall 覆盖检查：registered tools=150 / referenced tools=44 / missing=0
 土木公司 runner dry-run：10 steps / 6 executed / 4 skipped_write / failed=0
@@ -98,10 +98,9 @@ PR -> PI 本地 smoke：MAT-PRE-2026-00007 -> ACC-PINV-2026-00013，PI 行保留
 
 ## 下一步队列
 
-1. 实现 DeepSeek 意图抽取、Resolver 注册表、参数编排、结构化会话和 CLI Runtime。
-2. 用自然语言 Runtime 贯通材料申请、采购、收货退货、库存领料、财务和项目成本。
-3. 按员工身份重新执行并记录 08:00 至 18:00 完整一天事件流。
-4. 主线跑通后集中处理幂等、权限、审计、恢复和长尾数据问题。
+1. 用自然语言 Runtime 贯通采购、收货退货、库存领料、财务和项目成本。
+2. 按员工身份重新执行并记录 08:00 至 18:00 完整一天事件流。
+3. 主线跑通后集中处理幂等、权限、审计、恢复和长尾数据问题。
 
 阶段 2 实际账套验收：
 
@@ -111,4 +110,15 @@ verified = 4,243
 failed = 0
 Item = 1,979
 Item Price = 1,979
+```
+
+首条自然语言闭环验收：
+
+```text
+员工：mao.xiaoquan@stec-up.local
+输入：合流1.3标明天需要100个6.8级螺栓M12*40，送到合流1.3标仓库
+解析物料：SPARE-000071-68
+解析项目：PROJ-0010
+创建草稿：MAT-MR-2026-00004
+ERPNext owner：mao.xiaoquan@stec-up.local
 ```

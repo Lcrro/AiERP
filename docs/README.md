@@ -46,6 +46,7 @@ scenarios     业务沙盘、角色、流程样例
 ## 运行与维护
 
 - [本地 Sandbox 运行说明](operations/local-sandbox.md)
+- [员工 Agent CLI](operations/agent-cli.md)
 - [物料目录 PostgreSQL 运行说明](operations/material-catalog-postgres.md)
 
 运行文档回答“本地系统怎么启动、怎么验证、怎么维护”。
