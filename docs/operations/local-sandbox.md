@@ -85,6 +85,27 @@ Expected response:
 {"message":"pong"}
 ```
 
+## Import v1 Master Data
+
+The independent `civil` site can be initialized from the authoritative releases without direct database writes:
+
+```powershell
+python scripts\erpnext\import_master_data_release.py plan
+python scripts\erpnext\import_master_data_release.py apply --profile civil
+python scripts\erpnext\import_master_data_release.py verify --profile civil --workers 10
+```
+
+Large independent batches can be resumed safely:
+
+```powershell
+python scripts\erpnext\import_master_data_release.py apply --profile civil --doctype "Item Group" --workers 10
+python scripts\erpnext\import_master_data_release.py apply --profile civil --doctype UOM --workers 10
+python scripts\erpnext\import_master_data_release.py apply --profile civil --doctype Item --workers 15
+python scripts\erpnext\import_master_data_release.py apply --profile civil --doctype "Item Price" --workers 20
+```
+
+The importer always uses ERPNext/Frappe APIs and supports `plan`, idempotent `apply`, and full `verify` modes.
+
 Run adapter smoke checks after setting `NEXTERP_LOCAL_*` values:
 
 ```powershell

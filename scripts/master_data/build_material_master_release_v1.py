@@ -49,6 +49,19 @@ OUTPUT_FIELDS = [
     "updated_at",
 ]
 
+# These codes already exist in the independent sandbox with incompatible
+# stock units and posted scenario transactions. v1 receives fresh stable
+# codes while preserving the old codes in source_item_codes for traceability.
+SANDBOX_CODE_CONFLICTS = {
+    "ELEC-000006": "ELEC-000006-V1",
+    "ELEC-000007": "ELEC-000007-V1",
+    "MAT-000159": "MAT-000159-V1",
+    "MAT-CEM-000004": "MAT-CEM-000004-V1",
+    "METAL-000001": "METAL-000001-V1",
+    "SAFE-000006": "SAFE-000006-V1",
+    "SAFE-000007": "SAFE-000007-V1",
+}
+
 
 def read_tsv(path: Path) -> list[dict[str, str]]:
     with path.open("r", encoding="utf-8-sig", newline="") as handle:
@@ -78,6 +91,8 @@ def build_search_keywords(row: dict[str, str]) -> str:
 
 
 def normalize_row(row: dict[str, str]) -> dict[str, str]:
+    source_item_code = row.get("item_code", "").strip()
+    release_item_code = SANDBOX_CODE_CONFLICTS.get(source_item_code, source_item_code)
     stock_uom = row.get("unit", "").strip()
     rate = Decimal(row.get("estimated_rate") or "0")
     governance_notes: list[str] = []
@@ -88,7 +103,7 @@ def normalize_row(row: dict[str, str]) -> dict[str, str]:
         governance_notes.append("固定长度6m作为一个SKU，单位由米改为根，测试价按6米折算。")
 
     normalized = {
-        "item_code": row.get("item_code", "").strip(),
+        "item_code": release_item_code,
         "item_name": row.get("item_name", "").strip(),
         "sku_name": row.get("sku_name", "").strip(),
         "required_specs": row.get("required_specs", "").strip(),
@@ -110,7 +125,7 @@ def normalize_row(row: dict[str, str]) -> dict[str, str]:
         "status": "active",
         "quality_level": "standard",
         "agent_use_policy": "auto_select_allowed",
-        "source_item_codes": row.get("source_item_codes", "").strip() or row.get("item_code", "").strip(),
+        "source_item_codes": row.get("source_item_codes", "").strip() or source_item_code,
         "merged_count": row.get("merged_count", "1").strip() or "1",
         "governance_note": "；".join(governance_notes),
         "updated_at": row.get("updated_at", "").strip(),
@@ -136,6 +151,7 @@ def validate_rows(rows: list[dict[str, str]]) -> dict[str, Any]:
         "unique_item_codes": len(set(codes)),
         "merged_source_rows": sum(int(row.get("merged_count") or "1") for row in rows),
         "fixed_length_unit_overrides": sum(row["item_code"] == "PIPE-000411" for row in rows),
+        "sandbox_code_conflict_overrides": len(SANDBOX_CODE_CONFLICTS),
     }
 
 

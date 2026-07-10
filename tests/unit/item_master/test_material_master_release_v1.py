@@ -28,3 +28,14 @@ def test_fixed_length_pipe_uses_root_unit_and_root_price() -> None:
     assert row["purchase_uom"] == "根"
     assert row["estimated_rate"] == "2520.00"
     assert "6m" in row["sku_name"]
+
+
+def test_sandbox_unit_conflicts_receive_new_v1_codes() -> None:
+    rows = load_release()
+    codes = {row["item_code"] for row in rows}
+
+    assert "SAFE-000006" not in codes
+    assert "SAFE-000006-V1" in codes
+    replacement = next(row for row in rows if row["item_code"] == "SAFE-000006-V1")
+    assert replacement["source_item_codes"] == "SAFE-000006"
+    assert replacement["stock_uom"] == "双"

@@ -15,5 +15,6 @@ logs/
 outputs/
 data/runtime/logs/*
 data/runtime/sessions/*
+data/runtime/*_report.json
 !data/runtime/logs/.gitkeep
 !data/runtime/sessions/.gitkeep
