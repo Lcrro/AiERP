@@ -1,0 +1,9 @@
+duplicate_group_id	duplicate_count	keep_candidate_item_code	action	item_code	item_name	sku_name	required_specs	unit	estimated_rate	original_sku_name	default_fill_basis
+DEDUP-0001	4	PIPE-000307	keep	PIPE-000307	对丝接头	对丝接头 M20*1.5 高压	螺纹规格：M20*1.5；材质：碳钢；压力等级：高压	个	8.00	对丝接头 20	螺距1.5按常见标准补齐，材质和压力按常规
+DEDUP-0001	4	PIPE-000307	merge_into_keep	PIPE-000352	对丝接头	对丝接头 M20*1.5 高压	螺纹规格：M20*1.5；材质：碳钢；压力等级：高压	个	8.00	对丝接头 20*1.5	材质按常规补齐
+DEDUP-0001	4	PIPE-000307	merge_into_keep	PIPE-000377	对丝接头	对丝接头 M20*1.5 高压	螺纹规格：M20*1.5；材质：碳钢；压力等级：高压	个	8.00	对丝接头 M20*1.5	材质压力补齐
+DEDUP-0001	4	PIPE-000307	merge_into_keep	PIPE-000390	对丝接头	对丝接头 M20*1.5 高压	螺纹规格：M20*1.5；材质：碳钢；压力等级：高压	个	8.00	对丝接头 20*1.5	口径和压力按常规补齐
+DEDUP-0002	2	PIPE-000338	keep	PIPE-000338	对丝接头	对丝接头 M36*2 高压	螺纹规格：M36*2；材质：碳钢；压力等级：高压	个	18.00	对丝接头 36*2	材质和压力补齐
+DEDUP-0002	2	PIPE-000338	merge_into_keep	PIPE-000355	对丝接头	对丝接头 M36*2 高压	螺纹规格：M36*2；材质：碳钢；压力等级：高压	个	18.00	对丝接头 36*2	材质补齐
+DEDUP-0003	2	SAFE-000060	keep	SAFE-000060	安全网	安全网 1.8米×6米 加厚	尺寸：1.8米×6米；特征：加厚；材质：PE	张	40.00	安全网 加厚	补齐尺寸为常见1.8m×6m
+DEDUP-0003	2	SAFE-000060	merge_into_keep	SAFE-000092	安全网	安全网 1.8米×6米 加厚	尺寸：1.8米×6米；特征：加厚；材质：PE	张	45.00	安全网 1.8米×6米 加厚	补齐材质

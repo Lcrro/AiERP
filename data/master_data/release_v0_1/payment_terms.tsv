@@ -1,0 +1,5 @@
+payment_term_code	payment_term_name	days	erpnext_payment_terms_template	status	note
+PT-COD	现结	0	现结	active	基础付款条件；到货或下单时立即付款，真实供应商确认后再调整。
+PT-NET30	月结30天	30	月结30天	active	基础付款条件；常用供应商默认账期，真实供应商确认后再调整。
+PT-INVOICE30	票到30天	30	票到30天	active	基础付款条件；收到合规发票后 30 天付款，候选品类供应商默认使用。
+PT-PREPAY	预付款	0	预付款	active	基础付款条件；款到发货或特殊材料预付款，真实供应商确认后再使用。

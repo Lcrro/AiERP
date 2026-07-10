@@ -1,0 +1,30 @@
+{
+  "row_count": 1979,
+  "family_count": 147,
+  "factor_family_count": 148,
+  "generated_at": "2026-07-08",
+  "reliability_row_counts": {
+    "medium": 908,
+    "low": 1023,
+    "high": 48
+  },
+  "sample_count_row_counts": {
+    "4": 208,
+    "2": 593,
+    "1": 338,
+    "3": 372,
+    "5": 48,
+    "11": 104,
+    "7": 131,
+    "6": 114,
+    "8": 71
+  },
+  "min_factor": "0.1607",
+  "max_factor": "13.2500",
+  "rounding": "Decimal ROUND_HALF_UP, 2 decimal places",
+  "release": "data\\material_master\\price_ready_release_v0_1\\material_master_price_ready_release_v0_1.tsv",
+  "factors": "data\\material_master\\price_review_samples\\price_review_family_adjustment_factors.tsv",
+  "output": "data\\material_master\\price_review_samples\\material_master_price_adjusted_by_family.tsv",
+  "adjusted_release": "data\\material_master\\price_ready_release_v0_1\\material_master_price_ready_release_v0_1_family_adjusted.tsv",
+  "browser_json": "data\\material_master\\price_ready_release_v0_1\\material_master_price_ready_browser_data.json"
+}

@@ -1,13 +1,13 @@
 # 项目状态
 
-最后更新：2026-06-12
+最后更新：2026-07-10
 
 ## 当前版本
 
-- 当前整理版本：`project-structure-cleanup-v0.3`
+- 当前整理版本：`civil-agent-v1.0-foundation`
 - 当前分支：`codex/project-structure-cleanup-v0.3`
 - 整理基线：`996ae1e`
-- 本轮状态：工程结构整理已完成；在此基础上新增了采购退货、项目成本/项目领料、材料申请转采购订单、采购订单转采购收货、采购收货转采购发票、到货差异记录，以及物料生命周期验证类业务 ToolCall，并开始建立土木公司一日运转沙盘。项目结构第一轮收纳已完成：`scripts/` 已按职责分区并保留兼容入口，`data/` 已建立目标分区说明，`agent_runtime/` 与 `scenarios/` 已建立代码边界。
+- 本轮状态：工程结构和 150 个 ToolCall 基线已经稳定；土木公司一日运转沙盘已通过人工 ToolCall 跑通主要采购、收货、退货、领料、财务和项目成本链。当前进入 v1.0 产品主线：统一物料与基础主数据发布版、构建干净 ERPNext 测试账套、完成自然语言 CLI Agent Runtime，并用员工身份重新执行完整一天事件流。
 
 ## 当前结构
 
@@ -66,7 +66,7 @@ python -m pytest -q
 
 ```text
 注册表一致性：150 schemas / 150 handlers / missing=[] / extra=[]
-无显式 .env 全量测试：140 passed, 3 skipped
+当前单元测试：176 passed
 加载本地 sandbox .env 全量测试：本轮未运行；上一轮为 100 passed
 土木公司 ToolCall 覆盖检查：registered tools=150 / referenced tools=44 / missing=0
 土木公司 runner dry-run：10 steps / 6 executed / 4 skipped_write / failed=0
@@ -98,9 +98,9 @@ PR -> PI 本地 smoke：MAT-PRE-2026-00007 -> ACC-PINV-2026-00013，PI 行保留
 
 ## 下一步队列
 
-1. 扩展一日运转 scenario runner，覆盖材料申请、采购、收货退货、项目领料、财务草稿和管理摘要的完整链路。
-2. 给 runner 增加 apply 模式下的状态传递和引用关系验收，例如 MR -> submit MR -> PO -> submit PO -> PR -> submit PR -> verify stock impact -> QI/discrepancy -> PI -> project issue -> verify cost impact。
-3. 继续补待采购工作台、逾期采购跟进、管理层日报等业务 wrapper。
-4. 完成 `project-structure-cleanup-v0.3` 的全量验证并并入主分支。
-5. 做自然语言 Agent Runtime，让“用户说人话 -> ToolCall -> ToolResult -> 人话回复”完整跑起来。
-6. 增加企业监管层前的审计日志、确认策略和可观测性。
+1. 固化价格就绪版 1,979 条物料和基础主数据为唯一发布源。
+2. 实现干净 ERPNext 测试账套的 `plan/apply/verify` 幂等导入器。
+3. 实现 DeepSeek 意图抽取、Resolver 注册表、参数编排、结构化会话和 CLI Runtime。
+4. 用自然语言 Runtime 贯通材料申请、采购、收货退货、库存领料、财务和项目成本。
+5. 按员工身份重新执行并记录 08:00 至 18:00 完整一天事件流。
+6. 主线跑通后集中处理幂等、权限、审计、恢复和长尾数据问题。

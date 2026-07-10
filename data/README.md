@@ -19,6 +19,7 @@
 | `material_master/purchase_2024/exports/` | 给 ERPNext 或其他系统导入的文件。 |
 | `material_master/purchase_2024/reports/` | 校验报告、统计报告、导入报告。 |
 | `material_master/purchase_2024/batches/` | 分批处理输入和输出。 |
+| `master_data/` | 除物料外的基础主数据，例如公司、员工、项目、仓库、供应商、付款条件和期初库存。 |
 | `scenarios/civil_company_day/` | 小型土木公司一日运转沙盘数据。 |
 | `runtime/` | 未来 Agent Runtime 会话、日志和临时运行状态。 |
 

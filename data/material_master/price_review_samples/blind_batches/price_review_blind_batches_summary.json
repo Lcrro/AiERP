@@ -1,0 +1,52 @@
+{
+  "source": "data\\material_master\\price_review_samples\\price_review_sample_10pct_by_family.tsv",
+  "output_dir": "data\\material_master\\price_review_samples\\blind_batches",
+  "generated_at": "2026-07-08",
+  "agent_count": 5,
+  "source_count": 273,
+  "fields": [
+    "item_code",
+    "item_name",
+    "sku_name",
+    "required_specs",
+    "top_group",
+    "sub_group",
+    "material_family",
+    "unit",
+    "aliases",
+    "brand",
+    "model"
+  ],
+  "batches": [
+    {
+      "batch": 1,
+      "path": "data\\material_master\\price_review_samples\\blind_batches\\price_review_blind_batch_01.tsv",
+      "count": 55,
+      "family_count": 52
+    },
+    {
+      "batch": 2,
+      "path": "data\\material_master\\price_review_samples\\blind_batches\\price_review_blind_batch_02.tsv",
+      "count": 55,
+      "family_count": 52
+    },
+    {
+      "batch": 3,
+      "path": "data\\material_master\\price_review_samples\\blind_batches\\price_review_blind_batch_03.tsv",
+      "count": 55,
+      "family_count": 52
+    },
+    {
+      "batch": 4,
+      "path": "data\\material_master\\price_review_samples\\blind_batches\\price_review_blind_batch_04.tsv",
+      "count": 54,
+      "family_count": 51
+    },
+    {
+      "batch": 5,
+      "path": "data\\material_master\\price_review_samples\\blind_batches\\price_review_blind_batch_05.tsv",
+      "count": 54,
+      "family_count": 51
+    }
+  ]
+}

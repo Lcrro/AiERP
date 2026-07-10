@@ -1,0 +1,12 @@
+department_code	department_name	parent_department_code	company_code	erpnext_department_name	status	note
+DEPT-HQ	公司本部		STEC	公司本部 - STEC	active	组织根；承载公司级管理。
+DEPT-UP	UP事业部	DEPT-HQ	STEC	UP事业部 - STEC	active	UP事业部管理各项目及蕰川路基地；按现有组织口径整理。
+DEPT-HL-13	合流1.3标项目部	DEPT-UP	STEC	合流1.3标项目部 - STEC	active	目前在建项目组织；按现有名单推测。
+DEPT-WCL-BASE	蕰川路基地	DEPT-UP	STEC	蕰川路基地 - STEC	active	UP事业部材料设备基地；按现有名单推测。
+DEPT-NJ-P1	南京一期管理口	DEPT-UP	STEC	南京一期管理口 - STEC	active	组织管理口径，不替代 Project；按现有信息推测：南京一期由 UP事业部管理。
+DEPT-NJ-NH	南京南湖管理口	DEPT-UP	STEC	南京南湖管理口 - STEC	active	组织管理口径，不替代 Project；按现有信息推测：南京南湖由 UP事业部管理。
+DEPT-TH-12	泰和1.2标管理口	DEPT-UP	STEC	泰和1.2标管理口 - STEC	active	组织管理口径，不替代 Project；按现有信息推测：泰和1.2标由 UP事业部管理。
+DEPT-LH-12	龙华1.2标管理口	DEPT-UP	STEC	龙华1.2标管理口 - STEC	active	组织管理口径，不替代 Project；按现有信息推测：龙华1.2标由 UP事业部管理。
+DEPT-YB-11	迎宾1.1标管理口	DEPT-UP	STEC	迎宾1.1标管理口 - STEC	active	组织管理口径，不替代 Project；按现有信息推测：迎宾1.1标由 UP事业部管理。
+DEPT-ZB-12	竹白1.2标管理口	DEPT-UP	STEC	竹白1.2标管理口 - STEC	active	组织管理口径，不替代 Project；按现有信息推测：竹白1.2标由 UP事业部管理。
+DEPT-IT	系统管理	DEPT-HQ	STEC	系统管理 - STEC	candidate	系统管理员候选部门；仅用于测试账套初始化。

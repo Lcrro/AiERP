@@ -1,0 +1,3 @@
+price_list_code	price_list_name	currency	buying_or_selling	enabled	status	note
+PL-BUY-STD	标准采购	CNY	Buying	1	active	默认采购价目表，对应 ERPNext Standard Buying；当前价格为初始化参考价，不代表真实报价。
+PL-BUY-URGENT	紧急采购	CNY	Buying	1	candidate	紧急采购价格策略，当前仅预留，不作为默认供货策略。

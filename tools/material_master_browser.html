@@ -461,6 +461,7 @@
       </label>
       <label class="control">
         <select id="categoryMode" title="分类视图">
+          <option value="price_ready_v0_1">价格就绪版 v0.1</option>
           <option value="release_v0_3">发布版 v0.3</option>
           <option value="third_layer">三级名称人工预览</option>
           <option value="screw_bolt_third">螺丝三级预览</option>
@@ -527,6 +528,7 @@
 
   <script>
     const DATA_URLS = {
+      price_ready_v0_1: "../data/material_master/price_ready_release_v0_1/material_master_price_ready_browser_data.json",
       release_v0_3: "../data/material_master/release_v0_3/material_master_release_v0_3_browser_data.json",
       original: "../data/material_master/material_master_browser_data.json",
       reclassified: "../data/material_master/reclassification/material_master_browser_data_reclassified.json",
@@ -537,6 +539,7 @@
     };
 
     const VIEW_LABELS = {
+      price_ready_v0_1: "价格就绪版 v0.1",
       release_v0_3: "发布版 v0.3",
       original: "旧分类",
       reclassified: "新分类",
@@ -550,7 +553,7 @@
       dataSets: {},
       data: null,
       view: "materials",
-      mode: "release_v0_3",
+      mode: "price_ready_v0_1",
       query: "",
       status: "",
       quality: "",
@@ -622,6 +625,14 @@
       drill_material: "钻头材质",
       drill_use_type: "钻头类型/用途",
       drill_shank: "钻头柄型",
+      estimated_rate: "测试单价",
+      currency: "币种",
+      price_basis: "估价依据",
+      default_fill_basis: "规格补齐依据",
+      original_item_name: "原始物料名称",
+      original_sku_name: "原始SKU名称",
+      original_required_specs: "原始必填规格",
+      original_unit: "原始单位",
     };
 
     function fmt(n) {
@@ -1101,6 +1112,7 @@
               <th>必填规格</th>
               <th style="width: 130px;">分组</th>
               <th style="width: 64px;">单位</th>
+              <th style="width: 96px;">测试单价</th>
               <th style="width: 110px;">质量</th>
             </tr>
           </thead>
@@ -1112,6 +1124,7 @@
                 <td>${escapeHtml(row.required_specs)}</td>
                 <td>${escapeHtml(row.item_group)}</td>
                 <td>${escapeHtml(row.stock_uom)}</td>
+                <td>${escapeHtml(row.estimated_rate)}</td>
                 <td>${chip(row.quality_level)}</td>
               </tr>
             `).join("")}
@@ -1139,7 +1152,9 @@
       const ordered = [
         "item_code", "sku_name", "material_family", "item_name", "required_specs", "optional_specs", "item_group",
         "top_group", "sub_group", "stock_uom", "purchase_uom", "conversion_factor",
+        "estimated_rate", "currency", "price_basis", "default_fill_basis",
         "aliases", "brand", "model", "status", "quality_level", "agent_use_policy",
+        "original_item_name", "original_sku_name", "original_required_specs", "original_unit",
         "family_rule", "family_note", "family_type", "family_material", "family_use",
         "family_connection", "family_surface", "family_attributes", "family_split_candidates",
         "family_attribute_terms", "drill_use_type", "drill_material", "drill_shank",

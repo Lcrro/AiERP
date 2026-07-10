@@ -1,0 +1,11 @@
+warehouse_code	warehouse_name	company_code	parent_warehouse_code	warehouse_type	project_code	manager_employee_code	erpnext_warehouse_name	is_group	status	note
+WH-STEC	盛拓仓库	STEC		仓库根		EMP-PANFENG	盛拓仓库 - STEC	1	active	仓库根节点；按现有名单推测由材料设备主管潘丰兜底管理。
+WH-CENTER	中心仓	STEC	WH-STEC	中心仓		EMP-PANFENG	中心仓 - STEC	0	active	公司中心仓；按现有名单推测由材料设备主管潘丰兜底管理。
+WH-NJ-P1	南京一期仓库	STEC	WH-STEC	项目仓	PRJ-NJ-P1	EMP-PANFENG	南京一期仓库 - STEC	0	active	沉井式停车设施建设项目工程总承包（一期) 项目仓库；按现有名单推测由潘丰兜底，待项目人员确认后调整。
+WH-NJ-NH	南京南湖仓库	STEC	WH-STEC	项目仓	PRJ-NJ-NH	EMP-PANFENG	南京南湖仓库 - STEC	0	active	沉井式停车设施建设项目工程总承包（南湖中心广场点）项目仓库；按现有名单推测由潘丰兜底，待项目人员确认后调整。
+WH-TH-12	泰和1.2标仓库	STEC	WH-STEC	项目仓	PRJ-TH-12	EMP-PANFENG	泰和1.2标仓库 - STEC	0	active	泰和污水处理厂扩建工程 THK1.2 标项目仓库；按现有名单推测由潘丰兜底，待项目人员确认后调整。
+WH-LH-12	龙华1.2标仓库	STEC	WH-STEC	项目仓	PRJ-LH-12	EMP-PANFENG	龙华1.2标仓库 - STEC	0	active	龙华污水处理厂初期雨水调蓄工程 LH1.2 标项目仓库；按现有名单推测由潘丰兜底，待项目人员确认后调整。
+WH-YB-11	迎宾1.1标仓库	STEC	WH-STEC	项目仓	PRJ-YB-11	EMP-PANFENG	迎宾1.1标仓库 - STEC	0	active	迎宾水厂进厂原水管工程 YB1.1 标项目仓库；按现有名单推测由潘丰兜底，待项目人员确认后调整。
+WH-ZB-12	竹白1.2标仓库	STEC	WH-STEC	项目仓	PRJ-ZB-12	EMP-PANFENG	竹白1.2标仓库 - STEC	0	active	竹园白龙港污水连通管工程 ZB1.2 项目仓库；按现有名单推测由潘丰兜底，待项目人员确认后调整。
+WH-HL-13	合流1.3标仓库	STEC	WH-STEC	项目仓	PRJ-HL-13	EMP-MAOXIAOQUAN	合流1.3标仓库 - STEC	0	active	合流污水一期复线工程 FXQ1.3 标项目仓库；按现有名单推测由合流1.3标材料员毛晓泉负责。
+WH-WCL-BASE	蕰川路基地仓库	STEC	WH-STEC	项目仓	PRJ-WCL-BASE	EMP-MAOXIAOQUAN	蕰川路基地仓库 - STEC	0	active	蕰川路 UP 事业部材料设备基地仓库；按现有名单推测由毛晓泉兼任材料员，潘丰负责管理。

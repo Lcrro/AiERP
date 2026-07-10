@@ -1,0 +1,876 @@
+{
+  "input": "data\\material_master\\price_ready_release_v0_1\\material_master_price_ready_release_v0_1.tsv",
+  "output": "data\\material_master\\price_review_samples\\price_review_sample_10pct_by_family.tsv",
+  "generated_at": "2026-07-08",
+  "seed": 20260708,
+  "sample_rate": 0.1,
+  "source_count": 1979,
+  "family_count": 144,
+  "sample_count": 273,
+  "family_summary": [
+    {
+      "material_family": "螺丝/螺栓",
+      "total_count": 104,
+      "sample_count": 11,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "直接/接头",
+      "total_count": 71,
+      "sample_count": 8,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "液压接头",
+      "total_count": 69,
+      "sample_count": 7,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "定制管路件",
+      "total_count": 62,
+      "sample_count": 7,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "阀门",
+      "total_count": 60,
+      "sample_count": 6,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "钻头",
+      "total_count": 54,
+      "sample_count": 6,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "低压电器",
+      "total_count": 48,
+      "sample_count": 5,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "油漆涂料",
+      "total_count": 40,
+      "sample_count": 4,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "生活后勤",
+      "total_count": 36,
+      "sample_count": 4,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "开关插座",
+      "total_count": 35,
+      "sample_count": 4,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "胶管总成",
+      "total_count": 34,
+      "sample_count": 4,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "弯头",
+      "total_count": 32,
+      "sample_count": 4,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "电线电缆",
+      "total_count": 31,
+      "sample_count": 4,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "定制结构件",
+      "total_count": 30,
+      "sample_count": 3,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "清洁工具",
+      "total_count": 30,
+      "sample_count": 3,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "管卡/抱箍",
+      "total_count": 29,
+      "sample_count": 3,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "接线端子/线鼻子",
+      "total_count": 28,
+      "sample_count": 3,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "门窗五金",
+      "total_count": 28,
+      "sample_count": 3,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "型钢",
+      "total_count": 27,
+      "sample_count": 3,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "测量工具",
+      "total_count": 27,
+      "sample_count": 3,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "管材",
+      "total_count": 27,
+      "sample_count": 3,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "胶粘密封",
+      "total_count": 27,
+      "sample_count": 3,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "三通",
+      "total_count": 25,
+      "sample_count": 3,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "扳手",
+      "total_count": 25,
+      "sample_count": 3,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "电工辅材",
+      "total_count": 24,
+      "sample_count": 3,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "卸扣/卡环",
+      "total_count": 23,
+      "sample_count": 3,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "膨胀锚栓",
+      "total_count": 22,
+      "sample_count": 3,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "刷涂耗材",
+      "total_count": 20,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "气动接头",
+      "total_count": 20,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "润滑防锈",
+      "total_count": 20,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "消防管件",
+      "total_count": 19,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "水龙头/洁具配件",
+      "total_count": 18,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "覆盖材料",
+      "total_count": 18,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "钳类",
+      "total_count": 18,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "垫圈/垫片",
+      "total_count": 17,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "定制板牌件",
+      "total_count": 17,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "手套",
+      "total_count": 17,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "检测仪器（候选新增）",
+      "total_count": 17,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "泵类设备",
+      "total_count": 17,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "照明光源",
+      "total_count": 17,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "砖板模板",
+      "total_count": 17,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "传动件",
+      "total_count": 16,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "润滑配件",
+      "total_count": 16,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "装饰装修材料",
+      "total_count": 16,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "套筒",
+      "total_count": 15,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "螺母",
+      "total_count": 15,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "钢管",
+      "total_count": 15,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "锤铲撬工具",
+      "total_count": 15,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "容器周转箱",
+      "total_count": 14,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "气体减压附件",
+      "total_count": 14,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "焊割工具",
+      "total_count": 14,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "钢丝绳",
+      "total_count": 14,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "水泥砂石",
+      "total_count": 13,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "泵类配件",
+      "total_count": 13,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "焊材",
+      "total_count": 13,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "眼面防护",
+      "total_count": 13,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "安全警示",
+      "total_count": 12,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "清洁用品",
+      "total_count": 12,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "设备定制配件",
+      "total_count": 12,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "高压油管/胶管",
+      "total_count": 12,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "包装袋/吨袋",
+      "total_count": 11,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "安全带/安全绳",
+      "total_count": 11,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "密封过滤件",
+      "total_count": 11,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "手推搬运设备",
+      "total_count": 11,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "清洗脱漆剂",
+      "total_count": 11,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "电气箱柜",
+      "total_count": 11,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "防水保温材料",
+      "total_count": 11,
+      "sample_count": 2,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "刀具/刃具",
+      "total_count": 10,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "吊带/吊装带",
+      "total_count": 10,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "电动工具",
+      "total_count": 10,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "胶带标签",
+      "total_count": 10,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "螺丝刀/批类",
+      "total_count": 10,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "螺杆/丝杆",
+      "total_count": 10,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "钢筋/线材",
+      "total_count": 10,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "扣件/连接件",
+      "total_count": 9,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "焊机配件",
+      "total_count": 9,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "电缆附件",
+      "total_count": 9,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "登高工具（候选新增）",
+      "total_count": 9,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "办公文具",
+      "total_count": 8,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "吊钩/吊具",
+      "total_count": 8,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "切磨耗材",
+      "total_count": 7,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "小型施工设备",
+      "total_count": 7,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "工具附件",
+      "total_count": 7,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "急救用品",
+      "total_count": 7,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "网络通信",
+      "total_count": 7,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "葫芦/起重工具",
+      "total_count": 7,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "安全网/防护网",
+      "total_count": 6,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "油管护套/液压防护件（候选）",
+      "total_count": 6,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "液压气动阀",
+      "total_count": 6,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "牵引捆绑绳链（候选）",
+      "total_count": 6,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "监控安防",
+      "total_count": 6,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "胶枪/施胶工具（候选新增）",
+      "total_count": 6,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "足部防护",
+      "total_count": 6,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "呼吸防护",
+      "total_count": 5,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "定制橡胶件（候选）",
+      "total_count": 5,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "密封垫片",
+      "total_count": 5,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "法兰",
+      "total_count": 5,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "泵油润滑设备",
+      "total_count": 5,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "消防器材",
+      "total_count": 5,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "砂纸/磨料",
+      "total_count": 5,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "花篮螺丝/紧线器（候选）",
+      "total_count": 5,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "钉类",
+      "total_count": 5,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "钢板/板材",
+      "total_count": 5,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "销/卡簧",
+      "total_count": 5,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "刀具耗材（候选新增）",
+      "total_count": 4,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "工具附件（候选新增）",
+      "total_count": 4,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "电源/电池",
+      "total_count": 4,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "管道辅材",
+      "total_count": 4,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "雨具",
+      "total_count": 4,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "刷具附件（候选新增）",
+      "total_count": 3,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "办公设备",
+      "total_count": 3,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "围挡护栏",
+      "total_count": 3,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "气动工具",
+      "total_count": 3,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "电机/驱动件（候选）",
+      "total_count": 3,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "身体防护",
+      "total_count": 3,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "通风设备",
+      "total_count": 3,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "化工原料",
+      "total_count": 2,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "吊装袋/吊包",
+      "total_count": 2,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "安全帽/头部防护",
+      "total_count": 2,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "对讲通信",
+      "total_count": 2,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "建筑附属件（候选新增）",
+      "total_count": 2,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "气管",
+      "total_count": 2,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "脚手架配件",
+      "total_count": 2,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "软连接",
+      "total_count": 2,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "井盖/道路附属件",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "仓储用品",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "土工材料",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "地面防护",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "开孔器",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "搅拌机配件（候选）",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "支垫件/垫块（候选）",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "检测仪器配件（候选新增）",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "检测耗材",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "橡胶材料",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "水处理剂",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "水箱容器（候选）",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "液压工具",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "焊接设备/焊机（候选）",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "设备垫块/缓冲件（候选）",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "试验器具（候选新增）",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "过滤器/水处理附件",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "门窗构件（候选新增）",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "防潮材料",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    },
+    {
+      "material_family": "风机设备（候选）",
+      "total_count": 1,
+      "sample_count": 1,
+      "sample_rate": 0.1
+    }
+  ]
+}

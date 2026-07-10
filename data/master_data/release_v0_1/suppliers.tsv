@@ -1,0 +1,10 @@
+supplier_code	supplier_name	supplier_group	supplier_type	primary_category	default_currency	default_payment_term	status	note
+SUP-CAT-LABOR	候选劳保防护供应商	候选品类供应商	Company	劳保防护	CNY	PT-INVOICE30	candidate	按品类推测；用于初始化劳保防护类采购策略，不代表真实供应商。
+SUP-CAT-PIPE	候选管材管件阀门供应商	候选品类供应商	Company	管材管件阀门	CNY	PT-INVOICE30	candidate	按品类推测；用于初始化管材、管件、阀门类采购策略，不代表真实供应商。
+SUP-CAT-BUILD	候选建筑材料供应商	候选品类供应商	Company	建筑材料	CNY	PT-INVOICE30	candidate	按品类推测；用于初始化水泥砂石、井盖等建材采购策略，不代表真实供应商。
+SUP-CAT-ELEC	候选电气电料供应商	候选品类供应商	Company	电气电料	CNY	PT-INVOICE30	candidate	按品类推测；用于初始化低压电器、电缆附件、照明等采购策略，不代表真实供应商。
+SUP-CAT-FASTENER	候选紧固件连接件供应商	候选品类供应商	Company	紧固件与连接件	CNY	PT-COD	candidate	按品类推测；用于初始化螺丝、螺栓、垫片等小五金采购策略，不代表真实供应商。
+SUP-CAT-TOOLS	候选工具量具耗材供应商	候选品类供应商	Company	工具量具/工具耗材	CNY	PT-COD	candidate	按品类推测；用于初始化工具量具、切磨耗材等采购策略，不代表真实供应商。
+SUP-CAT-LIFTING	候选吊装索具供应商	候选品类供应商	Company	吊装索具	CNY	PT-INVOICE30	candidate	按品类推测；用于初始化卸扣、吊带、钢丝绳等采购策略，不代表真实供应商。
+SUP-CAT-METAL	候选金属材料供应商	候选品类供应商	Company	金属材料	CNY	PT-INVOICE30	candidate	按品类推测；用于初始化型钢、钢材等采购策略，不代表真实供应商。
+SUP-CAT-SAFETY	候选安全消防供应商	候选品类供应商	Company	安全消防	CNY	PT-INVOICE30	candidate	按品类推测；用于初始化围挡、安全网、警示材料等采购策略，不代表真实供应商。

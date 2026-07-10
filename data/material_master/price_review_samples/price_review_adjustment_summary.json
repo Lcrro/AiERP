@@ -1,0 +1,11 @@
+{
+  "sample": "data\\material_master\\price_review_samples\\price_review_sample_10pct_by_family.tsv",
+  "review_dir": "data\\material_master\\price_review_samples\\review_outputs",
+  "row_output": "data\\material_master\\price_review_samples\\price_review_comparison_rows.tsv",
+  "family_output": "data\\material_master\\price_review_samples\\price_review_family_adjustment_factors.tsv",
+  "generated_at": "2026-07-08",
+  "reviewed_count": 273,
+  "family_count": 144,
+  "overall_median_ratio": "1.5000",
+  "overall_mean_ratio": "2.1784"
+}

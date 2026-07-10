@@ -1,0 +1,8 @@
+user_email	full_name	employee_code	role_code	enabled	send_welcome_email	language	timezone	status	note
+zhang.zhenguang@stec-up.local	张振光	EMP-ZHANGZHENGUANG	ROLE-GM	1	0	zh	Asia/Shanghai	active	按现有名单推测；测试账号，不写密码。
+pan.feng@stec-up.local	潘丰	EMP-PANFENG	ROLE-MAT-EQP-MGR	1	0	zh	Asia/Shanghai	active	按现有名单推测；测试账号，不写密码。
+lin.qiaohang@stec-up.local	林乔航	EMP-LINQIAOHANG	ROLE-TECH-LEAD	1	0	zh	Asia/Shanghai	active	按现有名单推测；测试账号，不写密码。
+mao.xiaoquan@stec-up.local	毛晓泉	EMP-MAOXIAOQUAN	ROLE-MATERIAL-CLERK	1	0	zh	Asia/Shanghai	active	按现有名单推测；测试账号，不写密码。
+liang.zhihua@stec-up.local	梁志华	EMP-LIANGZHIHUA	ROLE-TECH-LEAD	1	0	zh	Asia/Shanghai	active	按现有名单推测；测试账号，不写密码。
+xu.puqi@stec-up.local	徐溥祺	EMP-XUPUQI	ROLE-OPS-MGR	1	0	zh	Asia/Shanghai	active	按现有名单推测；测试账号，不写密码。
+xu.feng@stec-up.local	许峰	EMP-XUFENG	ROLE-SYSADMIN	1	0	zh	Asia/Shanghai	candidate	按现有名单推测；系统管理员候选账号，不写密码。

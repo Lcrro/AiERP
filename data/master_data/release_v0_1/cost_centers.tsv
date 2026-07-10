@@ -1,0 +1,17 @@
+cost_center_code	cost_center_name	company_code	parent_cost_center_code	is_group	project_code	status	note
+CC-STEC	盛拓工程有限公司	STEC		1		active	成本中心根。
+CC-HQ	公司本部	STEC	CC-STEC	1		active	总部费用归集。
+CC-FIN	财务部	STEC	CC-HQ	0		active	财务部费用。
+CC-BUY	采购部	STEC	CC-HQ	0		active	采购部费用。
+CC-WH	仓储部	STEC	CC-HQ	0		active	仓储部费用。
+CC-UP	UP事业部	STEC	CC-STEC	1		active	按现有信息推测：UP事业部项目、基地和材料设备管理费用汇总口径。
+CC-UP-MATERIAL	UP事业部材料设备组	STEC	CC-UP	0		active	按现有信息推测：材料设备主管、材料员、基地材料设备管理费用口径。
+CC-PROJ	项目成本	STEC	CC-UP	1		active	按现有信息推测：UP事业部项目成本根。
+CC-NJ-P1	南京一期	STEC	CC-PROJ	0	PRJ-NJ-P1	active	沉井式停车设施建设项目工程总承包（一期)。
+CC-NJ-NH	南京南湖	STEC	CC-PROJ	0	PRJ-NJ-NH	active	沉井式停车设施建设项目工程总承包（南湖中心广场点）。
+CC-TH-12	泰和1.2标	STEC	CC-PROJ	0	PRJ-TH-12	active	泰和污水处理厂扩建工程 THK1.2 标。
+CC-LH-12	龙华1.2标	STEC	CC-PROJ	0	PRJ-LH-12	active	龙华污水处理厂初期雨水调蓄工程 LH1.2 标。
+CC-YB-11	迎宾1.1标	STEC	CC-PROJ	0	PRJ-YB-11	active	迎宾水厂进厂原水管工程 YB1.1 标。
+CC-ZB-12	竹白1.2标	STEC	CC-PROJ	0	PRJ-ZB-12	active	竹园白龙港污水连通管工程 ZB1.2。
+CC-HL-13	合流1.3标	STEC	CC-PROJ	0	PRJ-HL-13	active	合流污水一期复线工程 FXQ1.3 标 4-15 井。
+CC-WCL-BASE	蕰川路基地	STEC	CC-UP	0	PRJ-WCL-BASE	active	蕰川路 UP 事业部材料设备基地；按现有信息推测：基地运营成本中心。

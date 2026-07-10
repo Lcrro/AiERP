@@ -1,0 +1,10 @@
+contact_code	supplier_code	contact_name	role	phone	email	is_primary	status	note
+CONT-CAT-LABOR-001	SUP-CAT-LABOR	待定联系人	品类联系人			1	candidate	按品类推测；真实供应商确认后替换联系人。
+CONT-CAT-PIPE-001	SUP-CAT-PIPE	待定联系人	品类联系人			1	candidate	按品类推测；真实供应商确认后替换联系人。
+CONT-CAT-BUILD-001	SUP-CAT-BUILD	待定联系人	品类联系人			1	candidate	按品类推测；真实供应商确认后替换联系人。
+CONT-CAT-ELEC-001	SUP-CAT-ELEC	待定联系人	品类联系人			1	candidate	按品类推测；真实供应商确认后替换联系人。
+CONT-CAT-FASTENER-001	SUP-CAT-FASTENER	待定联系人	品类联系人			1	candidate	按品类推测；真实供应商确认后替换联系人。
+CONT-CAT-TOOLS-001	SUP-CAT-TOOLS	待定联系人	品类联系人			1	candidate	按品类推测；真实供应商确认后替换联系人。
+CONT-CAT-LIFTING-001	SUP-CAT-LIFTING	待定联系人	品类联系人			1	candidate	按品类推测；真实供应商确认后替换联系人。
+CONT-CAT-METAL-001	SUP-CAT-METAL	待定联系人	品类联系人			1	candidate	按品类推测；真实供应商确认后替换联系人。
+CONT-CAT-SAFETY-001	SUP-CAT-SAFETY	待定联系人	品类联系人			1	candidate	按品类推测；真实供应商确认后替换联系人。

@@ -1,0 +1,17 @@
+import_order	table_file	domain	erpnext_doctype	primary_key	purpose	depends_on	import_policy
+10	companies.tsv	组织	Company	company_code	公司主体		create_or_update
+20	departments.tsv	组织	Department	department_code	部门和组织结构	companies.tsv	create_or_update
+30	role_profiles.tsv	权限	Role / Role Profile	role_code	岗位画像和 ERPNext 角色映射		create_or_update
+40	cost_centers.tsv	财务	Cost Center	cost_center_code	成本中心	companies.tsv	create_or_update
+50	warehouses.tsv	库存	Warehouse	warehouse_code	仓库主数据	companies.tsv	create_or_update
+60	projects.tsv	项目	Project	project_code	项目主数据	companies.tsv;cost_centers.tsv;warehouses.tsv	create_or_update
+70	employees.tsv	人员	Employee	employee_code	员工主数据	departments.tsv;role_profiles.tsv;projects.tsv;warehouses.tsv	create_or_update
+80	employee_assignments.tsv	人员	Employee Assignment	assignment_code	员工多组织/多项目任职关系	employees.tsv;role_profiles.tsv;projects.tsv;departments.tsv	create_or_update
+90	user_accounts.tsv	权限	User	user_email	测试登录账号	employees.tsv;role_profiles.tsv	create_or_update
+100	project_teams.tsv	项目	Project User / Assignment	project_code+employee_code	项目团队和班组	projects.tsv;employees.tsv	create_or_update
+110	payment_terms.tsv	财务	Payment Terms Template	payment_term_code	付款条件		create_or_update
+120	price_lists.tsv	采购	Price List	price_list_code	采购价目表		create_or_update
+130	suppliers.tsv	采购	Supplier	supplier_code	供应商主数据	payment_terms.tsv	create_or_update
+140	supplier_contacts.tsv	采购	Contact	contact_code	供应商联系人	suppliers.tsv	create_or_update
+150	supplier_item_policies.tsv	采购	Item Price / Supplier Item	supplier_code+item_code	供应商供货策略	suppliers.tsv;price_lists.tsv;material_master_release_v0_3.tsv	create_or_update
+160	stock_opening_balances.tsv	库存	Stock Entry	opening_id	期初库存	warehouses.tsv;material_master_release_v0_3.tsv	create_once

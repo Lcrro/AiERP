@@ -21,6 +21,8 @@ scenarios     业务沙盘、角色、流程样例
 - [架构路线图](architecture/roadmap.md)：分阶段架构目标。
 - [Tool Layer v0.1 清单](planning/tool-layer-v0.1.md)：后端工具层工作队列。
 - [物料主数据与检索 v0.1 计划](planning/item-master-search-v0.1.md)：物料表和检索工作队列。
+- [土木进销存 Agent v1.0](planning/civil-agent-v1.0.md)：当前产品主线、交付阶段和验收口径。
+- [基础主数据标准](reference/master-data-standard.md)：公司、组织、员工、项目、仓库、供应商等非物料主数据口径。
 
 ## 架构
 
@@ -37,6 +39,7 @@ scenarios     业务沙盘、角色、流程样例
 - [ERPNext Tool Layer v0.1](planning/tool-layer-v0.1.md)
 - [ERPNext Tool Layer v0.2 模块覆盖](planning/tool-layer-v0.2-module-coverage.md)
 - [物料主数据与检索 v0.1](planning/item-master-search-v0.1.md)
+- [土木进销存 Agent v1.0](planning/civil-agent-v1.0.md)
 
 计划文档是按版本组织的工作队列，应该包含开发清单、验收标准和下一步任务。
 
@@ -66,6 +69,7 @@ scenarios     业务沙盘、角色、流程样例
 
 - [ERPNext 能力地图](reference/erpnext-capability-map.md)
 - [物料主数据标准](reference/material-master-standard.md)
+- [基础主数据标准](reference/master-data-standard.md)
 - [ERPNext 物料检索工具](reference/item-search-tool.md)
 - [采购清单物料标准化归档](reference/purchase-material-standardization.md)
 - [采购清单整理后的标准物料目录](reference/standard-item-catalog-from-review.md)
