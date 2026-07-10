@@ -20,7 +20,7 @@ data/master_data/release_v0_1/
 - 当前目录只保存可审查、可复用的主数据表，不直接写 ERPNext。
 - 表里的 `*_code` 是我们自己的稳定编码，不依赖 ERPNext 自动编号。
 - 导入 ERPNext 时再把这些编码映射到 `Company`、`Department`、`Employee`、`User`、`Project`、`Warehouse`、`Supplier` 等 DocType。
-- 物料只引用 `data/material_master/release_v0_3/material_master_release_v0_3.tsv` 的 `item_code`，不在这里重复维护物料本体。
+- 物料只引用 `data/material_master/release_v1_0/material_master_release_v1_0.tsv` 的 `item_code`，不在这里重复维护物料本体。
 - 期初库存、供应商价格、项目团队都视为可重建的初始化数据，不混入物料主表。
 - 供应商当前采用“候选品类供应商”口径，只用于让采购策略和测试流程可运行，不代表真实合作供应商。
 - 库存当前采用“零库存初始化”口径，`stock_opening_balances.tsv` 中 `qty=0` 且 `valuation_rate=0`；参考价格放在 `supplier_item_policies.tsv`，不形成期初库存金额。
@@ -53,6 +53,14 @@ data/master_data/release_v0_1/
 2. 做校验脚本，检查主键唯一、外键存在、物料编码存在。
 3. 生成 ERPNext 导入包。
 4. 新建干净测试账套后按 `manifest.tsv` 顺序导入。
+
+派生表使用以下命令统一生成：
+
+```powershell
+python scripts\master_data\build_material_master_release_v1.py
+python scripts\master_data\finalize_master_data_release.py
+python scripts\master_data\validate_master_data_release.py
+```
 
 ## 校验
 

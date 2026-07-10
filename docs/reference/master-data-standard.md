@@ -1,6 +1,6 @@
 # 基础主数据标准 v0.1
 
-本文定义除物料以外的企业基础主数据治理口径。物料主数据仍以 `data/material_master/release_v0_3/material_master_release_v0_3.tsv` 为当前入口。
+本文定义除物料以外的企业基础主数据治理口径。物料主数据以 `data/material_master/release_v1_0/material_master_release_v1_0.tsv` 为唯一发布入口。
 
 ## 目标
 
@@ -80,7 +80,7 @@ supplier_code
 供应商价格和期初库存只引用物料发布表里的 `item_code`：
 
 ```text
-data/material_master/release_v0_3/material_master_release_v0_3.tsv
+data/material_master/release_v1_0/material_master_release_v1_0.tsv
 ```
 
 不在基础主数据表里重复维护 `sku_name`、规格、物料族等物料本体信息。

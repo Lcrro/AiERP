@@ -1,0 +1,10 @@
+{
+  "row_count": 1979,
+  "unique_item_codes": 1979,
+  "merged_source_rows": 1984,
+  "fixed_length_unit_overrides": 1,
+  "release": "material_master_release_v1_0",
+  "source": "data\\material_master\\price_ready_release_v0_1\\material_master_price_ready_release_v0_1_family_adjusted.tsv",
+  "output": "data\\material_master\\release_v1_0\\material_master_release_v1_0.tsv",
+  "authoritative": true
+}

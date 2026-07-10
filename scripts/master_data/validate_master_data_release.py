@@ -13,8 +13,8 @@ DEFAULT_MATERIAL_PATH = (
     REPO_ROOT
     / "data"
     / "material_master"
-    / "release_v0_3"
-    / "material_master_release_v0_3.tsv"
+    / "release_v1_0"
+    / "material_master_release_v1_0.tsv"
 )
 
 ALLOWED_STATUS = {"active", "candidate", "disabled"}

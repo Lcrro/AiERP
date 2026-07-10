@@ -13,5 +13,5 @@ import_order	table_file	domain	erpnext_doctype	primary_key	purpose	depends_on	im
 120	price_lists.tsv	采购	Price List	price_list_code	采购价目表		create_or_update
 130	suppliers.tsv	采购	Supplier	supplier_code	供应商主数据	payment_terms.tsv	create_or_update
 140	supplier_contacts.tsv	采购	Contact	contact_code	供应商联系人	suppliers.tsv	create_or_update
-150	supplier_item_policies.tsv	采购	Item Price / Supplier Item	supplier_code+item_code	供应商供货策略	suppliers.tsv;price_lists.tsv;material_master_release_v0_3.tsv	create_or_update
-160	stock_opening_balances.tsv	库存	Stock Entry	opening_id	期初库存	warehouses.tsv;material_master_release_v0_3.tsv	create_once
+150	supplier_item_policies.tsv	采购	Item Price / Supplier Item	supplier_code+item_code	供应商供货策略	suppliers.tsv;price_lists.tsv;material_master_release_v1_0.tsv	create_or_update
+160	stock_opening_balances.tsv	库存	Stock Entry	opening_id	期初库存	warehouses.tsv;material_master_release_v1_0.tsv	create_once

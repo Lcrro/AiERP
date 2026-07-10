@@ -11,8 +11,8 @@ DEFAULT_RELEASE_CATALOG_PATH = (
     Path(__file__).resolve().parents[3]
     / "data"
     / "material_master"
-    / "release_v0_3"
-    / "material_master_release_v0_3.tsv"
+    / "release_v1_0"
+    / "material_master_release_v1_0.tsv"
 )
 
 

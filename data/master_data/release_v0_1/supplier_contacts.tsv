@@ -1,4 +1,5 @@
 contact_code	supplier_code	contact_name	role	phone	email	is_primary	status	note
+CONT-TEST-ALL-001	SUP-TEST-ALL	测试联系人	测试供应商联系人			1	active	仅用于测试账套，不对应真实联系人。
 CONT-CAT-LABOR-001	SUP-CAT-LABOR	待定联系人	品类联系人			1	candidate	按品类推测；真实供应商确认后替换联系人。
 CONT-CAT-PIPE-001	SUP-CAT-PIPE	待定联系人	品类联系人			1	candidate	按品类推测；真实供应商确认后替换联系人。
 CONT-CAT-BUILD-001	SUP-CAT-BUILD	待定联系人	品类联系人			1	candidate	按品类推测；真实供应商确认后替换联系人。
