@@ -1,6 +1,6 @@
 role_code	role_name	role_type	erpnext_roles	default_agent_profile	can_login	status	note
-ROLE-GM	总经理	管理层	Accounts Manager;Purchase Manager;Stock Manager;Projects Manager	manager_agent	1	active	按现有名单推测；看经营异常、项目进展、采购和库存摘要，不默认授予 System Manager。
-ROLE-MAT-EQP-MGR	材料设备主管	材料设备	Purchase Manager;Purchase User;Stock Manager;Stock User;Projects User	material_equipment_agent	1	active	按现有名单推测；负责材料设备、仓库、采购协调和项目物资统筹。
+ROLE-GM	总经理	管理层	Accounts Manager;Purchase Manager;Stock Manager;Projects Manager;Projects User	manager_agent	1	active	按现有名单推测；看经营异常、项目进展、采购和库存摘要，不默认授予 System Manager。
+ROLE-MAT-EQP-MGR	材料设备主管	材料设备	Purchase Manager;Purchase User;Purchase Master Manager;Stock Manager;Stock User;Item Manager;Projects User	material_equipment_agent	1	active	按现有名单推测；负责材料设备、仓库、物料和采购价格主数据、采购协调及项目物资统筹。
 ROLE-OPS-MGR	经营主管	经营	Accounts User;Purchase User;Projects User	operations_agent	1	active	按现有名单推测；负责经营数据、项目经营信息和基础采购成本查看。
 ROLE-PROJ-MGR	项目经理	项目	Projects Manager;Projects User;Stock User	project_agent	1	active	按现有名单推测；负责项目材料需求、项目仓和项目成本查看。
 ROLE-TECH-LEAD	技术负责人	技术	Projects User;Stock User	technical_agent	1	active	按现有名单推测；负责技术口径、规格确认、现场材料技术判断。

@@ -226,6 +226,24 @@ class BuyingFakeClient:
         if doctype == "Item Supplier":
             return ToolResult(ok=True, data=[{"name": "ISUP-1", "parent": "ITEM-001", "supplier": "SUP-BLOCKED"}])
         if doctype == "Item Price":
+            supplier = kwargs.get("filters", {}).get("supplier")
+            if supplier == "SUP-001":
+                return ToolResult(
+                    ok=True,
+                    data=[
+                        {
+                            "name": "IP-BUY-1",
+                            "item_code": "ITEM-001",
+                            "supplier": supplier,
+                            "price_list": "Standard Buying",
+                            "price_list_rate": 8.5,
+                            "currency": "USD",
+                            "uom": "Nos",
+                            "valid_from": "2026-01-01",
+                            "valid_upto": "2027-12-31",
+                        }
+                    ],
+                )
             return ToolResult(ok=True, data=[{"name": "IP-1", "item_code": "ITEM-001", "supplier": "SUP-BLOCKED", "price_list_rate": 9.5, "currency": "USD"}])
         return ToolResult(ok=True, data=[])
 
@@ -395,6 +413,28 @@ def test_purchase_order_from_material_request_preserves_source_references() -> N
             },
         ),
     ]
+
+
+def test_purchase_order_from_material_request_resolves_missing_supplier_price() -> None:
+    client = BuyingFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    result = adapter.execute(
+        {
+            "tool": "erpnext.buying.create_purchase_order_from_material_request_draft",
+            "arguments": {
+                "material_request": "MR-001",
+                "supplier": "SUP-001",
+                "transaction_date": "2026-06-11",
+            },
+        }
+    )
+
+    assert result.ok
+    create_call = next(call for call in client.calls if call[0:2] == ("create_document", "Purchase Order"))
+    assert create_call[2]["buying_price_list"] == "Standard Buying"
+    assert create_call[2]["items"][0]["rate"] == 8.5
+    assert create_call[2]["items"][0]["price_list_rate"] == 8.5
 
 
 def test_purchase_order_from_material_request_requires_submitted_purchase_request() -> None:

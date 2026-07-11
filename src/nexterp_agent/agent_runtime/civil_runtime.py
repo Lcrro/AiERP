@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, replace
-from datetime import date
+from datetime import date, datetime
+import re
 from typing import Any, Callable
 
 from nexterp_agent.erpnext.adapter import ERPNextAdapter
@@ -9,7 +10,7 @@ from nexterp_agent.erpnext.client import ERPNextClient
 from nexterp_agent.item_master.release_resolver import ReleaseMaterialResolver
 from nexterp_agent.master_data import MasterDataRelease
 
-from .deepseek_material_request import extract_material_request_intent_with_deepseek
+from .deepseek_civil_intent import extract_civil_intent_with_deepseek
 from .material_request_orchestrator import compose_material_request_tool_call
 from .resolvers import EntityResolverRegistry, ResolutionResult
 from .session import RuntimeSessionState, RuntimeSessionStore
@@ -29,6 +30,8 @@ class RuntimeTurnResult:
     resolutions: dict[str, Any]
     tool_call: dict[str, Any] | None = None
     tool_result: dict[str, Any] | None = None
+    tool_calls: tuple[dict[str, Any], ...] = ()
+    tool_results: tuple[dict[str, Any], ...] = ()
     questions: tuple[str, ...] = ()
     candidates: tuple[dict[str, Any], ...] = ()
 
@@ -41,7 +44,7 @@ class CivilAgentRuntime:
         self,
         *,
         release: MasterDataRelease | None = None,
-        intent_extractor: IntentExtractor = extract_material_request_intent_with_deepseek,
+        intent_extractor: IntentExtractor = extract_civil_intent_with_deepseek,
         client_factory: ClientFactory | None = None,
         session_store: RuntimeSessionStore | None = None,
     ) -> None:
@@ -60,11 +63,17 @@ class CivilAgentRuntime:
         extraction_context = {"current_date": today.isoformat(), "employee": employee["employee_name"]}
         intent = self.intent_extractor(user_text, context=extraction_context)
         if intent.get("intent") != "create_material_request":
-            result = RuntimeTurnResult("unsupported_intent", "目前这条 CLI 主线先支持材料申请。", intent, {})
-            self._save_turn(session, user_text, result)
-            return result
+            return self._run_workflow_intent(
+                user_text,
+                intent=intent,
+                employee=employee,
+                profile=profile,
+                session=session,
+                execute=execute,
+                today=today,
+            )
 
-        project_query = intent.get("project_text") or session.selected_project_code or employee.get("default_project_code")
+        project_query = intent.get("project_text") or self._session_project_query(session, employee)
         warehouse_query = intent.get("warehouse_text") or session.selected_warehouse_name or employee.get("default_warehouse_code")
         # Relative language is always resolved deterministically by Runtime;
         # model-produced ISO dates must not override words such as "明天".
@@ -128,7 +137,7 @@ class CivilAgentRuntime:
 
         tool_call = composition["tool_call"]
         session.company = company.value
-        session.selected_project_code = project.value
+        session.selected_project_code = self._stable_project_code(project)
         session.selected_warehouse_name = warehouse.value
         if not execute:
             result = RuntimeTurnResult(
@@ -166,6 +175,396 @@ class CivilAgentRuntime:
         self._save_turn(session, user_text, result)
         return result
 
+    def _run_workflow_intent(
+        self,
+        user_text: str,
+        *,
+        intent: dict[str, Any],
+        employee: dict[str, str],
+        profile: str,
+        session: RuntimeSessionState,
+        execute: bool,
+        today: date,
+    ) -> RuntimeTurnResult:
+        intent_name = intent.get("intent")
+        if intent_name in {None, "unknown"}:
+            result = RuntimeTurnResult("unsupported_intent", "我还不能确定你要执行哪项 ERPNext 业务。", intent, {})
+            self._save_turn(session, user_text, result)
+            return result
+
+        company = self.entity_resolvers.resolve_company()
+        project_query = intent.get("project_text") or self._session_project_query(session, employee)
+        warehouse_query = intent.get("warehouse_text") or session.selected_warehouse_name or employee.get("default_warehouse_code")
+        project = self.entity_resolvers.resolve_project(project_query) if project_query else None
+        if project:
+            project = self._resolve_live_project_name(session.user, project)
+        warehouse = self.entity_resolvers.resolve_warehouse(warehouse_query) if warehouse_query else None
+        supplier = self.entity_resolvers.resolve_supplier(intent.get("supplier_text")) if intent.get("supplier_text") else None
+        assigned_to = self.entity_resolvers.resolve_employee(intent.get("assigned_to_text")) if intent.get("assigned_to_text") else None
+        resolutions: dict[str, Any] = {"company": company.to_dict()}
+        if project:
+            resolutions["project"] = project.to_dict()
+        if warehouse:
+            resolutions["warehouse"] = warehouse.to_dict()
+        if supplier:
+            resolutions["supplier"] = supplier.to_dict()
+        if assigned_to:
+            resolutions["assigned_to"] = assigned_to.to_dict()
+
+        questions: list[str] = []
+        tool_calls: list[dict[str, Any]] = []
+        confirmation = self._confirmation(user=session.user, reason=intent.get("description") or user_text)
+        document_name = str(intent.get("document_name") or "").strip() or _extract_document_reference(user_text)
+
+        def document(doctype: str) -> str | None:
+            return document_name or self._latest_document(session, doctype)
+
+        def date_value(text: Any, default: str | None = None) -> str | None:
+            if not text:
+                return default
+            resolved = self.entity_resolvers.resolve_date(str(text), current_date=today)
+            return str(resolved.value) if resolved.status == "resolved" and resolved.value else default
+
+        if intent_name == "submit_document":
+            doctype = (
+                _normalize_document_type(intent.get("document_type"))
+                or _infer_document_type(user_text)
+                or self._latest_document_type(session)
+            )
+            name = document(doctype) if doctype else None
+            if not doctype or not name:
+                questions.append("请说明要提交的单据类型和单号。")
+            else:
+                tool = _submit_tool_for_doctype(doctype)
+                if not tool:
+                    questions.append(f"暂不支持提交 {doctype}。")
+                else:
+                    tool_calls.append({"tool": tool, "arguments": {"doctype": doctype, "name": name, "confirmation": confirmation}})
+
+        elif intent_name == "create_purchase_order":
+            material_request = document("Material Request")
+            if not material_request:
+                questions.append("请说明要转采购订单的材料申请单号。")
+            if not supplier or supplier.status != "resolved":
+                questions.append(supplier.question if supplier and supplier.question else "请选择供应商。")
+            if material_request and supplier and supplier.status == "resolved":
+                tool_calls.append(
+                    {
+                        "tool": "erpnext.buying.create_purchase_order_from_material_request_draft",
+                        "arguments": {
+                            "material_request": material_request,
+                            "supplier": supplier.value,
+                            "transaction_date": today.isoformat(),
+                            "company": company.value,
+                        },
+                    }
+                )
+
+        elif intent_name == "create_purchase_receipt":
+            purchase_order = document("Purchase Order")
+            if not purchase_order:
+                questions.append("请说明对应的采购订单号。")
+            else:
+                tool_calls.append(
+                    {
+                        "tool": "erpnext.buying.create_purchase_receipt_from_purchase_order_draft",
+                        "arguments": {"purchase_order": purchase_order, "posting_date": today.isoformat(), "company": company.value},
+                    }
+                )
+
+        elif intent_name == "record_receipt_discrepancy":
+            purchase_receipt = document("Purchase Receipt")
+            if not purchase_receipt:
+                questions.append("请说明发生差异的采购收货单号。")
+            if not intent.get("description"):
+                questions.append("请说明到货与采购要求有什么差异。")
+            if purchase_receipt and intent.get("description"):
+                tool_calls.append(
+                    {
+                        "tool": "erpnext.buying.record_purchase_receipt_discrepancy",
+                        "arguments": {
+                            "purchase_receipt": purchase_receipt,
+                            "description": intent["description"],
+                            "discrepancy_type": intent.get("discrepancy_type") or "其他",
+                            "reported_by": session.user,
+                            "assigned_to": assigned_to.value if assigned_to and assigned_to.status == "resolved" else session.user,
+                            "create_todo": True,
+                            "prepare_return": bool(intent.get("full_return")),
+                            "full_return": bool(intent.get("full_return")),
+                        },
+                    }
+                )
+
+        elif intent_name == "create_purchase_return":
+            purchase_receipt = document("Purchase Receipt")
+            if not purchase_receipt:
+                questions.append("请说明要退货的采购收货单号。")
+            else:
+                tool_calls.append(
+                    {
+                        "tool": "erpnext.buying.create_purchase_receipt_return_draft",
+                        "arguments": {
+                            "purchase_receipt": purchase_receipt,
+                            "posting_date": today.isoformat(),
+                            "full_return": bool(intent.get("full_return", True)),
+                            "reason": intent.get("description") or "用户要求采购退货",
+                        },
+                    }
+                )
+
+        elif intent_name == "create_purchase_invoice":
+            purchase_receipt = document("Purchase Receipt")
+            if not purchase_receipt:
+                questions.append("请说明对应的采购收货单号。")
+            else:
+                tool_calls.append(
+                    {
+                        "tool": "erpnext.accounting.create_purchase_invoice_from_purchase_receipt_draft",
+                        "arguments": {
+                            "purchase_receipt": purchase_receipt,
+                            "posting_date": today.isoformat(),
+                            "bill_date": today.isoformat(),
+                            "company": company.value,
+                        },
+                    }
+                )
+
+        elif intent_name in {"create_material_issue", "query_stock"}:
+            item_result = self._resolve_workflow_items(
+                intent.get("items") or [],
+                require_qty=intent_name == "create_material_issue",
+            )
+            resolutions["materials"] = item_result
+            questions.extend(item_result["questions"])
+            if warehouse is None or warehouse.status != "resolved":
+                questions.append(warehouse.question if warehouse and warehouse.question else "请选择仓库。")
+            if intent_name == "query_stock" and not questions:
+                for item in item_result["items"]:
+                    tool_calls.append(
+                        {
+                            "tool": "erpnext.stock.get_balance",
+                            "arguments": {"item_code": item["item_code"], "warehouse": warehouse.value, "limit": 50},
+                        }
+                    )
+            if intent_name == "create_material_issue":
+                if project is None or project.status != "resolved":
+                    questions.append(project.question if project and project.question else "请选择项目。")
+                if not questions:
+                    tool_calls.append(
+                        {
+                            "tool": "erpnext.projects.create_material_issue_draft",
+                            "arguments": {
+                                "project": project.value,
+                                "source_warehouse": warehouse.value,
+                                "company": company.value,
+                                "posting_date": today.isoformat(),
+                                "require_available_stock": True,
+                                "remarks": intent.get("description") or "Agent 创建项目领料草稿",
+                                "items": item_result["items"],
+                            },
+                        }
+                    )
+
+        elif intent_name == "query_accounts_payable":
+            tool_calls.append(
+                {
+                    "tool": "erpnext.accounting.accounts_payable",
+                    "arguments": {
+                        "company": company.value,
+                        "from_date": date_value(intent.get("from_date_text")),
+                        "to_date": date_value(intent.get("to_date_text"), today.isoformat()),
+                    },
+                }
+            )
+
+        elif intent_name == "query_project_cost":
+            if project is None or project.status != "resolved":
+                questions.append(project.question if project and project.question else "请选择项目。")
+            else:
+                tool_calls.append(
+                    {
+                        "tool": "erpnext.projects.get_project_cost_context",
+                        "arguments": {
+                            "project": project.value,
+                            "company": company.value,
+                            "from_date": date_value(intent.get("from_date_text")),
+                            "to_date": date_value(intent.get("to_date_text"), today.isoformat()),
+                            "include_tasks": True,
+                            "include_stock_entries": True,
+                            "include_purchase_receipts": True,
+                            "limit": 100,
+                        },
+                    }
+                )
+
+        elif intent_name == "manager_summary":
+            tool_calls.extend(
+                [
+                    {"tool": "erpnext.buying.generate_purchase_suggestions", "arguments": {"limit": 100}},
+                    {
+                        "tool": "erpnext.search_documents",
+                        "arguments": {
+                            "doctype": "Purchase Order",
+                            "filters": {
+                                "company": company.value,
+                                "docstatus": 1,
+                                "schedule_date": ["<", today.isoformat()],
+                                "status": ["not in", ["Completed", "Closed", "Cancelled"]],
+                            },
+                            "fields": ["name", "supplier", "schedule_date", "status", "per_received", "grand_total"],
+                            "limit": 100,
+                            "order_by": "schedule_date asc",
+                        },
+                    },
+                    {
+                        "tool": "erpnext.accounting.accounts_payable",
+                        "arguments": {"company": company.value, "to_date": today.isoformat()},
+                    },
+                ]
+            )
+
+        else:
+            result = RuntimeTurnResult("unsupported_intent", f"暂不支持业务意图：{intent_name}", intent, resolutions)
+            self._save_turn(session, user_text, result)
+            return result
+
+        questions = list(dict.fromkeys(question for question in questions if question))
+        if questions:
+            result = RuntimeTurnResult(
+                "needs_clarification",
+                "还需要补充一些信息。",
+                intent,
+                resolutions,
+                questions=tuple(questions),
+            )
+            session.pending = result.to_dict()
+            self._save_turn(session, user_text, result)
+            return result
+
+        read_only = intent_name in {"query_stock", "query_accounts_payable", "query_project_cost", "manager_summary"}
+        if not execute and not read_only:
+            result = RuntimeTurnResult(
+                "needs_confirmation",
+                f"{len(tool_calls)} 个业务动作已经编排完成，确认后可以执行。",
+                intent,
+                resolutions,
+                tool_call=tool_calls[0] if tool_calls else None,
+                tool_calls=tuple(tool_calls),
+            )
+            session.pending = result.to_dict()
+            self._save_turn(session, user_text, result)
+            return result
+
+        results = self._execute_tool_calls(tool_calls, user=session.user, profile=profile, session=session)
+        ok = all(result.get("ok") for result in results)
+        message = self._workflow_message(intent_name, results, ok=ok)
+        result = RuntimeTurnResult(
+            "completed" if ok else "failed",
+            message,
+            intent,
+            resolutions,
+            tool_call=tool_calls[0] if tool_calls else None,
+            tool_result=results[0] if results else None,
+            tool_calls=tuple(tool_calls),
+            tool_results=tuple(results),
+        )
+        session.pending = None if ok else session.pending
+        self._save_turn(session, user_text, result)
+        return result
+
+    def _execute_tool_calls(
+        self,
+        tool_calls: list[dict[str, Any]],
+        *,
+        user: str,
+        profile: str,
+        session: RuntimeSessionState,
+    ) -> list[dict[str, Any]]:
+        if self.client_factory is None:
+            raise RuntimeError("ERPNext client factory is required for execution")
+        client = self.client_factory(user)
+        policy = make_tool_access_policy(
+            profile,
+            extra_allowed_tools={call["tool"] for call in tool_calls},
+            allow_runtime_internal=True,
+        )
+        gateway = ToolGateway(ERPNextAdapter(client), ToolSession(user=user, policy=policy, verify_erpnext_identity=True))
+        results: list[dict[str, Any]] = []
+        for tool_call in tool_calls:
+            execution = gateway.execute(tool_call, origin="runtime")
+            payload = execution.to_dict()
+            results.append(payload)
+            if execution.ok and isinstance(execution.data, dict):
+                doctype = execution.data.get("doctype")
+                name = _extract_document_name(execution.data)
+                if doctype and name:
+                    session.remember_document(doctype, name)
+            if not execution.ok:
+                break
+        return results
+
+    def _resolve_workflow_items(self, items: list[dict[str, Any]], *, require_qty: bool = True) -> dict[str, Any]:
+        resolved: list[dict[str, Any]] = []
+        questions: list[str] = []
+        candidates: list[dict[str, Any]] = []
+        for index, item in enumerate(items, start=1):
+            raw_text = str(item.get("raw_item_text") or "").strip()
+            qty = item.get("qty")
+            if not raw_text:
+                questions.append(f"第 {index} 行缺少物料名称。")
+                continue
+            if require_qty and (not isinstance(qty, (int, float)) or qty <= 0):
+                questions.append(f"请说明“{raw_text}”的领用或查询数量。")
+                continue
+            resolution = self.material_resolver.resolve(raw_text, specs=item.get("specs") or {}, limit=5)
+            if resolution["status"] != "ready":
+                questions.extend(resolution["questions"])
+                candidates.append({"raw_item_text": raw_text, "resolution": resolution})
+                continue
+            material = resolution["resolved"]
+            resolved.append(
+                {
+                    "item_code": material["item_code"],
+                    "qty": qty if isinstance(qty, (int, float)) and qty > 0 else 1,
+                    "uom": item.get("uom") or material.get("stock_uom"),
+                    "description": material.get("sku_name"),
+                }
+            )
+        return {"items": resolved, "questions": questions, "candidates": candidates}
+
+    def _latest_document(self, session: RuntimeSessionState, doctype: str) -> str | None:
+        values = session.documents.get(doctype) or []
+        return values[-1] if values else None
+
+    def _latest_document_type(self, session: RuntimeSessionState) -> str | None:
+        for doctype in ("Purchase Invoice", "Purchase Receipt", "Purchase Order", "Material Request", "Stock Entry"):
+            if session.documents.get(doctype):
+                return doctype
+        return None
+
+    def _confirmation(self, *, user: str, reason: str) -> dict[str, Any]:
+        return {
+            "confirmed": True,
+            "confirmed_by": user,
+            "confirmed_at": datetime.now().astimezone().isoformat(),
+            "confirmation_text": "用户通过 CLI --execute 明确确认",
+            "reason": reason,
+        }
+
+    def _workflow_message(self, intent_name: str, results: list[dict[str, Any]], *, ok: bool) -> str:
+        if not ok:
+            failed = next((result for result in results if not result.get("ok")), {})
+            return failed.get("user_message") or failed.get("error") or "ERPNext 执行失败。"
+        names = [
+            _extract_document_name(result.get("data"))
+            for result in results
+            if isinstance(result.get("data"), dict)
+        ]
+        names = [name for name in names if name]
+        if names:
+            return f"业务动作已完成：{', '.join(names)}。"
+        return f"{intent_name} 已完成，共执行 {len(results)} 个 ToolCall。"
+
     def _employee_for_user(self, user: str) -> dict[str, str]:
         for row in self.release.employees.values():
             if row["user_email"] == user:
@@ -183,6 +582,19 @@ class CivilAgentRuntime:
             "ROLE-SYSADMIN": "system_admin",
         }
         return mapping.get(employee["role_code"], "project")
+
+    def _session_project_query(self, session: RuntimeSessionState, employee: dict[str, str]) -> str | None:
+        selected = session.selected_project_code
+        if selected in self.release.projects:
+            return selected
+        return employee.get("default_project_code")
+
+    def _stable_project_code(self, resolution: ResolutionResult) -> str | None:
+        for candidate in resolution.candidates:
+            row = candidate.get("row")
+            if isinstance(row, dict) and row.get("project_code"):
+                return row["project_code"]
+        return resolution.value
 
     def _resolve_live_project_name(self, user: str, resolution: ResolutionResult) -> ResolutionResult:
         if resolution.status != "resolved" or not resolution.value or self.client_factory is None:
@@ -228,4 +640,59 @@ def _extract_document_name(data: Any) -> str | None:
         document = data.get("document")
         if isinstance(document, dict) and isinstance(document.get("name"), str):
             return document["name"]
+    return None
+
+
+def _submit_tool_for_doctype(doctype: str) -> str | None:
+    if doctype in {"Material Request", "Request for Quotation", "Supplier Quotation", "Purchase Order", "Purchase Receipt"}:
+        return "erpnext.buying.submit_document"
+    if doctype in {"Stock Entry", "Stock Reconciliation", "Delivery Note", "Pick List"}:
+        return "erpnext.stock.submit_document"
+    if doctype in {"Purchase Invoice", "Sales Invoice", "Payment Entry", "Journal Entry"}:
+        return "erpnext.accounting.submit_financial_document"
+    return None
+
+
+def _extract_document_reference(text: str) -> str:
+    patterns = (
+        r"MAT-MR-\d{4}-\d+",
+        r"PUR-ORD-\d{4}-\d+",
+        r"MAT-PRE-\d{4}-\d+",
+        r"MAT-PR-RET-\d{4}-\d+",
+        r"ACC-PINV-\d{4}-\d+",
+        r"MAT-STE-\d{4}-\d+",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, text, flags=re.IGNORECASE)
+        if match:
+            return match.group(0).upper()
+    return ""
+
+
+def _normalize_document_type(value: Any) -> str | None:
+    text = str(value or "").strip()
+    aliases = {
+        "Purchase Return": "Purchase Receipt",
+        "Purchase Receipt Return": "Purchase Receipt",
+        "采购退货": "Purchase Receipt",
+        "采购收货": "Purchase Receipt",
+        "采购订单": "Purchase Order",
+        "材料申请": "Material Request",
+        "采购发票": "Purchase Invoice",
+        "项目领料": "Stock Entry",
+    }
+    return aliases.get(text, text or None)
+
+
+def _infer_document_type(text: str) -> str | None:
+    for phrase, doctype in (
+        ("采购退货", "Purchase Receipt"),
+        ("采购收货", "Purchase Receipt"),
+        ("采购订单", "Purchase Order"),
+        ("材料申请", "Material Request"),
+        ("采购发票", "Purchase Invoice"),
+        ("项目领料", "Stock Entry"),
+    ):
+        if phrase in text:
+            return doctype
     return None

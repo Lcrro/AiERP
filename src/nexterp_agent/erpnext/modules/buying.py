@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date
 from typing import Any
 
 from ..schemas import ToolResult
@@ -265,6 +266,11 @@ class BuyingToolsMixin:
         items = [self._normalize_buying_item_row(item) for item in args["items"]]
         if any(not item.get("item_code") for item in items):
             return _item_resolution_error("采购订单草稿中存在无法解析 item_code 的行。")
+        price_lists: set[str] = set()
+        for item in items:
+            price_list = self._fill_supplier_item_price(item, args["supplier"])
+            if price_list:
+                price_lists.add(price_list)
         data = _without_empty(
             {
                 "doctype": "Purchase Order",
@@ -273,6 +279,7 @@ class BuyingToolsMixin:
                 "schedule_date": args.get("schedule_date"),
                 "company": args.get("company"),
                 "currency": args.get("currency"),
+                "buying_price_list": next(iter(price_lists)) if len(price_lists) == 1 else None,
                 "items": items,
                 "docstatus": 0,
             }
@@ -284,6 +291,37 @@ class BuyingToolsMixin:
             risk_level="L3",
             submit_tool="erpnext.buying.submit_document",
         )
+
+    def _fill_supplier_item_price(self, item: dict[str, Any], supplier: str) -> str | None:
+        if (_float_or_none(item.get("rate")) or 0) > 0:
+            return None
+        filters: dict[str, Any] = {
+            "item_code": item["item_code"],
+            "supplier": supplier,
+            "buying": 1,
+        }
+        if item.get("uom"):
+            filters["uom"] = item["uom"]
+        result = self.client.search_documents(
+            "Item Price",
+            filters=filters,
+            fields=["name", "price_list", "price_list_rate", "currency", "uom", "valid_from", "valid_upto"],
+            limit=20,
+            order_by="valid_from desc",
+        )
+        if not result.ok or not isinstance(result.data, list):
+            return None
+        today = date.today().isoformat()
+        for candidate in result.data:
+            valid_from = str(candidate.get("valid_from") or "")
+            valid_upto = str(candidate.get("valid_upto") or "")
+            rate = _float_or_none(candidate.get("price_list_rate"))
+            if not rate or (valid_from and valid_from > today) or (valid_upto and valid_upto < today):
+                continue
+            item["rate"] = rate
+            item["price_list_rate"] = rate
+            return str(candidate.get("price_list") or "") or None
+        return None
 
     def _buying_create_purchase_order_from_material_request_draft(self, args: dict[str, Any]) -> ToolResult:
         material_request = args["material_request"]

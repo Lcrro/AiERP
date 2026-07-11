@@ -15,6 +15,7 @@ from .deepseek_material_request import (
     extract_material_request_intent_with_deepseek,
     plan_material_request_with_deepseek,
 )
+from .deepseek_civil_intent import build_civil_intent_messages, extract_civil_intent_with_deepseek
 from .material_request_orchestrator import MaterialRequestRuntimeConfig, compose_material_request_tool_call
 from .civil_runtime import CivilAgentRuntime, RuntimeTurnResult
 from .resolvers import EntityResolverRegistry, ResolutionResult
@@ -35,10 +36,12 @@ __all__ = [
     "RuntimeSessionStore",
     "RuntimeTurnResult",
     "build_material_request_intent_messages",
+    "build_civil_intent_messages",
     "build_material_request_messages",
     "build_tool_contracts",
     "compose_material_request_tool_call",
     "extract_material_request_intent_with_deepseek",
+    "extract_civil_intent_with_deepseek",
     "filter_tool_schemas_for_policy",
     "get_tool_contract",
     "make_tool_access_policy",

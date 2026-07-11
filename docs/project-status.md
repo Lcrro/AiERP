@@ -1,13 +1,12 @@
 # 项目状态
 
-最后更新：2026-07-10
+最后更新：2026-07-11
 
 ## 当前版本
 
-- 当前整理版本：`civil-agent-v1.0-foundation`
-- 当前分支：`codex/project-structure-cleanup-v0.3`
-- 整理基线：`996ae1e`
-- 本轮状态：工程结构和 150 个 ToolCall 基线已经稳定；权威物料发布版 v1.0 和基础主数据已写入独立账套；自然语言 CLI Agent Runtime 已完成首条真实材料申请闭环。下一步扩展采购、收货退货、库存、财务和项目成本编排，并按员工身份重新执行完整一天事件流。
+- 当前整理版本：`civil-agent-v1.0-runtime`
+- 当前分支：`codex/civil-agent-v1.0`
+- 本轮状态：150 个 ToolCall、权威主数据、独立 ERPNext 账套和员工身份 Runtime 已贯通；自然语言已真实跑通材料申请、采购订单、采购收货、差异待办、采购退货、采购发票、项目领料、库存和项目成本。下一步执行并记录完整一天事件流，再集中加固。
 
 ## 当前结构
 
@@ -66,7 +65,7 @@ python -m pytest -q
 
 ```text
 注册表一致性：150 schemas / 150 handlers / missing=[] / extra=[]
-当前全量测试：190 passed, 3 skipped
+当前全量测试：203 passed, 3 skipped
 加载本地 sandbox .env 全量测试：本轮未运行；上一轮为 100 passed
 土木公司 ToolCall 覆盖检查：registered tools=150 / referenced tools=44 / missing=0
 土木公司 runner dry-run：10 steps / 6 executed / 4 skipped_write / failed=0
@@ -98,9 +97,9 @@ PR -> PI 本地 smoke：MAT-PRE-2026-00007 -> ACC-PINV-2026-00013，PI 行保留
 
 ## 下一步队列
 
-1. 用自然语言 Runtime 贯通采购、收货退货、库存领料、财务和项目成本。
-2. 按员工身份重新执行并记录 08:00 至 18:00 完整一天事件流。
-3. 主线跑通后集中处理幂等、权限、审计、恢复和长尾数据问题。
+1. 用自然语言 Runtime 按员工身份重新执行并记录 08:00 至 18:00 完整一天事件流。
+2. 为每一步保存意图、解析结果、ToolCall、ToolResult、单据编号和状态。
+3. 集中处理幂等、权限、审计、恢复和长尾数据问题。
 
 阶段 2 实际账套验收：
 
@@ -121,4 +120,17 @@ Item Price = 1,979
 解析项目：PROJ-0010
 创建草稿：MAT-MR-2026-00004
 ERPNext owner：mao.xiaoquan@stec-up.local
+```
+
+跨岗位采购闭环验收：
+
+```text
+材料申请：MAT-MR-2026-00005（毛晓泉创建并提交）
+采购订单：PUR-ORD-2026-00003（潘丰创建并提交，测试采购价 0.60 元/个）
+采购收货：MAT-PRE-2026-00003（潘丰创建并提交）
+采购发票：ACC-PINV-2026-00002（张振光创建并提交，金额 12.00 元）
+项目领料：MAT-STE-2026-00006（毛晓泉创建并提交，成本 3.00 元）
+退货链路：MAT-PRE-2026-00002 -> MAT-PR-RET-2026-00002
+管理摘要：3 个只读 ToolCall 均成功
+项目成本：PROJ-0010 查询成功
 ```

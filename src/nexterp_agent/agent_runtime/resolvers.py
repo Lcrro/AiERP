@@ -38,6 +38,7 @@ class EntityResolverRegistry:
             "project": self.resolve_project,
             "warehouse": self.resolve_warehouse,
             "supplier": self.resolve_supplier,
+            "employee": self.resolve_employee,
             "date": self.resolve_date,
             "uom": self.resolve_uom,
         }
@@ -89,6 +90,16 @@ class EntityResolverRegistry:
             label_key="supplier_name",
             search_keys=("supplier_code", "supplier_name", "primary_category"),
             question="请选择供应商。",
+        )
+
+    def resolve_employee(self, query: str | None, **_: Any) -> ResolutionResult:
+        return self._match_rows(
+            query,
+            list(self.release.employees.values()),
+            value_key="user_email",
+            label_key="employee_name",
+            search_keys=("employee_code", "employee_name", "user_email", "position"),
+            question="请选择负责跟进的员工。",
         )
 
     def resolve_uom(self, query: str | None, **_: Any) -> ResolutionResult:
