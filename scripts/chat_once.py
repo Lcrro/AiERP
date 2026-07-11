@@ -33,6 +33,7 @@ def main() -> int:
     parser.add_argument("--profile", default="civil")
     parser.add_argument("--execute", action="store_true", help="Explicitly confirm and execute the compiled ToolCall")
     parser.add_argument("--json", action="store_true", help="Print the complete structured result")
+    parser.add_argument("--request-id", help="Idempotency key; repeated use returns the first result without re-executing")
     parser.add_argument("--env-file", type=Path, default=REPO_ROOT / ".env")
     args = parser.parse_args()
     load_dotenv(args.env_file)
@@ -48,7 +49,7 @@ def main() -> int:
         )
 
     runtime = CivilAgentRuntime(client_factory=client_factory)
-    result = runtime.run_once(args.text, user=args.user, execute=args.execute)
+    result = runtime.run_once(args.text, user=args.user, execute=args.execute, request_id=args.request_id)
     print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2) if args.json else result.message)
     if result.questions and not args.json:
         for question in result.questions:

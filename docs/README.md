@@ -59,6 +59,7 @@ scenarios     业务沙盘、角色、流程样例
 - [小型土木公司一日运转模拟：Sandbox 初始化](scenarios/civil-company-day-seed.md)
 - [小型土木公司一日运转模拟：一天事件流准备度](scenarios/civil-company-day-readiness.md)
 - [小型土木公司一日运转模拟：执行记录](scenarios/civil-company-day-execution-log.md)
+- [员工自然语言 Runtime 全天执行报告](scenarios/civil-agent-day-runtime-report.md)
 - [材料申请 ToolCall 示例](scenarios/material-request-toolcall-example.md)
 - [Wizard of Oz ToolCall 手动测试](scenarios/wizard-of-oz-testing.md)
 - [DeepSeek 材料申请 ToolCall 试验](scenarios/deepseek-material-request-trial.md)

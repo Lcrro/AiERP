@@ -55,10 +55,23 @@ class CivilAgentRuntime:
         self.entity_resolvers = EntityResolverRegistry(self.release)
         self.material_resolver = ReleaseMaterialResolver(self.release.material_release_path)
 
-    def run_once(self, user_text: str, *, user: str, execute: bool = False, today: date | None = None) -> RuntimeTurnResult:
+    def run_once(
+        self,
+        user_text: str,
+        *,
+        user: str,
+        execute: bool = False,
+        today: date | None = None,
+        request_id: str | None = None,
+    ) -> RuntimeTurnResult:
         employee = self._employee_for_user(user)
         profile = self._profile_for_employee(employee)
         session = self.session_store.load(user, profile=profile)
+        if request_id and request_id in session.idempotency_results:
+            cached = dict(session.idempotency_results[request_id])
+            for field_name in ("tool_calls", "tool_results", "questions", "candidates"):
+                cached[field_name] = tuple(cached.get(field_name) or [])
+            return RuntimeTurnResult(**cached)
         today = today or date.today()
         extraction_context = {"current_date": today.isoformat(), "employee": employee["employee_name"]}
         intent = self.intent_extractor(user_text, context=extraction_context)
@@ -71,6 +84,7 @@ class CivilAgentRuntime:
                 session=session,
                 execute=execute,
                 today=today,
+                request_id=request_id,
             )
 
         project_query = intent.get("project_text") or self._session_project_query(session, employee)
@@ -98,7 +112,7 @@ class CivilAgentRuntime:
         if questions:
             result = RuntimeTurnResult("needs_clarification", "还需要补充一些信息。", intent, resolutions, questions=tuple(questions))
             session.pending = result.to_dict()
-            self._save_turn(session, user_text, result)
+            self._save_turn(session, user_text, result, request_id=request_id)
             return result
 
         normalized_intent = dict(intent)
@@ -132,7 +146,7 @@ class CivilAgentRuntime:
                 candidates=candidates,
             )
             session.pending = result.to_dict()
-            self._save_turn(session, user_text, result)
+            self._save_turn(session, user_text, result, request_id=request_id)
             return result
 
         tool_call = composition["tool_call"]
@@ -148,7 +162,7 @@ class CivilAgentRuntime:
                 tool_call=tool_call,
             )
             session.pending = result.to_dict()
-            self._save_turn(session, user_text, result)
+            self._save_turn(session, user_text, result, request_id=request_id)
             return result
 
         if self.client_factory is None:
@@ -172,7 +186,7 @@ class CivilAgentRuntime:
             message = execution.user_message or "ERPNext 执行失败。"
             status = "failed"
         result = RuntimeTurnResult(status, message, intent, resolutions, tool_call, tool_result)
-        self._save_turn(session, user_text, result)
+        self._save_turn(session, user_text, result, request_id=request_id)
         return result
 
     def _run_workflow_intent(
@@ -185,11 +199,12 @@ class CivilAgentRuntime:
         session: RuntimeSessionState,
         execute: bool,
         today: date,
+        request_id: str | None = None,
     ) -> RuntimeTurnResult:
         intent_name = intent.get("intent")
         if intent_name in {None, "unknown"}:
             result = RuntimeTurnResult("unsupported_intent", "我还不能确定你要执行哪项 ERPNext 业务。", intent, {})
-            self._save_turn(session, user_text, result)
+            self._save_turn(session, user_text, result, request_id=request_id)
             return result
 
         company = self.entity_resolvers.resolve_company()
@@ -256,6 +271,30 @@ class CivilAgentRuntime:
                             "supplier": supplier.value,
                             "transaction_date": today.isoformat(),
                             "company": company.value,
+                        },
+                    }
+                )
+
+        elif intent_name == "create_request_for_quotation":
+            item_result = self._resolve_workflow_items(intent.get("items") or [])
+            resolutions["materials"] = item_result
+            questions.extend(item_result["questions"])
+            if not warehouse or warehouse.status != "resolved":
+                questions.append(warehouse.question if warehouse and warehouse.question else "请选择询价物料的目标仓库。")
+            if not supplier or supplier.status != "resolved":
+                questions.append(supplier.question if supplier and supplier.question else "请选择至少一个询价供应商。")
+            if not questions and supplier and supplier.status == "resolved" and warehouse and warehouse.status == "resolved":
+                rfq_items = [dict(item, warehouse=warehouse.value) for item in item_result["items"]]
+                tool_calls.append(
+                    {
+                        "tool": "erpnext.buying.create_request_for_quotation_draft",
+                        "arguments": {
+                            "transaction_date": today.isoformat(),
+                            "schedule_date": date_value(intent.get("schedule_text"), today.isoformat()),
+                            "company": company.value,
+                            "message_for_supplier": intent.get("description") or "请按物料规格和数量报价。",
+                            "suppliers": [{"supplier": supplier.value}],
+                            "items": rfq_items,
                         },
                     }
                 )
@@ -377,6 +416,39 @@ class CivilAgentRuntime:
                 }
             )
 
+        elif intent_name == "query_pending_material_requests":
+            tool_calls.append(
+                {
+                    "tool": "erpnext.search_documents",
+                    "arguments": {
+                        "doctype": "Material Request",
+                        "filters": {"company": company.value, "material_request_type": "Purchase", "docstatus": 1, "status": "Pending"},
+                        "fields": ["name", "title", "transaction_date", "schedule_date", "status", "owner"],
+                        "limit": 100,
+                        "order_by": "schedule_date asc, modified asc",
+                    },
+                }
+            )
+
+        elif intent_name == "query_overdue_purchase_orders":
+            tool_calls.append(
+                {
+                    "tool": "erpnext.search_documents",
+                    "arguments": {
+                        "doctype": "Purchase Order",
+                        "filters": {
+                            "company": company.value,
+                            "docstatus": 1,
+                            "schedule_date": ["<", today.isoformat()],
+                            "status": ["not in", ["Completed", "Closed", "Cancelled"]],
+                        },
+                        "fields": ["name", "supplier", "schedule_date", "status", "per_received", "grand_total"],
+                        "limit": 100,
+                        "order_by": "schedule_date asc",
+                    },
+                }
+            )
+
         elif intent_name == "query_project_cost":
             if project is None or project.status != "resolved":
                 questions.append(project.question if project and project.question else "请选择项目。")
@@ -425,7 +497,7 @@ class CivilAgentRuntime:
 
         else:
             result = RuntimeTurnResult("unsupported_intent", f"暂不支持业务意图：{intent_name}", intent, resolutions)
-            self._save_turn(session, user_text, result)
+            self._save_turn(session, user_text, result, request_id=request_id)
             return result
 
         questions = list(dict.fromkeys(question for question in questions if question))
@@ -438,10 +510,17 @@ class CivilAgentRuntime:
                 questions=tuple(questions),
             )
             session.pending = result.to_dict()
-            self._save_turn(session, user_text, result)
+            self._save_turn(session, user_text, result, request_id=request_id)
             return result
 
-        read_only = intent_name in {"query_stock", "query_accounts_payable", "query_project_cost", "manager_summary"}
+        read_only = intent_name in {
+            "query_stock",
+            "query_pending_material_requests",
+            "query_overdue_purchase_orders",
+            "query_accounts_payable",
+            "query_project_cost",
+            "manager_summary",
+        }
         if not execute and not read_only:
             result = RuntimeTurnResult(
                 "needs_confirmation",
@@ -452,7 +531,7 @@ class CivilAgentRuntime:
                 tool_calls=tuple(tool_calls),
             )
             session.pending = result.to_dict()
-            self._save_turn(session, user_text, result)
+            self._save_turn(session, user_text, result, request_id=request_id)
             return result
 
         results = self._execute_tool_calls(tool_calls, user=session.user, profile=profile, session=session)
@@ -469,7 +548,7 @@ class CivilAgentRuntime:
             tool_results=tuple(results),
         )
         session.pending = None if ok else session.pending
-        self._save_turn(session, user_text, result)
+        self._save_turn(session, user_text, result, request_id=request_id)
         return result
 
     def _execute_tool_calls(
@@ -522,11 +601,13 @@ class CivilAgentRuntime:
                 candidates.append({"raw_item_text": raw_text, "resolution": resolution})
                 continue
             material = resolution["resolved"]
+            conversion_factor = material.get("conversion_factor")
             resolved.append(
                 {
                     "item_code": material["item_code"],
                     "qty": qty if isinstance(qty, (int, float)) and qty > 0 else 1,
                     "uom": item.get("uom") or material.get("stock_uom"),
+                    "conversion_factor": float(conversion_factor) if conversion_factor not in {None, ""} else 1.0,
                     "description": material.get("sku_name"),
                 }
             )
@@ -628,7 +709,16 @@ class CivilAgentRuntime:
         actual_name = result.data[0].get("name")
         return replace(resolution, value=actual_name, reason=f"{resolution.reason}；ERPNext项目主键已核对")
 
-    def _save_turn(self, session: RuntimeSessionState, user_text: str, result: RuntimeTurnResult) -> None:
+    def _save_turn(
+        self,
+        session: RuntimeSessionState,
+        user_text: str,
+        result: RuntimeTurnResult,
+        *,
+        request_id: str | None = None,
+    ) -> None:
+        if request_id:
+            session.remember_request(request_id, result.to_dict())
         session.add_turn({"user_text": user_text, "result": result.to_dict()})
         self.session_store.save(session)
 

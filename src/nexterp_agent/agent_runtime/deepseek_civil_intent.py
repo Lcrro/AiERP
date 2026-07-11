@@ -10,12 +10,15 @@ CIVIL_INTENTS = {
     "create_material_request",
     "submit_document",
     "create_purchase_order",
+    "create_request_for_quotation",
     "create_purchase_receipt",
     "record_receipt_discrepancy",
     "create_purchase_return",
     "create_material_issue",
     "create_purchase_invoice",
     "query_stock",
+    "query_pending_material_requests",
+    "query_overdue_purchase_orders",
     "query_accounts_payable",
     "query_project_cost",
     "manager_summary",
@@ -58,6 +61,8 @@ def build_civil_intent_messages(user_text: str, *, context: dict[str, Any] | Non
                 "不填写 ERPNext 编码，不编造单号、项目主键、仓库全称、供应商主键或物料编码。"
                 "“提交这张单”归 submit_document；材料申请转采购订单归 create_purchase_order；"
                 "采购订单到货归 create_purchase_receipt；到货不符归 record_receipt_discrepancy；"
+                "查询待采购材料申请归 query_pending_material_requests；发起询价归 create_request_for_quotation；"
+                "跟进逾期未到货订单归 query_overdue_purchase_orders；"
                 "退给供应商归 create_purchase_return；项目领料归 create_material_issue；"
                 "收货后开票归 create_purchase_invoice。只输出 JSON object。"
             ),

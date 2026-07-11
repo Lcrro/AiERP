@@ -29,3 +29,11 @@ def test_validator_accepts_purchase_receipt_intent() -> None:
 def test_validator_rejects_unknown_intent_name() -> None:
     with pytest.raises(ValueError):
         validate_civil_intent({"intent": "invent_database_rows", "questions": []})
+
+
+@pytest.mark.parametrize(
+    "intent",
+    ["create_request_for_quotation", "query_pending_material_requests", "query_overdue_purchase_orders"],
+)
+def test_validator_accepts_day_scenario_intents(intent: str) -> None:
+    assert validate_civil_intent({"intent": intent, "items": [], "questions": []})["intent"] == intent

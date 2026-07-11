@@ -22,6 +22,7 @@ class RuntimeSessionState:
     documents: dict[str, list[str]] = field(default_factory=dict)
     pending: dict[str, Any] | None = None
     turns: list[dict[str, Any]] = field(default_factory=list)
+    idempotency_results: dict[str, dict[str, Any]] = field(default_factory=dict)
     updated_at: str | None = None
 
     def remember_document(self, doctype: str, name: str) -> None:
@@ -33,6 +34,12 @@ class RuntimeSessionState:
         self.turns.append(payload)
         self.turns = self.turns[-50:]
         self.updated_at = datetime.now().astimezone().isoformat()
+
+    def remember_request(self, request_id: str, result: dict[str, Any]) -> None:
+        self.idempotency_results[request_id] = result
+        if len(self.idempotency_results) > 100:
+            oldest = next(iter(self.idempotency_results))
+            self.idempotency_results.pop(oldest, None)
 
 
 class RuntimeSessionStore:

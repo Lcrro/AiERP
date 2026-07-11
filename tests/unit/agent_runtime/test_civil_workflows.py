@@ -128,3 +128,58 @@ def test_runtime_normalizes_purchase_return_submit_type(tmp_path: Path) -> None:
 
     assert result.tool_call["tool"] == "erpnext.buying.submit_document"
     assert result.tool_call["arguments"]["doctype"] == "Purchase Receipt"
+
+
+def test_rfq_compiler_adds_resolved_default_warehouse(tmp_path: Path) -> None:
+    payload = {
+        "intent": "create_request_for_quotation",
+        "supplier_text": "测试综合供应商",
+        "items": [{"raw_item_text": "PPR直接 25", "qty": 10, "uom": "个", "specs": {}}],
+        "questions": [],
+    }
+    runtime = CivilAgentRuntime(intent_extractor=extractor(payload), session_store=RuntimeSessionStore(tmp_path))
+
+    result = runtime.run_once("创建询价", user="pan.feng@stec-up.local", today=date(2026, 7, 11))
+
+    assert result.status == "needs_confirmation"
+    assert result.tool_call["tool"] == "erpnext.buying.create_request_for_quotation_draft"
+    assert result.tool_call["arguments"]["items"][0]["warehouse"] == "蕰川路基地仓库 - SD"
+
+
+def test_request_id_returns_cached_result_without_reextracting(tmp_path: Path) -> None:
+    calls = 0
+
+    def counting_extractor(_: str, *, context=None) -> dict:
+        nonlocal calls
+        calls += 1
+        return {"intent": "query_pending_material_requests", "items": [], "questions": []}
+
+    runtime = CivilAgentRuntime(
+        intent_extractor=counting_extractor,
+        session_store=RuntimeSessionStore(tmp_path),
+        client_factory=None,
+    )
+    # Use a write preview so no ERPNext client is needed; the second call must
+    # return before intent extraction or execution.
+    runtime.intent_extractor = extractor(
+        {
+            "intent": "create_purchase_order",
+            "supplier_text": "测试综合供应商",
+            "document_name": "MAT-MR-TEST",
+            "items": [],
+            "questions": [],
+        }
+    )
+    original_extractor = runtime.intent_extractor
+
+    def wrapped(text: str, *, context=None) -> dict:
+        nonlocal calls
+        calls += 1
+        return original_extractor(text, context=context)
+
+    runtime.intent_extractor = wrapped
+    first = runtime.run_once("转采购订单", user="pan.feng@stec-up.local", request_id="request-1")
+    second = runtime.run_once("这段文字不会再次解析", user="pan.feng@stec-up.local", request_id="request-1")
+
+    assert calls == 1
+    assert second.to_dict() == first.to_dict()

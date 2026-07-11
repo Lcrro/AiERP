@@ -65,7 +65,7 @@ python -m pytest -q
 
 ```text
 注册表一致性：150 schemas / 150 handlers / missing=[] / extra=[]
-当前全量测试：203 passed, 3 skipped
+当前全量测试：210 passed, 3 skipped
 加载本地 sandbox .env 全量测试：本轮未运行；上一轮为 100 passed
 土木公司 ToolCall 覆盖检查：registered tools=150 / referenced tools=44 / missing=0
 土木公司 runner dry-run：10 steps / 6 executed / 4 skipped_write / failed=0
@@ -97,9 +97,9 @@ PR -> PI 本地 smoke：MAT-PRE-2026-00007 -> ACC-PINV-2026-00013，PI 行保留
 
 ## 下一步队列
 
-1. 用自然语言 Runtime 按员工身份重新执行并记录 08:00 至 18:00 完整一天事件流。
-2. 为每一步保存意图、解析结果、ToolCall、ToolResult、单据编号和状态。
-3. 集中处理幂等、权限、审计、恢复和长尾数据问题。
+1. 根据全天报告继续补充更丰富的岗位话术和业务数据，不再扩张底层通用工具。
+2. 增加可供员工实际试用的对话前端和登录入口。
+3. 在生产部署前补充审批策略、监控、备份和凭据托管。
 
 阶段 2 实际账套验收：
 
@@ -133,4 +133,16 @@ ERPNext owner：mao.xiaoquan@stec-up.local
 退货链路：MAT-PRE-2026-00002 -> MAT-PR-RET-2026-00002
 管理摘要：3 个只读 ToolCall 均成功
 项目成本：PROJ-0010 查询成功
+```
+
+全天自然语言 Runtime 验收：
+
+```text
+事件时间：08:00 -> 18:00
+事件数：17
+完成：17
+失败：0
+主要产物：MAT-MR-2026-00009/10/11、PUR-ORD-2026-00005、PUR-RFQ-2026-00002、
+          MAT-PRE-2026-00005、MAT-PR-RET-2026-00004、MAT-STE-2026-00008、ACC-PINV-2026-00004
+审计报告：docs/scenarios/civil-agent-day-runtime-report.md
 ```
