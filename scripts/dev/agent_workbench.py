@@ -240,7 +240,11 @@ class AgentWorkbenchService:
             raise ValueError("user 和 text 必填")
         execute = bool(payload.get("execute"))
         request_id = str(payload.get("request_id") or "").strip() or None
-        result = self.runtime().run_once(text, user=user, execute=execute, request_id=request_id)
+        context = {
+            "project_code": str(payload.get("project_code") or "").strip() or None,
+            "warehouse": str(payload.get("warehouse") or "").strip() or None,
+        }
+        result = self.runtime().run_once(text, user=user, execute=execute, request_id=request_id, context=context)
         response = result.to_dict()
         response["execute"] = execute
         response["document_links"] = result_document_links(response, self.base_url)

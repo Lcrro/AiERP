@@ -251,6 +251,13 @@ tools:
         constraints:
           - "必须是 ERPNext Warehouse.name 全称。"
           - "禁止把中心仓、项目仓等简称直接写入 ToolCall。"
+      "items[].project":
+        required: conditional
+        source: "Project Resolver / 当前项目上下文"
+        resolver: project
+        constraints:
+          - "项目采购场景必须使用 ERPNext Project.name 主键。"
+          - "禁止使用口头简称或稳定业务编码代替 ERPNext 主键。"
 
   erpnext.buying.create_request_for_quotation_draft:
     purpose: "L3：创建询价单草稿，包含已解析供应商和物料行，不提交。"

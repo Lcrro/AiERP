@@ -31,6 +31,7 @@ scenarios     业务沙盘、角色、流程样例
 - [DocType 索引与 Agent 上下文](architecture/doctype-index.md)
 - [Agent 使用 ToolCall 的统一方案](architecture/agent-toolcall-usage-strategy.md)
 - [ToolCall 参数编排层设计](architecture/toolcall-parameter-orchestration.md)
+- [DeepSeek 自主规划 Runtime](architecture/deepseek-agent-runtime.md)
 
 架构文档回答“系统应该长什么样，以及为什么这样设计”。
 

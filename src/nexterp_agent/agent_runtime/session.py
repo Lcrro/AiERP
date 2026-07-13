@@ -23,6 +23,9 @@ class RuntimeSessionState:
     pending: dict[str, Any] | None = None
     turns: list[dict[str, Any]] = field(default_factory=list)
     idempotency_results: dict[str, dict[str, Any]] = field(default_factory=dict)
+    selected_entities: dict[str, dict[str, Any]] = field(default_factory=dict)
+    agent_steps: list[dict[str, Any]] = field(default_factory=list)
+    pending_action: dict[str, Any] | None = None
     updated_at: str | None = None
 
     def remember_document(self, doctype: str, name: str) -> None:

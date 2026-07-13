@@ -142,6 +142,7 @@
       <aside id="details" class="details">
         <div class="tabs">
           <button class="tab active" data-tab="overview">概览</button>
+          <button class="tab" data-tab="steps">Agent步骤</button>
           <button class="tab" data-tab="toolcall">ToolCall</button>
           <button class="tab" data-tab="result">ToolResult</button>
           <button class="tab" data-tab="raw">完整 JSON</button>
@@ -215,10 +216,10 @@
         if (!state.user || !text) return;
         setBusy(true); if (!execute) { state.lastText = text; state.executeId = crypto.randomUUID(); addMessage("user", text); }
         try {
-          const data = await api("/api/agent", {method:"POST", body: JSON.stringify({user:state.user.user_email, text, execute, request_id:execute ? state.executeId : null})});
+          const data = await api("/api/agent", {method:"POST", body: JSON.stringify({user:state.user.user_email, project_code:state.project?.project_code, warehouse:state.project?.warehouse_code, text, execute, request_id:execute ? state.executeId : null})});
           state.preview = data.result; renderDetails();
           addMessage(data.result.status === "failed" ? "error" : "agent", data.result.message, data.result.document_links || []);
-          const canExecute = !execute && ["needs_confirmation"].includes(data.result.status) && data.result.tool_call;
+          const canExecute = !execute && ["needs_confirmation"].includes(data.result.status) && (data.result.pending_tool_call || data.result.tool_call);
           $("confirmBar").classList.toggle("visible", canExecute);
           if (execute) $("confirmBar").classList.remove("visible");
         } catch (error) { addMessage("error", error.message); }
@@ -238,8 +239,9 @@
           $("detailBody").innerHTML = `<p class="empty">执行一次预览后，这里会显示结构化过程。</p>`;
         } else if (state.tab === "overview") {
           const questions = (r.questions || []).map(q => `<li>${esc(q)}</li>`).join("");
-          $("detailBody").innerHTML = `<div class="summary"><div class="metric"><span>状态</span><strong>${esc(r.status)}</strong></div><div class="metric"><span>意图</span><strong>${esc(r.intent?.intent)}</strong></div><div class="metric"><span>员工</span><strong>${esc(state.user?.employee_name)}</strong></div></div>${(r.document_links||[]).length ? `<ul class="links">${r.document_links.map(l=>`<li><a target="_blank" href="${esc(l.url)}">${esc(l.name)}</a></li>`).join("")}</ul>`:""}${questions ? `<h3>需要补充</h3><ul>${questions}</ul>`:""}<h3>解析结果</h3><pre>${esc(pretty(r.resolutions))}</pre>`;
-        } else if (state.tab === "toolcall") $("detailBody").innerHTML = `<pre>${esc(pretty(r.tool_calls?.length ? r.tool_calls : r.tool_call))}</pre>`;
+          $("detailBody").innerHTML = `<div class="summary"><div class="metric"><span>状态</span><strong>${esc(r.status)}</strong></div><div class="metric"><span>Agent步骤</span><strong>${esc((r.steps||[]).length)}</strong></div><div class="metric"><span>员工</span><strong>${esc(state.user?.employee_name)}</strong></div></div>${(r.document_links||[]).length ? `<ul class="links">${r.document_links.map(l=>`<li><a target="_blank" href="${esc(l.url)}">${esc(l.name)}</a></li>`).join("")}</ul>`:""}${questions ? `<h3>需要补充</h3><ul>${questions}</ul>`:""}${(r.candidates||[]).length ? `<h3>候选</h3><pre>${esc(pretty(r.candidates))}</pre>`:""}`;
+        } else if (state.tab === "steps") $("detailBody").innerHTML = (r.steps||[]).length ? (r.steps||[]).map((s,i)=>`<div class="doctype-group"><div class="doctype-head"><span>${i+1}. ${esc(s.label)}</span><span>${esc(s.action)}</span></div><pre>${esc(pretty({payload:s.payload,result:s.result}))}</pre></div>`).join("") : `<p class="empty">暂无Agent步骤。</p>`;
+        else if (state.tab === "toolcall") $("detailBody").innerHTML = `<pre>${esc(pretty(r.tool_calls?.length ? r.tool_calls : (r.pending_tool_call || r.tool_call)))}</pre>`;
         else if (state.tab === "result") $("detailBody").innerHTML = `<pre>${esc(pretty(r.tool_results?.length ? r.tool_results : r.tool_result))}</pre>`;
         else $("detailBody").innerHTML = `<pre>${esc(pretty(r))}</pre>`;
       }

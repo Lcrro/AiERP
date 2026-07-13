@@ -786,3 +786,20 @@ def _infer_document_type(text: str) -> str | None:
         if phrase in text:
             return doctype
     return None
+
+
+# Kept only as an explicit regression fixture. Production entry points use the
+# DeepSeek planning loop below and never fall back to this implementation.
+LegacyCivilAgentRuntime = CivilAgentRuntime
+
+from .deepseek_agent_runtime import DeepSeekAgentRuntime  # noqa: E402
+
+
+class CivilAgentRuntime(DeepSeekAgentRuntime):
+    """Backward-compatible public name for the DeepSeek autonomous Runtime."""
+
+    def __new__(cls, *args: Any, **kwargs: Any):
+        intent_extractor = kwargs.pop("intent_extractor", None)
+        if intent_extractor is not None:
+            return LegacyCivilAgentRuntime(*args, intent_extractor=intent_extractor, **kwargs)
+        return super().__new__(cls)

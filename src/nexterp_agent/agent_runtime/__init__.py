@@ -17,13 +17,17 @@ from .deepseek_material_request import (
 )
 from .deepseek_civil_intent import build_civil_intent_messages, extract_civil_intent_with_deepseek
 from .material_request_orchestrator import MaterialRequestRuntimeConfig, compose_material_request_tool_call
-from .civil_runtime import CivilAgentRuntime, RuntimeTurnResult
+from .civil_runtime import CivilAgentRuntime, LegacyCivilAgentRuntime, RuntimeTurnResult
+from .deepseek_agent_runtime import DeepSeekAgentRuntime, DeepSeekTurnResult
 from .resolvers import EntityResolverRegistry, ResolutionResult
 from .session import RuntimeSessionState, RuntimeSessionStore
 
 __all__ = [
     "DeepSeekSettings",
     "CivilAgentRuntime",
+    "DeepSeekAgentRuntime",
+    "DeepSeekTurnResult",
+    "LegacyCivilAgentRuntime",
     "EntityResolverRegistry",
     "MaterialRequestRuntimeConfig",
     "ToolAccessPolicy",
