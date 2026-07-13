@@ -8,7 +8,6 @@
 - [项目结构与解耦边界](project-structure.md)
 - [DocType 索引与 Agent 上下文](doctype-index.md)
 - [当前 ToolCall 清单](../reference/toolcall-current-inventory.md)
-- [小型土木公司一日运转模拟：执行记录](../scenarios/civil-company-day-execution-log.md)
 
 ## 背景
 
@@ -83,7 +82,7 @@ erpnext.buying.run_purchase_analysis
 `company`、当前用户、岗位、默认项目、默认仓库、site、today 等由 Runtime 注入。
 
 第四，所有关键字符串先 resolve 再执行。  
-“中心仓”先解析成 `SCEN-CIVIL 中心仓 - SD`；“帆布手套”先解析成 `SAFE-000005`；“STEC”先解析成 `STEC (Demo)`。
+“中心仓”先解析成 `蕰川路基地仓库 - SD`；“帆布手套”先解析成 `SAFE-000005`；“STEC”先解析成 `STEC (Demo)`。
 
 第五，复杂操作走 preview / draft / submit。  
 查询可以直接执行；创建草稿可以自动或半自动；提交、财务、权限、库存移动必须显式确认。
@@ -164,11 +163,11 @@ erpnext.buying.run_purchase_analysis
 {
   "site": "civil",
   "today": "2026-06-16",
-  "user": "zhao.qiang@scen-civil.local",
+  "user": "pan.feng@stec-up.local",
   "employee_name": "赵强",
   "role": "采购主管",
   "company": "STEC (Demo)",
-  "default_warehouse": "SCEN-CIVIL 中心仓 - SD",
+  "default_warehouse": "蕰川路基地仓库 - SD",
   "default_project": null
 }
 ```
@@ -262,7 +261,7 @@ ERPNext 权限：防止员工账号执行不该执行的业务动作。
   "tool": "erpnext.stock.get_balance",
   "arguments": {
     "item_code": "SAFE-000005",
-    "warehouse": "SCEN-CIVIL 中心仓 - SD",
+    "warehouse": "蕰川路基地仓库 - SD",
     "limit": 100
   }
 }
@@ -277,7 +276,7 @@ ERPNext 权限：防止员工账号执行不该执行的业务动作。
     "doctype": "ToDo",
     "filters": {
       "status": "Open",
-      "description": ["like", "%SCEN-CIVIL-PREP%"]
+      "description": ["like", "%AGENT-PREP%"]
     },
     "fields": ["name", "allocated_to", "priority", "description", "reference_type", "reference_name"],
     "limit": 20,
@@ -333,7 +332,7 @@ ERPNext 权限：防止员工账号执行不该执行的业务动作。
     },
     {
       "type": "Warehouse",
-      "id": "SCEN-CIVIL 中心仓 - SD"
+      "id": "蕰川路基地仓库 - SD"
     }
   ],
   "facts": [
@@ -391,7 +390,7 @@ ERPNext 权限：防止员工账号执行不该执行的业务动作。
   -> item_text=帆布手套
   -> warehouse_text=中心仓
   -> resolve item SAFE-000005
-  -> resolve warehouse SCEN-CIVIL 中心仓 - SD
+  -> resolve warehouse 蕰川路基地仓库 - SD
   -> erpnext.stock.get_balance
 ```
 
@@ -478,7 +477,7 @@ Query Builder 输入示例：
   "doctype": "ToDo",
   "where": [
     {"field": "status", "op": "eq", "value": "Open"},
-    {"field": "description", "op": "contains", "value": "SCEN-CIVIL-PREP"}
+    {"field": "description", "op": "contains", "value": "AGENT-PREP"}
   ],
   "view": "manager_risk_list"
 }
@@ -491,7 +490,7 @@ Builder 输出 Frappe 参数：
   "doctype": "ToDo",
   "filters": {
     "status": "Open",
-    "description": ["like", "%SCEN-CIVIL-PREP%"]
+    "description": ["like", "%AGENT-PREP%"]
   },
   "fields": ["name", "allocated_to", "priority", "description", "status"],
   "limit": 20,
@@ -695,10 +694,9 @@ src/nexterp_agent/agent_runtime/
     stock.yaml
     buying.yaml
     accounting.yaml
-    scenarios.yaml
 ```
 
-第一版不需要接真实大模型，可以先让 Wizard of Oz 手动驱动器调用这些模块，证明参数编排稳定。
+参数编排通过 DeepSeek Runtime 和结构化模拟模型序列共同验证。
 
 ## v0.1 开发顺序
 
@@ -720,8 +718,8 @@ src/nexterp_agent/agent_runtime/
    - 查应付
    - 查管理层 open risks
    - 查采购分析
-7. 接入 Wizard of Oz 手动测试页面。
-8. 再接入自然语言 Agent Runtime。
+7. 接入自然语言 Agent Runtime。
+8. 用结构化模拟序列和本地 ERPNext 集成测试验收。
 
 ## 验收用例
 
@@ -736,7 +734,7 @@ src/nexterp_agent/agent_runtime/
 期望：
 
 - 解析 `帆布手套 -> SAFE-000005`
-- 解析 `中心仓 -> SCEN-CIVIL 中心仓 - SD`
+- 解析 `中心仓 -> 蕰川路基地仓库 - SD`
 - 生成 `erpnext.stock.get_balance`
 - 返回现货数量和估值
 

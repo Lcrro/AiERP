@@ -7,8 +7,8 @@ from nexterp_agent.agent_runtime.deepseek_material_request import MATERIAL_REQUE
 BASE_CONTEXT = {
     "company": "STEC (Demo)",
     "default_schedule_date": "2026-06-18",
-    "project_candidates": [{"name": "PROJ-CIVIL-EAST", "label": "城东项目"}],
-    "warehouse_candidates": [{"name": "SCEN-CIVIL 城东项目仓 - SD", "label": "城东项目仓"}],
+    "project_candidates": [{"name": "PROJ-0010", "label": "合流1.3标"}],
+    "warehouse_candidates": [{"name": "合流1.3标仓库 - SD", "label": "合流1.3标仓"}],
 }
 
 
@@ -30,9 +30,9 @@ def test_ready_intent_composes_material_request_tool_call() -> None:
             "item_code": "SPARE-000071-68",
             "qty": 10,
             "uom": "个",
-            "warehouse": "SCEN-CIVIL 城东项目仓 - SD",
+            "warehouse": "合流1.3标仓库 - SD",
             "schedule_date": "2026-06-18",
-            "project": "PROJ-CIVIL-EAST",
+            "project": "PROJ-0010",
         }
     ]
 

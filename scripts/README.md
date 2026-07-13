@@ -1,11 +1,9 @@
 # 脚本目录
 
-脚本按职责分区。根目录下保留同名兼容入口，因此旧命令仍可使用，例如：
+脚本按职责分区。根目录下保留少量兼容入口，例如：
 
 ```powershell
 python scripts/smoke_erpnext.py --profile local --check auth
-python scripts/run_civil_company_day_scenario.py --profile civil
-python scripts/wizard_workbench.py --profile civil --port 8787
 .\scripts\start_wsl_sandbox.ps1
 ```
 
@@ -16,7 +14,6 @@ python scripts/wizard_workbench.py --profile civil --port 8787
 | `dev/` | 本地开发、sandbox 启动、agent_bridge 同步、smoke 检查 |
 | `erpnext/` | ERPNext 初始化、清理、导入、导入验证 |
 | `material_master/` | 物料采购清单处理、标准物料候选、治理、检索评估 |
-| `scenarios/` | 业务沙盘 seed、runner、ToolCall 覆盖校验 |
 
 物料脚本较多，具体分组见：
 
@@ -36,14 +33,6 @@ python scripts/merge_category_mapping_batches.py
 python scripts/apply_category_mapping.py
 python scripts/merge_family_rule_batches.py
 ```
-
-常用 Agent Runtime 试验命令：
-
-```powershell
-python scripts\dev\deepseek_material_request_trial.py --use-runtime-resolver --context-json .\data\scenario\deepseek_material_request_context.sample.json
-```
-
-`--use-runtime-resolver` 表示 DeepSeek 只抽取业务意图，由本地发布版物料表 Resolver 和材料申请编排器生成候选 ToolCall。
 
 ## 规则
 

@@ -8,7 +8,6 @@ architecture  系统架构、模块关系和长期路线
 reference     稳定事实，例如 API、schema、ToolCall、规则
 planning      分版本计划、开发清单和验收标准
 operations    本地运行、验证、维护和排障
-scenarios     业务沙盘、角色、流程样例
 ```
 
 目标是让每个文档只回答一类问题，避免所有内容混在一起。
@@ -17,7 +16,6 @@ scenarios     业务沙盘、角色、流程样例
 
 - [项目 README](../README.md)：项目根目录的简短入口。
 - [项目状态](project-status.md)：当前分支、覆盖数量、测试状态和下一步队列。
-- [当前 Codex 对话压缩上下文](project-thread-context-2026-06-20.md)：本轮长期对话的关键决策、实现状态和下一步建议。
 - [架构路线图](architecture/roadmap.md)：分阶段架构目标。
 - [Tool Layer v0.1 清单](planning/tool-layer-v0.1.md)：后端工具层工作队列。
 - [物料主数据与检索 v0.1 计划](planning/item-master-search-v0.1.md)：物料表和检索工作队列。
@@ -52,22 +50,6 @@ scenarios     业务沙盘、角色、流程样例
 - [物料目录 PostgreSQL 运行说明](operations/material-catalog-postgres.md)
 
 运行文档回答“本地系统怎么启动、怎么验证、怎么维护”。
-
-## 业务场景
-
-- [小型土木公司一日运转模拟：员工角色表](scenarios/civil-company-day-roles.md)
-- [小型土木公司一日运转模拟：时间顺序事件流](scenarios/civil-company-day-events.md)
-- [小型土木公司一日运转模拟：ToolCall 覆盖矩阵](scenarios/civil-company-day-toolcall-coverage.md)
-- [小型土木公司一日运转模拟：Sandbox 初始化](scenarios/civil-company-day-seed.md)
-- [小型土木公司一日运转模拟：一天事件流准备度](scenarios/civil-company-day-readiness.md)
-- [小型土木公司一日运转模拟：执行记录](scenarios/civil-company-day-execution-log.md)
-- [员工自然语言 Runtime 全天执行报告](scenarios/civil-agent-day-runtime-report.md)
-- [材料申请 ToolCall 示例](scenarios/material-request-toolcall-example.md)
-- [Wizard of Oz ToolCall 手动测试](scenarios/wizard-of-oz-testing.md)
-- [DeepSeek 材料申请 ToolCall 试验](scenarios/deepseek-material-request-trial.md)
-- [DeepSeek 材料申请试验输入输出记录](scenarios/deepseek-material-request-io-log.md)
-
-业务场景文档回答“系统要服务哪些人、他们在真实业务中怎么协作”。
 
 ## 参考
 
@@ -111,7 +93,6 @@ docs/reference/configuration.md
 - 长架构说明和设计材料放到 `docs/architecture/`。
 - 分版本任务清单放到 `docs/planning/`。
 - 运行手册和排障说明放到 `docs/operations/`。
-- 业务沙盘、角色表和流程样例放到 `docs/scenarios/`。
 - 稳定的 schema、工具契约和 API 细节放到 `docs/reference/`。
 - 不提交生成缓存、密钥或真实 ERPNext 业务数据。
 - 优先使用链接，不重复粘贴同一份内容。

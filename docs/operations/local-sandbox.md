@@ -31,15 +31,14 @@ Local URL:
 http://localhost:8001
 ```
 
-Clean civil-company scenario site:
+Independent development site:
 
 ```text
 http://localhost:8002
 ```
 
-The `civil` profile points at this independent site. It contains the `STEC (Demo)`
-company plus only the small SCEN-CIVIL sandbox data set, instead of the larger
-material-master experiment data in the default `local` profile.
+The `civil` profile points at this independent site. It contains the current UP
+division master data used by the employee Agent workbench.
 
 ## Start Sandbox
 

@@ -16,8 +16,6 @@
 - [ToolCall 参数编排层设计](toolcall-parameter-orchestration.md)
 - [项目结构与解耦边界](project-structure.md)
 - [ToolCall Data Dictionary](../reference/toolcall-data-dictionary.md)
-- [DeepSeek 材料申请 ToolCall 试验](../scenarios/deepseek-material-request-trial.md)
-- [Wizard of Oz ToolCall 手动测试](../scenarios/wizard-of-oz-testing.md)
 
 ## 设计判断
 
@@ -205,7 +203,7 @@ Resolver 是这套架构的关键。它负责从已有数据里找出 ToolCall �
 |---|---|---|
 | `ItemResolver` | 帆布手套、门锁、角铁、水泥 | `item_code`、名称、单位、候选、置信度 |
 | `WarehouseResolver` | 中心仓、项目仓、西站仓 | ERPNext 仓库全称 |
-| `ProjectResolver` | 城东项目、南区管网 | ERPNext Project 编号 |
+| `ProjectResolver` | 合流1.3标、竹白1.2标 | ERPNext Project 编号 |
 | `SupplierResolver` | 供应商简称、联系人、历史采购对象 | Supplier 编号 |
 | `CompanyResolver` | 当前用户上下文、公司简称 | Company 全称 |
 | `DateResolver` | 今天、明天、下周一、月底前 | ISO 日期 |
@@ -285,7 +283,7 @@ Resolver 返回统一结构：
 用户说：
 
 ```text
-明天城东项目要 100 双帆布手套，送项目仓。
+明天合流1.3标要 100 双帆布手套，送项目仓。
 ```
 
 LLM 只输出意图草稿：
@@ -293,7 +291,7 @@ LLM 只输出意图草稿：
 ```json
 {
   "intent": "create_material_request",
-  "project_text": "城东项目",
+  "project_text": "合流1.3标",
   "warehouse_text": "项目仓",
   "schedule_text": "明天",
   "items": [
@@ -310,8 +308,8 @@ Runtime 做确定性处理：
 
 ```text
 DateResolver: 明天 -> 2026-06-23
-ProjectResolver: 城东项目 -> PROJ-0001
-WarehouseResolver: 项目仓 -> SCEN-CIVIL 项目仓 - SD
+ProjectResolver: 合流1.3标 -> PROJ-0010
+WarehouseResolver: 项目仓 -> 合流1.3标仓库 - SD
 ItemResolver: 帆布手套 -> SAFE-000005
 UOMResolver: 双 -> 双，且与物料主单位兼容
 CompanyResolver: 当前员工 -> STEC (Demo)
@@ -331,8 +329,8 @@ CompanyResolver: 当前员工 -> STEC (Demo)
         "item_code": "SAFE-000005",
         "qty": 100,
         "uom": "双",
-        "warehouse": "SCEN-CIVIL 项目仓 - SD",
-        "project": "PROJ-0001",
+        "warehouse": "合流1.3标仓库 - SD",
+        "project": "PROJ-0010",
         "schedule_date": "2026-06-23"
       }
     ]
@@ -433,7 +431,7 @@ Agent 不能只靠聊天上下文记住业务对象。
     "company": "STEC (Demo)"
   },
   "active_entities": {
-    "current_project": "PROJ-0001",
+    "current_project": "PROJ-0010",
     "last_material_request": "MAT-MR-2026-00003"
   },
   "pending_clarifications": [],
@@ -494,7 +492,7 @@ MCP tool handler 也可以调用参数编排层。
 必须支持的输入：
 
 ```text
-明天城东项目要 100 双帆布手套，送项目仓。
+明天合流1.3标要 100 双帆布手套，送项目仓。
 ```
 
 必须输出：
@@ -529,7 +527,7 @@ MCP tool handler 也可以调用参数编排层。
 7. validator 规则
 8. repair / clarification 策略
 9. 至少一个单元测试
-10. 如果是关键业务动作，要有 Wizard of Oz 或沙盘验收用例
+10. 如果是关键业务动作，要有模拟模型序列和本地 ERPNext 集成验收用例
 ```
 
 如果一个 ToolCall 的字段需要 ERPNext 主数据，就必须声明 Resolver；如果无法声明 Resolver，就不应该直接暴露给员工 Agent。

@@ -80,17 +80,15 @@ src/nexterp_agent/             Python package
   agent_runtime/               Future natural-language brain: routing, state, planning
   erpnext/                     ERPNext ToolCall schemas, adapter, client, risk policy
   item_master/                 Material master rules, coding, search, PostgreSQL catalog
-  scenarios/                   Future reusable business scenario runners
 frappe_apps/agent_bridge/      Tracked mirror of the local Frappe bridge app
 scripts/                       Compatibility wrappers plus categorized script folders
   dev/                         Local sandbox, sync, smoke checks
   erpnext/                     ERPNext setup, cleanup, import, verification
   material_master/             Material data processing, governance, search evaluation
-  scenarios/                   Business sandbox seed, runner, coverage checks
 data/                          Local data assets and generated reports
 docs/                          Project documentation
 tools/                         Local viewer/debug pages
-tests/                         Unit, integration, and future scenario tests
+tests/                         Unit and integration tests
 ```
 
 ## Current Local Sandbox

@@ -17,7 +17,7 @@ from nexterp_agent.agent_runtime.deepseek_material_request import (
 
 def test_material_request_prompt_restricts_tool_and_includes_context() -> None:
     messages = build_material_request_messages(
-        "城东项目明天要帆布手套100双",
+        "合流1.3标明天要帆布手套100双",
         context={"company": "STEC (Demo)", "item_candidates": [{"item_code": "SAFE-000005"}]},
     )
 
@@ -43,7 +43,7 @@ def test_validate_material_request_plan_accepts_candidate_tool_call() -> None:
                         "item_code": "SAFE-000005",
                         "qty": 100,
                         "uom": "双",
-                        "warehouse": "SCEN-CIVIL 项目仓 - SD",
+                        "warehouse": "合流1.3标仓库 - SD",
                         "schedule_date": "2026-06-18",
                     }
                 ],
@@ -92,8 +92,8 @@ def test_normalize_material_request_plan_overrides_model_guesses_from_runtime_co
         "company": "STEC (Demo)",
         "default_schedule_date": "2026-06-18",
         "item_candidates": [{"item_code": "SAFE-000005", "stock_uom": "双"}],
-        "warehouse_candidates": [{"name": "SCEN-CIVIL 项目仓 - SD"}],
-        "project_candidates": [{"name": "PROJ-0001"}],
+        "warehouse_candidates": [{"name": "合流1.3标仓库 - SD"}],
+        "project_candidates": [{"name": "PROJ-0010"}],
     }
 
     normalized = normalize_material_request_plan(plan, context=context)
@@ -104,8 +104,8 @@ def test_normalize_material_request_plan_overrides_model_guesses_from_runtime_co
     assert arguments["schedule_date"] == "2026-06-18"
     assert item["item_code"] == "SAFE-000005"
     assert item["uom"] == "双"
-    assert item["warehouse"] == "SCEN-CIVIL 项目仓 - SD"
-    assert item["project"] == "PROJ-0001"
+    assert item["warehouse"] == "合流1.3标仓库 - SD"
+    assert item["project"] == "PROJ-0010"
     assert item["schedule_date"] == "2026-06-18"
     assert normalized["runtime_corrections"]
     assert "Runtime 已用解析上下文覆盖模型输出中的主数据和日期字段。" in normalized["assumptions"]

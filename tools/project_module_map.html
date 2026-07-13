@@ -543,7 +543,6 @@
       tool: { label: "ToolCall 工具层", color: "#0f766e", desc: "工具契约、网关、Adapter 和标准结果。" },
       erp: { label: "ERPNext 执行层", color: "#7c3aed", desc: "ERPNext/Frappe、agent_bridge、本地 sandbox。" },
       material: { label: "物料主数据层", color: "#ca8a04", desc: "发布版物料表、Resolver、浏览器和治理脚本。" },
-      scenario: { label: "沙盘验证层", color: "#dc2626", desc: "小型土木公司一天事件流、Wizard 测试和覆盖矩阵。" },
       governance: { label: "工程治理层", color: "#64748b", desc: "文档、测试、脚本、GitHub 与项目状态。" }
     };
 
@@ -554,10 +553,10 @@
     };
 
     const nodes = [
-      node("employee", "企业员工", "采购/仓库/项目/财务", "user", "done", 900, 90, 54, "项目的最终服务对象。员工用自然语言提出材料申请、库存查询、采购跟进、项目成本查看等任务。", ["docs/scenarios/civil-company-day-roles.md", "docs/scenarios/civil-company-day-events.md"], ["真实业务需求", "当前登录账号", "岗位职责"], ["自然语言任务", "确认或补充信息"]),
-      node("assistant", "个人助理", "岗位工作 Agent", "user", "planned", 900, 205, 55, "未来每个员工会拥有自己的工作助理。当前还没有完整接入大模型 Runtime，正在先通过 DeepSeek 试验和 Wizard 测试验证链路。", ["docs/architecture/roadmap.md", "docs/architecture/agent-toolcall-usage-strategy.md"], ["员工自然语言", "岗位上下文"], ["业务意图草稿", "待确认问题"]),
-      node("intent", "意图抽取", "DeepSeek 试验", "runtime", "active", 620, 300, 58, "大模型只负责把人话抽成结构化业务意图，例如 raw_item_text、数量、单位、项目口头名、仓库口头名。", ["src/nexterp_agent/agent_runtime/deepseek_material_request.py", "scripts/dev/deepseek_material_request_trial.py"], ["员工自然语言", "运行时上下文"], ["业务意图草稿", "缺失信息问题"]),
-      node("context", "运行上下文", "公司/项目/仓库/日期", "runtime", "active", 1180, 300, 58, "注入当前公司、当前日期、候选项目、候选仓库、员工身份等结构化上下文。它阻止模型凭空编 ERPNext 主键。", ["docs/architecture/agent-toolcall-usage-strategy.md", "data/scenario/deepseek_material_request_context.sample.json"], ["登录用户", "沙盘配置", "ERPNext 主数据"], ["Runtime context", "默认字段"]),
+      node("employee", "企业员工", "采购/仓库/项目/财务", "user", "done", 900, 90, 54, "项目的最终服务对象。员工用自然语言提出材料申请、库存查询、采购跟进、项目成本查看等任务。", ["docs/reference/master-data-standard.md", "docs/operations/agent-workbench.md"], ["真实业务需求", "当前登录账号", "岗位职责"], ["自然语言任务", "确认或补充信息"]),
+      node("assistant", "个人助理", "岗位工作 Agent", "user", "active", 900, 205, 55, "员工通过统一工作台与 DeepSeek 自主规划 Runtime 协作，读取真实项目和岗位上下文并按需调用工具。", ["docs/architecture/deepseek-agent-runtime.md", "docs/architecture/agent-toolcall-usage-strategy.md"], ["员工自然语言", "岗位上下文"], ["Agent 动作", "待确认问题"]),
+      node("intent", "自主规划", "DeepSeek 动作循环", "runtime", "active", 620, 300, 58, "模型按需发现工具、读取契约、解析实体、执行只读操作或生成待确认写操作。", ["src/nexterp_agent/agent_runtime/deepseek_agent_runtime.py", "docs/architecture/deepseek-agent-runtime.md"], ["员工自然语言", "运行时上下文"], ["规划动作", "ToolCall", "最终回复"]),
+      node("context", "运行上下文", "公司/项目/仓库/日期", "runtime", "active", 1180, 300, 58, "注入当前公司、当前日期、候选项目、候选仓库、员工身份等结构化上下文。它阻止模型凭空编 ERPNext 主键。", ["docs/architecture/agent-toolcall-usage-strategy.md", "data/master_data"], ["登录用户", "项目主数据", "ERPNext 主数据"], ["Runtime context", "默认字段"]),
       node("orchestrator", "参数编排器", "Material Request", "runtime", "active", 900, 392, 72, "把业务意图、物料 Resolver、项目/仓库上下文和 ToolCall 契约合并，生成可执行或待确认的 ToolCall 草稿。", ["src/nexterp_agent/agent_runtime/material_request_orchestrator.py", "tests/unit/agent_runtime/test_material_request_orchestrator.py"], ["业务意图草稿", "Resolver 结果", "ToolCall 契约"], ["ready ToolCall", "needs_material_selection", "needs_item_creation", "needs_clarification"]),
       node("memory", "结构化记忆", "业务 ID 状态", "runtime", "planned", 380, 445, 52, "计划用于保存多轮流程里的采购申请号、采购订单号、项目、仓库、审批状态等。当前主要通过脚本和文档记录。", ["docs/architecture/agent-toolcall-usage-strategy.md"], ["ToolResult", "用户确认", "业务对象 ID"], ["跨轮上下文", "后续流程引用"]),
       node("tool_contracts", "ToolCall 契约", "Data Dictionary", "tool", "done", 620, 560, 61, "定义工具字段、角色、确认策略、Resolver、修复策略和底层映射。它让 ToolCall 像数据库表一样可治理。", ["src/nexterp_agent/agent_runtime/tool_contracts.py", "config/tool_contracts", "docs/reference/toolcall-data-dictionary.md"], ["Tool schema", "人工约束", "风险策略"], ["ToolContract", "参数说明书"]),
@@ -566,14 +565,12 @@
       node("tool_schemas", "Tool schemas", "五大模块+通用", "tool", "done", 1385, 455, 52, "当前工具 schema 被拆分到用户权限、资产、库存、采购、财务、通用等模块，统一由 tool_registry 导出。", ["src/nexterp_agent/erpnext/tool_schemas", "docs/reference/toolcall-current-inventory.md"], ["ERPNext 功能覆盖需求"], ["Agent 可见工具定义", "Adapter handler 对齐检查"]),
       node("erp_api", "ERPNext/Frappe", "API 与权限", "erp", "done", 1180, 755, 66, "最终执行层。ERPNext 后端负责真实业务权限、DocType 校验、提交规则和数据库写入。", ["src/nexterp_agent/erpnext/client.py", "docs/reference/erpnext-capability-map.md"], ["Frappe REST/method 调用", "当前 API 用户"], ["ERPNext 单据", "Frappe 错误", "业务状态"]),
       node("bridge", "agent_bridge", "复杂业务方法", "erp", "done", 1420, 720, 56, "ERPNext 内的自定义 app，用于暴露复杂业务方法，例如库存建议、项目风险、管理层异常摘要等。", ["frappe-bench/apps/agent_bridge", "docs/reference/agent-bridge-api.md"], ["业务方法调用", "ERPNext 内部模型"], ["业务聚合结果", "复杂操作草稿"]),
-      node("sandbox", "本地 Sandbox", "独立 ERPNext site", "erp", "done", 940, 810, 56, "本地 ERPNext 测试账套，用于随便造客户、物料、采购、库存和沙盘数据，不影响未来公司真实系统。", ["docs/operations/local-sandbox.md", "scripts/dev"], ["初始化脚本", "测试账号", "沙盘数据"], ["可登录 ERPNext 页面", "集成测试环境"]),
+      node("sandbox", "本地开发账套", "独立 ERPNext site", "erp", "done", 940, 810, 56, "本地 ERPNext 开发账套，承载 UP 事业部基础主数据和 Agent 集成测试，不影响未来公司真实系统。", ["docs/operations/local-sandbox.md", "scripts/dev"], ["主数据发布", "测试账号"], ["可登录 ERPNext 页面", "集成测试环境"]),
       node("material_release", "物料发布表", "release v0.3", "material", "done", 300, 690, 65, "当前发布版物料主数据。约 1,984 条 SKU，统一了四级结构、SKU 名称、规格、单位、别名和搜索词。", ["data/material_master/release_v0_3/material_master_release_v0_3.tsv", "data/material_master/README.md"], ["采购清单", "DeepSeek SKU 治理", "人工分类"], ["标准物料 TSV", "浏览器 JSON", "Resolver 数据源"]),
       node("material_browser", "物料浏览器", "四级查看", "material", "done", 170, 520, 52, "当前你正在使用的物料主数据浏览器。按一级类目、物料族、物料名称、SKU 明细查看，不写 ERPNext。", ["tools/material_master_browser.html", "data/material_master/release_v0_3/material_master_release_v0_3_browser_data.json"], ["发布版 browser_data.json"], ["人工检查界面", "分类治理反馈"]),
       node("material_resolver", "物料 Resolver", "人话到 SKU", "material", "active", 520, 725, 61, "把“帆布手套”“6.8级螺栓 M12*40”等人话物料词解析成候选或唯一 SKU。高置信才进入 ToolCall。", ["src/nexterp_agent/item_master/release_resolver.py", "tests/unit/item_master/test_release_material_resolver.py"], ["raw_item_text", "结构化规格", "发布版物料表"], ["ready", "needs_confirmation", "not_found"]),
       node("material_governance", "物料治理脚本", "分类/SKU/发布", "material", "active", 145, 830, 55, "从原始采购清单到治理表、人工映射、DeepSeek SKU 治理、发布版构建的一组脚本。", ["scripts/material_master", "docs/reference/material-sku-governance-prompt-v0.3.md"], ["原始清单", "人工规则", "DeepSeek 输出"], ["治理中间表", "发布版物料表"]),
-      node("scenario_day", "一天业务沙盘", "小型土木公司", "scenario", "active", 585, 880, 56, "按 08:00 到 18:00 的真实业务顺序验证采购、库存、退货、领料、财务和管理层摘要。", ["docs/scenarios/civil-company-day-events.md", "docs/scenarios/civil-company-day-execution-log.md"], ["员工角色", "项目仓库", "物料与供应商"], ["端到端业务验证", "缺失 ToolCall 清单"]),
-      node("wizard", "Wizard 测试台", "手动扮演 Agent", "scenario", "done", 760, 905, 50, "在真正接入完整 Agent Runtime 前，由人点击 ToolCall 验证业务流程是否能跑通。", ["docs/scenarios/wizard-of-oz-testing.md", "scripts/wizard_workbench.py"], ["手动选择 ToolCall", "沙盘数据"], ["操作结果", "流程缺口"]),
-      node("coverage", "覆盖矩阵", "ToolCall 能力清单", "scenario", "done", 1510, 560, 52, "记录各模块有哪些功能已经能被 ToolCall 控制，哪些仍需要补业务方法或更细的工具。", ["docs/reference/toolcall-five-module-control-matrix.md", "docs/scenarios/civil-company-day-toolcall-coverage.md"], ["ERPNext 模块能力", "沙盘事件"], ["覆盖状态", "开发优先级"]),
+      node("coverage", "覆盖矩阵", "ToolCall 能力清单", "governance", "done", 1510, 560, 52, "记录各模块有哪些功能已经能被 ToolCall 控制，哪些仍需要补业务方法或更细的工具。", ["docs/reference/toolcall-five-module-control-matrix.md", "docs/reference/toolcall-current-inventory.md"], ["ERPNext 模块能力", "工具注册表"], ["覆盖状态", "开发优先级"]),
       node("docs", "项目文档", "README/架构/参考", "governance", "done", 1490, 210, 55, "项目知识入口。把架构、计划、参考、运行、沙盘分开放，防止长期开发后信息混在一起。", ["docs/README.md", "docs/architecture/project-structure.md"], ["实现状态", "设计决策", "测试结论"], ["索引", "长期记忆", "开发指引"]),
       node("tests", "测试体系", "unit/integration", "governance", "done", 1490, 325, 50, "覆盖 ToolCall、Adapter、物料 Resolver、编排器和沙盘脚本的验证。当前新增 Resolver 相关测试 11 条通过。", ["tests/unit", "tests/integration"], ["代码变更", "业务样例"], ["回归结果", "行为约束"]),
       node("github", "GitHub/Git", "版本基线", "governance", "done", 1280, 160, 48, "记录当前项目提交历史和远端同步。近期提交包括物料发布版 v0.3 和物料 Resolver 编排层。", [".git", "docs/project-status.md"], ["代码与文档变更"], ["可回滚基线", "远程仓库"])
@@ -599,9 +596,6 @@
       edge("material_governance", "material_release", "data", "生成发布版物料表"),
       edge("material_release", "material_browser", "data", "生成浏览器数据"),
       edge("material_browser", "material_governance", "doc", "人工检查反馈治理规则"),
-      edge("scenario_day", "coverage", "doc", "沙盘暴露缺失 ToolCall"),
-      edge("wizard", "scenario_day", "flow", "手动跑业务流程"),
-      edge("sandbox", "scenario_day", "data", "沙盘读写本地 ERPNext"),
       edge("coverage", "tool_schemas", "doc", "覆盖矩阵指导工具补齐"),
       edge("tests", "orchestrator", "doc", "单元测试约束编排行为"),
       edge("tests", "material_resolver", "doc", "单元测试约束检索行为"),
@@ -697,7 +691,7 @@
             <text class="zone-label" x="900" y="524">ToolCall 执行通道</text>
             <text class="zone-label" x="1180" y="696">ERPNext 执行层</text>
             <text class="zone-label" x="300" y="625">物料主数据域</text>
-            <text class="zone-label" x="665" y="835">业务沙盘验证</text>
+            <text class="zone-label" x="665" y="835">集成验证</text>
           </g>
           <g id="edges"></g>
           <g id="nodes"></g>
