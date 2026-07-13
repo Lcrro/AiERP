@@ -32,6 +32,7 @@ class PlannerSequence:
 class FakeERPNextClient:
     def __init__(self) -> None:
         self.created = []
+        self.searches = []
 
     def get_logged_user(self):
         return ToolResult(ok=True, data="mao.xiaoquan@stec-up.local")
@@ -40,9 +41,24 @@ class FakeERPNextClient:
         self.created.append((doctype, data))
         return ToolResult(ok=True, data={"doctype": doctype, "name": "MAT-MR-TEST-0001", "docstatus": 0})
 
-    def search_documents(self, doctype, **_kwargs):
-        assert doctype == "Project"
-        return ToolResult(ok=True, data=[{"name": "PROJ-0010", "project_name": "合流1.3标"}])
+    def search_documents(self, doctype, **kwargs):
+        self.searches.append((doctype, kwargs))
+        if doctype == "Project":
+            return ToolResult(ok=True, data=[{"name": "PROJ-0010", "project_name": "合流1.3标"}])
+        if doctype == "Bin":
+            item_codes = kwargs["filters"][0][2]
+            return ToolResult(ok=True, data=[
+                {
+                    "name": f"BIN-{item_code}",
+                    "item_code": item_code,
+                    "warehouse": "蕰川路基地仓库 - SD",
+                    "actual_qty": 5,
+                    "reserved_qty": 1,
+                    "projected_qty": 7,
+                }
+                for item_code in item_codes
+            ])
+        raise AssertionError(f"Unexpected doctype: {doctype}")
 
     def get_document(self, doctype, name):
         assert doctype == "Item"
@@ -155,6 +171,52 @@ def test_forged_entity_is_rejected_and_returned_to_model(tmp_path: Path) -> None
     assert result.status == "needs_clarification"
     assert result.questions == ("请选择真实物料。",)
     assert any("不是Resolver" in message[1]["content"] for message in planner.messages if len(message) > 1)
+
+
+def test_item_resolution_batches_candidate_inventory_once(tmp_path: Path) -> None:
+    release = MasterDataRelease()
+    materials = release.materials[:2]
+    project = release.projects["PRJ-HL-13"]
+    planner = PlannerSequence([
+        {"action": "resolve_entities", "summary": "解析候选并查询库存", "arguments": {"entities": [
+            {
+                "id": str(index),
+                "kind": "item",
+                "query": material["item_code"],
+                "qty": 10,
+                "uom": material["stock_uom"],
+            }
+            for index, material in enumerate(materials, start=1)
+        ]}},
+        {"action": "ask_user", "summary": "请确认候选", "arguments": {"questions": ["请选择物料。"]}},
+    ])
+    client = FakeERPNextClient()
+    runtime = DeepSeekAgentRuntime(
+        release=release,
+        planner=planner,
+        client_factory=lambda _user: client,
+        session_store=RuntimeSessionStore(tmp_path),
+    )
+
+    result = runtime.run_once(
+        "查两个候选物料库存",
+        user="mao.xiaoquan@stec-up.local",
+        context={"project_code": project["project_code"], "warehouse": project["default_warehouse_code"]},
+    )
+
+    bin_searches = [search for search in client.searches if search[0] == "Bin"]
+    assert len(bin_searches) == 1
+    assert bin_searches[0][1]["filters"] == [
+        ["item_code", "in", [material["item_code"] for material in materials]],
+        ["warehouse", "in", ["合流1.3标仓库 - SD", "蕰川路基地仓库 - SD"]],
+    ]
+    observation = next(step["result"] for step in result.steps if step["label"] == "解析实体")
+    assert observation["inventory_query"]["status"] == "completed"
+    for entity in observation["entities"]:
+        candidate = entity["resolution"]["candidates"][0]
+        assert candidate["inventory"]
+        assert candidate["inventory_summary"]["total_available_qty"] == 4
+        assert candidate["inventory_summary"]["shortage_qty"] == 6
 
 
 def test_confirmation_executes_pending_call_then_returns_model_finish(tmp_path: Path) -> None:

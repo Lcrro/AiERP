@@ -35,6 +35,23 @@ DeepSeek 负责理解、规划、选工具和解释结果。以下能力保持�
 
 旧 `CivilAgentRuntime` 作为 `LegacyCivilAgentRuntime` 仅供回归测试。默认 `CivilAgentRuntime` 是 `DeepSeekAgentRuntime` 的兼容名称。
 
+### 候选物料库存补全
+
+物料实体解析采用一条无缓存的请求内链路：
+
+```text
+用户描述
+-> ReleaseMaterialResolver 返回候选物料
+-> 收集本次动作内所有候选 item_code
+-> 员工本人 ERPNext API 账号一次查询 Bin
+-> 将各仓实际量、预留量、可用量和预计量合并到候选
+-> DeepSeek 比较候选并向员工推荐
+```
+
+当前相关仓库限定为所选项目仓和蕰川路基地仓库。查询结果只存在于本轮 observation，
+不写入物料检索缓存或库存缓存。用户提供需求数量和单位时，候选结果同时计算库存缺口；
+单位不一致时不自动换算缺口。
+
 ## 审计
 
 每轮保存当前项目、仓库、已确认实体、历史单号、待确认动作和 Agent 步骤。网页只展示可审计的动作摘要、参数和 observation，不展示模型隐藏思维过程。

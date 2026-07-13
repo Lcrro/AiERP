@@ -13,6 +13,7 @@ from nexterp_agent.erpnext.tool_registry import ERPNext_TOOL_SCHEMAS
 from nexterp_agent.item_master.release_resolver import ReleaseMaterialResolver
 from nexterp_agent.master_data import MasterDataRelease
 
+from .candidate_inventory import enrich_item_entity_results
 from .deepseek_material_request import DeepSeekSettings, call_deepseek_json
 from .resolvers import EntityResolverRegistry, ResolutionResult
 from .session import RuntimeSessionState, RuntimeSessionStore
@@ -223,7 +224,7 @@ class DeepSeekAgentRuntime:
                 observations.append(observation)
                 continue
             if kind == "resolve_entities":
-                observation = self._resolve_entities(arguments, user=user, today=today)
+                observation = self._resolve_entities(arguments, user=user, today=today, session=session)
                 steps.append(_step("解析实体", kind, arguments, observation))
                 observations.append(observation)
                 session.selected_entities.update(_resolved_entity_values(observation))
@@ -280,6 +281,9 @@ class DeepSeekAgentRuntime:
             "你不能猜测ERPNext主键；物料、项目、仓库、供应商、公司、员工和单据号必须先resolve_entities，"
             "或来自runtime_context中已经确认的数据。先discover_tools，再get_tool_contracts，拿到契约后才能execute_tool。"
             "只读工具可直接执行；写工具会由Runtime暂停并要求用户确认。候选不唯一时ask_user。"
+            "物料解析结果会自动附带候选SKU在各仓库的实时库存；必须结合候选匹配度和库存分布比较推荐，"
+            "不得再次逐个查询这些候选的库存。用户明确说出物料需求数量和单位时，"
+            "resolve_entities中的对应item必须填写qty和uom，不得省略。"
             "完成后finish，并只引用observation中的真实数字、状态和单号。不要展示隐藏思维过程。"
             "必须严格使用action_schemas中给出的字段名，不得用type/value/materials/items等替代entities中的kind/query。"
         )
@@ -288,7 +292,7 @@ class DeepSeekAgentRuntime:
             "action_schemas": {
                 "discover_tools": {"query": "描述所需业务能力，必填", "modules": ["generic | users | assets | stock | buying | accounting | projects"], "limit": "1-8"},
                 "get_tool_contracts": {"tool_names": ["从discover_tools结果逐字复制的工具名，最多5个"]},
-                "resolve_entities": {"entities": [{"id": "本轮唯一标识", "kind": "item | project | warehouse | supplier | company | employee | date | uom | document", "query": "用户原话或待核对主键", "specs": {}, "doctype": "kind=document时必填"}]},
+                "resolve_entities": {"entities": [{"id": "本轮唯一标识", "kind": "item | project | warehouse | supplier | company | employee | date | uom | document", "query": "用户原话或待核对主键", "specs": {}, "qty": "kind=item时可提供需求数量", "uom": "kind=item时可提供用户单位", "doctype": "kind=document时必填"}]},
                 "execute_tool": {"tool_call": {"tool": "已读取契约的工具名", "arguments": {}}},
                 "ask_user": {"questions": ["最少必要问题"], "candidates": []},
                 "finish": {"message": "基于真实observation的最终答复"},
@@ -318,7 +322,14 @@ class DeepSeekAgentRuntime:
                 attempt_messages.append({"role": "system", "content": f"上一次输出不符合动作协议：{exc}。请只返回合法JSON动作。"})
         raise ValueError(str(error))
 
-    def _resolve_entities(self, arguments: dict[str, Any], *, user: str, today: date) -> dict[str, Any]:
+    def _resolve_entities(
+        self,
+        arguments: dict[str, Any],
+        *,
+        user: str,
+        today: date,
+        session: RuntimeSessionState,
+    ) -> dict[str, Any]:
         entities = arguments.get("entities") or []
         results = []
         for entity in entities[:20]:
@@ -327,7 +338,14 @@ class DeepSeekAgentRuntime:
             query = entity.get("query")
             if kind == "item":
                 resolution = self.material_resolver.resolve(str(query or ""), specs=entity.get("specs") or {}, limit=5)
-                results.append({"id": entity_id, "kind": kind, "query": query, "resolution": resolution})
+                results.append({
+                    "id": entity_id,
+                    "kind": kind,
+                    "query": query,
+                    "requested_qty": entity.get("qty"),
+                    "requested_uom": entity.get("uom"),
+                    "resolution": resolution,
+                })
                 continue
             if kind == "document":
                 doctype = str(entity.get("doctype") or "").strip()
@@ -346,7 +364,44 @@ class DeepSeekAgentRuntime:
                 results.append({"id": entity_id, "kind": kind, "query": query, "resolution": resolution.to_dict()})
             except KeyError:
                 results.append({"id": entity_id, "kind": kind, "query": query, "resolution": {"status": "unsupported", "question": f"不支持的实体类型：{kind}"}})
-        return {"type": "resolve_entities", "entities": results}
+        inventory_query = {"status": "skipped", "reason": "没有物料候选或ERPNext客户端不可用。"}
+        if self.client_factory is not None and any(result.get("kind") == "item" for result in results):
+            inventory_query = enrich_item_entity_results(
+                results,
+                client=self.client_factory(user),
+                preferred_warehouse=self._preferred_inventory_warehouse(session),
+                related_warehouses=self._related_inventory_warehouses(session),
+            )
+        return {"type": "resolve_entities", "entities": results, "inventory_query": inventory_query}
+
+    def _preferred_inventory_warehouse(self, session: RuntimeSessionState) -> str | None:
+        selected = str(session.selected_warehouse_name or "").strip()
+        if selected:
+            for warehouse in self.release.warehouses.values():
+                if selected in {
+                    warehouse.get("warehouse_code"),
+                    warehouse.get("warehouse_name"),
+                    warehouse.get("erpnext_warehouse_name"),
+                }:
+                    return warehouse.get("erpnext_warehouse_name") or selected
+            return selected
+        project = self.release.projects.get(str(session.selected_project_code or ""))
+        if not project:
+            return None
+        warehouse = self.release.warehouses.get(project.get("default_warehouse_code", ""))
+        return warehouse.get("erpnext_warehouse_name") if warehouse else None
+
+    def _related_inventory_warehouses(self, session: RuntimeSessionState) -> list[str]:
+        preferred = self._preferred_inventory_warehouse(session)
+        related = [preferred] if preferred else []
+        for warehouse in self.release.warehouses.values():
+            if warehouse.get("status") != "active":
+                continue
+            if warehouse.get("warehouse_code") == "WH-WCL-BASE":
+                name = warehouse.get("erpnext_warehouse_name")
+                if name and name not in related:
+                    related.append(name)
+        return related
 
     def _validate_proposed_call(self, call: Any, *, policy, session: RuntimeSessionState, observations: list[dict[str, Any]]) -> str | None:
         if not isinstance(call, dict) or not isinstance(call.get("tool"), str) or not isinstance(call.get("arguments") or {}, dict):
