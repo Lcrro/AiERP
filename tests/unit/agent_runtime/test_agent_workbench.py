@@ -34,3 +34,12 @@ def test_result_document_links_build_erpnext_route() -> None:
             "url": "http://localhost:8002/app/material-request/MAT-MR-2026-00001",
         }
     ]
+
+
+def test_project_catalog_contains_project_specific_and_organization_employees() -> None:
+    projects = {row["project_code"]: row for row in MODULE.project_catalog()}
+    names = {row["employee_name"] for row in projects["PRJ-HL-13"]["employees"]}
+
+    assert projects["PRJ-HL-13"]["project_short_name"] == "合流1.3标"
+    assert {"张振光", "林乔航", "毛晓泉", "徐溥祺"} <= names
+    assert "梁志华" not in names

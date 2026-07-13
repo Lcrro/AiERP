@@ -34,9 +34,12 @@
       .status { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
       .dot { width: 8px; height: 8px; border-radius: 50%; background: #9aa6b2; }
       .dot.ok { background: var(--accent); }
-      main { height: calc(100vh - 58px); display: grid; grid-template-columns: 230px minmax(420px, 1fr) minmax(340px, 42%); }
+      main { height: calc(100vh - 58px); display: grid; grid-template-columns: 270px minmax(420px, 1fr) minmax(390px, 42%); }
       aside, section { min-width: 0; }
       .employees { border-right: 1px solid var(--line); background: var(--surface); overflow: auto; }
+      .project-picker { padding: 0 12px 12px; }
+      .project-picker select { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+      .project-meta { margin-top: 7px; color: var(--muted); font-size: 11px; line-height: 1.45; }
       .panel-title { padding: 14px 16px 10px; color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
       .employee { width: 100%; padding: 12px 16px; border: 0; border-radius: 0; border-top: 1px solid #edf0f2; text-align: left; background: transparent; }
       .employee.active { background: var(--accent-soft); box-shadow: inset 3px 0 var(--accent); }
@@ -63,6 +66,7 @@
       .tabs { position: sticky; top: 0; z-index: 2; display: flex; border-bottom: 1px solid var(--line); background: var(--surface); }
       .tab { padding: 12px 14px; border: 0; border-radius: 0; color: var(--muted); }
       .tab.active { color: var(--accent); box-shadow: inset 0 -2px var(--accent); }
+      .tab.documents-tab { margin-left: auto; font-weight: 700; }
       .detail-body { padding: 14px; }
       .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
       .metric { padding: 10px; border: 1px solid var(--line); border-radius: 6px; }
@@ -72,6 +76,14 @@
       .links { margin: 0 0 14px; padding: 0; list-style: none; }
       .links li { margin-bottom: 7px; }
       .links a { color: var(--accent); text-decoration: none; font-weight: 600; }
+      .module { margin-bottom: 18px; }
+      .module h3 { margin: 0 0 8px; font-size: 14px; }
+      .doctype-group { margin-bottom: 10px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+      .doctype-head { display: flex; justify-content: space-between; padding: 8px 10px; background: var(--surface-2); font-size: 12px; font-weight: 700; }
+      .doc-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 8px 10px; border-top: 1px solid #edf0f2; font-size: 12px; }
+      .doc-row a { color: var(--accent); text-decoration: none; font-weight: 600; overflow-wrap: anywhere; }
+      .doc-row span, .no-docs { color: var(--muted); }
+      .no-docs { padding: 9px 10px; font-size: 12px; border-top: 1px solid #edf0f2; }
       .confirm-bar { display: none; padding: 12px 14px; border-top: 1px solid #efd998; background: var(--warn-soft); }
       .confirm-bar.visible { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
       .confirm-bar span { color: #704f00; font-size: 13px; }
@@ -96,7 +108,9 @@
     </header>
     <main>
       <aside class="employees">
-        <div class="panel-title">测试员工</div>
+        <div class="panel-title">项目</div>
+        <div class="project-picker"><select id="projectSelect"></select><div id="projectMeta" class="project-meta"></div></div>
+        <div class="panel-title">项目员工与岗位</div>
         <div id="employeeList"></div>
       </aside>
       <section class="chat">
@@ -131,12 +145,13 @@
           <button class="tab" data-tab="toolcall">ToolCall</button>
           <button class="tab" data-tab="result">ToolResult</button>
           <button class="tab" data-tab="raw">完整 JSON</button>
+          <button class="tab documents-tab" data-tab="documents">业务单据</button>
         </div>
         <div id="detailBody" class="detail-body"><p class="empty">执行一次预览后，这里会显示结构化过程。</p></div>
       </aside>
     </main>
     <script>
-      const state = { employees: [], user: null, preview: null, lastText: "", executeId: null, tab: "overview" };
+      const state = { projects: [], project: null, employees: [], user: null, preview: null, documents: null, lastText: "", executeId: null, tab: "overview" };
       const $ = (id) => document.getElementById(id);
       const esc = (v) => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
       const pretty = (value) => JSON.stringify(value ?? null, null, 2);
@@ -150,21 +165,42 @@
 
       async function boot() {
         try {
-          const [health, catalog] = await Promise.all([api("/api/health"), api("/api/employees")]);
+          const [health, catalog] = await Promise.all([api("/api/health"), api("/api/catalog")]);
           $("healthDot").classList.add("ok"); $("healthText").textContent = `Agent 服务已连接 · ${health.profile}`;
-          state.employees = catalog.employees; renderEmployees(); selectEmployee(catalog.employees.find(e => e.employee_name === "毛晓泉") || catalog.employees[0]);
+          state.projects = catalog.projects;
+          $("projectSelect").innerHTML = state.projects.map(p => `<option value="${esc(p.project_code)}">${esc(p.project_short_name)} · ${esc(p.operating_status)}</option>`).join("");
+          $("projectSelect").onchange = () => selectProject(state.projects.find(p => p.project_code === $("projectSelect").value));
+          selectProject(state.projects.find(p => p.project_code === "PRJ-HL-13") || state.projects[0]);
         } catch (error) { $("healthText").textContent = error.message; }
       }
 
+      function selectProject(project) {
+        state.project = project; state.employees = project.employees || []; state.documents = null;
+        $("projectSelect").value = project.project_code;
+        $("projectMeta").textContent = `${project.project_name}\n默认仓库：${project.warehouse_code || "未配置"}`;
+        renderEmployees();
+        selectEmployee(state.employees.find(e => e.employee_name === "毛晓泉") || state.employees[0] || null);
+      }
+
       function renderEmployees() {
-        $("employeeList").innerHTML = state.employees.map(e => `<button class="employee" data-user="${esc(e.user_email)}"><strong>${esc(e.employee_name)}</strong><span>${esc(e.position)}</span><span>${esc(e.user_email)}</span></button>`).join("");
+        $("employeeList").innerHTML = state.employees.length ? state.employees.map(e => `<button class="employee" data-user="${esc(e.user_email)}"><strong>${esc(e.employee_name)}</strong><span>${esc(e.project_position || e.position)}</span><span>${esc(e.user_email)}</span></button>`).join("") : `<div class="no-docs">该项目尚未配置项目员工，仅保留基础项目资料。</div>`;
         document.querySelectorAll(".employee").forEach(btn => btn.onclick = () => selectEmployee(state.employees.find(e => e.user_email === btn.dataset.user)));
       }
 
       function selectEmployee(employee) {
         state.user = employee;
-        document.querySelectorAll(".employee").forEach(btn => btn.classList.toggle("active", btn.dataset.user === employee.user_email));
-        $("actorLabel").textContent = `${employee.employee_name} · ${employee.position}`;
+        document.querySelectorAll(".employee").forEach(btn => btn.classList.toggle("active", employee && btn.dataset.user === employee.user_email));
+        $("actorLabel").textContent = employee ? `${state.project.project_short_name} · ${employee.employee_name} · ${employee.project_position || employee.position}` : "该项目暂未配置员工";
+        loadDocuments();
+      }
+
+      async function loadDocuments() {
+        if (!state.user || !state.project) { state.documents = null; renderDetails(); return; }
+        state.documents = {loading:true}; if (state.tab === "documents") renderDetails();
+        try {
+          state.documents = await api(`/api/documents?user=${encodeURIComponent(state.user.user_email)}&project=${encodeURIComponent(state.project.project_code)}`);
+        } catch (error) { state.documents = {error:error.message}; }
+        if (state.tab === "documents") renderDetails();
       }
 
       function addMessage(kind, text, links = []) {
@@ -192,9 +228,15 @@
       function setBusy(busy) { $("previewBtn").disabled = busy; $("executeBtn").disabled = busy; $("previewBtn").textContent = busy ? "处理中..." : "预览 Agent 操作"; }
 
       function renderDetails() {
-        const r = state.preview; if (!r) return;
+        const r = state.preview;
         document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === state.tab));
-        if (state.tab === "overview") {
+        if (state.tab === "documents") {
+          if (!state.documents || state.documents.loading) { $("detailBody").innerHTML = `<p class="empty">正在读取当前员工可见单据...</p>`; return; }
+          if (state.documents.error) { $("detailBody").innerHTML = `<p class="message error">${esc(state.documents.error)}</p>`; return; }
+          $("detailBody").innerHTML = `<div class="summary"><div class="metric"><span>项目</span><strong>${esc(state.project?.project_short_name)}</strong></div><div class="metric"><span>员工</span><strong>${esc(state.user?.employee_name)}</strong></div><div class="metric"><span>数据范围</span><strong>ERPNext 权限内</strong></div></div>${(state.documents.modules||[]).map(m => `<div class="module"><h3>${esc(m.label)}</h3>${m.groups.map(g => `<div class="doctype-group"><div class="doctype-head"><span>${esc(g.label)}</span><span>${g.documents.length}</span></div>${g.error ? `<div class="no-docs">${esc(g.error)}</div>` : g.documents.length ? g.documents.map(d => `<div class="doc-row"><a target="_blank" href="${esc(d.url)}">${esc(d.name)}</a><span>${esc(d.modified || "")}</span></div>`).join("") : `<div class="no-docs">当前项目暂无可见单据</div>`}</div>`).join("")}</div>`).join("")}`;
+        } else if (!r) {
+          $("detailBody").innerHTML = `<p class="empty">执行一次预览后，这里会显示结构化过程。</p>`;
+        } else if (state.tab === "overview") {
           const questions = (r.questions || []).map(q => `<li>${esc(q)}</li>`).join("");
           $("detailBody").innerHTML = `<div class="summary"><div class="metric"><span>状态</span><strong>${esc(r.status)}</strong></div><div class="metric"><span>意图</span><strong>${esc(r.intent?.intent)}</strong></div><div class="metric"><span>员工</span><strong>${esc(state.user?.employee_name)}</strong></div></div>${(r.document_links||[]).length ? `<ul class="links">${r.document_links.map(l=>`<li><a target="_blank" href="${esc(l.url)}">${esc(l.name)}</a></li>`).join("")}</ul>`:""}${questions ? `<h3>需要补充</h3><ul>${questions}</ul>`:""}<h3>解析结果</h3><pre>${esc(pretty(r.resolutions))}</pre>`;
         } else if (state.tab === "toolcall") $("detailBody").innerHTML = `<pre>${esc(pretty(r.tool_calls?.length ? r.tool_calls : r.tool_call))}</pre>`;
@@ -206,7 +248,7 @@
       $("cancelConfirm").onclick = () => $("confirmBar").classList.remove("visible");
       $("clearBtn").onclick = () => { $("input").value = ""; $("messages").innerHTML = ""; state.preview = null; $("detailBody").innerHTML = ""; $("confirmBar").classList.remove("visible"); };
       document.querySelectorAll("[data-example]").forEach(btn => btn.onclick = () => { $("input").value = btn.dataset.example; $("input").focus(); });
-      document.querySelectorAll(".tab").forEach(tab => tab.onclick = () => { state.tab = tab.dataset.tab; renderDetails(); });
+      document.querySelectorAll(".tab").forEach(tab => tab.onclick = () => { state.tab = tab.dataset.tab; renderDetails(); if (state.tab === "documents" && !state.documents) loadDocuments(); });
       $("input").addEventListener("keydown", e => { if (e.ctrlKey && e.key === "Enter") run(false); });
       boot();
     </script>

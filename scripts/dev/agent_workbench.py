@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 import sys
 from typing import Any
-from urllib.parse import quote, urlparse
+from urllib.parse import parse_qs, quote, urlparse
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -33,6 +33,26 @@ DOCTYPE_ROUTES = {
     "Project": "project",
     "ToDo": "todo",
 }
+DOCUMENT_MODULES = (
+    ("buying", "采购", (
+        ("Material Request", "材料申请", "Material Request Item"),
+        ("Request for Quotation", "询价单", None),
+        ("Purchase Order", "采购订单", "Purchase Order Item"),
+        ("Purchase Receipt", "采购收货", "Purchase Receipt Item"),
+    )),
+    ("stock", "库存", (
+        ("Stock Entry", "库存移动", "Stock Entry Detail"),
+    )),
+    ("accounting", "财务", (
+        ("Purchase Invoice", "采购发票", "Purchase Invoice Item"),
+        ("Payment Entry", "付款单", None),
+    )),
+    ("projects", "项目协作", (
+        ("Task", "任务", "Task"),
+        ("ToDo", "待办", None),
+    )),
+)
+DOCTYPE_ROUTES.update({"Payment Entry": "payment-entry", "Task": "task"})
 
 
 def load_dotenv(path: Path) -> None:
@@ -86,6 +106,39 @@ def employee_catalog() -> list[dict[str, str]]:
     ]
 
 
+def project_catalog() -> list[dict[str, Any]]:
+    release = MasterDataRelease()
+    employees = {row["employee_code"]: row for row in employee_catalog()}
+    assignments = release.table("employee_assignments.tsv", include_candidates=False)
+    organization_people = {
+        row["employee_code"] for row in assignments
+        if row.get("scope_type") == "organization" and row.get("scope_code") == "DEPT-UP" and row.get("is_active") == "1"
+    }
+    project_roles: dict[str, list[dict[str, str]]] = {}
+    for project_code, project in release.projects.items():
+        people: dict[str, dict[str, str]] = {}
+        for row in assignments:
+            employee_code = row.get("employee_code", "")
+            if employee_code not in employees or row.get("is_active") != "1":
+                continue
+            if employee_code in organization_people or row.get("scope_code") == project_code:
+                person = dict(employees[employee_code])
+                person["project_position"] = row.get("position", person["position"]) if row.get("scope_code") == project_code else person["position"]
+                people[employee_code] = person
+        project_roles[project_code] = sorted(people.values(), key=lambda row: (row["position"] != "项目经理", row["employee_name"]))
+    return [
+        {
+            "project_code": code,
+            "project_name": row["project_name"],
+            "project_short_name": row["project_short_name"],
+            "operating_status": row.get("project_operating_status", ""),
+            "warehouse_code": row.get("default_warehouse_code", ""),
+            "employees": project_roles[code],
+        }
+        for code, row in release.projects.items()
+    ]
+
+
 def result_document_links(result: dict[str, Any], erpnext_base_url: str) -> list[dict[str, str]]:
     links: list[dict[str, str]] = []
     payloads = result.get("tool_results") or ([result.get("tool_result")] if result.get("tool_result") else [])
@@ -130,6 +183,56 @@ class AgentWorkbenchService:
 
         return CivilAgentRuntime(client_factory=client_factory)
 
+    def client(self, user: str) -> ERPNextClient:
+        credentials = load_user_credentials(user)
+        return ERPNextClient(self.base_url, credentials["api_key"], credentials["api_secret"], host_header=self.host_header, timeout=90)
+
+    def documents(self, user: str, project: str = "") -> dict[str, Any]:
+        if not user:
+            raise ValueError("user 必填")
+        client = self.client(user)
+        modules: list[dict[str, Any]] = []
+        for module_code, module_label, doctypes in DOCUMENT_MODULES:
+            groups: list[dict[str, Any]] = []
+            for doctype, label, project_child in doctypes:
+                filters: dict[str, Any] = {}
+                if project and project_child:
+                    child_result = client.search_documents(
+                        project_child,
+                        filters={"project": project},
+                        fields=["name", "parent"] if project_child != "Task" else ["name"],
+                        limit=100,
+                    )
+                    child_rows = child_result.data if child_result.ok and isinstance(child_result.data, list) else []
+                    names = [row.get("name") if project_child == "Task" else row.get("parent") for row in child_rows]
+                    names = list(dict.fromkeys(name for name in names if name))
+                    if not names:
+                        groups.append({"doctype": doctype, "label": label, "documents": []})
+                        continue
+                    filters = {"name": ["in", names]}
+                result = client.search_documents(
+                    doctype,
+                    filters=filters,
+                    fields=["name", "owner", "modified", "docstatus"],
+                    limit=30,
+                    order_by="modified desc",
+                )
+                rows = result.data if result.ok and isinstance(result.data, list) else []
+                groups.append({
+                    "doctype": doctype,
+                    "label": label,
+                    "error": None if result.ok else result.user_message or result.error,
+                    "documents": [
+                        {
+                            **row,
+                            "url": f"{self.base_url.rstrip('/')}/app/{DOCTYPE_ROUTES[doctype]}/{quote(str(row.get('name', '')), safe='')}",
+                        }
+                        for row in rows
+                    ],
+                })
+            modules.append({"code": module_code, "label": module_label, "groups": groups})
+        return {"project": project, "modules": modules}
+
     def run(self, payload: dict[str, Any]) -> dict[str, Any]:
         user = str(payload.get("user") or "").strip()
         text = str(payload.get("text") or "").strip()
@@ -158,6 +261,17 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
             return
         if parsed.path == "/api/employees":
             json_response(self, {"ok": True, "employees": employee_catalog()})
+            return
+        if parsed.path == "/api/catalog":
+            json_response(self, {"ok": True, "projects": project_catalog(), "employees": employee_catalog()})
+            return
+        if parsed.path == "/api/documents":
+            query = parse_qs(parsed.query)
+            payload = self.server.service.documents(  # type: ignore[attr-defined]
+                (query.get("user") or [""])[0],
+                (query.get("project") or [""])[0],
+            )
+            json_response(self, {"ok": True, **payload})
             return
         if parsed.path == "/api/health":
             json_response(self, {"ok": True, "service": "agent-workbench", "profile": self.server.service.profile})  # type: ignore[attr-defined]
