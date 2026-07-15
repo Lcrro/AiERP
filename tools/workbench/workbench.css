@@ -285,3 +285,10 @@
         .field:nth-child(2n) { border-right: 0; }
         .supplier-options, .quotation-rate-grid, .quotation-form-grid, .quotation-entry-head { grid-template-columns: 1fr; }
       }
+.receipt-section { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 8px; }
+.receipt-grid { display: grid; gap: 8px; margin: 10px 0; }
+.receipt-row { display: grid; grid-template-columns: minmax(220px, 1fr) 150px minmax(220px, 1fr); gap: 10px; align-items: end; padding: 10px; border: 1px solid var(--line); background: #f8faf9; }
+.receipt-row span, .receipt-row label { display: grid; gap: 4px; }
+.receipt-row small { color: var(--muted); }
+.receipt-row input { width: 100%; }
+@media (max-width: 900px) { .receipt-row { grid-template-columns: 1fr; } }

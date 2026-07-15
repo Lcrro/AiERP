@@ -486,6 +486,38 @@ def test_create_purchase_order_from_supplier_quotation_uses_specialized_tool(mon
     assert calls[0]["arguments"]["supplier_quotation"] == "SQ-1"
 
 
+def test_create_purchase_receipt_from_purchase_order_uses_specialized_tool(monkeypatch) -> None:
+    calls = []
+
+    class FakeAdapter:
+        def __init__(self, client):
+            assert client == "client"
+
+        def execute(self, call):
+            calls.append(call)
+            return SimpleNamespace(ok=True, data={"doctype": "Purchase Receipt", "name": "PR-1"}, user_message=None, error=None)
+
+    service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
+    monkeypatch.setattr(sys.modules[service.__class__.__module__], "ERPNextAdapter", FakeAdapter)
+    service.client = lambda _user: "client"
+    service.document = lambda user, doctype, name: {"user": user, "doctype": doctype, "name": name}
+    service._idempotency_context = lambda *_args: (None, None)
+    service._remember_idempotent_result = lambda *_args: None
+
+    result = service.create_purchase_receipt_from_purchase_order(
+        "storekeeper@example.com",
+        "PRJ-HL-13",
+        "PO-1",
+        selected_items=[{"purchase_order_item": "POI-1", "qty": 2, "warehouse": "Stores - A"}],
+        request_id="req-1",
+    )
+
+    assert result["name"] == "PR-1"
+    assert result["source_purchase_order"] == "PO-1"
+    assert calls[0]["tool"] == "erpnext.buying.create_purchase_receipt_from_purchase_order_draft"
+    assert calls[0]["arguments"]["selected_items"][0]["qty"] == 2
+
+
 def test_project_catalog_contains_project_specific_and_organization_employees() -> None:
     projects = {row["project_code"]: row for row in MODULE.project_catalog()}
     names = {row["employee_name"] for row in projects["PRJ-HL-13"]["employees"]}

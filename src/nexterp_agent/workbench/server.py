@@ -975,6 +975,36 @@ class AgentWorkbenchService:
         self._remember_idempotent_result(request_context, request_id, payload)
         return payload
 
+    def create_purchase_receipt_from_purchase_order(
+        self,
+        user: str,
+        project: str,
+        purchase_order: str,
+        *,
+        selected_items: list[dict[str, Any]] | None = None,
+        request_id: str = "",
+        conversation_id: str = "default",
+    ) -> dict[str, Any]:
+        if not user or not project or not purchase_order:
+            raise ValueError("user、project 和 purchase_order 必填")
+        cached, request_context = self._idempotency_context(user, project, conversation_id, request_id)
+        if cached is not None:
+            return cached
+        result = ERPNextAdapter(self.client(user)).execute({
+            "tool": "erpnext.buying.create_purchase_receipt_from_purchase_order_draft",
+            "arguments": {
+                "purchase_order": purchase_order,
+                "posting_date": date.today().isoformat(),
+                "selected_items": selected_items or [],
+            },
+        })
+        if not result.ok or not isinstance(result.data, dict) or not result.data.get("name"):
+            raise ValueError(result.user_message or result.error or "创建采购收货草稿失败")
+        payload = self.document(user, "Purchase Receipt", str(result.data["name"]))
+        payload["source_purchase_order"] = purchase_order
+        self._remember_idempotent_result(request_context, request_id, payload)
+        return payload
+
     def _idempotency_context(
         self,
         user: str,
@@ -1600,6 +1630,18 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
                     str(request.get("user") or "").strip(),
                     str(request.get("project_code") or "").strip(),
                     str(request.get("supplier_quotation") or "").strip(),
+                    selected_items=list(request.get("selected_items") or []),
+                    request_id=str(request.get("request_id") or "").strip(),
+                    conversation_id=str(request.get("conversation_id") or "default").strip(),
+                )
+                json_response(self, {"ok": True, **payload})
+                return
+            if self.path == "/api/procurement/purchase-receipt":
+                request = read_json(self)
+                payload = self.server.service.create_purchase_receipt_from_purchase_order(  # type: ignore[attr-defined]
+                    str(request.get("user") or "").strip(),
+                    str(request.get("project_code") or "").strip(),
+                    str(request.get("purchase_order") or "").strip(),
                     selected_items=list(request.get("selected_items") or []),
                     request_id=str(request.get("request_id") or "").strip(),
                     conversation_id=str(request.get("conversation_id") or "default").strip(),

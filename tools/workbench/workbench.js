@@ -38,8 +38,8 @@
         "Task": ["subject","status","priority","project","owner","modified"],
         "ToDo": ["description","status","reference_type","reference_name","owner","modified"],
       };
-      const ITEM_COLUMNS = ["item_code","item_name","description","qty","uom","rate","amount","warehouse","project","schedule_date"];
-      const ITEM_LABELS = {item_code:"物料编码",item_name:"物料名称",description:"描述",qty:"数量",uom:"单位",rate:"单价",amount:"金额",warehouse:"仓库",project:"项目",schedule_date:"需求日期"};
+      const ITEM_COLUMNS = ["item_code","item_name","description","qty","received_qty","uom","rate","amount","warehouse","project","schedule_date"];
+      const ITEM_LABELS = {item_code:"物料编码",item_name:"物料名称",description:"描述",qty:"数量",received_qty:"已收数量",uom:"单位",rate:"单价",amount:"金额",warehouse:"仓库",project:"项目",schedule_date:"需求日期"};
 
       async function api(path, options = {}) {
         const response = await fetch(path, {headers:{"Content-Type":"application/json"}, ...options});
@@ -650,6 +650,7 @@
           ${workflowHistory.length ? `<h3 class="drawer-section-title">审批记录</h3><div class="workflow-history">${workflowHistory.map(row => `<div class="workflow-history-row"><span class="workflow-dot"></span><div><strong>${esc(row.workflow_state || row.status || "流程动作")}</strong><span>${esc(row.completed_by || row.user || "系统")} · ${esc(row.completed_by_role || "")}</span><small>${esc(dateShort(row.modified || row.creation))}</small></div></div>`).join("")}</div>` : ""}
           ${workflowComments.length ? `<h3 class="drawer-section-title">审批备注</h3><div class="workflow-comments">${workflowComments.map(row => `<div class="workflow-comment"><strong>${esc(row.comment_by || row.comment_email || row.owner || "系统")}</strong><p>${esc(row.content || "")}</p><small>${esc(dateShort(row.creation))}</small></div>`).join("")}</div>` : ""}
           ${childRows.length ? `<h3 class="drawer-section-title">明细行 · ${childRows.length}</h3>${detail.doctype === "Material Request" ? `<p class="section-note">材料申请中的价格是测试参考价，用于预计需求金额；供应商报价和采购订单价格才是正式采购价格。</p>` : ""}<div class="items-wrap"><table class="items-table"><thead><tr>${columns.map(key => `<th>${esc(itemColumnLabel(detail.doctype, key))}</th>`).join("")}</tr></thead><tbody>${childRows.map(row => `<tr>${columns.map(key => `<td>${esc(formatItemField(detail.doctype, key, row[key], row))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>` : ""}
+          ${purchaseReceiptPreparationHtml(detail)}
           ${rfqQuotationHtml(detail)}
           ${state.developerMode ? `<details class="raw-details"><summary>查看完整单据 JSON</summary><pre>${esc(pretty(doc))}</pre></details>` : ""}`;
         $("submitDocumentDraft")?.addEventListener("click", async () => {
@@ -693,6 +694,46 @@
         document.querySelectorAll("[data-open-quotation]").forEach(button => button.onclick = () => openDocument("Supplier Quotation", button.dataset.openQuotation));
         document.querySelectorAll("[data-create-purchase-order]").forEach(button => button.onclick = () => createPurchaseOrderFromQuotation(button.dataset.createPurchaseOrder));
         document.querySelectorAll("[data-open-purchase-order]").forEach(button => button.onclick = () => openDocument("Purchase Order", button.dataset.openPurchaseOrder));
+        $("createPurchaseReceipt")?.addEventListener("click", createPurchaseReceiptFromOrder);
+      }
+
+      function purchaseReceiptPreparationHtml(detail) {
+        if (detail.doctype !== "Purchase Order" || Number(detail.document?.docstatus) !== 1) return "";
+        const rows = (detail.document.items || [])
+          .map(row => ({...row, remaining_qty:Math.max(Number(row.qty || 0) - Number(row.received_qty || 0), 0)}))
+          .filter(row => row.remaining_qty > 0);
+        if (!rows.length) return `<section class="receipt-section"><h3 class="drawer-section-title">采购收货</h3><div class="message success">这张采购订单已全部收货。</div></section>`;
+        return `<section class="receipt-section"><h3 class="drawer-section-title">办理收货</h3><p class="section-note">按实际到货数量填写。本次只创建收货草稿，复核并提交后才会增加 ERPNext 库存。</p><div class="receipt-grid">${rows.map(row => `<div class="receipt-row"><span><strong>${esc(row.item_name || row.item_code)}</strong><small>订单 ${esc(formatNumber(row.qty))} ${esc(row.uom || "")} · 已收 ${esc(formatNumber(row.received_qty || 0))} · 待收 ${esc(formatNumber(row.remaining_qty))}</small></span><label>本次<input type="number" min="0" max="${esc(row.remaining_qty)}" step="0.001" value="${esc(row.remaining_qty)}" data-receipt-qty data-po-item="${esc(row.name)}" data-item-code="${esc(row.item_code)}" data-warehouse="${esc(row.warehouse || "")}"></label><label>入库仓库<input type="text" value="${esc(row.warehouse || "")}" data-receipt-warehouse="${esc(row.name)}"></label></div>`).join("")}</div><button id="createPurchaseReceipt" class="primary">创建采购收货草稿</button></section>`;
+      }
+
+      async function createPurchaseReceiptFromOrder() {
+        const rows = [...document.querySelectorAll("[data-receipt-qty]")].map(input => ({
+          purchase_order_item:input.dataset.poItem,
+          item_code:input.dataset.itemCode,
+          qty:Number(input.value || 0),
+          warehouse:document.querySelector(`[data-receipt-warehouse="${CSS.escape(input.dataset.poItem)}"]`)?.value || input.dataset.warehouse,
+        })).filter(row => row.qty > 0);
+        if (!rows.length) { window.alert("请至少填写一条大于 0 的本次收货数量。"); return; }
+        if (!window.confirm(`确认按当前 ${rows.length} 条明细创建采购收货草稿？\n\n草稿提交后才会正式增加库存。`)) return;
+        const button = $("createPurchaseReceipt");
+        button.disabled = true;
+        button.textContent = "正在创建...";
+        try {
+          const result = await api("/api/procurement/purchase-receipt", {method:"POST", body:JSON.stringify({
+            user:state.user.user_email,
+            project_code:state.project.project_code,
+            conversation_id:state.conversationId,
+            request_id:crypto.randomUUID(),
+            purchase_order:state.documentDetail.name,
+            selected_items:rows,
+          })});
+          await loadDocuments({preserve:true});
+          await openDocument("Purchase Receipt", result.name);
+        } catch (error) {
+          window.alert(error.message);
+          button.disabled = false;
+          button.textContent = "创建采购收货草稿";
+        }
       }
 
       function rfqQuotationHtml(detail) {
