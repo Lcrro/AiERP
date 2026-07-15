@@ -162,7 +162,56 @@ def read_json(handler: BaseHTTPRequestHandler) -> dict[str, Any]:
     return json.loads(handler.rfile.read(length).decode("utf-8")) if length else {}
 
 
-def employee_catalog() -> list[dict[str, str]]:
+WORKBENCH_ROLE_VIEWS: dict[str, dict[str, Any]] = {
+    "材料员": {
+        "default_panel": "mine",
+        "recommended_panels": ["mine", "progress", "recent"],
+        "focus": "提出材料需求、跟踪申请与补充被退回的信息",
+    },
+    "材料设备主管": {
+        "default_panel": "inbox",
+        "recommended_panels": ["inbox", "pending", "progress", "exceptions"],
+        "focus": "审批材料需求、组织询价下单、跟进收货与异常退货",
+    },
+    "项目经理": {
+        "default_panel": "inbox",
+        "recommended_panels": ["inbox", "progress", "exceptions"],
+        "focus": "审批项目采购需求、关注紧急缺料和采购执行风险",
+    },
+    "采购员": {
+        "default_panel": "pending",
+        "recommended_panels": ["pending", "progress", "exceptions", "recent"],
+        "focus": "处理待采购需求、组织询价下单并跟进供应商交付",
+    },
+    "仓库主管": {
+        "default_panel": "progress",
+        "recommended_panels": ["progress", "exceptions", "recent"],
+        "focus": "办理采购收货、检查到货差异并跟进退货处理",
+    },
+    "仓管员": {
+        "default_panel": "progress",
+        "recommended_panels": ["progress", "exceptions", "recent"],
+        "focus": "办理本人仓库权限范围内的收货、入库和退货",
+    },
+    "总经理": {
+        "default_panel": "progress",
+        "recommended_panels": ["progress", "exceptions", "recent"],
+        "focus": "查看采购进度、异常升级和项目风险",
+    },
+    "经营主管": {
+        "default_panel": "progress",
+        "recommended_panels": ["progress", "recent", "exceptions"],
+        "focus": "关注项目采购履约、合同与经营风险",
+    },
+    "技术负责人": {
+        "default_panel": "recent",
+        "recommended_panels": ["recent", "exceptions"],
+        "focus": "协助确认技术规格和处理到货技术差异",
+    },
+}
+
+
+def employee_catalog() -> list[dict[str, Any]]:
     release = MasterDataRelease()
     roles = release.roles
     return [
@@ -174,6 +223,10 @@ def employee_catalog() -> list[dict[str, str]]:
             "profile": roles[row["role_code"]]["default_agent_profile"],
             "default_project_code": row.get("default_project_code", ""),
             "default_warehouse_code": row.get("default_warehouse_code", ""),
+            "workbench_view": WORKBENCH_ROLE_VIEWS.get(
+                row["position"],
+                {"default_panel": "recent", "recommended_panels": ["recent"], "focus": "处理本人 ERPNext 权限范围内的工作"},
+            ),
         }
         for row in release.table("employees.tsv", include_candidates=False)
         if row.get("user_email")
@@ -1423,6 +1476,11 @@ class AgentWorkbenchService:
             if request_id in session.idempotency_results:
                 return session.idempotency_results[request_id]
         client = self.client(user)
+        detail = client.get_document(doctype, name)
+        if not detail.ok or not isinstance(detail.data, dict):
+            raise ValueError(detail.user_message or detail.error or f"无法读取 {doctype} {name}")
+        if str(detail.data.get("workflow_state") or "").strip():
+            raise ValueError("该单据已启用审批工作流，请执行当前工作流动作，不能直接提交。")
         result = client.submit_document(doctype, name)
         if not result.ok:
             raise ValueError(result.user_message or result.error or f"提交 {doctype} {name} 失败")

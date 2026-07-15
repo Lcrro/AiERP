@@ -297,3 +297,4 @@
 .return-actions .danger { background: #b42318; color: white; border-color: #b42318; }
 @media (max-width: 900px) { .receipt-row { grid-template-columns: 1fr; } }
 @media (max-width: 900px) { .return-form { grid-template-columns: 1fr; } }
+.operations-tab.recommended::after { content: ""; display: inline-block; width: 5px; height: 5px; margin-left: 5px; border-radius: 50%; background: #16a36a; vertical-align: middle; }

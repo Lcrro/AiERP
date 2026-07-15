@@ -165,6 +165,26 @@ def test_workbench_workflow_button_executes_erpnext_directly_without_agent() -> 
     ]
 
 
+def test_direct_submit_rejects_documents_with_workflow() -> None:
+    class FakeClient:
+        def get_document(self, doctype, name):
+            return SimpleNamespace(
+                ok=True,
+                data={"doctype": doctype, "name": name, "workflow_state": "草稿"},
+                user_message=None,
+                error=None,
+            )
+
+        def submit_document(self, _doctype, _name):
+            raise AssertionError("workflow document must not be submitted directly")
+
+    service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
+    service.client = lambda _user: FakeClient()
+
+    with pytest.raises(ValueError, match="已启用审批工作流"):
+        service.submit_document("clerk@example.com", "Material Request", "MAT-MR-0001")
+
+
 def test_workbench_rejection_requires_and_forwards_reason() -> None:
     calls = []
 
@@ -562,6 +582,16 @@ def test_project_catalog_contains_project_specific_and_organization_employees() 
     assert projects["PRJ-HL-13"]["project_short_name"] == "合流1.3标"
     assert {"张振光", "林乔航", "毛晓泉", "徐溥祺"} <= names
     assert "梁志华" not in names
+
+
+def test_employee_catalog_exposes_role_focused_workbench_views() -> None:
+    employees = {row["employee_name"]: row for row in MODULE.employee_catalog()}
+
+    assert employees["毛晓泉"]["workbench_view"]["default_panel"] == "mine"
+    assert employees["潘丰"]["workbench_view"]["recommended_panels"] == ["inbox", "pending", "progress", "exceptions"]
+    assert employees["胡银虎"]["workbench_view"]["default_panel"] == "inbox"
+    assert MODULE.WORKBENCH_ROLE_VIEWS["采购员"]["default_panel"] == "pending"
+    assert MODULE.WORKBENCH_ROLE_VIEWS["仓管员"]["recommended_panels"] == ["progress", "exceptions", "recent"]
 
 
 def test_session_history_restores_visible_chat_and_reset_clears_context(tmp_path: Path) -> None:

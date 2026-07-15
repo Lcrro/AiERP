@@ -543,6 +543,12 @@ def submit_document(doctype: str, name: str) -> dict:
     """Submit a submittable ERPNext document through normal Frappe rules."""
 
     doc = frappe.get_doc(doctype, name)
+    from frappe.model.workflow import get_workflow_name
+
+    if get_workflow_name(doctype):
+        frappe.throw(
+            "该单据已启用审批工作流，请读取当前可用工作流动作并通过 apply_workflow 执行。"
+        )
     doc.submit()
     return _compact_doc(doc)
 
@@ -988,6 +994,10 @@ def create_material_request_draft(
                     "qty": row.get("qty") or row.get("suggested_qty") or 1,
                     "schedule_date": row.get("schedule_date") or schedule_date or today(),
                     "warehouse": row.get("warehouse"),
+                    "project": row.get("project"),
+                    "cost_center": row.get("cost_center"),
+                    "uom": row.get("uom"),
+                    "rate": row.get("rate"),
                 }
                 for row in items
             ],

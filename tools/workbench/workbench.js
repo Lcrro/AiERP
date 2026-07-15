@@ -110,6 +110,8 @@
         const historyToken = state.historyToken;
         document.querySelectorAll(".employee").forEach(button => button.classList.toggle("active", employee && button.dataset.user === employee.user_email));
         const position = employee?.project_position || employee?.position || "";
+        state.panel = employee?.workbench_view?.default_panel || "inbox";
+        document.querySelectorAll(".operations-tab").forEach(button => button.classList.toggle("recommended", (employee?.workbench_view?.recommended_panels || []).includes(button.dataset.panel)));
         $("assistantName").textContent = employee ? `${employee.employee_name}的工作助理` : "员工工作助理";
         $("assistantContext").textContent = employee ? `${state.project.project_short_name} · ${position}` : "该项目暂未配置员工";
         $("actorLabel").textContent = employee ? `${state.project.project_short_name} · ${employee.employee_name} · ${position}` : "请选择员工";
@@ -141,7 +143,8 @@
         $("contextSummary").innerHTML = `
           <div class="metric"><span>当前项目</span><strong>${esc(state.project?.project_short_name || "-")}</strong></div>
           <div class="metric"><span>当前身份</span><strong>${esc(state.user?.employee_name || "-")}</strong></div>
-          <div class="metric"><span>数据范围</span><strong>本人权限</strong></div>`;
+          <div class="metric"><span>岗位重点</span><strong>${esc(state.user?.workbench_view?.focus || "本人工作")}</strong></div>
+          <div class="metric"><span>数据范围</span><strong>ERPNext 本人权限</strong></div>`;
       }
 
       async function loadDocuments({preserve = false} = {}) {
