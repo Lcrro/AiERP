@@ -1,4 +1,6 @@
-# 员工 Agent 网页测试台
+# 员工工作台
+
+员工工作台是 ERPNext 上方的简化业务入口。DeepSeek 负责理解目标和规划，ERPNext 仍负责数据、权限、工作流和审计。
 
 ## 启动
 
@@ -8,44 +10,57 @@
 .\scripts\dev\start_wsl_sandbox.ps1
 ```
 
-再启动 Agent 测试台：
+再启动工作台：
 
 ```powershell
 python scripts\dev\agent_workbench.py --port 8788 --profile civil
 ```
 
-浏览器打开：
+打开 `http://127.0.0.1:8788/`。
+
+## 页面结构
+
+- 左侧选择项目和员工测试身份。
+- 中间是按“员工 + 项目 + 会话”隔离并持久化的工作助理。
+- 右侧“我的工作”显示 ERPNext 的审批待办、本人申请、采购进度、最近单据和异常退回。
+- 单据在工作台抽屉中打开，不跳转 ERPNext；普通员工不显示 ToolCall 和 JSON。
+- “开发者模式”用于查看 Agent 步骤、ToolCall、ToolResult 和完整 JSON。
+
+## 操作规则
+
+自然语言请求通过 DeepSeek 自主规划循环。物料多候选时，工作台展示名称、关键规格、单位和相关仓库实时库存，点击卡片会发送结构化选择事件。
+
+所有 Agent 写操作先展示业务摘要并等待确认。`request_id` 防止重复写入。
+
+明确的提交、批准和驳回按钮不调用 DeepSeek，直接使用当前员工的 ERPNext 身份执行原生工作流动作。右侧“待我处理”直接读取 ERPNext `Workflow Action`，工作台不维护第二套审批状态。
+
+“新会话”只清理当前项目和员工的对话、已解析实体和待确认操作，不删除 ERPNext 单据。刷新页面会恢复当前会话。
+
+## 接口
 
 ```text
-http://127.0.0.1:8788/
+GET  /api/workbench/bootstrap
+GET  /api/inbox
+GET  /api/documents
+GET  /api/document
+POST /api/workflow/action
+POST /api/document/submit
+POST /api/agent/turn
+POST /api/agent/confirm
+POST /api/session/reset
 ```
 
-## 测试步骤
+旧 `/api/agent` 在迁移期继续兼容。
 
-1. 左侧先选择项目，再选择该项目下的员工和岗位。每个员工使用自己的 ERPNext API 身份和岗位权限。
-2. 输入自然语言，点击“预览 Agent 操作”。预览不会写 ERPNext。
-3. 在右侧检查 DeepSeek Agent 步骤、Resolver、ToolCall 和 ToolResult。
-4. 写操作出现黄色确认栏后，点击“确认执行”才会写入。
-5. 创建成功后，点击单据链接进入 `http://localhost:8002` 查看真实 ERPNext 单据。
+## 当前采购流程
 
-右侧“业务单据”按采购、库存、财务、项目协作分组，使用当前员工身份查询项目相关单据；没有权限的模块会直接显示权限提示。
-
-工作台默认使用 DeepSeek 自主规划循环。它按需发现工具、读取契约和解析实体，不再进入固定意图或关键词业务分支。
-
-只读查询会在预览阶段直接执行。写操作使用浏览器生成的 `request_id` 防止重复点击造成重复建单。API key 和 secret 只在 Python 后端读取，不传给网页。
-
-物料请求在“解析实体”步骤中会同时显示候选编码、名称、规格，以及当前项目仓和蕰川路基地的
-实时库存。候选库存由一次 ERPNext `Bin` 批量查询产生，包括实际数量、预留数量、可用数量、
-预计数量和需求缺口；不逐个 SKU 调用库存工具，也不缓存库存查询结果。
-
-## 推荐话术
+第一版覆盖材料申请、审批、询价、采购订单、采购收货和采购退货的读取及单据卡。材料申请审批为：
 
 ```text
-合流1.3标明天需要20个6.8级螺栓M12*40，送到合流1.3标仓库，创建材料申请草稿
-
-合流1.3标仓库还有多少6.8级螺栓M12*40
-
-查询所有待采购的材料申请
-
-今天公司有哪些异常需要我关注
+材料员提交申请
+-> 材料设备主管批准或驳回
+-> 项目经理批准或驳回
+-> ERPNext 正式提交
 ```
+
+审批通知、Workflow Action 和操作记录均以 ERPNext 为准。

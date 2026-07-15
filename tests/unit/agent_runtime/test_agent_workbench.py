@@ -217,3 +217,78 @@ def test_session_history_restores_visible_chat_and_reset_clears_context(tmp_path
     }]
     assert service.reset_session(user) == {"reset": True, "had_history": True}
     assert service.session_history(user)["turns"] == []
+
+
+def test_conversations_are_isolated_by_employee_project_and_conversation(tmp_path: Path) -> None:
+    user = "mao.xiaoquan@stec-up.local"
+    service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
+    service.session_store = MODULE.RuntimeSessionStore(tmp_path)
+    service.base_url = "http://localhost:8002"
+
+    first = service.scoped_session_store(user, "PRJ-HL-13", "conversation-a")
+    session = first.load(user, profile="project")
+    session.add_turn({"user_text": "合流项目要水泥", "result": {"message": "收到"}})
+    first.save(session)
+
+    assert service.session_history(user, "PRJ-HL-13", "conversation-a")["turns"]
+    assert service.session_history(user, "PRJ-HL-13", "conversation-b")["turns"] == []
+    assert service.session_history(user, "PRJ-NJ-01", "conversation-a")["turns"] == []
+
+
+def test_documents_are_loaded_by_module_with_page_offset() -> None:
+    calls = []
+    service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
+    service._project_name_cache = {}
+    service.client = lambda _user: object()
+    service.erpnext_project_name = lambda _client, _project: "ERP-PROJECT"
+
+    def load_group(user, doctype, label, project_child, project, limit, offset, status, owner):
+        calls.append((doctype, limit, offset, status, owner))
+        return {"doctype": doctype, "label": label, "documents": []}
+
+    service._load_document_group = load_group
+    result = service.documents(
+        "buyer@example.com",
+        "PRJ-HL-13",
+        module="buying",
+        status="Draft",
+        page=3,
+        page_size=10,
+        mine_only=True,
+    )
+
+    assert result["module"] == "buying"
+    assert {call[0] for call in calls} == set(MODULE.MODULE_DOCTYPES["buying"])
+    assert all(call[1:] == (10, 20, "Draft", "buyer@example.com") for call in calls)
+
+
+def test_inbox_uses_open_erpnext_workflow_actions_and_real_transitions() -> None:
+    class FakeClient:
+        def search_documents(self, doctype, **kwargs):
+            assert doctype == "Workflow Action"
+            assert kwargs["filters"] == {"status": "Open"}
+            return SimpleNamespace(ok=True, data=[{
+                "name": "WA-1",
+                "reference_doctype": "Material Request",
+                "reference_name": "MR-1",
+                "workflow_state": "待材料设备主管审批",
+                "modified": "2026-07-15 12:00:00",
+            }], user_message=None, error=None)
+
+        def call_method(self, method, arguments):
+            assert method == "agent_bridge.api.get_document_with_workflow_actions"
+            assert arguments == {"doctype": "Material Request", "name": "MR-1"}
+            return SimpleNamespace(ok=True, data={
+                "document": {"name": "MR-1", "title": "手套申请", "owner": "clerk@example.com"},
+                "actions": [{"action": "批准"}, {"action": "驳回"}],
+            })
+
+    service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
+    service.client = lambda _user: FakeClient()
+    service.erpnext_project_name = lambda _client, _project: ""
+
+    result = service.inbox("supervisor@example.com")
+
+    assert result["count"] == 1
+    assert result["items"][0]["actions"] == ["批准", "驳回"]
+    assert result["items"][0]["title"] == "手套申请"
