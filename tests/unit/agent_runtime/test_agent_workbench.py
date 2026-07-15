@@ -337,11 +337,122 @@ def test_reset_documents_cancels_submitted_documents_before_deleting() -> None:
 
     assert calls == [
         ("delete", "Purchase Invoice", "PI-1"),
+        ("delete", "Request for Quotation", "RFQ-KEEP"),
         ("cancel", "Material Request", "MR-1"),
         ("delete", "Material Request", "MR-1"),
     ]
-    assert result["deleted_count"] == 2
+    assert result["deleted_count"] == 3
     assert result["failed_count"] == 0
+
+
+def test_create_rfq_reloads_pending_rows_and_preserves_material_request_links() -> None:
+    calls = []
+
+    class FakeClient:
+        def get_document(self, doctype, name):
+            assert (doctype, name) == ("Item", "MAT-CEM-000008")
+            return SimpleNamespace(ok=True, data={"item_name": "水泥 42.5 袋装 50kg", "stock_uom": "包", "disabled": 0})
+
+        def create_document(self, doctype, data):
+            calls.append((doctype, data))
+            return SimpleNamespace(ok=True, data={"name": "PUR-RFQ-0001", "docstatus": 0}, status_code=200, raw_status_code=200)
+
+    service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
+    service.client = lambda _user: FakeClient()
+    service.pending_procurement = lambda *_args, **_kwargs: {"rows": [{
+        "material_request": "MAT-MR-1",
+        "material_request_item": "MRI-1",
+        "item_code": "MAT-CEM-000008",
+        "remaining_qty": 15,
+        "uom": "包",
+        "schedule_date": "2026-07-20",
+        "warehouse": "合流1.3标仓库 - SD",
+        "project": "PROJ-0010",
+    }]}
+    service.document = lambda _user, doctype, name: {"doctype": doctype, "name": name}
+    service._idempotency_context = lambda *_args: (None, None)
+
+    result = service.create_request_for_quotation(
+        "buyer@example.com",
+        "PRJ-HL-13",
+        ["MAT-MR-1:MRI-1"],
+        ["SUP-TEST-A"],
+    )
+
+    assert result["name"] == "PUR-RFQ-0001"
+    data = calls[0][1]
+    assert data["suppliers"] == [{"supplier": "测试建材供应商甲"}]
+    assert data["items"][0]["qty"] == 15
+    assert data["items"][0]["material_request"] == "MAT-MR-1"
+    assert data["items"][0]["material_request_item"] == "MRI-1"
+
+
+def test_create_supplier_quotation_requires_submitted_rfq_and_preserves_rfq_row() -> None:
+    calls = []
+
+    class FakeClient:
+        def get_document(self, doctype, name):
+            if doctype == "Item":
+                return SimpleNamespace(ok=True, data={"item_name": "水泥 42.5 袋装 50kg", "stock_uom": "包", "disabled": 0})
+            assert (doctype, name) == ("Request for Quotation", "PUR-RFQ-0001")
+            return SimpleNamespace(ok=True, data={
+                    "name": name,
+                    "docstatus": 1,
+                    "suppliers": [{"supplier": "测试建材供应商甲"}],
+                    "items": [{
+                        "name": "RFQI-1",
+                        "item_code": "MAT-CEM-000008",
+                        "qty": 15,
+                        "uom": "包",
+                        "schedule_date": "2026-07-20",
+                    }],
+                }, user_message=None, error=None)
+
+        def create_document(self, doctype, data):
+            calls.append((doctype, data))
+            return SimpleNamespace(ok=True, data={"name": "PUR-SQ-0001", "docstatus": 0}, status_code=200, raw_status_code=200)
+
+    service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
+    service.client = lambda _user: FakeClient()
+    service.document = lambda _user, doctype, name: {"doctype": doctype, "name": name}
+    service._idempotency_context = lambda *_args: (None, None)
+
+    result = service.create_supplier_quotation(
+        "buyer@example.com",
+        "PRJ-HL-13",
+        "PUR-RFQ-0001",
+        "SUP-TEST-A",
+        [{"request_for_quotation_item": "RFQI-1", "rate": 27.5}],
+        terms="月结30天",
+    )
+
+    assert result["name"] == "PUR-SQ-0001"
+    data = calls[0][1]
+    assert data["supplier"] == "测试建材供应商甲"
+    assert data["items"][0]["request_for_quotation"] == "PUR-RFQ-0001"
+    assert data["items"][0]["request_for_quotation_item"] == "RFQI-1"
+    assert data["items"][0]["rate"] == 27.5
+
+
+def test_create_supplier_quotation_rejects_zero_rate() -> None:
+    class FakeClient:
+        def get_document(self, _doctype, name):
+            return SimpleNamespace(ok=True, data={
+                "name": name,
+                "docstatus": 1,
+                "suppliers": [{"supplier": "测试建材供应商甲"}],
+                "items": [{"name": "RFQI-1", "item_code": "MAT-CEM-000008", "qty": 1, "uom": "包"}],
+            }, user_message=None, error=None)
+
+    service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
+    service.client = lambda _user: FakeClient()
+    service._idempotency_context = lambda *_args: (None, None)
+
+    with pytest.raises(ValueError, match="单价必须大于 0"):
+        service.create_supplier_quotation(
+            "buyer@example.com", "PRJ-HL-13", "PUR-RFQ-0001", "SUP-TEST-A",
+            [{"request_for_quotation_item": "RFQI-1", "rate": 0}],
+        )
 
 
 def test_project_catalog_contains_project_specific_and_organization_employees() -> None:
@@ -433,6 +544,47 @@ def test_documents_are_loaded_by_module_with_page_offset() -> None:
     assert result["module"] == "buying"
     assert {call[0] for call in calls} == set(MODULE.MODULE_DOCTYPES["buying"])
     assert all(call[1:] == (10, 20, "Draft", "buyer@example.com") for call in calls)
+
+
+def test_supplier_quotation_project_scope_follows_rfq_and_material_request() -> None:
+    documents = {
+        ("Supplier Quotation", "SQ-1"): {
+            "name": "SQ-1",
+            "items": [{
+                "request_for_quotation": "RFQ-1",
+                "request_for_quotation_item": "RFQI-1",
+            }],
+        },
+        ("Request for Quotation", "RFQ-1"): {
+            "name": "RFQ-1",
+            "items": [{
+                "name": "RFQI-1",
+                "material_request": "MR-1",
+                "material_request_item": "MRI-1",
+            }],
+        },
+        ("Material Request", "MR-1"): {
+            "name": "MR-1",
+            "items": [{"name": "MRI-1", "project": "ERP-PROJECT"}],
+        },
+    }
+
+    class FakeClient:
+        def get_document(self, doctype, name):
+            document = documents.get((doctype, name))
+            return SimpleNamespace(ok=document is not None, data=document)
+
+    service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
+    service.client = lambda _user: FakeClient()
+
+    rows = service.filter_parent_documents_by_project(
+        "buyer@example.com",
+        "Supplier Quotation",
+        [{"name": "SQ-1"}, {"name": "SQ-OTHER"}],
+        "ERP-PROJECT",
+    )
+
+    assert rows == [{"name": "SQ-1"}]
 
 
 def test_inbox_uses_open_erpnext_workflow_actions_and_real_transitions() -> None:

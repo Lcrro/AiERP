@@ -233,6 +233,8 @@ class BuyingToolsMixin:
                 "doctype": "Request for Quotation",
                 "transaction_date": args.get("transaction_date"),
                 "schedule_date": args.get("schedule_date"),
+                "company": args.get("company"),
+                "message_for_supplier": args.get("message_for_supplier"),
                 "suppliers": [{"supplier": supplier} if isinstance(supplier, str) else supplier for supplier in args["suppliers"]],
                 "items": items,
                 "docstatus": 0,
@@ -256,7 +258,13 @@ class BuyingToolsMixin:
                 "supplier": args["supplier"],
                 "transaction_date": args.get("transaction_date"),
                 "valid_till": args.get("valid_till"),
+                "company": args.get("company"),
                 "currency": args.get("currency"),
+                "buying_price_list": args.get("buying_price_list"),
+                "request_for_quotation": args.get("request_for_quotation"),
+                "taxes_and_charges": args.get("taxes_and_charges"),
+                "payment_terms_template": args.get("payment_terms_template"),
+                "terms": args.get("terms"),
                 "items": items,
                 "docstatus": 0,
             }
@@ -818,6 +826,8 @@ class BuyingToolsMixin:
                 return row
             row["uom"] = row.get("uom") or item_doc.data.get("stock_uom")
             row["item_name"] = item_doc.data.get("item_name")
+            if not row.get("conversion_factor") and row.get("uom") == item_doc.data.get("stock_uom"):
+                row["conversion_factor"] = 1
         allowed_fields = {
             "item_code",
             "item_name",
@@ -834,6 +844,7 @@ class BuyingToolsMixin:
             "material_request",
             "material_request_item",
             "request_for_quotation",
+            "request_for_quotation_item",
             "supplier_quotation",
             "purchase_order",
             "purchase_order_item",

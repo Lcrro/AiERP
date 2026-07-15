@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[3]
 from nexterp_agent.agent_runtime.civil_runtime import CivilAgentRuntime
 from nexterp_agent.agent_runtime.credentials import load_user_credentials
 from nexterp_agent.agent_runtime.session import RuntimeSessionStore
+from nexterp_agent.erpnext.adapter import ERPNextAdapter
 from nexterp_agent.erpnext.client import ERPNextClient
 from nexterp_agent.master_data import MasterDataRelease
 
@@ -29,6 +30,7 @@ ASSET_TYPES = {".css": "text/css; charset=utf-8", ".js": "text/javascript; chars
 DOCTYPE_ROUTES = {
     "Material Request": "material-request",
     "Request for Quotation": "request-for-quotation",
+    "Supplier Quotation": "supplier-quotation",
     "Purchase Order": "purchase-order",
     "Purchase Receipt": "purchase-receipt",
     "Purchase Invoice": "purchase-invoice",
@@ -40,6 +42,7 @@ DOCUMENT_MODULES = (
     ("buying", "采购", (
         ("Material Request", "材料申请", "Material Request Item"),
         ("Request for Quotation", "询价单", None),
+        ("Supplier Quotation", "供应商报价", "Supplier Quotation Item"),
         ("Purchase Order", "采购订单", "Purchase Order Item"),
         ("Purchase Receipt", "采购收货", "Purchase Receipt Item"),
     )),
@@ -60,6 +63,8 @@ DOCUMENT_RESET_ORDER = (
     "Purchase Receipt",
     "Stock Entry",
     "Purchase Order",
+    "Supplier Quotation",
+    "Request for Quotation",
     "Material Request",
     "Task",
 )
@@ -68,6 +73,7 @@ ALLOWED_DOCUMENT_TYPES = frozenset(DOCTYPE_ROUTES)
 SUBMITTABLE_DOCUMENT_TYPES = frozenset({
     "Material Request",
     "Request for Quotation",
+    "Supplier Quotation",
     "Purchase Order",
     "Purchase Receipt",
     "Purchase Invoice",
@@ -76,6 +82,7 @@ SUBMITTABLE_DOCUMENT_TYPES = frozenset({
 DOCUMENT_LIST_FIELDS = {
     "Material Request": ["name", "title", "status", "workflow_state", "transaction_date", "schedule_date", "owner", "modified", "docstatus"],
     "Request for Quotation": ["name", "status", "transaction_date", "owner", "modified", "docstatus"],
+    "Supplier Quotation": ["name", "supplier", "status", "transaction_date", "valid_till", "grand_total", "currency", "owner", "modified", "docstatus"],
     "Purchase Order": ["name", "supplier", "status", "transaction_date", "grand_total", "currency", "owner", "modified", "docstatus"],
     "Purchase Receipt": ["name", "supplier", "status", "posting_date", "grand_total", "currency", "owner", "modified", "docstatus", "is_return", "return_against"],
     "Stock Entry": ["name", "stock_entry_type", "purpose", "posting_date", "owner", "modified", "docstatus"],
@@ -650,6 +657,22 @@ class AgentWorkbenchService:
         aggregate_rows.sort(key=lambda row: (str(row.get("earliest_schedule_date") or "9999-12-31"), row["sku_name"]))
         rows.sort(key=lambda row: (str(row.get("schedule_date") or "9999-12-31"), row["sku_name"]))
 
+        payment_templates = {
+            row.get("payment_term_code"): row.get("erpnext_payment_terms_template")
+            for row in release.table("payment_terms.tsv", include_candidates=False)
+        }
+        active_suppliers = [
+            {
+                "supplier_code": supplier.get("supplier_code"),
+                "supplier_name": supplier.get("supplier_name"),
+                "supplier_group": supplier.get("supplier_group"),
+                "primary_category": supplier.get("primary_category"),
+                "currency": supplier.get("default_currency") or "CNY",
+                "payment_term": payment_templates.get(supplier.get("default_payment_term")) or supplier.get("default_payment_term"),
+            }
+            for supplier in release.table("suppliers.tsv", include_candidates=False)
+            if supplier.get("supplier_code") and supplier.get("supplier_name")
+        ]
         return {
             "scope": scope,
             "project": project,
@@ -672,8 +695,251 @@ class AgentWorkbenchService:
                     if supplier.get("supplier_name")
                 }),
             },
+            "available_suppliers": active_suppliers,
             "inventory_error": result.data.get("inventory_error"),
         }
+
+    def create_request_for_quotation(
+        self,
+        user: str,
+        project: str,
+        selected_rows: list[str],
+        supplier_codes: list[str],
+        *,
+        schedule_date: str = "",
+        message_for_supplier: str = "",
+        request_id: str = "",
+        conversation_id: str = "default",
+    ) -> dict[str, Any]:
+        if not user or not project:
+            raise ValueError("user 和 project 必填")
+        selected = {str(value).strip() for value in selected_rows if str(value).strip()}
+        if not selected:
+            raise ValueError("请至少选择一条待采购需求")
+        if not supplier_codes:
+            raise ValueError("请至少选择一家供应商")
+        cached, request_context = self._idempotency_context(user, project, conversation_id, request_id)
+        if cached is not None:
+            return cached
+
+        release = MasterDataRelease()
+        supplier_by_code = {
+            row["supplier_code"]: row
+            for row in release.table("suppliers.tsv", include_candidates=False)
+            if row.get("supplier_code")
+        }
+        unknown_suppliers = [code for code in supplier_codes if code not in supplier_by_code]
+        if unknown_suppliers:
+            raise ValueError(f"未知或未启用的供应商：{'、'.join(unknown_suppliers)}")
+
+        current = self.pending_procurement(user, project, scope="project")
+        current_rows = {
+            f"{row.get('material_request') or ''}:{row.get('material_request_item') or row.get('item_code') or ''}": row
+            for row in current["rows"]
+        }
+        stale = sorted(selected - set(current_rows))
+        if stale:
+            raise ValueError(f"有 {len(stale)} 条需求已不在待采购队列，请刷新后重新选择")
+        rows = [current_rows[key] for key in selected]
+        effective_schedule_date = schedule_date or min(
+            (str(row.get("schedule_date") or "")[:10] for row in rows if row.get("schedule_date")),
+            default="",
+        )
+        items = [
+            {
+                "item_code": row["item_code"],
+                "qty": _number(row.get("remaining_qty")),
+                "uom": row.get("uom"),
+                "schedule_date": str(row.get("schedule_date") or effective_schedule_date)[:10],
+                "warehouse": row.get("warehouse"),
+                "project": row.get("project"),
+                "material_request": row.get("material_request"),
+                "material_request_item": row.get("material_request_item"),
+            }
+            for row in rows
+        ]
+        adapter = ERPNextAdapter(self.client(user))
+        result = adapter.execute({
+            "tool": "erpnext.buying.create_request_for_quotation_draft",
+            "arguments": {
+                "company": release.company_name("STEC"),
+                "transaction_date": date.today().isoformat(),
+                "schedule_date": effective_schedule_date,
+                "message_for_supplier": message_for_supplier.strip(),
+                "suppliers": [
+                    {"supplier": supplier_by_code[code]["supplier_name"]}
+                    for code in supplier_codes
+                ],
+                "items": items,
+            },
+        })
+        if not result.ok or not isinstance(result.data, dict) or not result.data.get("name"):
+            raise ValueError(result.user_message or result.error or "创建询价单草稿失败")
+        payload = self.document(user, "Request for Quotation", str(result.data["name"]))
+        payload["source_rows"] = rows
+        payload["selected_suppliers"] = [supplier_by_code[code]["supplier_name"] for code in supplier_codes]
+        self._remember_idempotent_result(request_context, request_id, payload)
+        return payload
+
+    def create_supplier_quotation(
+        self,
+        user: str,
+        project: str,
+        request_for_quotation: str,
+        supplier_code: str,
+        offers: list[dict[str, Any]],
+        *,
+        valid_till: str = "",
+        terms: str = "",
+        request_id: str = "",
+        conversation_id: str = "default",
+    ) -> dict[str, Any]:
+        if not user or not request_for_quotation or not supplier_code:
+            raise ValueError("user、request_for_quotation 和 supplier_code 必填")
+        cached, request_context = self._idempotency_context(user, project, conversation_id, request_id)
+        if cached is not None:
+            return cached
+        release = MasterDataRelease()
+        supplier = next(
+            (
+                row for row in release.table("suppliers.tsv", include_candidates=False)
+                if supplier_code in {row.get("supplier_code"), row.get("supplier_name")}
+            ),
+            None,
+        )
+        if not supplier:
+            raise ValueError("供应商不存在或未启用")
+        client = self.client(user)
+        rfq_result = client.get_document("Request for Quotation", request_for_quotation)
+        if not rfq_result.ok or not isinstance(rfq_result.data, dict):
+            raise ValueError(rfq_result.user_message or rfq_result.error or "无法读取询价单")
+        rfq = rfq_result.data
+        if int(rfq.get("docstatus") or 0) != 1:
+            raise ValueError("请先提交询价单，再录入供应商报价")
+        supplier_name = supplier["supplier_name"]
+        rfq_suppliers = {
+            str(row.get("supplier") or row.get("supplier_name") or "")
+            for row in rfq.get("suppliers") or []
+            if isinstance(row, dict)
+        }
+        if supplier_name not in rfq_suppliers:
+            raise ValueError("该供应商不在这张询价单的供应商范围内")
+        offer_by_row = {
+            str(row.get("request_for_quotation_item") or row.get("item_code") or ""): row
+            for row in offers
+            if isinstance(row, dict)
+        }
+        items = []
+        for row in rfq.get("items") or []:
+            if not isinstance(row, dict):
+                continue
+            offer = offer_by_row.get(str(row.get("name") or "")) or offer_by_row.get(str(row.get("item_code") or ""))
+            rate = _number((offer or {}).get("rate"))
+            if rate <= 0:
+                raise ValueError(f"{row.get('item_code') or '报价明细'} 的单价必须大于 0")
+            items.append({
+                "item_code": row.get("item_code"),
+                "qty": row.get("qty"),
+                "uom": row.get("uom"),
+                "schedule_date": (offer or {}).get("schedule_date") or row.get("schedule_date"),
+                "rate": rate,
+                "warehouse": row.get("warehouse"),
+                "project": row.get("project"),
+                "request_for_quotation": request_for_quotation,
+                "request_for_quotation_item": row.get("name"),
+            })
+        if not items:
+            raise ValueError("询价单没有可报价的物料明细")
+        result = ERPNextAdapter(client).execute({
+            "tool": "erpnext.buying.create_supplier_quotation_draft",
+            "arguments": {
+                "supplier": supplier_name,
+                "company": release.company_name("STEC"),
+                "currency": supplier.get("default_currency") or "CNY",
+                "transaction_date": date.today().isoformat(),
+                "valid_till": valid_till,
+                "request_for_quotation": request_for_quotation,
+                "payment_terms_template": next(
+                    (
+                        row.get("erpnext_payment_terms_template")
+                        for row in release.table("payment_terms.tsv", include_candidates=False)
+                        if row.get("payment_term_code") == supplier.get("default_payment_term")
+                    ),
+                    supplier.get("default_payment_term"),
+                ),
+                "terms": terms.strip(),
+                "items": items,
+            },
+        })
+        if not result.ok or not isinstance(result.data, dict) or not result.data.get("name"):
+            raise ValueError(result.user_message or result.error or "创建供应商报价草稿失败")
+        payload = self.document(user, "Supplier Quotation", str(result.data["name"]))
+        payload["request_for_quotation"] = request_for_quotation
+        self._remember_idempotent_result(request_context, request_id, payload)
+        return payload
+
+    def supplier_quotations(self, user: str, request_for_quotation: str) -> dict[str, Any]:
+        if not user or not request_for_quotation:
+            raise ValueError("user 和 request_for_quotation 必填")
+        client = self.client(user)
+        parents = client.search_documents(
+            "Supplier Quotation",
+            fields=["name", "supplier", "status", "transaction_date", "valid_till", "grand_total", "currency", "docstatus", "modified"],
+            limit=200,
+            order_by="modified desc",
+        )
+        if not parents.ok:
+            raise ValueError(parents.user_message or parents.error or "无法读取关联供应商报价")
+        quotations = []
+        for row in parents.data or []:
+            name = str(row.get("name") or "")
+            if not name:
+                continue
+            result = client.get_document("Supplier Quotation", name)
+            if result.ok and isinstance(result.data, dict) and any(
+                str(item.get("request_for_quotation") or "") == request_for_quotation
+                for item in result.data.get("items") or []
+                if isinstance(item, dict)
+            ):
+                quotations.append(result.data)
+        return {"request_for_quotation": request_for_quotation, "quotations": quotations, "count": len(quotations)}
+
+    def compare_supplier_quotations(self, user: str, names: list[str], *, include_drafts: bool = False) -> dict[str, Any]:
+        if not user:
+            raise ValueError("user 必填")
+        result = ERPNextAdapter(self.client(user)).execute({
+            "tool": "erpnext.buying.compare_supplier_quotations",
+            "arguments": {"supplier_quotations": names, "include_drafts": include_drafts},
+        })
+        if not result.ok or not isinstance(result.data, dict):
+            raise ValueError(result.user_message or result.error or "供应商报价比较失败")
+        return result.data
+
+    def _idempotency_context(
+        self,
+        user: str,
+        project: str,
+        conversation_id: str,
+        request_id: str,
+    ) -> tuple[dict[str, Any] | None, tuple[RuntimeSessionStore, Any] | None]:
+        if not request_id:
+            return None, None
+        store = self.scoped_session_store(user, project, conversation_id)
+        employee = next((row for row in employee_catalog() if row["user_email"] == user), None)
+        session = store.load(user, profile=employee["profile"] if employee else "general")
+        return session.idempotency_results.get(request_id), (store, session)
+
+    @staticmethod
+    def _remember_idempotent_result(
+        context: tuple[RuntimeSessionStore, Any] | None,
+        request_id: str,
+        payload: dict[str, Any],
+    ) -> None:
+        if not request_id or context is None:
+            return
+        store, session = context
+        session.remember_request(request_id, payload)
+        store.save(session)
 
     def procurement_inventory_warehouses(self, project: str, *, include_all: bool = False) -> list[str]:
         release = MasterDataRelease()
@@ -810,19 +1076,76 @@ class AgentWorkbenchService:
         rows: list[dict[str, Any]],
         erpnext_project: str,
     ) -> list[dict[str, Any]]:
+        client = self.client(user)
+        detail_cache: dict[tuple[str, str], dict[str, Any] | None] = {}
+
+        def detail(document_type: str, name: str) -> dict[str, Any] | None:
+            key = (document_type, name)
+            if key not in detail_cache:
+                result = client.get_document(document_type, name)
+                detail_cache[key] = result.data if result.ok and isinstance(result.data, dict) else None
+            return detail_cache[key]
+
+        def material_request_matches(name: str, item_name: str = "") -> bool:
+            document = detail("Material Request", name)
+            if not document:
+                return False
+            if str(document.get("project") or "") == erpnext_project:
+                return True
+            items = document.get("items") or []
+            return any(
+                (not item_name or str(item.get("name") or "") == item_name)
+                and str(item.get("project") or "") == erpnext_project
+                for item in items
+                if isinstance(item, dict)
+            )
+
+        def rfq_matches(name: str, item_name: str = "") -> bool:
+            document = detail("Request for Quotation", name)
+            if not document:
+                return False
+            for item in document.get("items") or []:
+                if not isinstance(item, dict):
+                    continue
+                if item_name and str(item.get("name") or "") != item_name:
+                    continue
+                if str(item.get("project") or "") == erpnext_project:
+                    return True
+                material_request = str(item.get("material_request") or "")
+                if material_request and material_request_matches(
+                    material_request,
+                    str(item.get("material_request_item") or ""),
+                ):
+                    return True
+            return False
+
         def matches(row: dict[str, Any]) -> bool:
             name = str(row.get("name") or "")
             if not name:
                 return False
-            client = self.client(user)
-            detail = client.get_document(doctype, name)
-            if not detail.ok or not isinstance(detail.data, dict):
+            document = detail(doctype, name)
+            if not document:
                 return False
-            items = detail.data.get("items")
-            return isinstance(items, list) and any(
-                str(item.get("project") or "") == erpnext_project
-                for item in items
-            )
+            if str(document.get("project") or "") == erpnext_project:
+                return True
+            for item in document.get("items") or []:
+                if not isinstance(item, dict):
+                    continue
+                if str(item.get("project") or "") == erpnext_project:
+                    return True
+                material_request = str(item.get("material_request") or "")
+                if material_request and material_request_matches(
+                    material_request,
+                    str(item.get("material_request_item") or ""),
+                ):
+                    return True
+                request_for_quotation = str(item.get("request_for_quotation") or "")
+                if request_for_quotation and rfq_matches(
+                    request_for_quotation,
+                    str(item.get("request_for_quotation_item") or ""),
+                ):
+                    return True
+            return False
 
         with ThreadPoolExecutor(max_workers=min(6, max(1, len(rows)))) as executor:
             decisions = list(executor.map(matches, rows))
@@ -1093,6 +1416,14 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
             )
             json_response(self, {"ok": True, **payload})
             return
+        if parsed.path == "/api/procurement/quotations":
+            query = parse_qs(parsed.query)
+            payload = self.server.service.supplier_quotations(  # type: ignore[attr-defined]
+                (query.get("user") or [""])[0],
+                (query.get("request_for_quotation") or [""])[0],
+            )
+            json_response(self, {"ok": True, **payload})
+            return
         if parsed.path == "/api/documents":
             query = parse_qs(parsed.query)
             payload = self.server.service.documents(  # type: ignore[attr-defined]
@@ -1162,6 +1493,44 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
                     request_id=str(request.get("request_id") or "").strip(),
                     project=str(request.get("project_code") or "").strip(),
                     conversation_id=str(request.get("conversation_id") or "default").strip(),
+                )
+                json_response(self, {"ok": True, **payload})
+                return
+            if self.path == "/api/procurement/rfq":
+                request = read_json(self)
+                payload = self.server.service.create_request_for_quotation(  # type: ignore[attr-defined]
+                    str(request.get("user") or "").strip(),
+                    str(request.get("project_code") or "").strip(),
+                    list(request.get("selected_rows") or []),
+                    list(request.get("supplier_codes") or []),
+                    schedule_date=str(request.get("schedule_date") or "").strip(),
+                    message_for_supplier=str(request.get("message_for_supplier") or "").strip(),
+                    request_id=str(request.get("request_id") or "").strip(),
+                    conversation_id=str(request.get("conversation_id") or "default").strip(),
+                )
+                json_response(self, {"ok": True, **payload})
+                return
+            if self.path == "/api/procurement/quotation":
+                request = read_json(self)
+                payload = self.server.service.create_supplier_quotation(  # type: ignore[attr-defined]
+                    str(request.get("user") or "").strip(),
+                    str(request.get("project_code") or "").strip(),
+                    str(request.get("request_for_quotation") or "").strip(),
+                    str(request.get("supplier_code") or "").strip(),
+                    list(request.get("offers") or []),
+                    valid_till=str(request.get("valid_till") or "").strip(),
+                    terms=str(request.get("terms") or "").strip(),
+                    request_id=str(request.get("request_id") or "").strip(),
+                    conversation_id=str(request.get("conversation_id") or "default").strip(),
+                )
+                json_response(self, {"ok": True, **payload})
+                return
+            if self.path == "/api/procurement/compare":
+                request = read_json(self)
+                payload = self.server.service.compare_supplier_quotations(  # type: ignore[attr-defined]
+                    str(request.get("user") or "").strip(),
+                    list(request.get("supplier_quotations") or []),
+                    include_drafts=bool(request.get("include_drafts")),
                 )
                 json_response(self, {"ok": True, **payload})
                 return

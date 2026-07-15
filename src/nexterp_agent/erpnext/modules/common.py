@@ -197,6 +197,13 @@ def _supplier_quotation_summary(doc: dict[str, Any]) -> dict[str, Any]:
         "supplier_name": doc.get("supplier_name"),
         "transaction_date": doc.get("transaction_date"),
         "valid_till": doc.get("valid_till"),
+        "payment_terms_template": doc.get("payment_terms_template"),
+        "terms": doc.get("terms"),
+        "taxes_and_charges": doc.get("taxes_and_charges"),
+        "latest_schedule_date": max(
+            (str(item.get("schedule_date")) for item in items if item.get("schedule_date")),
+            default=None,
+        ),
         "currency": doc.get("currency"),
         "docstatus": doc.get("docstatus"),
         "status": doc.get("status"),
@@ -214,6 +221,11 @@ def _supplier_quotation_ranking_row(summary: dict[str, Any]) -> dict[str, Any]:
         "currency": summary.get("currency"),
         "total_amount": summary.get("total_amount"),
         "item_count": summary.get("item_count"),
+        "latest_schedule_date": summary.get("latest_schedule_date"),
+        "valid_till": summary.get("valid_till"),
+        "payment_terms_template": summary.get("payment_terms_template"),
+        "terms": summary.get("terms"),
+        "taxes_and_charges": summary.get("taxes_and_charges"),
     }
 
 def _supplier_quotation_item_comparisons(comparable: list[tuple[dict[str, Any], dict[str, Any]]]) -> list[dict[str, Any]]:

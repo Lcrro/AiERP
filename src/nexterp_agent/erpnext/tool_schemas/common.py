@@ -26,6 +26,7 @@ BUYING_ITEM_LINE_SCHEMA = {
         "material_request": {"type": "string"},
         "material_request_item": {"type": "string"},
         "request_for_quotation": {"type": "string"},
+        "request_for_quotation_item": {"type": "string"},
         "supplier_quotation": {"type": "string"},
         "description": {"type": "string"},
     },

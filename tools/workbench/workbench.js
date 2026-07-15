@@ -1,7 +1,7 @@
       const state = {
         projects: [], project: null, employees: [], user: null,
         preview: null, documents: null, inbox: null, procurement: null, procurementPreparation: null, lastText: "", executeId: null,
-        panel: "inbox", technicalView: "toolcall", documentDetail: null, historyToken: 0,
+        panel: "inbox", technicalView: "toolcall", documentDetail: null, quotationContext: null, historyToken: 0,
         conversationId: "default", developerMode: false,
         procurementFilters: {scope:"project", urgency:"", family:"", supplier:"", before:"", view:"rows"},
         procurementSelected: new Set(),
@@ -20,7 +20,7 @@
       const FIELD_LABELS = {
         name:"单号", owner:"创建人", creation:"创建时间", modified:"最后修改", modified_by:"最后修改人",
         docstatus:"提交状态", status:"状态", title:"标题", company:"公司", material_request_type:"申请类型",
-        transaction_date:"业务日期", schedule_date:"需求日期", posting_date:"过账日期", posting_time:"过账时间",
+        transaction_date:"业务日期", schedule_date:"需求日期", valid_till:"报价有效期", posting_date:"过账日期", posting_time:"过账时间",
         supplier:"供应商", supplier_name:"供应商名称", project:"项目", cost_center:"成本中心", warehouse:"仓库",
         grand_total:"含税总额", net_total:"未税总额", currency:"币种", party:"往来方", payment_type:"收付类型",
         paid_amount:"支付金额", subject:"主题", priority:"优先级", purpose:"用途", stock_entry_type:"库存移动类型",
@@ -29,6 +29,7 @@
       const PRIMARY_FIELDS = {
         "Material Request": ["material_request_type","company","transaction_date","schedule_date","status","project","owner","modified","per_ordered","per_received"],
         "Request for Quotation": ["company","transaction_date","schedule_date","status","owner","modified"],
+        "Supplier Quotation": ["supplier","company","transaction_date","valid_till","status","currency","grand_total","owner","modified"],
         "Purchase Order": ["supplier","company","transaction_date","schedule_date","status","currency","grand_total","owner","modified"],
         "Purchase Receipt": ["supplier","company","posting_date","status","currency","grand_total","owner","modified"],
         "Purchase Invoice": ["supplier","company","posting_date","status","currency","grand_total","owner","modified"],
@@ -432,7 +433,7 @@
           </div>
           ${state.procurement.inventory_error ? `<p class="section-note warning-note">部分库存读取失败：${esc(state.procurement.inventory_error)}</p>` : ""}
           ${cards || `<div class="empty-state">当前筛选条件下没有待采购需求。</div>`}
-          ${prep ? `<div class="procurement-preparation"><strong>${prep.mode === "rfq" ? "询价准备" : "直接采购准备"}</strong><span>已选择 ${prep.rows.length} 条需求、${prep.itemCount} 种物料。此处仅形成处理清单，尚未创建 ERPNext 单据。</span></div>` : ""}
+          ${prep ? procurementPreparationHtml(prep) : ""}
           <div class="procurement-actions"><span>已选择 <strong id="procurementSelectedCount">${state.procurementSelected.size}</strong> 行</span><div><button id="prepareRfq">准备询价</button><button id="prepareDirect" class="primary">准备直接采购</button></div></div>`;
         $("refreshProcurement")?.addEventListener("click", () => loadPendingProcurement({preserve:true}));
         $("procurementScope").onchange = event => { filters.scope = event.target.value; loadPendingProcurement(); };
@@ -448,6 +449,7 @@
         });
         $("prepareRfq")?.addEventListener("click", () => prepareProcurementSelection("rfq"));
         $("prepareDirect")?.addEventListener("click", () => prepareProcurementSelection("direct"));
+        $("createRfqDraft")?.addEventListener("click", createRfqDraft);
       }
 
       function prepareProcurementSelection(mode) {
@@ -455,6 +457,51 @@
         if (!rows.length) { window.alert("请先选择至少一条待采购需求。"); return; }
         state.procurementPreparation = {mode, rows, itemCount:new Set(rows.map(row => row.item_code)).size};
         renderPendingProcurement();
+      }
+
+      function procurementPreparationHtml(prep) {
+        if (prep.mode !== "rfq") return `<div class="procurement-preparation"><strong>直接采购准备</strong><span>已选择 ${prep.rows.length} 条需求、${prep.itemCount} 种物料。采购订单将在下一阶段接通；当前尚未写入 ERPNext。</span></div>`;
+        const suppliers = state.procurement?.available_suppliers || [];
+        const earliest = prep.rows.map(row => String(row.schedule_date || "").slice(0,10)).filter(Boolean).sort()[0] || "";
+        return `<div class="procurement-preparation rfq-form"><strong>创建询价单</strong><span>已选择 ${prep.rows.length} 条需求、${prep.itemCount} 种物料。请选择真实供应商，创建后仍是 ERPNext 草稿。</span>
+          <div class="supplier-options">${suppliers.map(supplier => `<label><input type="checkbox" data-rfq-supplier="${esc(supplier.supplier_code)}"><span><b>${esc(supplier.supplier_name)}</b><small>${esc(supplier.primary_category || supplier.supplier_group || "")}</small></span></label>`).join("") || `<span>没有可用供应商，请先完善供应商主数据。</span>`}</div>
+          <label class="form-field"><span>期望回复/到货日期</span><input id="rfqScheduleDate" type="date" value="${esc(earliest)}"></label>
+          <label class="form-field"><span>询价说明</span><textarea id="rfqMessage" rows="3">请按清单报价，并说明含税单价、交货期、付款条件和报价有效期。</textarea></label>
+          <button id="createRfqDraft" class="primary" ${suppliers.length ? "" : "disabled"}>创建询价草稿</button>
+        </div>`;
+      }
+
+      async function createRfqDraft() {
+        const prep = state.procurementPreparation;
+        if (!prep || prep.mode !== "rfq") return;
+        const supplierCodes = [...document.querySelectorAll("[data-rfq-supplier]:checked")].map(input => input.dataset.rfqSupplier);
+        if (!supplierCodes.length) { window.alert("请至少选择一家供应商。"); return; }
+        if (!window.confirm(`确认创建询价草稿？\n需求行：${prep.rows.length}\n供应商：${supplierCodes.length} 家`)) return;
+        const button = $("createRfqDraft");
+        button.disabled = true;
+        button.textContent = "正在创建...";
+        try {
+          const result = await api("/api/procurement/rfq", {
+            method:"POST",
+            body:JSON.stringify({
+              user:state.user.user_email,
+              project_code:state.project.project_code,
+              conversation_id:state.conversationId,
+              request_id:crypto.randomUUID(),
+              selected_rows:prep.rows.map(procurementRowKey),
+              supplier_codes:supplierCodes,
+              schedule_date:$("rfqScheduleDate")?.value || "",
+              message_for_supplier:$("rfqMessage")?.value || "",
+            }),
+          });
+          state.procurementPreparation = null;
+          await Promise.all([loadPendingProcurement({preserve:true}), loadDocuments({preserve:true})]);
+          await openDocument(result.doctype, result.name);
+        } catch (error) {
+          window.alert(error.message);
+          button.disabled = false;
+          button.textContent = "创建询价草稿";
+        }
       }
 
       function renderInbox() {
@@ -506,7 +553,7 @@
         const titles = {mine:"我的申请",progress:"采购进度",recent:"最近单据",exceptions:"异常与退回"};
         const modules = (state.documents.modules || []).map(module => ({...module, groups:(module.groups || []).map(group => ({...group, documents:(group.documents || []).filter(document => {
           if (mode === "mine") return group.doctype === "Material Request" && document.owner === state.user.user_email;
-          if (mode === "progress") return ["Request for Quotation","Purchase Order","Purchase Receipt"].includes(group.doctype) || (group.doctype === "Material Request" && Number(document.docstatus) === 1);
+          if (mode === "progress") return ["Request for Quotation","Supplier Quotation","Purchase Order","Purchase Receipt"].includes(group.doctype) || (group.doctype === "Material Request" && Number(document.docstatus) === 1);
           if (mode === "exceptions") return Boolean(document.is_return) || /驳回|取消|停止|异常|Rejected|Cancelled|Stopped/i.test(`${document.workflow_state || ""} ${document.status || ""}`);
           return true;
         })}))}));
@@ -518,7 +565,7 @@
       }
 
       function inferDoctype(label) {
-        return ({"材料申请":"Material Request","询价单":"Request for Quotation","采购订单":"Purchase Order","采购收货":"Purchase Receipt","库存移动":"Stock Entry","采购发票":"Purchase Invoice","付款单":"Payment Entry","任务":"Task","待办":"ToDo"})[label] || "";
+        return ({"材料申请":"Material Request","询价单":"Request for Quotation","供应商报价":"Supplier Quotation","采购订单":"Purchase Order","采购收货":"Purchase Receipt","库存移动":"Stock Entry","采购发票":"Purchase Invoice","付款单":"Payment Entry","任务":"Task","待办":"ToDo"})[label] || "";
       }
 
       function renderSteps() {
@@ -548,6 +595,7 @@
 
       async function openDocument(doctype, name) {
         if (!state.user || !doctype || !name) return;
+        state.quotationContext = null;
         state.documentDetail = {loading:true, doctype, name};
         showDrawer();
         renderDocumentDrawer();
@@ -555,6 +603,13 @@
           state.documentDetail = await api(`/api/document?user=${encodeURIComponent(state.user.user_email)}&doctype=${encodeURIComponent(doctype)}&name=${encodeURIComponent(name)}`);
         } catch (error) {
           state.documentDetail = {error:error.message, doctype, name};
+        }
+        if (state.documentDetail?.doctype === "Request for Quotation" && Number(state.documentDetail.document?.docstatus) === 1) {
+          try {
+            state.quotationContext = await api(`/api/procurement/quotations?user=${encodeURIComponent(state.user.user_email)}&request_for_quotation=${encodeURIComponent(name)}`);
+          } catch (error) {
+            state.quotationContext = {error:error.message, quotations:[]};
+          }
         }
         renderDocumentDrawer();
       }
@@ -595,6 +650,7 @@
           ${workflowHistory.length ? `<h3 class="drawer-section-title">审批记录</h3><div class="workflow-history">${workflowHistory.map(row => `<div class="workflow-history-row"><span class="workflow-dot"></span><div><strong>${esc(row.workflow_state || row.status || "流程动作")}</strong><span>${esc(row.completed_by || row.user || "系统")} · ${esc(row.completed_by_role || "")}</span><small>${esc(dateShort(row.modified || row.creation))}</small></div></div>`).join("")}</div>` : ""}
           ${workflowComments.length ? `<h3 class="drawer-section-title">审批备注</h3><div class="workflow-comments">${workflowComments.map(row => `<div class="workflow-comment"><strong>${esc(row.comment_by || row.comment_email || row.owner || "系统")}</strong><p>${esc(row.content || "")}</p><small>${esc(dateShort(row.creation))}</small></div>`).join("")}</div>` : ""}
           ${childRows.length ? `<h3 class="drawer-section-title">明细行 · ${childRows.length}</h3>${detail.doctype === "Material Request" ? `<p class="section-note">材料申请中的价格是测试参考价，用于预计需求金额；供应商报价和采购订单价格才是正式采购价格。</p>` : ""}<div class="items-wrap"><table class="items-table"><thead><tr>${columns.map(key => `<th>${esc(itemColumnLabel(detail.doctype, key))}</th>`).join("")}</tr></thead><tbody>${childRows.map(row => `<tr>${columns.map(key => `<td>${esc(formatItemField(detail.doctype, key, row[key], row))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>` : ""}
+          ${rfqQuotationHtml(detail)}
           ${state.developerMode ? `<details class="raw-details"><summary>查看完整单据 JSON</summary><pre>${esc(pretty(doc))}</pre></details>` : ""}`;
         $("submitDocumentDraft")?.addEventListener("click", async () => {
           if (!window.confirm(`确认提交 ${detail.name}？`)) return;
@@ -632,6 +688,79 @@
             await openDocument(detail.doctype, detail.name);
           }
         }));
+        $("createSupplierQuotation")?.addEventListener("click", createSupplierQuotation);
+        $("compareSupplierQuotations")?.addEventListener("click", compareSupplierQuotations);
+        document.querySelectorAll("[data-open-quotation]").forEach(button => button.onclick = () => openDocument("Supplier Quotation", button.dataset.openQuotation));
+      }
+
+      function rfqQuotationHtml(detail) {
+        if (detail.doctype !== "Request for Quotation" || Number(detail.document?.docstatus) !== 1) return "";
+        const doc = detail.document || {};
+        const suppliers = (doc.suppliers || []).map(row => row.supplier || row.supplier_name).filter(Boolean);
+        const rows = Array.isArray(doc.items) ? doc.items : [];
+        const context = state.quotationContext || {quotations:[]};
+        const quotations = context.quotations || [];
+        const comparison = context.comparison;
+        return `<section class="quotation-section">
+          <h3 class="drawer-section-title">供应商报价</h3>
+          <p class="section-note">询价单已提交。逐家录入供应商的真实报价，提交至少两张报价后可以比较；系统不会自动选中供应商。</p>
+          ${context.error ? `<div class="message error">${esc(context.error)}</div>` : ""}
+          <div class="quotation-list">${quotations.length ? quotations.map(quote => `<button data-open-quotation="${esc(quote.name)}"><span><strong>${esc(quote.name)}</strong><small>${esc(quote.supplier || "-")} · ${Number(quote.docstatus) === 1 ? "已提交" : "草稿"}</small></span><b>${esc(formatNumber(quote.grand_total || quote.net_total || 0))} ${esc(quote.currency || "CNY")}</b></button>`).join("") : `<div class="empty-state">尚未录入供应商报价。</div>`}</div>
+          <div class="quotation-entry">
+            <div class="quotation-entry-head"><strong>录入一份报价</strong><select id="quotationSupplier"><option value="">选择供应商</option>${suppliers.map(supplier => `<option value="${esc(supplier)}">${esc(supplier)}</option>`).join("")}</select></div>
+            <div class="quotation-rate-grid">${rows.map((row,index) => `<label><span>${esc(row.item_name || row.item_code)} · ${esc(formatNumber(row.qty))} ${esc(row.uom || "")}</span><input type="number" min="0.000001" step="0.01" placeholder="含税单价" data-rfq-rate="${index}" data-rfq-item="${esc(row.name || row.item_code)}"></label>`).join("")}</div>
+            <div class="quotation-form-grid"><label class="form-field"><span>报价有效期</span><input id="quotationValidTill" type="date"></label><label class="form-field"><span>交付与付款条款</span><textarea id="quotationTerms" rows="2" placeholder="例如：7月20日前到货；月结30天；含税含运费"></textarea></label></div>
+            <button id="createSupplierQuotation" class="primary">创建报价草稿</button>
+          </div>
+          ${quotations.length >= 2 ? `<button id="compareSupplierQuotations">比较已提交报价</button>` : ""}
+          ${comparison ? quotationComparisonHtml(comparison) : ""}
+        </section>`;
+      }
+
+      async function createSupplierQuotation() {
+        const supplier = $("quotationSupplier")?.value || "";
+        if (!supplier) { window.alert("请选择供应商。"); return; }
+        const offers = [...document.querySelectorAll("[data-rfq-rate]")].map(input => ({request_for_quotation_item:input.dataset.rfqItem, rate:Number(input.value || 0)}));
+        if (offers.some(offer => offer.rate <= 0)) { window.alert("请为每条物料填写大于 0 的单价。"); return; }
+        if (!window.confirm(`确认录入 ${supplier} 的报价草稿？`)) return;
+        const button = $("createSupplierQuotation");
+        button.disabled = true;
+        button.textContent = "正在创建...";
+        try {
+          await api("/api/procurement/quotation", {method:"POST", body:JSON.stringify({
+            user:state.user.user_email,
+            project_code:state.project.project_code,
+            conversation_id:state.conversationId,
+            request_id:crypto.randomUUID(),
+            request_for_quotation:state.documentDetail.name,
+            supplier_code:supplier,
+            offers,
+            valid_till:$("quotationValidTill")?.value || "",
+            terms:$("quotationTerms")?.value || "",
+          })});
+          await Promise.all([loadDocuments({preserve:true}), openDocument("Request for Quotation", state.documentDetail.name)]);
+        } catch (error) {
+          window.alert(error.message);
+          button.disabled = false;
+          button.textContent = "创建报价草稿";
+        }
+      }
+
+      async function compareSupplierQuotations() {
+        const submitted = (state.quotationContext?.quotations || []).filter(row => Number(row.docstatus) === 1).map(row => row.name);
+        if (submitted.length < 2) { window.alert("请先提交至少两张供应商报价。"); return; }
+        try {
+          const comparison = await api("/api/procurement/compare", {method:"POST", body:JSON.stringify({user:state.user.user_email, supplier_quotations:submitted})});
+          state.quotationContext.comparison = comparison;
+          renderDocumentDrawer();
+        } catch (error) {
+          window.alert(error.message);
+        }
+      }
+
+      function quotationComparisonHtml(comparison) {
+        const recommendation = comparison.recommendation || {};
+        return `<div class="quotation-comparison"><strong>比价结果</strong><p>当前最低可比总价：${esc(recommendation.supplier || recommendation.supplier_quotation || "-")} · ${esc(formatNumber(recommendation.total_amount || 0))} ${esc(recommendation.currency || "")}</p><p>该结果只按当前报价金额排序。交期、质量、付款条款仍需采购人员复核后决定。</p>${(comparison.total_ranking || []).map((row,index) => `<div><span>${index + 1}. ${esc(row.supplier || row.name)}</span><b>${esc(formatNumber(row.total_amount))} ${esc(row.currency || "")}</b></div>`).join("")}</div>`;
       }
 
       function formatField(key, value) {

@@ -336,7 +336,7 @@ def test_purchase_order_draft_returns_v02_result_shape_and_resolves_items() -> N
             "doctype": "Purchase Order",
             "supplier": "SUP-001",
             "schedule_date": "2026-06-10",
-            "items": [{"item_name": "Test Item", "item_code": "ITEM-001", "qty": 3, "uom": "Nos", "rate": 12}],
+                "items": [{"item_name": "Test Item", "item_code": "ITEM-001", "qty": 3, "uom": "Nos", "conversion_factor": 1, "rate": 12}],
             "docstatus": 0,
         },
     )
@@ -378,6 +378,7 @@ def test_material_request_draft_preserves_project_context_on_items() -> None:
                     "item_code": "ITEM-001",
                     "qty": 3,
                     "uom": "Nos",
+                    "conversion_factor": 1,
                     "schedule_date": "2026-06-12",
                     "warehouse": "Stores - A",
                     "project": "PROJ-001",
@@ -431,6 +432,7 @@ def test_purchase_order_from_material_request_preserves_source_references() -> N
                         "item_code": "ITEM-001",
                         "qty": 5.0,
                         "uom": "Nos",
+                        "conversion_factor": 1,
                         "schedule_date": "2026-06-12",
                         "warehouse": "Stores - A",
                         "rate": 12,
@@ -468,6 +470,55 @@ def test_purchase_order_from_material_request_resolves_missing_supplier_price() 
     assert create_call[2]["items"][0]["rate"] == 8.5
     assert create_call[2]["items"][0]["price_list_rate"] == 8.5
 
+
+def test_rfq_and_supplier_quotation_preserve_sources_and_commercial_terms() -> None:
+    client = BuyingFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    rfq = adapter.execute({
+        "tool": "erpnext.buying.create_request_for_quotation_draft",
+        "arguments": {
+            "company": "Acme",
+            "transaction_date": "2026-07-15",
+            "schedule_date": "2026-07-20",
+            "message_for_supplier": "请说明交货期和付款条件。",
+            "suppliers": [{"supplier": "SUP-001"}],
+            "items": [{
+                "item_code": "ITEM-001",
+                "qty": 3,
+                "material_request": "MR-001",
+                "material_request_item": "MRI-001",
+            }],
+        },
+    })
+    quote = adapter.execute({
+        "tool": "erpnext.buying.create_supplier_quotation_draft",
+        "arguments": {
+            "supplier": "SUP-001",
+            "company": "Acme",
+            "request_for_quotation": "RFQ-001",
+            "payment_terms_template": "30 Days",
+            "terms": "2026-07-20 前到货，含税含运费。",
+            "items": [{
+                "item_code": "ITEM-001",
+                "qty": 3,
+                "rate": 12,
+                "request_for_quotation": "RFQ-001",
+                "request_for_quotation_item": "RFQI-001",
+            }],
+        },
+    })
+
+    assert rfq.ok and quote.ok
+    rfq_data = next(call[2] for call in client.calls if call[:2] == ("create_document", "Request for Quotation"))
+    quote_data = next(call[2] for call in client.calls if call[:2] == ("create_document", "Supplier Quotation"))
+    assert rfq_data["company"] == "Acme"
+    assert rfq_data["message_for_supplier"] == "请说明交货期和付款条件。"
+    assert rfq_data["items"][0]["material_request_item"] == "MRI-001"
+    assert quote_data["request_for_quotation"] == "RFQ-001"
+    assert quote_data["payment_terms_template"] == "30 Days"
+    assert quote_data["terms"] == "2026-07-20 前到货，含税含运费。"
+    assert quote_data["items"][0]["request_for_quotation_item"] == "RFQI-001"
 
 def test_purchase_order_from_material_request_requires_submitted_purchase_request() -> None:
     client = BuyingFakeClient()
@@ -527,6 +578,7 @@ def test_purchase_receipt_from_purchase_order_preserves_source_references() -> N
                         "item_code": "ITEM-001",
                         "qty": 4.0,
                         "uom": "Nos",
+                        "conversion_factor": 1,
                         "warehouse": "Stores - B",
                         "rate": 12,
                         "price_list_rate": 12,
