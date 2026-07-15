@@ -89,6 +89,7 @@ class ERPNextAdapter(
             "erpnext.buying.create_supplier_quotation_draft": self._buying_create_supplier_quotation_draft,
             "erpnext.buying.compare_supplier_quotations": self._buying_compare_supplier_quotations,
             "erpnext.buying.create_purchase_order_draft": self._buying_create_purchase_order_draft,
+            "erpnext.buying.create_purchase_order_from_supplier_quotation_draft": self._buying_create_purchase_order_from_supplier_quotation_draft,
             "erpnext.buying.create_purchase_order_from_material_request_draft": self._buying_create_purchase_order_from_material_request_draft,
             "erpnext.buying.create_purchase_receipt_draft": self._buying_create_purchase_receipt_draft,
             "erpnext.buying.create_purchase_receipt_from_purchase_order_draft": self._buying_create_purchase_receipt_from_purchase_order_draft,

@@ -122,6 +122,7 @@ def infer_risk_level(tool: str) -> str:
         "erpnext.buying.create_request_for_quotation_draft",
         "erpnext.buying.create_supplier_quotation_draft",
         "erpnext.buying.create_purchase_order_draft",
+        "erpnext.buying.create_purchase_order_from_supplier_quotation_draft",
         "erpnext.buying.create_purchase_order_from_material_request_draft",
         "erpnext.buying.create_purchase_receipt_draft",
         "erpnext.buying.create_purchase_receipt_from_purchase_order_draft",

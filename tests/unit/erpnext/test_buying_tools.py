@@ -205,8 +205,43 @@ class BuyingFakeClient:
                     "items": [{"item_code": "ITEM-001", "qty": 10, "rate": 8, "amount": 80}],
                 },
             )
+        if doctype == "Supplier Quotation" and name == "SQ-AWARD":
+            return ToolResult(ok=True, data={
+                "doctype": doctype,
+                "name": name,
+                "supplier": "SUP-001",
+                "company": "Acme",
+                "currency": "USD",
+                "docstatus": 1,
+                "valid_till": "2027-12-31",
+                "payment_terms_template": "30 Days",
+                "terms": "Delivered duty paid.",
+                "items": [{
+                    "name": "SQI-001",
+                    "item_code": "ITEM-001",
+                    "qty": 10,
+                    "uom": "Nos",
+                    "conversion_factor": 1,
+                    "rate": 12,
+                    "warehouse": "Stores - A",
+                    "request_for_quotation": "RFQ-001",
+                    "request_for_quotation_item": "RFQI-001",
+                }],
+            })
         if doctype == "Supplier Quotation":
             return ToolResult(ok=False, error_type="not_found", error="not found")
+        if doctype == "Request for Quotation" and name == "RFQ-001":
+            return ToolResult(ok=True, data={
+                "doctype": doctype,
+                "name": name,
+                "items": [{
+                    "name": "RFQI-001",
+                    "material_request": "MR-001",
+                    "material_request_item": "MRI-001",
+                    "schedule_date": "2026-06-12",
+                    "warehouse": "Stores - A",
+                }],
+            })
         return ToolResult(ok=True, data={"doctype": doctype, "name": name})
 
     def search_documents(self, doctype, **kwargs) -> ToolResult:
@@ -447,6 +482,73 @@ def test_purchase_order_from_material_request_preserves_source_references() -> N
             },
         ),
     ]
+
+
+def test_purchase_order_from_supplier_quotation_preserves_full_source_chain() -> None:
+    client = BuyingFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    result = adapter.execute({
+        "tool": "erpnext.buying.create_purchase_order_from_supplier_quotation_draft",
+        "arguments": {"supplier_quotation": "SQ-AWARD", "transaction_date": "2026-06-11"},
+    })
+
+    assert result.ok
+    assert result.data["source_supplier_quotation"] == "SQ-AWARD"
+    purchase_order = next(call[2] for call in client.calls if call[:2] == ("create_document", "Purchase Order"))
+    assert purchase_order["supplier"] == "SUP-001"
+    assert purchase_order["payment_terms_template"] == "30 Days"
+    assert purchase_order["terms"] == "Delivered duty paid."
+    assert purchase_order["items"] == [{
+        "item_name": "Test Item",
+        "item_code": "ITEM-001",
+        "qty": 10.0,
+        "uom": "Nos",
+        "conversion_factor": 1,
+        "schedule_date": "2026-06-12",
+        "warehouse": "Stores - A",
+        "rate": 12,
+        "project": "PROJ-001",
+        "cost_center": "Bridge - A",
+        "material_request": "MR-001",
+        "material_request_item": "MRI-001",
+        "request_for_quotation": "RFQ-001",
+        "request_for_quotation_item": "RFQI-001",
+        "supplier_quotation": "SQ-AWARD",
+        "supplier_quotation_item": "SQI-001",
+    }]
+
+
+def test_purchase_order_from_supplier_quotation_blocks_already_ordered_quantity() -> None:
+    client = BuyingFakeClient()
+    original_search = client.search_documents
+
+    def search_documents(doctype, **kwargs):
+        if doctype == "Purchase Order":
+            return ToolResult(ok=True, data=[{"name": "PO-QUOTED", "docstatus": 1}])
+        return original_search(doctype, **kwargs)
+
+    original_get = client.get_document
+
+    def get_document(doctype, name):
+        if (doctype, name) == ("Purchase Order", "PO-QUOTED"):
+            return ToolResult(ok=True, data={"name": name, "items": [{
+                "supplier_quotation": "SQ-AWARD",
+                "supplier_quotation_item": "SQI-001",
+                "qty": 10,
+            }]})
+        return original_get(doctype, name)
+
+    client.search_documents = search_documents  # type: ignore[method-assign]
+    client.get_document = get_document  # type: ignore[method-assign]
+    result = ERPNextAdapter(client).execute({
+        "tool": "erpnext.buying.create_purchase_order_from_supplier_quotation_draft",
+        "arguments": {"supplier_quotation": "SQ-AWARD"},
+    })
+
+    assert not result.ok
+    assert result.error_type == "validation_error"
+    assert result.data["errors"][0]["remaining_qty"] == 0
 
 
 def test_purchase_order_from_material_request_resolves_missing_supplier_price() -> None:
@@ -1077,6 +1179,7 @@ def test_buying_tools_infer_expected_risk_levels() -> None:
     assert ToolCall.from_dict({"tool": "erpnext.buying.compare_supplier_quotations"}).risk_level == "L1"
     assert ToolCall.from_dict({"tool": "erpnext.buying.record_purchase_receipt_discrepancy"}).risk_level == "L2"
     assert ToolCall.from_dict({"tool": "erpnext.buying.create_purchase_order_draft"}).risk_level == "L3"
+    assert ToolCall.from_dict({"tool": "erpnext.buying.create_purchase_order_from_supplier_quotation_draft"}).risk_level == "L3"
     assert ToolCall.from_dict({"tool": "erpnext.buying.create_purchase_order_from_material_request_draft"}).risk_level == "L3"
     assert ToolCall.from_dict({"tool": "erpnext.buying.create_purchase_receipt_from_purchase_order_draft"}).risk_level == "L3"
     assert ToolCall.from_dict({"tool": "erpnext.buying.create_purchase_receipt_return_draft"}).risk_level == "L3"

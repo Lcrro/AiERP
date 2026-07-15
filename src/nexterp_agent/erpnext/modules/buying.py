@@ -295,6 +295,9 @@ class BuyingToolsMixin:
                 "company": args.get("company"),
                 "currency": args.get("currency"),
                 "buying_price_list": next(iter(price_lists)) if len(price_lists) == 1 else None,
+                "taxes_and_charges": args.get("taxes_and_charges"),
+                "payment_terms_template": args.get("payment_terms_template"),
+                "terms": args.get("terms"),
                 "items": items,
                 "docstatus": 0,
             }
@@ -337,6 +340,162 @@ class BuyingToolsMixin:
             item["price_list_rate"] = rate
             return str(candidate.get("price_list") or "") or None
         return None
+
+    def _buying_create_purchase_order_from_supplier_quotation_draft(self, args: dict[str, Any]) -> ToolResult:
+        quotation_name = args["supplier_quotation"]
+        result = self.client.get_document("Supplier Quotation", quotation_name)
+        if not result.ok:
+            return result
+        quotation = result.data if isinstance(result.data, dict) else {}
+        if int(quotation.get("docstatus") or 0) != 1:
+            return _source_document_error(
+                "Supplier Quotation",
+                quotation_name,
+                "Not Submitted",
+                "只有已提交的供应商报价才能生成采购订单草稿。",
+            )
+        valid_till = str(quotation.get("valid_till") or "")[:10]
+        if valid_till and valid_till < date.today().isoformat():
+            return _source_document_error(
+                "Supplier Quotation",
+                quotation_name,
+                "Expired",
+                f"供应商报价已于 {valid_till} 失效，请重新确认报价。",
+            )
+
+        ordered_result = self.client.search_documents(
+            "Purchase Order",
+            filters={"supplier": quotation.get("supplier"), "docstatus": ["!=", 2]},
+            fields=["name", "docstatus"],
+            limit=500,
+            order_by="creation asc",
+        )
+        if not ordered_result.ok:
+            return ordered_result
+        ordered_by_item: dict[str, float] = {}
+        for parent in ordered_result.data or []:
+            parent_name = str(parent.get("name") or "")
+            if not parent_name:
+                continue
+            parent_result = self.client.get_document("Purchase Order", parent_name)
+            if not parent_result.ok or not isinstance(parent_result.data, dict):
+                return parent_result
+            for row in parent_result.data.get("items") or []:
+                if str(row.get("supplier_quotation") or "") != quotation_name:
+                    continue
+                key = str(row.get("supplier_quotation_item") or "")
+                ordered_by_item[key] = ordered_by_item.get(key, 0.0) + (_float_or_none(row.get("qty")) or 0.0)
+
+        selected = {
+            str(row.get("supplier_quotation_item") or ""): row
+            for row in args.get("selected_items") or []
+            if isinstance(row, dict) and row.get("supplier_quotation_item")
+        }
+        rfq_cache: dict[str, dict[str, Any]] = {}
+        material_request_cache: dict[str, dict[str, Any]] = {}
+        items: list[dict[str, Any]] = []
+        errors: list[dict[str, Any]] = []
+        warnings: list[str] = []
+        for quote_item in quotation.get("items") or []:
+            if not isinstance(quote_item, dict):
+                continue
+            quote_item_name = str(quote_item.get("name") or "")
+            if selected and quote_item_name not in selected:
+                continue
+            requested = selected.get(quote_item_name, {})
+            quoted_qty = _float_or_none(quote_item.get("qty")) or 0.0
+            remaining_qty = max(quoted_qty - ordered_by_item.get(quote_item_name, 0.0), 0.0)
+            order_qty = _float_or_none(requested.get("qty")) if requested else remaining_qty
+            order_qty = remaining_qty if order_qty is None else order_qty
+            if order_qty <= 0 or order_qty > remaining_qty:
+                errors.append({
+                    "supplier_quotation_item": quote_item_name,
+                    "quoted_qty": quoted_qty,
+                    "already_ordered_qty": ordered_by_item.get(quote_item_name, 0.0),
+                    "requested_qty": order_qty,
+                    "remaining_qty": remaining_qty,
+                })
+                continue
+
+            rfq_name = str(quote_item.get("request_for_quotation") or "")
+            rfq_item_name = str(quote_item.get("request_for_quotation_item") or "")
+            rfq_item: dict[str, Any] = {}
+            if rfq_name:
+                if rfq_name not in rfq_cache:
+                    rfq_result = self.client.get_document("Request for Quotation", rfq_name)
+                    rfq_cache[rfq_name] = rfq_result.data if rfq_result.ok and isinstance(rfq_result.data, dict) else {}
+                rfq_item = next(
+                    (row for row in rfq_cache[rfq_name].get("items") or [] if str(row.get("name") or "") == rfq_item_name),
+                    {},
+                )
+            material_request = str(rfq_item.get("material_request") or "")
+            material_request_item = str(rfq_item.get("material_request_item") or "")
+            source_item: dict[str, Any] = {}
+            if material_request:
+                if material_request not in material_request_cache:
+                    mr_result = self.client.get_document("Material Request", material_request)
+                    material_request_cache[material_request] = mr_result.data if mr_result.ok and isinstance(mr_result.data, dict) else {}
+                source_item = next(
+                    (row for row in material_request_cache[material_request].get("items") or [] if str(row.get("name") or "") == material_request_item),
+                    {},
+                )
+            else:
+                warnings.append(f"报价行 {quote_item_name} 没有可追溯的材料申请行。")
+
+            items.append(_without_empty({
+                "item_code": quote_item.get("item_code"),
+                "qty": order_qty,
+                "uom": quote_item.get("uom") or quote_item.get("stock_uom"),
+                "conversion_factor": quote_item.get("conversion_factor"),
+                "schedule_date": requested.get("schedule_date") or args.get("schedule_date") or quote_item.get("expected_delivery_date") or rfq_item.get("schedule_date"),
+                "warehouse": requested.get("warehouse") or quote_item.get("warehouse") or rfq_item.get("warehouse") or source_item.get("warehouse"),
+                "rate": quote_item.get("rate") or quote_item.get("net_rate"),
+                "description": quote_item.get("description"),
+                "supplier_quotation": quotation_name,
+                "supplier_quotation_item": quote_item_name,
+                "request_for_quotation": rfq_name,
+                "request_for_quotation_item": rfq_item_name,
+                "material_request": material_request,
+                "material_request_item": material_request_item,
+                "project": source_item.get("project"),
+                "cost_center": source_item.get("cost_center"),
+            }))
+
+        if errors or not items:
+            return ToolResult(
+                ok=False,
+                error="Purchase Order draft cannot be created from the current Supplier Quotation context.",
+                error_type="validation_error",
+                user_message="无法从该供应商报价创建采购订单：请检查剩余可订数量和报价明细。",
+                data={
+                    "doctype": "Supplier Quotation",
+                    "name": quotation_name,
+                    "status": "Purchase Order Draft Blocked",
+                    "errors": errors,
+                    "warnings": warnings,
+                },
+                debug={"raw_supplier_quotation": quotation},
+            )
+
+        draft_result = self._buying_create_purchase_order_draft({
+            "supplier": quotation.get("supplier"),
+            "transaction_date": args.get("transaction_date") or date.today().isoformat(),
+            "schedule_date": args.get("schedule_date"),
+            "company": quotation.get("company"),
+            "currency": quotation.get("currency"),
+            "taxes_and_charges": quotation.get("taxes_and_charges"),
+            "payment_terms_template": quotation.get("payment_terms_template"),
+            "terms": quotation.get("terms"),
+            "items": items,
+        })
+        if draft_result.ok and isinstance(draft_result.data, dict):
+            draft_result.data.update({
+                "source_supplier_quotation": quotation_name,
+                "source_item_count": len(items),
+                "warnings": warnings,
+                "summary": f"Created Purchase Order draft from Supplier Quotation {quotation_name} with {len(items)} item row(s).",
+            })
+        return draft_result
 
     def _buying_create_purchase_order_from_material_request_draft(self, args: dict[str, Any]) -> ToolResult:
         material_request = args["material_request"]
@@ -846,10 +1005,26 @@ class BuyingToolsMixin:
             "request_for_quotation",
             "request_for_quotation_item",
             "supplier_quotation",
+            "supplier_quotation_item",
             "purchase_order",
             "purchase_order_item",
         }
         return _without_empty({field: row.get(field) for field in allowed_fields})
+
+
+def _source_document_error(doctype: str, name: str, status: str, user_message: str) -> ToolResult:
+    return ToolResult(
+        ok=False,
+        error=f"{doctype} {name} cannot be used in its current state: {status}.",
+        error_type="validation_error",
+        user_message=user_message,
+        data={
+            "doctype": doctype,
+            "name": name,
+            "status": status,
+            "risk": {"level": "L1", "requires_confirmation_for_submit": False},
+        },
+    )
 
 
 def _validate_material_request_for_purchase_order(doc: dict[str, Any], material_request: str) -> ToolResult | None:

@@ -157,7 +157,35 @@ BUYING_TOOL_SCHEMAS = [
                 "company": {"type": "string"},
                 "currency": {"type": "string"},
                 "buying_price_list": {"type": "string"},
+                "taxes_and_charges": {"type": "string"},
+                "payment_terms_template": {"type": "string"},
+                "terms": {"type": "string", "maxLength": 4000},
                 "items": {"type": "array", "items": BUYING_ITEM_LINE_SCHEMA},
+            },
+        ),
+    },
+    {
+        "name": "erpnext.buying.create_purchase_order_from_supplier_quotation_draft",
+        "description": "Create a Purchase Order draft from a submitted Supplier Quotation, preserving quotation, RFQ and Material Request references while enforcing remaining quoted quantity.",
+        "parameters": _object_schema(
+            ["supplier_quotation"],
+            {
+                "supplier_quotation": {"type": "string"},
+                "transaction_date": {"type": "string"},
+                "schedule_date": {"type": "string"},
+                "selected_items": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": ["supplier_quotation_item"],
+                        "properties": {
+                            "supplier_quotation_item": {"type": "string"},
+                            "qty": {"type": "number", "exclusiveMinimum": 0},
+                            "warehouse": {"type": "string"},
+                            "schedule_date": {"type": "string"},
+                        },
+                    },
+                },
             },
         ),
     },

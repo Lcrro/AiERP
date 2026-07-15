@@ -902,6 +902,36 @@ class AgentWorkbenchService:
                 if isinstance(item, dict)
             ):
                 quotations.append(result.data)
+        purchase_orders = client.search_documents(
+            "Purchase Order",
+            filters={"docstatus": ["!=", 2]},
+            fields=["name", "supplier", "status", "docstatus"],
+            limit=500,
+            order_by="modified desc",
+        )
+        ordered_by_quotation: dict[str, dict[str, Any]] = {}
+        if purchase_orders.ok:
+            quotation_names = {str(row.get("name") or "") for row in quotations}
+            for parent in purchase_orders.data or []:
+                parent_name = str(parent.get("name") or "")
+                if not parent_name:
+                    continue
+                detail = client.get_document("Purchase Order", parent_name)
+                if not detail.ok or not isinstance(detail.data, dict):
+                    continue
+                for item in detail.data.get("items") or []:
+                    quotation_name = str(item.get("supplier_quotation") or "")
+                    if quotation_name not in quotation_names:
+                        continue
+                    summary = ordered_by_quotation.setdefault(quotation_name, {"purchase_orders": set(), "ordered_qty": 0.0})
+                    summary["purchase_orders"].add(parent_name)
+                    summary["ordered_qty"] += _number(item.get("qty"))
+        for quotation in quotations:
+            summary = ordered_by_quotation.get(str(quotation.get("name") or ""), {})
+            quoted_qty = sum(_number(item.get("qty")) for item in quotation.get("items") or [] if isinstance(item, dict))
+            quotation["purchase_orders"] = sorted(summary.get("purchase_orders") or [])
+            quotation["ordered_qty"] = _number(summary.get("ordered_qty"))
+            quotation["remaining_qty"] = max(quoted_qty - quotation["ordered_qty"], 0.0)
         return {"request_for_quotation": request_for_quotation, "quotations": quotations, "count": len(quotations)}
 
     def compare_supplier_quotations(self, user: str, names: list[str], *, include_drafts: bool = False) -> dict[str, Any]:
@@ -914,6 +944,36 @@ class AgentWorkbenchService:
         if not result.ok or not isinstance(result.data, dict):
             raise ValueError(result.user_message or result.error or "供应商报价比较失败")
         return result.data
+
+    def create_purchase_order_from_supplier_quotation(
+        self,
+        user: str,
+        project: str,
+        supplier_quotation: str,
+        *,
+        selected_items: list[dict[str, Any]] | None = None,
+        request_id: str = "",
+        conversation_id: str = "default",
+    ) -> dict[str, Any]:
+        if not user or not project or not supplier_quotation:
+            raise ValueError("user、project 和 supplier_quotation 必填")
+        cached, request_context = self._idempotency_context(user, project, conversation_id, request_id)
+        if cached is not None:
+            return cached
+        result = ERPNextAdapter(self.client(user)).execute({
+            "tool": "erpnext.buying.create_purchase_order_from_supplier_quotation_draft",
+            "arguments": {
+                "supplier_quotation": supplier_quotation,
+                "transaction_date": date.today().isoformat(),
+                "selected_items": selected_items or [],
+            },
+        })
+        if not result.ok or not isinstance(result.data, dict) or not result.data.get("name"):
+            raise ValueError(result.user_message or result.error or "创建采购订单草稿失败")
+        payload = self.document(user, "Purchase Order", str(result.data["name"]))
+        payload["source_supplier_quotation"] = supplier_quotation
+        self._remember_idempotent_result(request_context, request_id, payload)
+        return payload
 
     def _idempotency_context(
         self,
@@ -1531,6 +1591,18 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
                     str(request.get("user") or "").strip(),
                     list(request.get("supplier_quotations") or []),
                     include_drafts=bool(request.get("include_drafts")),
+                )
+                json_response(self, {"ok": True, **payload})
+                return
+            if self.path == "/api/procurement/purchase-order":
+                request = read_json(self)
+                payload = self.server.service.create_purchase_order_from_supplier_quotation(  # type: ignore[attr-defined]
+                    str(request.get("user") or "").strip(),
+                    str(request.get("project_code") or "").strip(),
+                    str(request.get("supplier_quotation") or "").strip(),
+                    selected_items=list(request.get("selected_items") or []),
+                    request_id=str(request.get("request_id") or "").strip(),
+                    conversation_id=str(request.get("conversation_id") or "default").strip(),
                 )
                 json_response(self, {"ok": True, **payload})
                 return

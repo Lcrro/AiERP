@@ -691,6 +691,8 @@
         $("createSupplierQuotation")?.addEventListener("click", createSupplierQuotation);
         $("compareSupplierQuotations")?.addEventListener("click", compareSupplierQuotations);
         document.querySelectorAll("[data-open-quotation]").forEach(button => button.onclick = () => openDocument("Supplier Quotation", button.dataset.openQuotation));
+        document.querySelectorAll("[data-create-purchase-order]").forEach(button => button.onclick = () => createPurchaseOrderFromQuotation(button.dataset.createPurchaseOrder));
+        document.querySelectorAll("[data-open-purchase-order]").forEach(button => button.onclick = () => openDocument("Purchase Order", button.dataset.openPurchaseOrder));
       }
 
       function rfqQuotationHtml(detail) {
@@ -705,7 +707,7 @@
           <h3 class="drawer-section-title">供应商报价</h3>
           <p class="section-note">询价单已提交。逐家录入供应商的真实报价，提交至少两张报价后可以比较；系统不会自动选中供应商。</p>
           ${context.error ? `<div class="message error">${esc(context.error)}</div>` : ""}
-          <div class="quotation-list">${quotations.length ? quotations.map(quote => `<button data-open-quotation="${esc(quote.name)}"><span><strong>${esc(quote.name)}</strong><small>${esc(quote.supplier || "-")} · ${Number(quote.docstatus) === 1 ? "已提交" : "草稿"}</small></span><b>${esc(formatNumber(quote.grand_total || quote.net_total || 0))} ${esc(quote.currency || "CNY")}</b></button>`).join("") : `<div class="empty-state">尚未录入供应商报价。</div>`}</div>
+          <div class="quotation-list">${quotations.length ? quotations.map(quote => `<div class="quotation-list-row"><button data-open-quotation="${esc(quote.name)}"><span><strong>${esc(quote.name)}</strong><small>${esc(quote.supplier || "-")} · ${Number(quote.docstatus) === 1 ? "已提交" : "草稿"}${quote.purchase_orders?.length ? ` · 已生成 ${quote.purchase_orders.length} 张订单` : ""}</small></span><b>${esc(formatNumber(quote.grand_total || quote.net_total || 0))} ${esc(quote.currency || "CNY")}</b></button>${Number(quote.docstatus) === 1 && Number(quote.remaining_qty || 0) > 0 ? `<button class="quotation-award" data-create-purchase-order="${esc(quote.name)}">据此下单</button>` : quote.purchase_orders?.length ? `<button class="quotation-award" data-open-purchase-order="${esc(quote.purchase_orders[0])}">查看订单</button>` : ""}</div>`).join("") : `<div class="empty-state">尚未录入供应商报价。</div>`}</div>
           <div class="quotation-entry">
             <div class="quotation-entry-head"><strong>录入一份报价</strong><select id="quotationSupplier"><option value="">选择供应商</option>${suppliers.map(supplier => `<option value="${esc(supplier)}">${esc(supplier)}</option>`).join("")}</select></div>
             <div class="quotation-rate-grid">${rows.map((row,index) => `<label><span>${esc(row.item_name || row.item_code)} · ${esc(formatNumber(row.qty))} ${esc(row.uom || "")}</span><input type="number" min="0.000001" step="0.01" placeholder="含税单价" data-rfq-rate="${index}" data-rfq-item="${esc(row.name || row.item_code)}"></label>`).join("")}</div>
@@ -753,6 +755,25 @@
           const comparison = await api("/api/procurement/compare", {method:"POST", body:JSON.stringify({user:state.user.user_email, supplier_quotations:submitted})});
           state.quotationContext.comparison = comparison;
           renderDocumentDrawer();
+        } catch (error) {
+          window.alert(error.message);
+        }
+      }
+
+      async function createPurchaseOrderFromQuotation(supplierQuotation) {
+        const quote = (state.quotationContext?.quotations || []).find(row => row.name === supplierQuotation) || {};
+        const amount = `${formatNumber(quote.grand_total || quote.net_total || 0)} ${quote.currency || "CNY"}`;
+        if (!window.confirm(`确认选择 ${quote.supplier || supplierQuotation} 的报价 ${amount}，并创建采购订单草稿？\n\n这一步不会提交采购订单，创建后仍需复核并提交。`)) return;
+        try {
+          const result = await api("/api/procurement/purchase-order", {method:"POST", body:JSON.stringify({
+            user:state.user.user_email,
+            project_code:state.project.project_code,
+            conversation_id:state.conversationId,
+            request_id:crypto.randomUUID(),
+            supplier_quotation:supplierQuotation,
+          })});
+          await loadDocuments({preserve:true});
+          await openDocument("Purchase Order", result.name);
         } catch (error) {
           window.alert(error.message);
         }

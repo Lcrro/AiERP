@@ -188,7 +188,9 @@
       .procurement-actions button.primary { border-color: var(--accent); background: var(--accent); color: white; }
       .quotation-section { margin-top: 18px; padding-top: 2px; border-top: 1px solid var(--line); }
       .quotation-list { display: grid; gap: 6px; margin: 8px 0 12px; }
+      .quotation-list-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; align-items: stretch; }
       .quotation-list button { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; padding: 9px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); text-align: left; }
+      .quotation-list-row .quotation-award { width: auto; white-space: nowrap; color: #006b4f; border-color: #8acbb8; background: #effaf6; font-weight: 700; }
       .quotation-list span, .quotation-list strong, .quotation-list small { display: block; }
       .quotation-list small { margin-top: 3px; color: var(--muted); }
       .quotation-entry { display: grid; gap: 9px; margin: 10px 0; padding: 12px; border: 1px solid var(--line); background: var(--surface-soft); }
