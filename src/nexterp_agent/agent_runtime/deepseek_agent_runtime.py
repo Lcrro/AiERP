@@ -179,6 +179,7 @@ class DeepSeekAgentRuntime:
         steps: list[dict[str, Any]] = []
         observations: list[dict[str, Any]] = []
         tool_results: list[dict[str, Any]] = []
+        confirmed_call: dict[str, Any] | None = None
         today = today or date.today()
 
         if execute:
@@ -186,6 +187,7 @@ class DeepSeekAgentRuntime:
             if not isinstance(pending, dict) or not isinstance(pending.get("tool_call"), dict):
                 return self._save(session, user_text, DeepSeekTurnResult("failed", "没有等待确认的ToolCall。"), request_id)
             call = pending["tool_call"]
+            confirmed_call = deepcopy(call)
             execution = self._execute(call, user=user, profile=profile)
             payload = execution.to_dict()
             tool_results.append(payload)
@@ -205,6 +207,21 @@ class DeepSeekAgentRuntime:
             try:
                 action = self._plan_with_retry(prompt)
             except Exception as exc:
+                if confirmed_call is not None and tool_results and tool_results[-1].get("ok"):
+                    steps.append(_step(
+                        "生成回复降级",
+                        "finish_fallback",
+                        {"error": str(exc)},
+                        {"source": "successful_tool_result"},
+                    ))
+                    result = DeepSeekTurnResult(
+                        "completed",
+                        _successful_execution_message(tool_results[-1]),
+                        tuple(steps),
+                        tool_result=tool_results[-1],
+                        tool_results=tuple(tool_results),
+                    )
+                    return self._save(session, user_text, result, request_id)
                 result = DeepSeekTurnResult("failed", f"DeepSeek规划失败：{exc}", tuple(steps), tool_results=tuple(tool_results))
                 return self._save(session, user_text, result, request_id)
             steps.append(_step("DeepSeek规划", action["action"], action.get("arguments") or {}, {"summary": action["summary"]}))
@@ -227,14 +244,24 @@ class DeepSeekAgentRuntime:
                 observation = self._resolve_entities(arguments, user=user, today=today, session=session)
                 steps.append(_step("解析实体", kind, arguments, observation))
                 observations.append(observation)
-                session.selected_entities.update(_resolved_entity_values(observation))
+                resolved_values = _resolved_entity_values(observation)
+                if any(entity.get("kind") == "item" for entity in observation.get("entities") or []):
+                    for selected_id, selected in list(session.selected_entities.items()):
+                        if selected.get("kind") == "item":
+                            session.selected_entities.pop(selected_id, None)
+                for entity in observation.get("entities") or []:
+                    entity_id = str(entity.get("id") or "")
+                    if entity_id and entity_id not in resolved_values:
+                        session.selected_entities.pop(entity_id, None)
+                session.selected_entities.update(resolved_values)
                 continue
             if kind == "ask_user":
                 questions = tuple(str(value) for value in arguments.get("questions") or [] if str(value).strip())
                 if not questions:
                     questions = (str(arguments.get("question") or "请补充必要信息。"),)
-                candidates = tuple(arguments.get("candidates") or _observation_candidates(observations))
-                result = DeepSeekTurnResult("needs_clarification", action["summary"], tuple(steps), questions=questions, candidates=candidates, tool_results=tuple(tool_results))
+                candidates = tuple(_hydrate_presented_candidates(arguments.get("candidates") or [], observations))
+                message = str(arguments.get("message") or "\n\n".join(questions))
+                result = DeepSeekTurnResult("needs_clarification", message, tuple(steps), questions=questions, candidates=candidates, tool_results=tuple(tool_results))
                 session.pending_action = {"type": "clarification", "steps": steps, "observations": observations}
                 return self._save(session, user_text, result, request_id)
             if kind == "execute_tool":
@@ -245,6 +272,16 @@ class DeepSeekAgentRuntime:
                     corrections = _inject_resolved_arguments(call["arguments"], contract, session, observations)
                     if corrections:
                         steps.append(_step("参数编排", "inject_context", {}, {"corrections": corrections}))
+                if confirmed_call == call and tool_results and tool_results[-1].get("ok"):
+                    steps.append(_step("跳过重复动作", kind, call, {"reason": "confirmed_tool_call_already_succeeded"}))
+                    result = DeepSeekTurnResult(
+                        "completed",
+                        _successful_execution_message(tool_results[-1]),
+                        tuple(steps),
+                        tool_result=tool_results[-1],
+                        tool_results=tuple(tool_results),
+                    )
+                    return self._save(session, user_text, result, request_id)
                 validation_error = self._validate_proposed_call(call, policy=policy, session=session, observations=observations)
                 if validation_error:
                     observations.append({"type": "tool_validation_error", "error": validation_error, "tool_call": call})
@@ -255,7 +292,15 @@ class DeepSeekAgentRuntime:
                 contract = next(contract for contract in self.discovery.contracts if contract.name == call["tool"])
                 if contract.confirm != "none":
                     session.pending_action = {"tool_call": call, "steps": steps, "observations": observations, "user_text": user_text}
-                    result = DeepSeekTurnResult("needs_confirmation", action["summary"], tuple(steps), pending_tool_call=call, tool_call=call, tool_calls=(call,), tool_results=tuple(tool_results))
+                    result = DeepSeekTurnResult(
+                        "needs_confirmation",
+                        _pending_confirmation_message(action["summary"]),
+                        tuple(steps),
+                        pending_tool_call=call,
+                        tool_call=call,
+                        tool_calls=(call,),
+                        tool_results=tuple(tool_results),
+                    )
                     return self._save(session, user_text, result, request_id=None)
                 execution = self._execute(call, user=user, profile=profile)
                 payload = execution.to_dict()
@@ -278,10 +323,15 @@ class DeepSeekAgentRuntime:
     def _messages(self, user_text: str, employee: dict[str, str], session: RuntimeSessionState, today: date, observations: list[dict[str, Any]], steps: list[dict[str, Any]]) -> list[dict[str, str]]:
         system = (
             "你是ERPNext企业员工自主Agent。你必须通过JSON动作逐步工作，不得输出动作之外的正文。"
+            "summary只用于审计，不会展示给员工；ask_user.message和finish.message必须像一名懂业务的工作助理，"
+            "先简短说明你已理解和查到了什么，再提出员工能直接回答的问题，禁止使用‘询问数量’之类流程节点措辞。"
             "你不能猜测ERPNext主键；物料、项目、仓库、供应商、公司、员工和单据号必须先resolve_entities，"
             "或来自runtime_context中已经确认的数据。先discover_tools，再get_tool_contracts，拿到契约后才能execute_tool。"
             "只读工具可直接执行；写工具会由Runtime暂停并要求用户确认。候选不唯一时ask_user。"
             "物料解析结果会自动附带候选SKU在各仓库的实时库存；必须结合候选匹配度和库存分布比较推荐，"
+            "当物料resolution.selection_required为true，或存在多个用途/规格/单位不同的相关SKU时，必须ask_user，"
+            "并在message或questions中列出最多5个相关候选的SKU名称、编码、关键规格、单位和各仓可用库存；"
+            "同时合并追问数量等其他缺失信息，不得只问数量，也不得列出名称仅包含查询词但不是同一种物料的候选。"
             "不得再次逐个查询这些候选的库存。用户明确说出物料需求数量和单位时，"
             "resolve_entities中的对应item必须填写qty和uom，不得省略。"
             "完成后finish，并只引用observation中的真实数字、状态和单号。不要展示隐藏思维过程。"
@@ -294,7 +344,7 @@ class DeepSeekAgentRuntime:
                 "get_tool_contracts": {"tool_names": ["从discover_tools结果逐字复制的工具名，最多5个"]},
                 "resolve_entities": {"entities": [{"id": "本轮唯一标识", "kind": "item | project | warehouse | supplier | company | employee | date | uom | document", "query": "用户原话或待核对主键", "specs": {}, "qty": "kind=item时可提供需求数量", "uom": "kind=item时可提供用户单位", "doctype": "kind=document时必填"}]},
                 "execute_tool": {"tool_call": {"tool": "已读取契约的工具名", "arguments": {}}},
-                "ask_user": {"questions": ["最少必要问题"], "candidates": []},
+                "ask_user": {"message": "可直接展示给员工的自然回复", "questions": ["员工可直接回答的最少必要问题"], "candidates": ["从observation复制的相关候选，可省略并由Runtime补齐"]},
                 "finish": {"message": "基于真实observation的最终答复"},
             },
             "modules": MODULE_DESCRIPTIONS,
@@ -338,6 +388,11 @@ class DeepSeekAgentRuntime:
             query = entity.get("query")
             if kind == "item":
                 resolution = self.material_resolver.resolve(str(query or ""), specs=entity.get("specs") or {}, limit=5)
+                resolution = _require_selection_for_shared_item_name(
+                    resolution,
+                    query=str(query or ""),
+                    specs=entity.get("specs") or {},
+                )
                 results.append({
                     "id": entity_id,
                     "kind": kind,
@@ -510,6 +565,53 @@ def _safe_tool_result(payload: dict[str, Any]) -> dict[str, Any]:
     return safe
 
 
+def _successful_execution_message(payload: dict[str, Any]) -> str:
+    data = payload.get("data") if isinstance(payload.get("data"), dict) else {}
+    doctype = str(data.get("doctype") or "ERPNext单据")
+    name = str(data.get("name") or "").strip()
+    status = str(data.get("status") or "").strip()
+    target = f"{doctype} {name}".strip()
+    return f"{target} 已执行成功" + (f"，当前状态：{status}。" if status else "。")
+
+
+def _pending_confirmation_message(summary: str) -> str:
+    action = str(summary or "执行这项操作").strip().rstrip("。")
+    return f"我已准备好{action}，但尚未写入 ERPNext。请确认后再执行。"
+
+
+def _require_selection_for_shared_item_name(
+    resolution: dict[str, Any],
+    *,
+    query: str,
+    specs: dict[str, Any],
+) -> dict[str, Any]:
+    """Do not auto-select one SKU when the user supplied only a shared item name."""
+    if specs or resolution.get("status") not in {"ready", "needs_confirmation", "needs_clarification"}:
+        return resolution
+    normalized_query = _normalized_item_text(query)
+    candidates = resolution.get("candidates") or []
+    same_name = [
+        candidate
+        for candidate in candidates
+        if _normalized_item_text(str(candidate.get("item_name") or "")) == normalized_query
+    ]
+    if len({str(candidate.get("item_code") or "") for candidate in same_name if candidate.get("item_code")}) < 2:
+        return resolution
+    updated = deepcopy(resolution)
+    updated["status"] = "needs_clarification"
+    updated["selection_required"] = True
+    updated["recommended"] = updated.get("resolved")
+    updated["resolved"] = None
+    updated["candidates"] = same_name
+    updated["questions"] = [f"“{query}”对应多个规格，请先选择具体物料。"]
+    updated["decision_reason"] = "用户输入的是多个SKU共用的物料名称，不能仅凭检索分数自动选择。"
+    return updated
+
+
+def _normalized_item_text(value: str) -> str:
+    return re.sub(r"[\s\-_()/（）]+", "", value).lower()
+
+
 def _resolved_entity_values(observation: dict[str, Any]) -> dict[str, Any]:
     values = {}
     for entity in observation.get("entities") or []:
@@ -600,6 +702,24 @@ def _observation_candidates(observations: list[dict[str, Any]]) -> list[dict[str
             if resolution.get("candidates"):
                 result.append({"id": entity.get("id"), "kind": entity.get("kind"), "query": entity.get("query"), "candidates": resolution["candidates"]})
     return result
+
+
+def _hydrate_presented_candidates(presented: list[Any], observations: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    available = _observation_candidates(observations)
+    requested_codes = {
+        str(candidate.get("item_code"))
+        for group in presented
+        for candidate in (group.get("candidates") if isinstance(group, dict) and isinstance(group.get("candidates"), list) else [group])
+        if isinstance(candidate, dict) and candidate.get("item_code")
+    }
+    if not requested_codes:
+        return available
+    hydrated: list[dict[str, Any]] = []
+    for group in available:
+        rows = [row for row in group.get("candidates") or [] if str(row.get("item_code")) in requested_codes]
+        if rows:
+            hydrated.append({**group, "candidates": rows})
+    return hydrated or available
 
 
 def _validate_json_value(value: Any, schema: dict[str, Any], path: str) -> str | None:

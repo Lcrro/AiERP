@@ -25,8 +25,9 @@ def test_test_supplier_has_a_price_for_every_released_item() -> None:
 def test_project_teams_are_derived_from_active_assignments() -> None:
     teams = read_tsv("project_teams.tsv")
 
-    assert len(teams) == 5
+    assert len(teams) == 6
     assert {row["project_code"] for row in teams} == {"PRJ-HL-13", "PRJ-WCL-BASE"}
+    assert any(row["employee_code"] == "EMP-HUYINHU" and row["member_role"] == "项目经理" for row in teams)
 
 
 def test_zero_inventory_does_not_create_opening_rows() -> None:

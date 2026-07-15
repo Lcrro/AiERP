@@ -56,6 +56,7 @@ operations    本地运行、验证、维护和排障
 - [ERPNext 能力地图](reference/erpnext-capability-map.md)
 - [物料主数据标准](reference/material-master-standard.md)
 - [基础主数据标准](reference/master-data-standard.md)
+- [材料申请审批流程](reference/material-request-approval-workflow.md)
 - [ERPNext 物料检索工具](reference/item-search-tool.md)
 - [采购清单物料标准化归档](reference/purchase-material-standardization.md)
 - [采购清单整理后的标准物料目录](reference/standard-item-catalog-from-review.md)

@@ -2,5 +2,6 @@ project_code	team_code	team_name	employee_code	member_role	status	note
 PRJ-WCL-BASE	ASG-PF-WCL-PM	蕰川路基地	EMP-PANFENG	项目经理	active	由 employee_assignments.tsv 中的有效项目/基地任职关系生成。
 PRJ-HL-13	ASG-LQH-HL-TECH	合流1.3标	EMP-LINQIAOHANG	技术负责人	active	由 employee_assignments.tsv 中的有效项目/基地任职关系生成。
 PRJ-HL-13	ASG-MXQ-HL-MAT	合流1.3标	EMP-MAOXIAOQUAN	材料员	active	由 employee_assignments.tsv 中的有效项目/基地任职关系生成。
+PRJ-HL-13	ASG-HYH-HL-PM	合流1.3标	EMP-HUYINHU	项目经理	active	由用户确认的有效项目任职关系生成。
 PRJ-WCL-BASE	ASG-MXQ-WCL-MAT	蕰川路基地	EMP-MAOXIAOQUAN	材料员	active	由 employee_assignments.tsv 中的有效项目/基地任职关系生成。
 PRJ-WCL-BASE	ASG-LZH-WCL-TECH	蕰川路基地	EMP-LIANGZHIHUA	技术负责人	active	由 employee_assignments.tsv 中的有效项目/基地任职关系生成。

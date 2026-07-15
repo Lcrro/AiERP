@@ -3,6 +3,7 @@ EMP-ZHANGZHENGUANG	张振光	男	DEPT-UP	总经理	ROLE-GM	zhang.zhenguang@stec-
 EMP-PANFENG	潘丰	男	DEPT-UP	材料设备主管	ROLE-MAT-EQP-MGR	pan.feng@stec-up.local		PRJ-WCL-BASE	WH-WCL-BASE	active	按现有名单推测；UP事业部材料设备主管，并兼任蕰川路基地项目经理。
 EMP-LINQIAOHANG	林乔航	男	DEPT-HL-13	技术负责人	ROLE-TECH-LEAD	lin.qiaohang@stec-up.local		PRJ-HL-13	WH-HL-13	active	按现有名单推测；合流1.3标技术负责人。
 EMP-MAOXIAOQUAN	毛晓泉	男	DEPT-HL-13	材料员	ROLE-MATERIAL-CLERK	mao.xiaoquan@stec-up.local		PRJ-HL-13	WH-HL-13	active	按现有名单推测；合流1.3标材料员，并兼任蕰川路基地材料员。
+EMP-HUYINHU	胡银虎	男	DEPT-HL-13	项目经理	ROLE-PROJ-MGR	hu.yinhu@stec-up.local		PRJ-HL-13	WH-HL-13	active	用户确认；合流1.3标项目经理。
 EMP-LIANGZHIHUA	梁志华	男	DEPT-WCL-BASE	技术负责人	ROLE-TECH-LEAD	liang.zhihua@stec-up.local		PRJ-WCL-BASE	WH-WCL-BASE	active	按现有名单推测；蕰川路基地技术负责人。
 EMP-XUPUQI	徐溥祺	男	DEPT-UP	经营主管	ROLE-OPS-MGR	xu.puqi@stec-up.local				active	按现有名单推测；UP事业部经营主管。
 EMP-XUFENG	许峰	男	DEPT-IT	系统管理员	ROLE-SYSADMIN	xu.feng@stec-up.local				candidate	按现有名单推测；系统管理员候选，用于测试账套初始化和权限配置。

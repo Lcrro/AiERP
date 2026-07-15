@@ -115,6 +115,13 @@ def test_tool_discovery_only_returns_agent_visible_profile_tools() -> None:
     assert all(policy.decide(card["name"], origin="agent").allowed for card in cards)
 
 
+def test_project_profile_can_discover_material_request_submit_tool() -> None:
+    policy = make_tool_access_policy("project")
+    cards = ToolDiscoveryIndex().discover("提交材料申请单据", policy=policy, modules=["buying"], limit=8)
+
+    assert "erpnext.buying.submit_document" in {card["name"] for card in cards}
+
+
 def test_write_tool_is_paused_with_resolved_entities(tmp_path: Path) -> None:
     release = MasterDataRelease()
     material = release.materials[0]
@@ -152,6 +159,8 @@ def test_write_tool_is_paused_with_resolved_entities(tmp_path: Path) -> None:
     result = runtime.run_once("明天需要20个物料", user="mao.xiaoquan@stec-up.local", today=__import__("datetime").date(2026, 7, 13))
 
     assert result.status == "needs_confirmation"
+    assert "尚未写入 ERPNext" in result.message
+    assert "确认" in result.message
     assert result.pending_tool_call["arguments"]["company"] == release.company_name("STEC")
     assert result.pending_tool_call["arguments"]["items"][0]["project"] == project["project_code"]
     assert store.load("mao.xiaoquan@stec-up.local", profile="project").pending_action["tool_call"] == result.pending_tool_call
@@ -170,6 +179,7 @@ def test_forged_entity_is_rejected_and_returned_to_model(tmp_path: Path) -> None
 
     assert result.status == "needs_clarification"
     assert result.questions == ("请选择真实物料。",)
+    assert result.message == "请选择真实物料。"
     assert any("不是Resolver" in message[1]["content"] for message in planner.messages if len(message) > 1)
 
 
@@ -219,6 +229,45 @@ def test_item_resolution_batches_candidate_inventory_once(tmp_path: Path) -> Non
         assert candidate["inventory_summary"]["shortage_qty"] == 6
 
 
+def test_shared_item_name_requires_user_selection_and_excludes_partial_name_matches(tmp_path: Path) -> None:
+    planner = PlannerSequence([
+        {"action": "resolve_entities", "summary": "解析水泥", "arguments": {"entities": [
+            {"id": "cement", "kind": "item", "query": "水泥"},
+        ]}},
+        {
+            "action": "ask_user",
+            "summary": "询问水泥需求",
+            "arguments": {
+                "questions": ["请选择具体水泥，并告诉我需要多少。"],
+                "candidates": [{"item_code": "MAT-CEM-000011", "sku_name": "水泥 PC425 袋装 50kg"}],
+            },
+        },
+    ])
+    store = RuntimeSessionStore(tmp_path)
+    session = store.load("mao.xiaoquan@stec-up.local", profile="project")
+    session.selected_entities["old_item"] = {"kind": "item", "value": "STALE-CEMENT"}
+    store.save(session)
+    runtime = DeepSeekAgentRuntime(
+        planner=planner,
+        client_factory=lambda _user: FakeERPNextClient(),
+        session_store=store,
+    )
+
+    result = runtime.run_once("帮我采购点水泥，后天要用", user="mao.xiaoquan@stec-up.local")
+
+    assert result.status == "needs_clarification"
+    assert result.message == "请选择具体水泥，并告诉我需要多少。"
+    candidates = result.candidates[0]["candidates"]
+    assert len(candidates) == 1
+    assert {candidate["item_name"] for candidate in candidates} == {"水泥"}
+    assert all("水泥砖" not in candidate["sku_name"] for candidate in candidates)
+    assert candidates[0]["inventory"]
+    resolve_step = next(step for step in result.steps if step["label"] == "解析实体")
+    assert resolve_step["result"]["entities"][0]["resolution"]["selection_required"] is True
+    selected = store.load("mao.xiaoquan@stec-up.local", profile="project").selected_entities
+    assert not any(entity.get("kind") == "item" for entity in selected.values())
+
+
 def test_confirmation_executes_pending_call_then_returns_model_finish(tmp_path: Path) -> None:
     release = MasterDataRelease()
     material = release.materials[0]
@@ -246,3 +295,76 @@ def test_confirmation_executes_pending_call_then_returns_model_finish(tmp_path: 
     assert completed.message == "已创建测试材料申请草稿。"
     assert client.created[0][0] == "Material Request"
     assert runtime.session_store.load("mao.xiaoquan@stec-up.local", profile="project").documents["Material Request"] == ["MAT-MR-TEST-0001"]
+
+
+def test_successful_write_is_not_reported_failed_when_finish_json_is_invalid(tmp_path: Path) -> None:
+    release = MasterDataRelease()
+    material = release.materials[0]
+    tool = "erpnext.buying.create_material_request_draft"
+    call = {
+        "tool": tool,
+        "arguments": {
+            "schedule_date": "2026-07-14",
+            "items": [{"item_code": material["item_code"], "qty": 1}],
+        },
+    }
+    planner = PlannerSequence([
+        {"action": "get_tool_contracts", "summary": "读取契约", "arguments": {"tool_names": [tool]}},
+        {"action": "resolve_entities", "summary": "解析物料", "arguments": {"entities": [
+            {"id": "item", "kind": "item", "query": material["item_code"]},
+        ]}},
+        {"action": "execute_tool", "summary": "创建草稿", "arguments": {"tool_call": call}},
+        {"action": "finish", "summary": "完成", "arguments": {}},
+        {"action": "finish", "summary": "完成", "arguments": {}},
+    ])
+    client = FakeERPNextClient()
+    runtime = DeepSeekAgentRuntime(
+        release=release,
+        planner=planner,
+        client_factory=lambda _user: client,
+        session_store=RuntimeSessionStore(tmp_path),
+    )
+
+    preview = runtime.run_once("创建草稿", user="mao.xiaoquan@stec-up.local")
+    completed = runtime.run_once("确认创建", user="mao.xiaoquan@stec-up.local", execute=True)
+
+    assert preview.status == "needs_confirmation"
+    assert completed.status == "completed"
+    assert "MAT-MR-TEST-0001" in completed.message
+    assert len(client.created) == 1
+    assert any(step["label"] == "生成回复降级" for step in completed.steps)
+
+
+def test_confirmation_does_not_reconfirm_identical_successful_tool_call(tmp_path: Path) -> None:
+    release = MasterDataRelease()
+    material = release.materials[0]
+    tool = "erpnext.buying.create_material_request_draft"
+    call = {
+        "tool": tool,
+        "arguments": {
+            "schedule_date": "2026-07-14",
+            "items": [{"item_code": material["item_code"], "qty": 1}],
+        },
+    }
+    planner = PlannerSequence([
+        {"action": "get_tool_contracts", "summary": "读取契约", "arguments": {"tool_names": [tool]}},
+        {"action": "resolve_entities", "summary": "解析物料", "arguments": {"entities": [
+            {"id": "item", "kind": "item", "query": material["item_code"]},
+        ]}},
+        {"action": "execute_tool", "summary": "创建草稿", "arguments": {"tool_call": call}},
+        {"action": "execute_tool", "summary": "重复创建草稿", "arguments": {"tool_call": call}},
+    ])
+    runtime = DeepSeekAgentRuntime(
+        release=release,
+        planner=planner,
+        client_factory=lambda _user: FakeERPNextClient(),
+        session_store=RuntimeSessionStore(tmp_path),
+    )
+
+    preview = runtime.run_once("创建草稿", user="mao.xiaoquan@stec-up.local")
+    completed = runtime.run_once("确认创建", user="mao.xiaoquan@stec-up.local", execute=True)
+
+    assert preview.status == "needs_confirmation"
+    assert completed.status == "completed"
+    assert completed.tool_result["ok"] is True
+    assert any(step["label"] == "跳过重复动作" for step in completed.steps)

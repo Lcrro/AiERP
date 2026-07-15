@@ -1012,7 +1012,7 @@ tools:
   erpnext.buying.submit_document:
     purpose: "L4：提交采购相关单据，触发正式业务状态变更。"
     expose: agent_visible
-    allowed_roles: ["采购", "仓管", "管理层"]
+    allowed_roles: ["项目", "采购", "仓管", "管理层"]
     confirm: submit_confirm
     backend_mapping:
       doctypes: ["Material Request", "Request for Quotation", "Supplier Quotation", "Purchase Order", "Purchase Receipt"]

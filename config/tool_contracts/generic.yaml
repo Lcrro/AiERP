@@ -311,10 +311,30 @@ tools:
         required: conditional
         source: "Confirmation Policy"
 
+  erpnext.get_workflow_actions:
+    purpose: "L0：读取当前员工对指定 ERPNext 单据可执行的工作流动作。"
+    expose: agent_visible
+    allowed_roles: ["材料员", "材料设备主管", "项目经理", "采购", "仓管", "财务", "管理层"]
+    confirm: none
+    backend_mapping:
+      methods: ["frappe.model.workflow.get_transitions"]
+    audit_fields: ["doctype", "name"]
+    repair: ["permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "执行审批动作前必须先读取当前账号真实可用动作。"
+      - "返回空列表表示当前账号不是本节点处理人，不得猜测动作。"
+    parameters:
+      doctype:
+        required: yes
+        resolver: doctype
+      name:
+        required: yes
+        resolver: docname
+
   erpnext.apply_workflow:
     purpose: "L4：对某张 ERPNext 单据执行工作流动作。"
-    expose: runtime_internal
-    allowed_roles: ["Runtime"]
+    expose: agent_visible
+    allowed_roles: ["材料员", "材料设备主管", "项目经理", "采购", "仓管", "财务", "管理层"]
     confirm: submit_confirm
     backend_mapping:
       methods: ["frappe.model.workflow.apply_workflow"]

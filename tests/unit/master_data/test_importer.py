@@ -52,7 +52,7 @@ def test_release_builds_a_complete_ordered_plan() -> None:
     assert len(operations) > 4000
     assert sum(operation.doctype == "Item" for operation in operations) == 1979
     assert sum(operation.doctype == "Item Price" for operation in operations) == 1979
-    assert sum(operation.doctype == "User" for operation in operations) == 7
+    assert sum(operation.doctype == "User" for operation in operations) == 8
     assert sum(operation.doctype == "Project" for operation in operations) == 10
     assert operations[0].doctype == "Company"
 

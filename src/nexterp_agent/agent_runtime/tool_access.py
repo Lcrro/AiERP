@@ -38,8 +38,6 @@ RUNTIME_INTERNAL_TOOLS = frozenset(
         "erpnext.submit_document",
         "erpnext.cancel_document",
         "erpnext.amend_document",
-        "erpnext.get_workflow_actions",
-        "erpnext.apply_workflow",
         "erpnext.run_report",
         "erpnext.prepare_item_from_intent",
     }
@@ -56,6 +54,8 @@ COMMON_AGENT_TOOLS = frozenset(
         "erpnext.clear_assignment",
         "erpnext.attach_file",
         "erpnext.list_attachments",
+        "erpnext.get_workflow_actions",
+        "erpnext.apply_workflow",
     }
 )
 
@@ -225,7 +225,12 @@ def make_tool_access_policy(
             allowed_tools=COMMON_AGENT_TOOLS
             | _tools_with_prefix("erpnext.projects.")
             | STOCK_READ_TOOLS
-            | frozenset({"erpnext.buying.create_material_request_draft"})
+            | frozenset(
+                {
+                    "erpnext.buying.create_material_request_draft",
+                    "erpnext.buying.submit_document",
+                }
+            )
             | extra,
             blocked_tools=blocked,
             allow_runtime_internal=allow_runtime_internal,

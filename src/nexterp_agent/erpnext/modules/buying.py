@@ -771,6 +771,23 @@ class BuyingToolsMixin:
         guard = _require_buying_confirmation(args["doctype"], args["name"], args.get("confirmation"))
         if guard:
             return guard
+        current = self.client.get_document(args["doctype"], args["name"])
+        if not current.ok:
+            return current
+        current_doc = current.data if isinstance(current.data, dict) else {}
+        if current_doc.get("workflow_state"):
+            return ToolResult(
+                ok=False,
+                error="Document has an active ERPNext workflow and cannot use direct submission.",
+                error_type="validation_error",
+                user_message="该单据已配置审批流，请先读取当前可执行动作，再使用工作流动作推进，不能直接提交。",
+                data={
+                    "doctype": args["doctype"],
+                    "name": args["name"],
+                    "workflow_state": current_doc.get("workflow_state"),
+                    "next_actions": ["erpnext.get_workflow_actions", "erpnext.apply_workflow"],
+                },
+            )
         return _module_doc_result(
             self.client.submit_document(args["doctype"], args["name"]),
             args["doctype"],

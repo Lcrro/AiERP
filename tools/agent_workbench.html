@@ -4,254 +4,717 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="data:," />
-    <title>员工 Agent 测试台</title>
+    <title>Nexterp Agent 工作台</title>
     <style>
       :root {
-        --bg: #f4f6f8;
-        --surface: #fff;
-        --surface-2: #eef2f5;
-        --line: #d9e0e6;
-        --text: #18212b;
-        --muted: #65717e;
+        --page: #edf1f3;
+        --surface: #ffffff;
+        --surface-soft: #f5f7f8;
+        --surface-strong: #edf1f3;
+        --line: #dbe2e7;
+        --line-strong: #c9d2d9;
+        --ink: #17212b;
+        --muted: #68747f;
         --accent: #087f5b;
-        --accent-soft: #e7f5ef;
-        --warn: #9a6700;
-        --warn-soft: #fff7d6;
+        --accent-hover: #066f50;
+        --accent-soft: #e8f5ef;
+        --warning: #925b00;
+        --warning-soft: #fff4d8;
         --danger: #b42318;
         --danger-soft: #fff0ee;
+        --shadow: 0 18px 46px rgba(23, 33, 43, 0.16);
         font-family: Inter, ui-sans-serif, system-ui, "Segoe UI", "Microsoft YaHei", sans-serif;
       }
       * { box-sizing: border-box; }
-      body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); }
-      button, textarea, select { font: inherit; }
-      button { border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text); cursor: pointer; }
-      button:hover { border-color: #9aa6b2; }
-      button:disabled { cursor: not-allowed; opacity: .5; }
-      .primary { border-color: var(--accent); background: var(--accent); color: white; }
-      .danger { border-color: #efb4ae; background: var(--danger-soft); color: var(--danger); }
-      header { height: 58px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--line); background: var(--surface); }
-      h1 { margin: 0; font-size: 18px; letter-spacing: 0; }
-      .status { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
-      .dot { width: 8px; height: 8px; border-radius: 50%; background: #9aa6b2; }
-      .dot.ok { background: var(--accent); }
-      main { height: calc(100vh - 58px); display: grid; grid-template-columns: 270px minmax(420px, 1fr) minmax(390px, 42%); }
-      aside, section { min-width: 0; }
-      .employees { border-right: 1px solid var(--line); background: var(--surface); overflow: auto; }
-      .project-picker { padding: 0 12px 12px; }
-      .project-picker select { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
-      .project-meta { margin-top: 7px; color: var(--muted); font-size: 11px; line-height: 1.45; }
-      .panel-title { padding: 14px 16px 10px; color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
-      .employee { width: 100%; padding: 12px 16px; border: 0; border-radius: 0; border-top: 1px solid #edf0f2; text-align: left; background: transparent; }
-      .employee.active { background: var(--accent-soft); box-shadow: inset 3px 0 var(--accent); }
-      .employee strong { display: block; font-size: 14px; }
-      .employee span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; }
-      .chat { display: grid; grid-template-rows: 1fr auto; min-height: 0; }
-      .messages { overflow: auto; padding: 20px; }
-      .empty { max-width: 640px; margin: 70px auto 0; text-align: center; color: var(--muted); }
-      .empty h2 { color: var(--text); font-size: 22px; margin: 0 0 8px; }
-      .examples { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 24px; }
-      .examples button { padding: 8px 10px; font-size: 12px; }
-      .message { max-width: 82%; margin-bottom: 14px; padding: 11px 13px; border: 1px solid var(--line); border-radius: 8px; white-space: pre-wrap; line-height: 1.55; }
-      .message.user { margin-left: auto; border-color: #b8ddd0; background: var(--accent-soft); }
-      .message.agent { background: var(--surface); }
-      .message.error { border-color: #efb4ae; background: var(--danger-soft); }
-      .composer { padding: 14px; border-top: 1px solid var(--line); background: var(--surface); }
-      textarea { width: 100%; min-height: 82px; max-height: 180px; resize: vertical; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; color: var(--text); outline: none; }
-      textarea:focus { border-color: var(--accent); }
-      .actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; }
-      .actions small { color: var(--muted); }
-      .actions div { display: flex; gap: 8px; }
-      .actions button { min-height: 36px; padding: 0 14px; }
-      .details { border-left: 1px solid var(--line); background: var(--surface); overflow: auto; }
-      .tabs { position: sticky; top: 0; z-index: 2; display: flex; border-bottom: 1px solid var(--line); background: var(--surface); }
-      .tab { padding: 12px 14px; border: 0; border-radius: 0; color: var(--muted); }
-      .tab.active { color: var(--accent); box-shadow: inset 0 -2px var(--accent); }
-      .tab.documents-tab { margin-left: auto; font-weight: 700; }
-      .detail-body { padding: 14px; }
-      .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
-      .metric { padding: 10px; border: 1px solid var(--line); border-radius: 6px; }
-      .metric span { display: block; color: var(--muted); font-size: 11px; }
-      .metric strong { display: block; margin-top: 5px; font-size: 13px; overflow-wrap: anywhere; }
-      pre { margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: #f7f9fa; overflow: auto; font: 12px/1.55 Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
-      .links { margin: 0 0 14px; padding: 0; list-style: none; }
-      .links li { margin-bottom: 7px; }
-      .links a { color: var(--accent); text-decoration: none; font-weight: 600; }
-      .module { margin-bottom: 18px; }
-      .module h3 { margin: 0 0 8px; font-size: 14px; }
-      .doctype-group { margin-bottom: 10px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
-      .doctype-head { display: flex; justify-content: space-between; padding: 8px 10px; background: var(--surface-2); font-size: 12px; font-weight: 700; }
-      .doc-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 8px 10px; border-top: 1px solid #edf0f2; font-size: 12px; }
-      .doc-row a { color: var(--accent); text-decoration: none; font-weight: 600; overflow-wrap: anywhere; }
-      .doc-row span, .no-docs { color: var(--muted); }
-      .no-docs { padding: 9px 10px; font-size: 12px; border-top: 1px solid #edf0f2; }
-      .confirm-bar { display: none; padding: 12px 14px; border-top: 1px solid #efd998; background: var(--warn-soft); }
-      .confirm-bar.visible { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-      .confirm-bar span { color: #704f00; font-size: 13px; }
-      .confirm-bar button { padding: 8px 12px; }
-      @media (max-width: 1050px) {
-        main { grid-template-columns: 190px 1fr; }
-        .details { position: fixed; z-index: 20; inset: 58px 0 0 28%; transform: translateX(100%); transition: transform .2s ease; }
-        .details.open { transform: translateX(0); }
+      html, body { width: 100%; min-width: 0; min-height: 100%; }
+      body { margin: 0; overflow: hidden; background: var(--page); color: var(--ink); }
+      button, select, textarea { font: inherit; letter-spacing: 0; }
+      button { color: inherit; cursor: pointer; }
+      button:disabled { cursor: not-allowed; opacity: 0.55; }
+      .topbar {
+        height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 18px;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
       }
-      @media (max-width: 700px) {
-        main { grid-template-columns: 1fr; }
-        .employees { display: none; }
-        .details { inset-left: 0; }
+      .brand { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 750; }
+      .brand-mark { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 6px; background: var(--ink); color: white; }
+      .top-actions { display: flex; align-items: center; gap: 10px; }
+      .health { color: var(--muted); font-size: 12px; }
+      .health::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 7px; border-radius: 50%; background: #98a2aa; }
+      .health.ok::before { background: var(--accent); }
+      .mobile-toggle { display: none; min-height: 34px; padding: 0 10px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); }
+      .workspace { height: calc(100vh - 58px); display: grid; grid-template-columns: 252px minmax(430px, 1fr) 420px; }
+      .context-panel, .operations-panel, .conversation { min-width: 0; min-height: 0; }
+
+      .context-panel { overflow: auto; border-right: 1px solid var(--line); background: var(--surface); }
+      .section-label { padding: 17px 15px 8px; color: var(--muted); font-size: 11px; font-weight: 750; text-transform: uppercase; }
+      .project-picker { padding: 0 14px 14px; }
+      .project-picker select { width: 100%; min-height: 40px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--ink); outline: none; }
+      .project-picker select:focus { border-color: var(--accent); }
+      .project-meta { margin: 8px 2px 0; color: var(--muted); font-size: 11px; line-height: 1.5; white-space: pre-line; }
+      .employee { width: 100%; min-height: 58px; display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: center; padding: 10px 15px; border: 0; border-top: 1px solid #edf0f2; background: transparent; text-align: left; }
+      .employee:hover { background: #f8faf9; }
+      .employee.active { background: var(--accent-soft); box-shadow: inset 3px 0 var(--accent); }
+      .avatar { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; background: #e7ecef; font-size: 12px; font-weight: 750; }
+      .employee strong, .employee span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .employee strong { font-size: 13px; }
+      .employee span { margin-top: 3px; color: var(--muted); font-size: 11px; }
+
+      .conversation { display: grid; grid-template-rows: 62px 1fr auto; background: var(--surface-soft); }
+      .conversation-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 20px; border-bottom: 1px solid var(--line); background: var(--surface); }
+      .conversation-identity strong { display: block; font-size: 14px; }
+      .conversation-identity span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+      .permission-scope { color: var(--accent); font-size: 11px; font-weight: 700; }
+      .messages { overflow: auto; padding: 22px; }
+      .welcome { max-width: 620px; margin: 44px auto; text-align: center; }
+      .welcome h1 { margin: 0 0 8px; font-size: 24px; letter-spacing: 0; }
+      .welcome p { margin: 0; color: var(--muted); font-size: 13px; }
+      .quick-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 22px; }
+      .quick-actions button { min-height: 44px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); font-size: 12px; }
+      .quick-actions button:hover { border-color: #9eaaaF; background: #fafcfc; }
+      .message { max-width: min(78%, 680px); margin-bottom: 13px; padding: 11px 13px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); font-size: 13px; line-height: 1.58; white-space: pre-wrap; }
+      .message.user { margin-left: auto; border-color: #b7ddce; background: var(--accent-soft); }
+      .message.error { border-color: #efb4ae; background: var(--danger-soft); color: var(--danger); }
+      .message-doc { width: 100%; display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-top: 9px; padding: 9px 10px; border: 0; border-left: 3px solid var(--accent); background: var(--surface-soft); text-align: left; }
+      .message-doc strong { display: block; color: var(--accent); font-size: 12px; }
+      .message-doc small { display: block; margin-top: 3px; color: var(--muted); }
+      .message-doc span { color: var(--muted); font-size: 12px; white-space: nowrap; }
+      .candidate-list { display: grid; gap: 7px; margin-top: 10px; }
+      .candidate-card { width: 100%; padding: 10px 11px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface-soft); text-align: left; }
+      .candidate-card:hover { border-color: #93b9aa; background: #f4faf7; }
+      .candidate-title { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+      .candidate-title strong { color: var(--ink); font-size: 12px; }
+      .candidate-title span { color: var(--accent); font-size: 11px; font-weight: 700; }
+      .candidate-specs { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+      .candidate-stock { display: block; margin-top: 6px; color: #3f4a53; font-size: 11px; }
+      .confirm-bar { display: none; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 15px; border-top: 1px solid #ecd18a; background: var(--warning-soft); }
+      .confirm-bar.visible { display: flex; }
+      .confirm-copy strong, .confirm-copy span { display: block; }
+      .confirm-copy strong { color: var(--warning); font-size: 12px; }
+      .confirm-copy span { margin-top: 2px; color: #745006; font-size: 11px; }
+      .confirm-actions { display: flex; gap: 7px; }
+      .composer { padding: 12px 16px 14px; border-top: 1px solid var(--line); background: var(--surface); }
+      .composer textarea { width: 100%; height: 72px; min-height: 72px; max-height: 180px; resize: vertical; padding: 11px 12px; border: 1px solid var(--line); border-radius: 6px; outline: none; color: var(--ink); }
+      .composer textarea:focus { border-color: var(--accent); }
+      .composer-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 9px; }
+      .actor { min-width: 0; color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .button-row { display: flex; gap: 7px; }
+      .button { min-height: 36px; padding: 0 13px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); }
+      .button:hover { border-color: #9eaaaF; }
+      .button.primary { border-color: var(--accent); background: var(--accent); color: white; }
+      .button.primary:hover { background: var(--accent-hover); }
+      .button.danger { border-color: var(--danger); background: var(--danger); color: white; }
+
+      .operations-panel { display: grid; grid-template-rows: auto auto 1fr; border-left: 1px solid var(--line); background: var(--surface); }
+      .operations-tabs { display: flex; border-bottom: 1px solid var(--line); }
+      .operations-tab { flex: 1; min-height: 48px; padding: 0 8px; border: 0; background: var(--surface); color: var(--muted); font-size: 12px; }
+      .operations-tab.active { color: var(--accent); font-weight: 750; box-shadow: inset 0 -2px var(--accent); }
+      .context-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; padding: 12px; }
+      .metric { min-width: 0; padding: 9px; border: 1px solid var(--line); border-radius: 5px; }
+      .metric span, .metric strong { display: block; }
+      .metric span { color: var(--muted); font-size: 10px; }
+      .metric strong { margin-top: 5px; font-size: 12px; overflow-wrap: anywhere; }
+      .operations-body { overflow: auto; padding: 0 12px 18px; }
+      .panel-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 4px 0 10px; }
+      .panel-toolbar strong { font-size: 12px; }
+      .panel-toolbar button { padding: 5px 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); color: var(--muted); font-size: 11px; }
+      .panel-toolbar button + button { margin-left: 6px; }
+      #clearDocuments { color: var(--danger); border-color: #e7b8b2; }
+      .module-title { margin: 12px 0 6px; font-size: 12px; font-weight: 750; }
+      .doctype-group { margin-bottom: 8px; overflow: hidden; border: 1px solid var(--line); border-radius: 6px; }
+      .doctype-head { display: flex; justify-content: space-between; gap: 10px; padding: 8px 10px; background: var(--surface-strong); font-size: 11px; font-weight: 700; }
+      .doc-row { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 9px 10px; border: 0; border-top: 1px solid #edf0f2; background: var(--surface); text-align: left; }
+      .doc-row:hover { background: #f8faf9; }
+      .doc-row strong, .doc-row span, .doc-row small { display: block; }
+      .doc-row strong { color: var(--accent); font-size: 12px; overflow-wrap: anywhere; }
+      .doc-row small { margin-top: 3px; color: var(--muted); font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .doc-row-status { text-align: right; }
+      .doc-row-status span { font-size: 10px; font-weight: 700; }
+      .doc-row-status small { white-space: nowrap; }
+      .empty-state { padding: 16px 10px; color: var(--muted); font-size: 11px; text-align: center; }
+      .step { margin-bottom: 8px; overflow: hidden; border: 1px solid var(--line); border-radius: 6px; }
+      .step-head { display: flex; justify-content: space-between; gap: 8px; padding: 9px 10px; background: var(--surface-strong); font-size: 11px; font-weight: 700; }
+      pre { margin: 0; padding: 11px; overflow: auto; background: #f8fafb; color: #2b3640; font: 11px/1.55 Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+      .tech-switch { display: flex; padding: 3px; border: 1px solid var(--line); background: var(--surface-soft); }
+      .tech-switch button { flex: 1; min-height: 31px; border: 0; background: transparent; color: var(--muted); font-size: 11px; }
+      .tech-switch button.active { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(23, 33, 43, 0.1); }
+
+      .drawer-shade { display: none; position: fixed; z-index: 30; inset: 58px 0 0; background: rgba(23, 33, 43, 0.2); }
+      .drawer-shade.visible { display: block; }
+      .document-drawer { position: fixed; z-index: 31; inset: 58px 0 0 auto; width: min(680px, 62vw); display: grid; grid-template-rows: auto 1fr; transform: translateX(102%); border-left: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow); transition: transform 180ms ease; }
+      .document-drawer.visible { transform: translateX(0); }
+      .drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; padding: 17px 20px; border-bottom: 1px solid var(--line); }
+      .drawer-title { min-width: 0; }
+      .drawer-title h2 { margin: 0; font-size: 18px; overflow-wrap: anywhere; }
+      .drawer-title p { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
+      .status-badge { display: inline-block; margin-left: 7px; padding: 3px 7px; border-radius: 20px; background: var(--surface-strong); color: var(--muted); vertical-align: middle; font-size: 10px; }
+      .status-badge.submitted { background: var(--accent-soft); color: var(--accent); }
+      .status-badge.draft { background: var(--warning-soft); color: var(--warning); }
+      .drawer-close { width: 34px; height: 34px; flex: 0 0 34px; border: 0; border-radius: 50%; background: transparent; font-size: 22px; }
+      .drawer-close:hover { background: var(--surface-strong); }
+      .drawer-body { overflow: auto; padding: 18px 20px 28px; }
+      .drawer-loading { padding: 50px 20px; color: var(--muted); text-align: center; }
+      .field-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--line); border-radius: 6px; }
+      .field { min-width: 0; padding: 10px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+      .field:nth-child(3n) { border-right: 0; }
+      .field span, .field strong { display: block; }
+      .field span { color: var(--muted); font-size: 10px; }
+      .field strong { margin-top: 5px; font-size: 12px; overflow-wrap: anywhere; }
+      .drawer-section-title { margin: 20px 0 8px; font-size: 13px; }
+      .process-card { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; margin-bottom: 14px; padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-soft); }
+      .process-card strong, .process-card span { display: block; }
+      .process-card strong { font-size: 12px; }
+      .process-card span { margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.5; }
+      .process-card button { min-height: 34px; padding: 0 12px; border: 0; border-radius: 5px; background: var(--accent); color: white; font-weight: 700; }
+      .process-card > div:last-child { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+      .items-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; }
+      .items-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+      .items-table th, .items-table td { min-width: 90px; padding: 9px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+      .items-table th { background: var(--surface-strong); color: var(--muted); font-weight: 700; }
+      .items-table tr:last-child td { border-bottom: 0; }
+      details.raw-details { margin-top: 20px; border: 1px solid var(--line); border-radius: 6px; }
+      details.raw-details summary { padding: 10px; cursor: pointer; color: var(--muted); font-size: 11px; font-weight: 700; }
+
+      @media (max-width: 1180px) {
+        .workspace { grid-template-columns: 220px minmax(420px, 1fr); }
+        .operations-panel { position: fixed; z-index: 20; inset: 58px 0 0 auto; width: min(440px, 88vw); transform: translateX(102%); box-shadow: var(--shadow); transition: transform 180ms ease; }
+        .operations-panel.open { transform: translateX(0); }
+        .mobile-toggle.ops-toggle { display: block; }
+      }
+      @media (max-width: 720px) {
+        .topbar { padding: 0 10px; }
+        .brand span { display: none; }
+        .health { display: none; }
+        .mobile-toggle { display: block; }
+        .workspace { grid-template-columns: 1fr; }
+        .context-panel { position: fixed; z-index: 22; inset: 58px auto 0 0; width: min(290px, 88vw); transform: translateX(-102%); box-shadow: var(--shadow); transition: transform 180ms ease; }
+        .context-panel.open { transform: translateX(0); }
+        .conversation-head { padding: 0 14px; }
+        .messages { padding: 14px; }
+        .welcome { margin: 30px auto; }
+        .quick-actions { grid-template-columns: 1fr; }
         .message { max-width: 94%; }
+        .composer { padding: 10px; }
+        .composer-footer { align-items: flex-end; }
+        .actor { max-width: 46%; }
+        .document-drawer { width: 100vw; }
+        .field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .field:nth-child(3n) { border-right: 1px solid var(--line); }
+        .field:nth-child(2n) { border-right: 0; }
       }
     </style>
   </head>
   <body>
-    <header>
-      <h1>员工 Agent 测试台</h1>
-      <div class="status"><span id="healthDot" class="dot"></span><span id="healthText">正在连接</span></div>
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark">N</div><span>Nexterp Agent 工作台</span></div>
+      <div class="top-actions">
+        <button id="contextToggle" class="mobile-toggle">项目与员工</button>
+        <button id="operationsToggle" class="mobile-toggle ops-toggle">单据与过程</button>
+        <div id="healthText" class="health">正在连接</div>
+      </div>
     </header>
-    <main>
-      <aside class="employees">
-        <div class="panel-title">项目</div>
-        <div class="project-picker"><select id="projectSelect"></select><div id="projectMeta" class="project-meta"></div></div>
-        <div class="panel-title">项目员工与岗位</div>
+
+    <div class="workspace">
+      <aside id="contextPanel" class="context-panel">
+        <div class="section-label">当前项目</div>
+        <div class="project-picker">
+          <select id="projectSelect" aria-label="选择项目"></select>
+          <div id="projectMeta" class="project-meta"></div>
+        </div>
+        <div class="section-label">项目团队</div>
         <div id="employeeList"></div>
       </aside>
-      <section class="chat">
+
+      <main class="conversation">
+        <div class="conversation-head">
+          <div class="conversation-identity"><strong id="assistantName">员工工作助理</strong><span id="assistantContext">请选择项目和员工</span></div>
+          <div class="permission-scope">ERPNext 本人权限</div>
+        </div>
         <div id="messages" class="messages">
-          <div id="empty" class="empty">
-            <h2>用员工身份测试真实业务</h2>
-            <p>先预览 Agent 的理解和 ToolCall，确认后才会写入 ERPNext。</p>
-            <div class="examples">
-              <button data-example="合流1.3标明天需要20个6.8级螺栓M12*40，送到合流1.3标仓库，创建材料申请草稿">创建材料申请</button>
-              <button data-example="合流1.3标仓库还有多少6.8级螺栓M12*40">查询库存</button>
-              <button data-example="今天公司有哪些异常需要我关注">管理摘要</button>
+          <div id="welcome" class="welcome">
+            <h1>今天需要处理什么？</h1>
+            <p>我会先查询真实业务数据，涉及写入时再请你确认。</p>
+            <div class="quick-actions">
+              <button data-example="帮我创建一张材料申请">创建材料申请</button>
+              <button data-example="查询当前项目仓库的库存">查询库存</button>
+              <button data-example="查看我负责的待办和异常">查看待办</button>
             </div>
           </div>
         </div>
         <div>
           <div id="confirmBar" class="confirm-bar">
-            <span>该操作将使用所选员工身份写入 ERPNext。</span>
-            <div><button id="cancelConfirm">取消</button><button id="executeBtn" class="danger">确认执行</button></div>
+            <div class="confirm-copy"><strong>尚未创建单据</strong><span>操作已准备好，确认后才会使用当前员工身份写入 ERPNext。</span></div>
+            <div class="confirm-actions"><button id="cancelConfirm" class="button">取消</button><button id="executeBtn" class="button danger">确认执行</button></div>
           </div>
           <div class="composer">
-            <textarea id="input" placeholder="例如：合流1.3标明天需要20个6.8级螺栓M12*40，送到合流1.3标仓库"></textarea>
-            <div class="actions">
-              <small id="actorLabel">请选择员工</small>
-              <div><button id="clearBtn">清空</button><button id="previewBtn" class="primary">预览 Agent 操作</button></div>
+            <textarea id="input" placeholder="描述你要完成的工作，例如：帮我买100双帆布手套，明天要到货"></textarea>
+            <div class="composer-footer">
+              <div id="actorLabel" class="actor">请选择员工</div>
+              <div class="button-row"><button id="clearBtn" class="button">清空上下文</button><button id="previewBtn" class="button primary">预览 Agent 操作</button></div>
             </div>
           </div>
         </div>
-      </section>
-      <aside id="details" class="details">
-        <div class="tabs">
-          <button class="tab active" data-tab="overview">概览</button>
-          <button class="tab" data-tab="steps">Agent步骤</button>
-          <button class="tab" data-tab="toolcall">ToolCall</button>
-          <button class="tab" data-tab="result">ToolResult</button>
-          <button class="tab" data-tab="raw">完整 JSON</button>
-          <button class="tab documents-tab" data-tab="documents">业务单据</button>
+      </main>
+
+      <aside id="operationsPanel" class="operations-panel">
+        <div class="operations-tabs">
+          <button class="operations-tab active" data-panel="documents">业务单据</button>
+          <button class="operations-tab" data-panel="steps">执行过程</button>
+          <button class="operations-tab" data-panel="technical">技术数据</button>
         </div>
-        <div id="detailBody" class="detail-body"><p class="empty">执行一次预览后，这里会显示结构化过程。</p></div>
+        <div id="contextSummary" class="context-summary"></div>
+        <div id="operationsBody" class="operations-body"></div>
       </aside>
-    </main>
+    </div>
+
+    <div id="drawerShade" class="drawer-shade"></div>
+    <section id="documentDrawer" class="document-drawer" aria-label="业务单据详情">
+      <div class="drawer-head">
+        <div id="drawerTitle" class="drawer-title"><h2>业务单据</h2><p>正在读取</p></div>
+        <button id="drawerClose" class="drawer-close" aria-label="关闭单据详情">×</button>
+      </div>
+      <div id="drawerBody" class="drawer-body"></div>
+    </section>
+
     <script>
-      const state = { projects: [], project: null, employees: [], user: null, preview: null, documents: null, lastText: "", executeId: null, tab: "overview" };
-      const $ = (id) => document.getElementById(id);
-      const esc = (v) => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
-      const pretty = (value) => JSON.stringify(value ?? null, null, 2);
+      const state = {
+        projects: [], project: null, employees: [], user: null,
+        preview: null, documents: null, lastText: "", executeId: null,
+        panel: "documents", technicalView: "toolcall", documentDetail: null, historyToken: 0,
+      };
+      const $ = id => document.getElementById(id);
+      const WELCOME_HTML = $("messages").innerHTML;
+      const esc = value => String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
+      const pretty = value => JSON.stringify(value ?? null, null, 2);
+      const FIELD_LABELS = {
+        name:"单号", owner:"创建人", creation:"创建时间", modified:"最后修改", modified_by:"最后修改人",
+        docstatus:"提交状态", status:"状态", title:"标题", company:"公司", material_request_type:"申请类型",
+        transaction_date:"业务日期", schedule_date:"需求日期", posting_date:"过账日期", posting_time:"过账时间",
+        supplier:"供应商", supplier_name:"供应商名称", project:"项目", cost_center:"成本中心", warehouse:"仓库",
+        grand_total:"含税总额", net_total:"未税总额", currency:"币种", party:"往来方", payment_type:"收付类型",
+        paid_amount:"支付金额", subject:"主题", priority:"优先级", purpose:"用途", stock_entry_type:"库存移动类型",
+        per_ordered:"已转订单比例", per_received:"已收货比例", buying_price_list:"采购价格表",
+      };
+      const PRIMARY_FIELDS = {
+        "Material Request": ["material_request_type","company","transaction_date","schedule_date","status","project","owner","modified","per_ordered","per_received"],
+        "Request for Quotation": ["company","transaction_date","schedule_date","status","owner","modified"],
+        "Purchase Order": ["supplier","company","transaction_date","schedule_date","status","currency","grand_total","owner","modified"],
+        "Purchase Receipt": ["supplier","company","posting_date","status","currency","grand_total","owner","modified"],
+        "Purchase Invoice": ["supplier","company","posting_date","status","currency","grand_total","owner","modified"],
+        "Payment Entry": ["payment_type","party","company","posting_date","paid_amount","status","owner","modified"],
+        "Stock Entry": ["stock_entry_type","purpose","company","posting_date","project","owner","modified"],
+        "Task": ["subject","status","priority","project","owner","modified"],
+        "ToDo": ["description","status","reference_type","reference_name","owner","modified"],
+      };
+      const ITEM_COLUMNS = ["item_code","item_name","description","qty","uom","rate","amount","warehouse","project","schedule_date"];
+      const ITEM_LABELS = {item_code:"物料编码",item_name:"物料名称",description:"描述",qty:"数量",uom:"单位",rate:"单价",amount:"金额",warehouse:"仓库",project:"项目",schedule_date:"需求日期"};
 
       async function api(path, options = {}) {
-        const response = await fetch(path, { headers: {"Content-Type":"application/json"}, ...options });
+        const response = await fetch(path, {headers:{"Content-Type":"application/json"}, ...options});
         const data = await response.json();
-        if (!response.ok || data.ok === false && !data.result) throw new Error(data.error || `HTTP ${response.status}`);
+        if (!response.ok || (data.ok === false && !data.result)) throw new Error(data.error || `HTTP ${response.status}`);
         return data;
+      }
+
+      function initials(name) { return String(name || "?").slice(0, 1); }
+      function statusText(doc) {
+        if (doc.workflow_state) return String(doc.workflow_state);
+        if (doc.status) return String(doc.status);
+        if (Number(doc.docstatus) === 1) return "已提交";
+        if (Number(doc.docstatus) === 2) return "已取消";
+        return "草稿";
+      }
+      function statusClass(doc) { return Number(doc.docstatus) === 1 || /Submitted|已提交/.test(statusText(doc)) ? "submitted" : "draft"; }
+      function docSubtitle(doc) {
+        return doc.title || doc.supplier || doc.party || doc.subject || doc.description || doc.stock_entry_type || doc.purpose || doc.owner || "";
+      }
+      function dateShort(value) { return value ? String(value).replace("T", " ").slice(0, 16) : ""; }
+      function formatNumber(value) {
+        const number = Number(value);
+        if (!Number.isFinite(number)) return String(value ?? "-");
+        return Number.isInteger(number) ? String(number) : number.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
       }
 
       async function boot() {
         try {
           const [health, catalog] = await Promise.all([api("/api/health"), api("/api/catalog")]);
-          $("healthDot").classList.add("ok"); $("healthText").textContent = `Agent 服务已连接 · ${health.profile}`;
-          state.projects = catalog.projects;
-          $("projectSelect").innerHTML = state.projects.map(p => `<option value="${esc(p.project_code)}">${esc(p.project_short_name)} · ${esc(p.operating_status)}</option>`).join("");
-          $("projectSelect").onchange = () => selectProject(state.projects.find(p => p.project_code === $("projectSelect").value));
-          selectProject(state.projects.find(p => p.project_code === "PRJ-HL-13") || state.projects[0]);
-        } catch (error) { $("healthText").textContent = error.message; }
+          $("healthText").classList.add("ok");
+          $("healthText").textContent = `DeepSeek 与 ERPNext 已连接 · ${health.profile}`;
+          state.projects = catalog.projects || [];
+          $("projectSelect").innerHTML = state.projects.map(project => `<option value="${esc(project.project_code)}">${esc(project.project_short_name)} · ${esc(project.operating_status)}</option>`).join("");
+          $("projectSelect").onchange = () => selectProject(state.projects.find(project => project.project_code === $("projectSelect").value));
+          selectProject(state.projects.find(project => project.project_code === "PRJ-HL-13") || state.projects[0]);
+        } catch (error) {
+          $("healthText").textContent = error.message;
+          addMessage("error", `工作台初始化失败：${error.message}`);
+        }
       }
 
       function selectProject(project) {
-        state.project = project; state.employees = project.employees || []; state.documents = null;
+        if (!project) return;
+        state.project = project;
+        state.employees = project.employees || [];
+        state.documents = null;
         $("projectSelect").value = project.project_code;
         $("projectMeta").textContent = `${project.project_name}\n默认仓库：${project.warehouse_code || "未配置"}`;
         renderEmployees();
-        selectEmployee(state.employees.find(e => e.employee_name === "毛晓泉") || state.employees[0] || null);
+        selectEmployee(state.employees.find(employee => employee.employee_name === "毛晓泉") || state.employees[0] || null);
       }
 
       function renderEmployees() {
-        $("employeeList").innerHTML = state.employees.length ? state.employees.map(e => `<button class="employee" data-user="${esc(e.user_email)}"><strong>${esc(e.employee_name)}</strong><span>${esc(e.project_position || e.position)}</span><span>${esc(e.user_email)}</span></button>`).join("") : `<div class="no-docs">该项目尚未配置项目员工，仅保留基础项目资料。</div>`;
-        document.querySelectorAll(".employee").forEach(btn => btn.onclick = () => selectEmployee(state.employees.find(e => e.user_email === btn.dataset.user)));
+        $("employeeList").innerHTML = state.employees.length
+          ? state.employees.map(employee => `<button class="employee" data-user="${esc(employee.user_email)}"><span class="avatar">${esc(initials(employee.employee_name))}</span><span><strong>${esc(employee.employee_name)}</strong><span>${esc(employee.project_position || employee.position)}</span></span></button>`).join("")
+          : `<div class="empty-state">该项目尚未配置可登录员工。</div>`;
+        document.querySelectorAll(".employee").forEach(button => button.onclick = () => selectEmployee(state.employees.find(employee => employee.user_email === button.dataset.user)));
       }
 
       function selectEmployee(employee) {
         state.user = employee;
-        document.querySelectorAll(".employee").forEach(btn => btn.classList.toggle("active", employee && btn.dataset.user === employee.user_email));
-        $("actorLabel").textContent = employee ? `${state.project.project_short_name} · ${employee.employee_name} · ${employee.project_position || employee.position}` : "该项目暂未配置员工";
+        state.preview = null;
+        state.historyToken += 1;
+        const historyToken = state.historyToken;
+        document.querySelectorAll(".employee").forEach(button => button.classList.toggle("active", employee && button.dataset.user === employee.user_email));
+        const position = employee?.project_position || employee?.position || "";
+        $("assistantName").textContent = employee ? `${employee.employee_name}的工作助理` : "员工工作助理";
+        $("assistantContext").textContent = employee ? `${state.project.project_short_name} · ${position}` : "该项目暂未配置员工";
+        $("actorLabel").textContent = employee ? `${state.project.project_short_name} · ${employee.employee_name} · ${position}` : "请选择员工";
+        renderContextSummary();
+        loadHistory(historyToken);
         loadDocuments();
       }
 
-      async function loadDocuments() {
-        if (!state.user || !state.project) { state.documents = null; renderDetails(); return; }
-        state.documents = {loading:true}; if (state.tab === "documents") renderDetails();
-        try {
-          state.documents = await api(`/api/documents?user=${encodeURIComponent(state.user.user_email)}&project=${encodeURIComponent(state.project.project_code)}`);
-        } catch (error) { state.documents = {error:error.message}; }
-        if (state.tab === "documents") renderDetails();
+      function renderContextSummary() {
+        $("contextSummary").innerHTML = `
+          <div class="metric"><span>当前项目</span><strong>${esc(state.project?.project_short_name || "-")}</strong></div>
+          <div class="metric"><span>当前身份</span><strong>${esc(state.user?.employee_name || "-")}</strong></div>
+          <div class="metric"><span>数据范围</span><strong>本人权限</strong></div>`;
       }
 
-      function addMessage(kind, text, links = []) {
-        $("empty")?.remove();
-        const node = document.createElement("div"); node.className = `message ${kind}`;
-        node.innerHTML = `<div>${esc(text)}</div>${links.length ? `<ul class="links">${links.map(l => `<li><a href="${esc(l.url)}" target="_blank">打开 ${esc(l.doctype)} · ${esc(l.name)}</a></li>`).join("")}</ul>` : ""}`;
-        $("messages").appendChild(node); $("messages").scrollTop = $("messages").scrollHeight;
+      async function loadDocuments({preserve = false} = {}) {
+        if (!state.user || !state.project) { state.documents = null; renderOperations(); return; }
+        state.documents = preserve && state.documents?.modules
+          ? {...state.documents, refreshing:true}
+          : {loading:true};
+        renderOperations();
+        try {
+          state.documents = await api(`/api/documents?user=${encodeURIComponent(state.user.user_email)}&project=${encodeURIComponent(state.project.project_code)}`);
+        } catch (error) {
+          state.documents = {error:error.message};
+        }
+        renderOperations();
+      }
+
+      function prependCreatedDocuments(links) {
+        if (!state.documents?.modules) return;
+        for (const link of links || []) {
+          const group = state.documents.modules.flatMap(module => module.groups || []).find(candidate => candidate.doctype === link.doctype);
+          if (!group || group.documents?.some(document => document.name === link.name)) continue;
+          group.documents = [{name:link.name, status:"Draft", modified:new Date().toISOString()}, ...(group.documents || [])];
+        }
+      }
+
+      async function loadHistory(token) {
+        $("messages").innerHTML = WELCOME_HTML;
+        $("confirmBar").classList.remove("visible");
+        state.preview = null;
+        state.lastText = "";
+        if (!state.user) return;
+        const requestedUser = state.user.user_email;
+        try {
+          const history = await api(`/api/session?user=${encodeURIComponent(requestedUser)}`);
+          if (token !== state.historyToken || state.user?.user_email !== requestedUser) return;
+          for (const turn of history.turns || []) {
+            if (turn.user_text) addMessage("user", turn.user_text);
+            const result = turn.result || {};
+            if (result.message) addMessage(result.status === "failed" ? "error" : "agent", result.message, result.document_links || [], result.candidates || []);
+          }
+          state.preview = history.latest_result || null;
+          state.lastText = history.latest_user_text || "";
+          state.executeId = crypto.randomUUID();
+          const canExecute = state.preview?.status === "needs_confirmation" && (state.preview.pending_tool_call || state.preview.tool_call);
+          $("confirmBar").classList.toggle("visible", Boolean(canExecute));
+          renderOperations();
+        } catch (error) {
+          if (token === state.historyToken) addMessage("error", `读取会话记录失败：${error.message}`);
+        }
+      }
+
+      async function startNewConversation() {
+        if (!state.user || !window.confirm("将清除该员工 Agent 的聊天记录、已解析实体和待确认操作，但不会删除 ERPNext 单据。是否继续？")) return;
+        setBusy(true);
+        try {
+          await api("/api/session/reset", {method:"POST", body:JSON.stringify({user:state.user.user_email})});
+          state.historyToken += 1;
+          state.preview = null;
+          state.lastText = "";
+          state.executeId = null;
+          $("input").value = "";
+          $("messages").innerHTML = WELCOME_HTML;
+          $("confirmBar").classList.remove("visible");
+          renderOperations();
+        } catch (error) {
+          addMessage("error", `新建会话失败：${error.message}`);
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      async function clearProjectDocuments() {
+        if (!state.user || !state.project) return;
+        const scope = `${state.project.project_short_name}中当前员工有权限处理的测试业务单据`;
+        if (!window.confirm(`将取消并删除${scope}。项目、仓库、物料和员工等基础主数据不会删除。是否继续？`)) return;
+        const button = $("clearDocuments");
+        if (button) { button.disabled = true; button.textContent = "清理中..."; }
+        try {
+          const result = await api("/api/documents/reset", {
+            method:"POST",
+            body:JSON.stringify({user:state.user.user_email, project:state.project.project_code}),
+          });
+          const message = result.failed_count
+            ? `已删除 ${result.deleted_count} 张测试单据，另有 ${result.failed_count} 张因权限或关联关系未能删除。`
+            : `已清空当前项目的 ${result.deleted_count} 张测试业务单据。`;
+          addMessage(result.failed_count ? "error" : "agent", message);
+          await loadDocuments();
+        } catch (error) {
+          addMessage("error", `清空测试单据失败：${error.message}`);
+          await loadDocuments();
+        }
+      }
+
+      function addMessage(kind, text, links = [], candidates = []) {
+        $("welcome")?.remove();
+        const node = document.createElement("div");
+        node.className = `message ${kind}`;
+        node.innerHTML = `<div>${esc(text)}</div>${candidateCards(candidates)}${links.map(link => `<button class="message-doc" data-doctype="${esc(link.doctype)}" data-name="${esc(link.name)}"><span><strong>${esc(link.name)}</strong><small>${esc(link.doctype)} · 在测试台查看</small></span><span>查看详情 ›</span></button>`).join("")}`;
+        $("messages").appendChild(node);
+        bindDocumentButtons(node);
+        node.querySelectorAll(".candidate-card").forEach(button => button.onclick = () => {
+          $("input").value = `选择 ${button.dataset.name}（${button.dataset.code}）`;
+          $("input").focus();
+        });
+        $("messages").scrollTop = $("messages").scrollHeight;
+      }
+
+      function candidateCards(groups) {
+        const rows = (groups || []).flatMap(group => Array.isArray(group?.candidates) ? group.candidates : group?.item_code ? [group] : []);
+        const unique = [...new Map(rows.filter(row => row?.item_code).map(row => [row.item_code, row])).values()].slice(0, 5);
+        if (!unique.length) return "";
+        return `<div class="candidate-list">${unique.map(row => {
+          const inventory = (row.inventory || []).map(stock => `${String(stock.warehouse || "").replace(/ - [A-Z]+$/, "")} ${formatNumber(stock.available_qty ?? 0)}${row.stock_uom || ""}`).join(" · ");
+          const total = row.inventory_summary?.total_available_qty;
+          const stockText = inventory || (total !== undefined ? `相关仓库可用库存 ${formatNumber(total)}${row.stock_uom || ""}` : "暂未取得相关仓库库存");
+          return `<button class="candidate-card" data-code="${esc(row.item_code)}" data-name="${esc(row.sku_name || row.item_name || row.item_code)}"><span class="candidate-title"><strong>${esc(row.sku_name || row.item_name || row.item_code)}</strong><span>${esc(row.item_code)}</span></span><span class="candidate-specs">${esc(row.required_specs || "暂无更多规格")} · 单位：${esc(row.stock_uom || "-")}</span><span class="candidate-stock">${esc(stockText)} · 点击选择</span></button>`;
+        }).join("")}</div>`;
       }
 
       async function run(execute) {
         const text = execute ? state.lastText : $("input").value.trim();
         if (!state.user || !text) return;
-        setBusy(true); if (!execute) { state.lastText = text; state.executeId = crypto.randomUUID(); addMessage("user", text); }
+        setBusy(true);
+        if (!execute) {
+          state.lastText = text;
+          state.executeId = crypto.randomUUID();
+          addMessage("user", text);
+        }
         try {
-          const data = await api("/api/agent", {method:"POST", body: JSON.stringify({user:state.user.user_email, project_code:state.project?.project_code, warehouse:state.project?.warehouse_code, text, execute, request_id:execute ? state.executeId : null})});
-          state.preview = data.result; renderDetails();
-          addMessage(data.result.status === "failed" ? "error" : "agent", data.result.message, data.result.document_links || []);
-          const canExecute = !execute && ["needs_confirmation"].includes(data.result.status) && (data.result.pending_tool_call || data.result.tool_call);
+          const data = await api("/api/agent", {
+            method:"POST",
+            body:JSON.stringify({user:state.user.user_email, project_code:state.project?.project_code, warehouse:state.project?.warehouse_code, text, execute, request_id:execute ? state.executeId : null}),
+          });
+          state.preview = data.result;
+          state.panel = data.result.document_links?.length ? "documents" : "steps";
+          addMessage(data.result.status === "failed" ? "error" : "agent", data.result.message, data.result.document_links || [], data.result.candidates || []);
+          const canExecute = !execute && data.result.status === "needs_confirmation" && (data.result.pending_tool_call || data.result.tool_call);
           $("confirmBar").classList.toggle("visible", canExecute);
-          if (execute) $("confirmBar").classList.remove("visible");
-        } catch (error) { addMessage("error", error.message); }
-        finally { setBusy(false); }
+          if (execute) {
+            $("confirmBar").classList.remove("visible");
+            prependCreatedDocuments(data.result.document_links || []);
+            renderOperations();
+            void loadDocuments({preserve:true});
+          }
+          renderOperations();
+        } catch (error) {
+          addMessage("error", error.message);
+        } finally {
+          setBusy(false);
+        }
       }
 
-      function setBusy(busy) { $("previewBtn").disabled = busy; $("executeBtn").disabled = busy; $("previewBtn").textContent = busy ? "处理中..." : "预览 Agent 操作"; }
-
-      function renderDetails() {
-        const r = state.preview;
-        document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === state.tab));
-        if (state.tab === "documents") {
-          if (!state.documents || state.documents.loading) { $("detailBody").innerHTML = `<p class="empty">正在读取当前员工可见单据...</p>`; return; }
-          if (state.documents.error) { $("detailBody").innerHTML = `<p class="message error">${esc(state.documents.error)}</p>`; return; }
-          $("detailBody").innerHTML = `<div class="summary"><div class="metric"><span>项目</span><strong>${esc(state.project?.project_short_name)}</strong></div><div class="metric"><span>员工</span><strong>${esc(state.user?.employee_name)}</strong></div><div class="metric"><span>数据范围</span><strong>ERPNext 权限内</strong></div></div>${(state.documents.modules||[]).map(m => `<div class="module"><h3>${esc(m.label)}</h3>${m.groups.map(g => `<div class="doctype-group"><div class="doctype-head"><span>${esc(g.label)}</span><span>${g.documents.length}</span></div>${g.error ? `<div class="no-docs">${esc(g.error)}</div>` : g.documents.length ? g.documents.map(d => `<div class="doc-row"><a target="_blank" href="${esc(d.url)}">${esc(d.name)}</a><span>${esc(d.modified || "")}</span></div>`).join("") : `<div class="no-docs">当前项目暂无可见单据</div>`}</div>`).join("")}</div>`).join("")}`;
-        } else if (!r) {
-          $("detailBody").innerHTML = `<p class="empty">执行一次预览后，这里会显示结构化过程。</p>`;
-        } else if (state.tab === "overview") {
-          const questions = (r.questions || []).map(q => `<li>${esc(q)}</li>`).join("");
-          $("detailBody").innerHTML = `<div class="summary"><div class="metric"><span>状态</span><strong>${esc(r.status)}</strong></div><div class="metric"><span>Agent步骤</span><strong>${esc((r.steps||[]).length)}</strong></div><div class="metric"><span>员工</span><strong>${esc(state.user?.employee_name)}</strong></div></div>${(r.document_links||[]).length ? `<ul class="links">${r.document_links.map(l=>`<li><a target="_blank" href="${esc(l.url)}">${esc(l.name)}</a></li>`).join("")}</ul>`:""}${questions ? `<h3>需要补充</h3><ul>${questions}</ul>`:""}${(r.candidates||[]).length ? `<h3>候选</h3><pre>${esc(pretty(r.candidates))}</pre>`:""}`;
-        } else if (state.tab === "steps") $("detailBody").innerHTML = (r.steps||[]).length ? (r.steps||[]).map((s,i)=>`<div class="doctype-group"><div class="doctype-head"><span>${i+1}. ${esc(s.label)}</span><span>${esc(s.action)}</span></div><pre>${esc(pretty({payload:s.payload,result:s.result}))}</pre></div>`).join("") : `<p class="empty">暂无Agent步骤。</p>`;
-        else if (state.tab === "toolcall") $("detailBody").innerHTML = `<pre>${esc(pretty(r.tool_calls?.length ? r.tool_calls : (r.pending_tool_call || r.tool_call)))}</pre>`;
-        else if (state.tab === "result") $("detailBody").innerHTML = `<pre>${esc(pretty(r.tool_results?.length ? r.tool_results : r.tool_result))}</pre>`;
-        else $("detailBody").innerHTML = `<pre>${esc(pretty(r))}</pre>`;
+      function setBusy(busy) {
+        $("previewBtn").disabled = busy;
+        $("executeBtn").disabled = busy;
+        $("previewBtn").textContent = busy ? "Agent 处理中..." : "预览 Agent 操作";
       }
 
-      $("previewBtn").onclick = () => run(false); $("executeBtn").onclick = () => run(true);
+      function renderOperations() {
+        document.querySelectorAll(".operations-tab").forEach(button => button.classList.toggle("active", button.dataset.panel === state.panel));
+        if (state.panel === "documents") return renderDocuments();
+        if (state.panel === "steps") return renderSteps();
+        return renderTechnical();
+      }
+
+      function renderDocuments() {
+        if (!state.documents || state.documents.loading) {
+          $("operationsBody").innerHTML = `<div class="empty-state">正在读取当前员工可见单据...</div>`;
+          return;
+        }
+        if (state.documents.error) {
+          $("operationsBody").innerHTML = `<div class="message error">${esc(state.documents.error)}</div>`;
+          return;
+        }
+        const modules = state.documents.modules || [];
+        $("operationsBody").innerHTML = `<div class="panel-toolbar"><strong>当前项目业务单据${state.documents.refreshing ? " · 正在同步" : ""}</strong><span><button id="refreshDocuments">刷新</button><button id="clearDocuments">清空测试单据</button></span></div>${modules.map(module => `<section><div class="module-title">${esc(module.label)}</div>${module.groups.map(group => `<div class="doctype-group"><div class="doctype-head"><span>${esc(group.label)}</span><span>${group.documents.length}</span></div>${group.error ? `<div class="empty-state">${esc(group.error)}</div>` : group.documents.length ? group.documents.map(document => `<button class="doc-row" data-doctype="${esc(group.doctype || "")}" data-name="${esc(document.name)}"><span><strong>${esc(document.name)}</strong><small>${esc(docSubtitle(document))}</small></span><span class="doc-row-status"><span>${esc(statusText(document))}</span><small>${esc(dateShort(document.modified))}</small></span></button>`).join("") : `<div class="empty-state">暂无可见单据</div>`}</div>`).join("")}</section>`).join("")}`;
+        // The API groups are enriched here so every row knows its parent DocType.
+        let groupIndex = 0;
+        document.querySelectorAll(".doctype-group").forEach(groupNode => {
+          const flatGroups = modules.flatMap(module => module.groups);
+          const group = flatGroups[groupIndex++];
+          groupNode.querySelectorAll(".doc-row").forEach(button => button.dataset.doctype = group.doctype || inferDoctype(group.label));
+        });
+        $("refreshDocuments")?.addEventListener("click", loadDocuments);
+        $("clearDocuments")?.addEventListener("click", clearProjectDocuments);
+        bindDocumentButtons($("operationsBody"));
+      }
+
+      function inferDoctype(label) {
+        return ({"材料申请":"Material Request","询价单":"Request for Quotation","采购订单":"Purchase Order","采购收货":"Purchase Receipt","库存移动":"Stock Entry","采购发票":"Purchase Invoice","付款单":"Payment Entry","任务":"Task","待办":"ToDo"})[label] || "";
+      }
+
+      function renderSteps() {
+        const steps = state.preview?.steps || [];
+        $("operationsBody").innerHTML = steps.length
+          ? `<div class="panel-toolbar"><strong>可审计执行轨迹</strong><span></span></div>${steps.map((step,index) => `<div class="step"><div class="step-head"><span>${index + 1}. ${esc(step.label)}</span><span>${esc(step.action)}</span></div><pre>${esc(pretty({payload:step.payload,result:step.result}))}</pre></div>`).join("")}`
+          : `<div class="empty-state">发送一条业务请求后，这里会显示 Agent 的可审计动作。</div>`;
+      }
+
+      function renderTechnical() {
+        const result = state.preview;
+        const views = {
+          toolcall: result?.tool_calls?.length ? result.tool_calls : (result?.pending_tool_call || result?.tool_call),
+          toolresult: result?.tool_results?.length ? result.tool_results : result?.tool_result,
+          raw: result,
+        };
+        $("operationsBody").innerHTML = `<div class="tech-switch"><button data-tech="toolcall">ToolCall</button><button data-tech="toolresult">ToolResult</button><button data-tech="raw">完整 JSON</button></div><div style="margin-top:10px"><pre>${esc(pretty(views[state.technicalView]))}</pre></div>`;
+        document.querySelectorAll("[data-tech]").forEach(button => {
+          button.classList.toggle("active", button.dataset.tech === state.technicalView);
+          button.onclick = () => { state.technicalView = button.dataset.tech; renderTechnical(); };
+        });
+      }
+
+      function bindDocumentButtons(root) {
+        root.querySelectorAll("[data-doctype][data-name]").forEach(button => button.onclick = () => openDocument(button.dataset.doctype, button.dataset.name));
+      }
+
+      async function openDocument(doctype, name) {
+        if (!state.user || !doctype || !name) return;
+        state.documentDetail = {loading:true, doctype, name};
+        showDrawer();
+        renderDocumentDrawer();
+        try {
+          state.documentDetail = await api(`/api/document?user=${encodeURIComponent(state.user.user_email)}&doctype=${encodeURIComponent(doctype)}&name=${encodeURIComponent(name)}`);
+        } catch (error) {
+          state.documentDetail = {error:error.message, doctype, name};
+        }
+        renderDocumentDrawer();
+      }
+
+      function showDrawer() {
+        $("drawerShade").classList.add("visible");
+        $("documentDrawer").classList.add("visible");
+      }
+      function closeDrawer() {
+        $("drawerShade").classList.remove("visible");
+        $("documentDrawer").classList.remove("visible");
+      }
+
+      function renderDocumentDrawer() {
+        const detail = state.documentDetail;
+        if (!detail || detail.loading) {
+          $("drawerTitle").innerHTML = `<h2>${esc(detail?.name || "业务单据")}</h2><p>正在读取当前员工可见内容</p>`;
+          $("drawerBody").innerHTML = `<div class="drawer-loading">正在加载单据...</div>`;
+          return;
+        }
+        if (detail.error) {
+          $("drawerTitle").innerHTML = `<h2>${esc(detail.name)}</h2><p>${esc(detail.doctype)}</p>`;
+          $("drawerBody").innerHTML = `<div class="message error">${esc(detail.error)}</div>`;
+          return;
+        }
+        const doc = detail.document || {};
+        const process = detail.process || {};
+        const status = statusText(doc);
+        $("drawerTitle").innerHTML = `<h2>${esc(detail.name)} <span class="status-badge ${statusClass(doc)}">${esc(status)}</span></h2><p>${esc(detail.label)} · ${esc(doc.owner || "-")} · ${esc(dateShort(doc.modified || doc.creation))}</p>`;
+        const fields = (PRIMARY_FIELDS[detail.doctype] || ["company","status","owner","modified"]).filter(key => doc[key] !== undefined && doc[key] !== null && doc[key] !== "");
+        const childRows = Array.isArray(doc.items) ? doc.items : [];
+        const columns = ITEM_COLUMNS.filter(key => childRows.some(row => row[key] !== undefined && row[key] !== null && row[key] !== ""));
+        $("drawerBody").innerHTML = `
+          <div class="process-card"><div><strong>流程状态：${esc(process.state || status)}</strong><span>${esc(process.description || "暂无流程信息")}</span><span>${esc(process.assignees?.length ? `当前处理人：${process.assignees.join("、")}` : process.notification || "")}</span></div><div>${(process.available_actions || []).map(action => `<button class="workflow-action" data-action="${esc(action)}">${esc(action)}</button>`).join("")}${process.can_submit ? `<button id="submitDocumentDraft">提交单据</button>` : ""}</div></div>
+          <div class="field-grid">${fields.map(key => `<div class="field"><span>${esc(FIELD_LABELS[key] || key)}</span><strong>${esc(formatField(key, doc[key]))}</strong></div>`).join("")}</div>
+          ${childRows.length ? `<h3 class="drawer-section-title">明细行 · ${childRows.length}</h3><div class="items-wrap"><table class="items-table"><thead><tr>${columns.map(key => `<th>${esc(ITEM_LABELS[key] || key)}</th>`).join("")}</tr></thead><tbody>${childRows.map(row => `<tr>${columns.map(key => `<td>${esc(formatField(key, row[key]))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>` : ""}
+          <details class="raw-details"><summary>查看完整单据 JSON</summary><pre>${esc(pretty(doc))}</pre></details>`;
+        $("submitDocumentDraft")?.addEventListener("click", async () => {
+          if (!window.confirm(`确认提交 ${detail.name}？`)) return;
+          const button = $("submitDocumentDraft");
+          button.disabled = true;
+          button.textContent = "提交中...";
+          try {
+            state.documentDetail = await api("/api/document/submit", {
+              method:"POST",
+              body:JSON.stringify({user:state.user.user_email, doctype:detail.doctype, name:detail.name}),
+            });
+            renderDocumentDrawer();
+            loadDocuments({preserve:true});
+          } catch (error) {
+            window.alert(error.message);
+            await openDocument(detail.doctype, detail.name);
+          }
+        });
+        document.querySelectorAll(".workflow-action").forEach(button => button.addEventListener("click", async () => {
+          const action = button.dataset.action;
+          if (!window.confirm(`确认对 ${detail.name} 执行“${action}”？`)) return;
+          button.disabled = true;
+          button.textContent = "处理中...";
+          try {
+            state.documentDetail = await api("/api/workflow/action", {
+              method:"POST",
+              body:JSON.stringify({user:state.user.user_email, doctype:detail.doctype, name:detail.name, action}),
+            });
+            renderDocumentDrawer();
+            loadDocuments({preserve:true});
+          } catch (error) {
+            window.alert(error.message);
+            await openDocument(detail.doctype, detail.name);
+          }
+        }));
+      }
+
+      function formatField(key, value) {
+        if (key === "docstatus") return Number(value) === 1 ? "已提交" : Number(value) === 2 ? "已取消" : "草稿";
+        if (typeof value === "number") return Number.isInteger(value) ? String(value) : value.toFixed(2);
+        if (typeof value === "object") return pretty(value);
+        return String(value ?? "-");
+      }
+
+      $("previewBtn").onclick = () => run(false);
+      $("executeBtn").onclick = () => run(true);
       $("cancelConfirm").onclick = () => $("confirmBar").classList.remove("visible");
-      $("clearBtn").onclick = () => { $("input").value = ""; $("messages").innerHTML = ""; state.preview = null; $("detailBody").innerHTML = ""; $("confirmBar").classList.remove("visible"); };
-      document.querySelectorAll("[data-example]").forEach(btn => btn.onclick = () => { $("input").value = btn.dataset.example; $("input").focus(); });
-      document.querySelectorAll(".tab").forEach(tab => tab.onclick = () => { state.tab = tab.dataset.tab; renderDetails(); if (state.tab === "documents" && !state.documents) loadDocuments(); });
-      $("input").addEventListener("keydown", e => { if (e.ctrlKey && e.key === "Enter") run(false); });
+      $("clearBtn").onclick = startNewConversation;
+      $("drawerClose").onclick = closeDrawer;
+      $("drawerShade").onclick = closeDrawer;
+      $("contextToggle").onclick = () => $("contextPanel").classList.toggle("open");
+      $("operationsToggle").onclick = () => $("operationsPanel").classList.toggle("open");
+      document.querySelectorAll("[data-example]").forEach(button => button.onclick = () => { $("input").value = button.dataset.example; $("input").focus(); });
+      document.querySelectorAll(".operations-tab").forEach(button => button.onclick = () => { state.panel = button.dataset.panel; renderOperations(); });
+      $("input").addEventListener("keydown", event => {
+        if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+          event.preventDefault();
+          if (!$("previewBtn").disabled) run(false);
+        }
+      });
+      document.addEventListener("keydown", event => { if (event.key === "Escape") closeDrawer(); });
       boot();
     </script>
   </body>

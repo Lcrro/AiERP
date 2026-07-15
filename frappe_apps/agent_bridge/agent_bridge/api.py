@@ -1528,3 +1528,264 @@ def _compact_permission_doc(doc) -> dict | None:
         "docstatus": doc.get("docstatus"),
         "modified": doc.get("modified"),
     }
+
+
+MATERIAL_REQUEST_WORKFLOW_NAME = "STEC Material Request Approval"
+MATERIAL_REQUEST_APPROVAL_ROLES = {
+    "clerk": "STEC Material Clerk",
+    "equipment_manager": "STEC Material Equipment Manager",
+    "project_manager": "STEC Project Manager",
+}
+
+
+@frappe.whitelist()
+def get_document_with_workflow_actions(doctype: str, name: str) -> dict:
+    """Return one permitted document and the current user's workflow actions."""
+
+    doc = frappe.get_doc(doctype, name)
+    doc.check_permission("read")
+    actions: list[dict] = []
+    from frappe.model.workflow import get_transitions, get_workflow_name
+
+    if get_workflow_name(doctype):
+        try:
+            actions = [dict(transition) for transition in get_transitions(doc)]
+        except frappe.ValidationError:
+            actions = []
+    return {"document": doc.as_dict(), "actions": actions}
+
+
+def _ensure_named_document(doctype: str, name: str, values: dict | None = None):
+    values = values or {}
+    if frappe.db.exists(doctype, name):
+        doc = frappe.get_doc(doctype, name)
+        for fieldname, value in values.items():
+            doc.set(fieldname, value)
+        doc.save(ignore_permissions=True)
+        return doc
+    return frappe.get_doc({"doctype": doctype, "name": name, **values}).insert(ignore_permissions=True)
+
+
+def _set_user_roles(user, roles: list[str]) -> None:
+    existing = {row.role for row in user.get("roles", [])}
+    for role in roles:
+        if role not in existing:
+            user.append("roles", {"role": role})
+
+
+@frappe.whitelist()
+def setup_material_request_approval_workflow() -> dict:
+    """Install the civil-project Material Request approval chain and Hu Yinhu account."""
+
+    frappe.only_for("System Manager")
+
+    for role in MATERIAL_REQUEST_APPROVAL_ROLES.values():
+        _ensure_named_document("Role", role, {"role_name": role, "desk_access": 1})
+
+    profile_roles = {
+        "材料员": ["Stock User", "Purchase User", "Projects User", MATERIAL_REQUEST_APPROVAL_ROLES["clerk"]],
+        "材料设备主管": [
+            "Purchase Manager",
+            "Purchase User",
+            "Purchase Master Manager",
+            "Stock Manager",
+            "Stock User",
+            "Item Manager",
+            "Projects User",
+            MATERIAL_REQUEST_APPROVAL_ROLES["equipment_manager"],
+        ],
+        "项目经理": [
+            "Projects Manager",
+            "Projects User",
+            "Stock User",
+            "Purchase User",
+            MATERIAL_REQUEST_APPROVAL_ROLES["project_manager"],
+        ],
+    }
+    for profile_name, roles in profile_roles.items():
+        _ensure_named_document(
+            "Role Profile",
+            profile_name,
+            {"role_profile": profile_name, "roles": [{"role": role} for role in roles]},
+        )
+
+    hu_email = "hu.yinhu@stec-up.local"
+    hu_roles = profile_roles["项目经理"]
+    generated_secret = None
+    if frappe.db.exists("User", hu_email):
+        hu_user = frappe.get_doc("User", hu_email)
+        hu_user.enabled = 1
+        hu_user.first_name = "胡银虎"
+        hu_user.language = "zh"
+        hu_user.time_zone = "Asia/Shanghai"
+    else:
+        hu_user = frappe.get_doc(
+            {
+                "doctype": "User",
+                "email": hu_email,
+                "first_name": "胡银虎",
+                "enabled": 1,
+                "send_welcome_email": 0,
+                "language": "zh",
+                "time_zone": "Asia/Shanghai",
+                "user_type": "System User",
+            }
+        ).insert(ignore_permissions=True)
+    _set_user_roles(hu_user, hu_roles)
+    hu_user.role_profile_name = "项目经理"
+    hu_user.save(ignore_permissions=True)
+
+    # Existing employees are the source of truth for company and department naming.
+    mao_employee_name = frappe.db.get_value("Employee", {"user_id": "mao.xiaoquan@stec-up.local"}, "name")
+    if not mao_employee_name:
+        frappe.throw("Mao Xiaoquan employee record is required before installing this workflow")
+    mao_employee = frappe.get_doc("Employee", mao_employee_name)
+    _ensure_named_document("Designation", "Project Manager", {"designation_name": "Project Manager"})
+    hu_employee_name = frappe.db.get_value("Employee", {"employee_number": "EMP-HUYINHU"}, "name")
+    employee_values = {
+        "employee_number": "EMP-HUYINHU",
+        "first_name": "胡银虎",
+        "employee_name": "胡银虎",
+        "gender": "Male",
+        "date_of_birth": "1990-01-01",
+        "date_of_joining": "2026-07-01",
+        "company": mao_employee.company,
+        "department": mao_employee.department,
+        "designation": "Project Manager",
+        "user_id": hu_email,
+        "status": "Active",
+    }
+    if hu_employee_name:
+        hu_employee = frappe.get_doc("Employee", hu_employee_name)
+        for fieldname, value in employee_values.items():
+            hu_employee.set(fieldname, value)
+        hu_employee.save(ignore_permissions=True)
+    else:
+        hu_employee = frappe.get_doc({"doctype": "Employee", **employee_values}).insert(ignore_permissions=True)
+
+    project_name = "合流污水一期复线工程（其他部分）FXQ1.3标4-15井"
+    project_id = frappe.db.get_value("Project", {"project_name": project_name}, "name")
+    if not project_id:
+        frappe.throw(f"Project not found: {project_name}")
+    project = frappe.get_doc("Project", project_id)
+    if hu_email not in {row.user for row in project.get("users", [])}:
+        project.append("users", {"user": hu_email, "welcome_email_sent": 1})
+        project.save(ignore_permissions=True)
+
+    for user_email, roles in {
+        "mao.xiaoquan@stec-up.local": profile_roles["材料员"],
+        "pan.feng@stec-up.local": profile_roles["材料设备主管"],
+        hu_email: hu_roles,
+    }.items():
+        user = frappe.get_doc("User", user_email)
+        _set_user_roles(user, roles)
+        user.save(ignore_permissions=True)
+
+    workflow_states = ["草稿", "待材料设备主管审批", "待项目经理审批", "已批准"]
+    workflow_actions = ["提交申请", "批准", "驳回"]
+    for state in workflow_states:
+        _ensure_named_document("Workflow State", state, {"workflow_state_name": state})
+    for action in workflow_actions:
+        _ensure_named_document("Workflow Action Master", action, {"workflow_action_name": action})
+
+    for workflow in frappe.get_all(
+        "Workflow",
+        filters={"document_type": "Material Request", "name": ["!=", MATERIAL_REQUEST_WORKFLOW_NAME]},
+        fields=["name", "is_active"],
+    ):
+        if workflow.is_active:
+            frappe.db.set_value("Workflow", workflow.name, "is_active", 0, update_modified=False)
+
+    workflow_values = {
+        "workflow_name": MATERIAL_REQUEST_WORKFLOW_NAME,
+        "document_type": "Material Request",
+        "is_active": 1,
+        "override_status": 1,
+        # Test accounts use local-only addresses. Workflow Action provides the
+        # in-app notification without waiting for an unreachable mail server.
+        "send_email_alert": 0,
+        "workflow_state_field": "workflow_state",
+        "states": [
+            {"state": "草稿", "doc_status": "0", "allow_edit": MATERIAL_REQUEST_APPROVAL_ROLES["clerk"]},
+            {
+                "state": "待材料设备主管审批",
+                "doc_status": "0",
+                "allow_edit": MATERIAL_REQUEST_APPROVAL_ROLES["equipment_manager"],
+                "send_email": 0,
+            },
+            {
+                "state": "待项目经理审批",
+                "doc_status": "0",
+                "allow_edit": MATERIAL_REQUEST_APPROVAL_ROLES["project_manager"],
+                "send_email": 0,
+            },
+            {"state": "已批准", "doc_status": "1", "allow_edit": MATERIAL_REQUEST_APPROVAL_ROLES["project_manager"]},
+        ],
+        "transitions": [
+            {
+                "state": "草稿",
+                "action": "提交申请",
+                "next_state": "待材料设备主管审批",
+                "allowed": MATERIAL_REQUEST_APPROVAL_ROLES["clerk"],
+                # The requester must be allowed to submit their own draft. The
+                # two actual approval transitions below still forbid self approval.
+                "allow_self_approval": 1,
+            },
+            {
+                "state": "待材料设备主管审批",
+                "action": "批准",
+                "next_state": "待项目经理审批",
+                "allowed": MATERIAL_REQUEST_APPROVAL_ROLES["equipment_manager"],
+                "allow_self_approval": 0,
+            },
+            {
+                "state": "待材料设备主管审批",
+                "action": "驳回",
+                "next_state": "草稿",
+                "allowed": MATERIAL_REQUEST_APPROVAL_ROLES["equipment_manager"],
+                "allow_self_approval": 0,
+            },
+            {
+                "state": "待项目经理审批",
+                "action": "批准",
+                "next_state": "已批准",
+                "allowed": MATERIAL_REQUEST_APPROVAL_ROLES["project_manager"],
+                "allow_self_approval": 0,
+            },
+            {
+                "state": "待项目经理审批",
+                "action": "驳回",
+                "next_state": "草稿",
+                "allowed": MATERIAL_REQUEST_APPROVAL_ROLES["project_manager"],
+                "allow_self_approval": 0,
+            },
+        ],
+    }
+    workflow = _ensure_named_document("Workflow", MATERIAL_REQUEST_WORKFLOW_NAME, workflow_values)
+    frappe.db.set_value(
+        "Material Request",
+        {"docstatus": 0, "workflow_state": ["in", [None, ""]]},
+        "workflow_state",
+        "草稿",
+        update_modified=False,
+    )
+
+    if not hu_user.api_key:
+        from frappe.core.doctype.user.user import generate_keys
+
+        generated = generate_keys(hu_email)
+        generated_secret = generated.get("api_secret")
+        hu_user.reload()
+
+    frappe.clear_cache()
+    frappe.db.commit()
+    return {
+        "workflow": workflow.name,
+        "project": project.name,
+        "employee": hu_employee.name,
+        "user": hu_email,
+        "api_key": hu_user.api_key,
+        "api_secret": generated_secret,
+        "states": workflow_states,
+        "actions": workflow_actions,
+    }

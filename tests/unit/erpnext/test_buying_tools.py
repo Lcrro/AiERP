@@ -55,6 +55,8 @@ class BuyingFakeClient:
                     ],
                 },
             )
+        if doctype == "Material Request" and name == "MR-WORKFLOW":
+            return ToolResult(ok=True, data={"doctype": doctype, "name": name, "docstatus": 0, "workflow_state": "草稿"})
         if doctype == "Material Request" and name == "MR-DRAFT":
             return ToolResult(
                 ok=True,
@@ -780,7 +782,36 @@ def test_buying_submit_requires_confirmation_metadata_and_returns_stable_shape()
     assert allowed.data["docstatus"] == 1
     assert allowed.data["status"] == "Submitted"
     assert allowed.data["risk"]["level"] == "L4"
-    assert client.calls == [("submit_document", "Purchase Order", "PO-0001")]
+    assert client.calls == [
+        ("get_document", "Purchase Order", "PO-0001"),
+        ("submit_document", "Purchase Order", "PO-0001"),
+    ]
+
+
+def test_buying_submit_rejects_direct_submission_when_workflow_is_active() -> None:
+    client = BuyingFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    result = adapter.execute(
+        {
+            "tool": "erpnext.buying.submit_document",
+            "arguments": {
+                "doctype": "Material Request",
+                "name": "MR-WORKFLOW",
+                "confirmation": {
+                    "confirmed_by": "clerk@example.com",
+                    "confirmed_at": "2026-07-15T12:00:00Z",
+                    "confirmation_text": "确认提交材料申请 MR-WORKFLOW",
+                    "reason": "进入审批流程",
+                },
+            },
+        }
+    )
+
+    assert not result.ok
+    assert result.error_type == "validation_error"
+    assert result.data["next_actions"] == ["erpnext.get_workflow_actions", "erpnext.apply_workflow"]
+    assert client.calls == [("get_document", "Material Request", "MR-WORKFLOW")]
 
 
 def test_purchase_suggestions_and_analysis_have_next_actions_and_l0_risk() -> None:

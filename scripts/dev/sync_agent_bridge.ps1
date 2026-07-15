@@ -5,7 +5,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
+$repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $source = Join-Path $repoRoot "frappe_apps\$AppName\$AppName"
 $target = Join-Path $BenchPath "apps\$AppName\$AppName"
 
