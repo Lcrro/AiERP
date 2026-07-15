@@ -177,6 +177,18 @@
       .process-card span { margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.5; }
       .process-card button { min-height: 34px; padding: 0 12px; border: 0; border-radius: 5px; background: var(--accent); color: white; font-weight: 700; }
       .process-card > div:last-child { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+      .workflow-history { margin-bottom: 16px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+      .workflow-history-row { display: grid; grid-template-columns: 14px 1fr; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+      .workflow-history-row:last-child { border-bottom: 0; }
+      .workflow-dot { width: 8px; height: 8px; margin-top: 4px; border-radius: 50%; background: var(--accent); }
+      .workflow-history-row strong, .workflow-history-row span, .workflow-history-row small { display: block; }
+      .workflow-history-row strong { font-size: 12px; }
+      .workflow-history-row span, .workflow-history-row small { margin-top: 3px; color: var(--muted); font-size: 10px; }
+      .workflow-comments { display: grid; gap: 8px; margin-bottom: 16px; }
+      .workflow-comment { padding: 10px 12px; border-left: 3px solid var(--warning); background: var(--surface-soft); }
+      .workflow-comment strong, .workflow-comment small { display: block; font-size: 10px; }
+      .workflow-comment p { margin: 5px 0; white-space: pre-wrap; font-size: 11px; line-height: 1.5; }
+      .workflow-comment small { color: var(--muted); }
       .items-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; }
       .items-table { width: 100%; border-collapse: collapse; font-size: 11px; }
       .items-table th, .items-table td { min-width: 90px; padding: 9px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; overflow-wrap: anywhere; }

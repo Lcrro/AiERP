@@ -149,6 +149,7 @@ class DeepSeekAgentRuntime:
         self.session_store = session_store or RuntimeSessionStore()
         self.entity_resolvers = EntityResolverRegistry(self.release)
         self.material_resolver = ReleaseMaterialResolver(self.release.material_release_path)
+        self.materials_by_code = {row["item_code"]: row for row in self.release.materials if row.get("item_code")}
         self.discovery = ToolDiscoveryIndex()
         self.max_steps = max_steps
 
@@ -270,6 +271,7 @@ class DeepSeekAgentRuntime:
                 corrections: list[dict[str, Any]] = []
                 if contract:
                     corrections = _inject_resolved_arguments(call["arguments"], contract, session, observations)
+                    corrections.extend(_inject_material_request_reference_prices(call, self.materials_by_code))
                     if corrections:
                         steps.append(_step("参数编排", "inject_context", {}, {"corrections": corrections}))
                 if confirmed_call == call and tool_results and tool_results[-1].get("ok"):
@@ -680,6 +682,45 @@ def _inject_resolved_arguments(arguments: dict[str, Any], contract: ToolContract
         elif "." not in parameter.name and arguments.get(parameter.name) in (None, ""):
             arguments[parameter.name] = resolved
             corrections.append({"field": parameter.name, "value": resolved, "source": parameter.resolver})
+    return corrections
+
+
+def _inject_material_request_reference_prices(
+    call: dict[str, Any],
+    materials_by_code: dict[str, dict[str, str]],
+) -> list[dict[str, Any]]:
+    """Use governed test reference prices; never accept a model-invented MR rate."""
+    if call.get("tool") != "erpnext.buying.create_material_request_draft":
+        return []
+    arguments = call.get("arguments")
+    if not isinstance(arguments, dict) or not isinstance(arguments.get("items"), list):
+        return []
+    corrections: list[dict[str, Any]] = []
+    for index, row in enumerate(arguments["items"]):
+        if not isinstance(row, dict):
+            continue
+        item_code = str(row.get("item_code") or row.get("selected_item_code") or "")
+        source = materials_by_code.get(item_code) or {}
+        try:
+            rate = round(float(source.get("estimated_rate") or 0), 2)
+        except (TypeError, ValueError):
+            rate = 0
+        if rate > 0:
+            if row.get("rate") != rate:
+                row["rate"] = rate
+                corrections.append({
+                    "field": f"items[{index}].rate",
+                    "value": rate,
+                    "source": "material_master.estimated_rate",
+                    "price_basis": source.get("price_basis") or "测试参考价",
+                })
+        elif "rate" in row:
+            row.pop("rate", None)
+            corrections.append({
+                "field": f"items[{index}].rate",
+                "value": None,
+                "source": "removed_unverified_model_rate",
+            })
     return corrections
 
 

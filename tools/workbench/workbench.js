@@ -274,7 +274,8 @@
           const inventory = (row.inventory || []).map(stock => `${String(stock.warehouse || "").replace(/ - [A-Z]+$/, "")} ${formatNumber(stock.available_qty ?? 0)}${row.stock_uom || ""}`).join(" · ");
           const total = row.inventory_summary?.total_available_qty;
           const stockText = inventory || (total !== undefined ? `相关仓库可用库存 ${formatNumber(total)}${row.stock_uom || ""}` : "暂未取得相关仓库库存");
-          return `<button class="candidate-card" data-code="${esc(row.item_code)}" data-name="${esc(row.sku_name || row.item_name || row.item_code)}"><span class="candidate-title"><strong>${esc(row.sku_name || row.item_name || row.item_code)}</strong><span>${esc(row.item_code)}</span></span><span class="candidate-specs">${esc(row.required_specs || "暂无更多规格")} · 单位：${esc(row.stock_uom || "-")}</span><span class="candidate-stock">${esc(stockText)} · 点击选择</span></button>`;
+          const priceText = Number(row.estimated_rate) > 0 ? ` · 测试参考价：${formatNumber(row.estimated_rate)}${row.currency === "CNY" ? "元" : row.currency || ""}/${row.stock_uom || "单位"}` : "";
+          return `<button class="candidate-card" data-code="${esc(row.item_code)}" data-name="${esc(row.sku_name || row.item_name || row.item_code)}"><span class="candidate-title"><strong>${esc(row.sku_name || row.item_name || row.item_code)}</strong><span>${esc(row.item_code)}</span></span><span class="candidate-specs">${esc(row.required_specs || "暂无更多规格")} · 单位：${esc(row.stock_uom || "-")}${esc(priceText)}</span><span class="candidate-stock">${esc(stockText)} · 点击选择</span></button>`;
         }).join("")}</div>`;
       }
 
@@ -351,11 +352,13 @@
       }
 
       async function performWorkflowAction(doctype, name, action) {
+        const comment = action.includes("驳回") ? window.prompt("请填写驳回原因。该原因会写入 ERPNext 单据记录：") : "";
+        if (action.includes("驳回") && !String(comment || "").trim()) return;
         if (!window.confirm(`确认对 ${name} 执行“${action}”？`)) return;
         try {
           await api("/api/workflow/action", {
             method:"POST",
-            body:JSON.stringify({user:state.user.user_email, doctype, name, action, project_code:state.project.project_code, conversation_id:state.conversationId, request_id:crypto.randomUUID()}),
+            body:JSON.stringify({user:state.user.user_email, doctype, name, action, comment:String(comment || "").trim(), project_code:state.project.project_code, conversation_id:state.conversationId, request_id:crypto.randomUUID()}),
           });
           await Promise.all([loadInbox({preserve:true}), loadDocuments({preserve:true})]);
         } catch (error) {
@@ -456,10 +459,14 @@
         const fields = (PRIMARY_FIELDS[detail.doctype] || ["company","status","owner","modified"]).filter(key => doc[key] !== undefined && doc[key] !== null && doc[key] !== "");
         const childRows = Array.isArray(doc.items) ? doc.items : [];
         const columns = ITEM_COLUMNS.filter(key => childRows.some(row => row[key] !== undefined && row[key] !== null && row[key] !== ""));
+        const workflowHistory = Array.isArray(process.history) ? process.history : [];
+        const workflowComments = Array.isArray(process.comments) ? process.comments : [];
         $("drawerBody").innerHTML = `
           <div class="process-card"><div><strong>流程状态：${esc(process.state || status)}</strong><span>${esc(process.description || "暂无流程信息")}</span><span>${esc(process.assignees?.length ? `当前处理人：${process.assignees.join("、")}` : process.notification || "")}</span></div><div>${(process.available_actions || []).map(action => `<button class="workflow-action" data-action="${esc(action)}">${esc(action)}</button>`).join("")}${process.can_submit ? `<button id="submitDocumentDraft">提交单据</button>` : ""}</div></div>
           <div class="field-grid">${fields.map(key => `<div class="field"><span>${esc(FIELD_LABELS[key] || key)}</span><strong>${esc(formatField(key, doc[key]))}</strong></div>`).join("")}</div>
-          ${childRows.length ? `<h3 class="drawer-section-title">明细行 · ${childRows.length}</h3><div class="items-wrap"><table class="items-table"><thead><tr>${columns.map(key => `<th>${esc(ITEM_LABELS[key] || key)}</th>`).join("")}</tr></thead><tbody>${childRows.map(row => `<tr>${columns.map(key => `<td>${esc(formatField(key, row[key]))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>` : ""}
+          ${workflowHistory.length ? `<h3 class="drawer-section-title">审批记录</h3><div class="workflow-history">${workflowHistory.map(row => `<div class="workflow-history-row"><span class="workflow-dot"></span><div><strong>${esc(row.workflow_state || row.status || "流程动作")}</strong><span>${esc(row.completed_by || row.user || "系统")} · ${esc(row.completed_by_role || "")}</span><small>${esc(dateShort(row.modified || row.creation))}</small></div></div>`).join("")}</div>` : ""}
+          ${workflowComments.length ? `<h3 class="drawer-section-title">审批备注</h3><div class="workflow-comments">${workflowComments.map(row => `<div class="workflow-comment"><strong>${esc(row.comment_by || row.comment_email || row.owner || "系统")}</strong><p>${esc(row.content || "")}</p><small>${esc(dateShort(row.creation))}</small></div>`).join("")}</div>` : ""}
+          ${childRows.length ? `<h3 class="drawer-section-title">明细行 · ${childRows.length}</h3>${detail.doctype === "Material Request" ? `<p class="section-note">材料申请中的价格是测试参考价，用于预计需求金额；供应商报价和采购订单价格才是正式采购价格。</p>` : ""}<div class="items-wrap"><table class="items-table"><thead><tr>${columns.map(key => `<th>${esc(itemColumnLabel(detail.doctype, key))}</th>`).join("")}</tr></thead><tbody>${childRows.map(row => `<tr>${columns.map(key => `<td>${esc(formatItemField(detail.doctype, key, row[key], row))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>` : ""}
           ${state.developerMode ? `<details class="raw-details"><summary>查看完整单据 JSON</summary><pre>${esc(pretty(doc))}</pre></details>` : ""}`;
         $("submitDocumentDraft")?.addEventListener("click", async () => {
           if (!window.confirm(`确认提交 ${detail.name}？`)) return;
@@ -480,13 +487,15 @@
         });
         document.querySelectorAll(".workflow-action").forEach(button => button.addEventListener("click", async () => {
           const action = button.dataset.action;
+          const comment = action.includes("驳回") ? window.prompt("请填写驳回原因。该原因会写入 ERPNext 单据记录：") : "";
+          if (action.includes("驳回") && !String(comment || "").trim()) return;
           if (!window.confirm(`确认对 ${detail.name} 执行“${action}”？`)) return;
           button.disabled = true;
           button.textContent = "处理中...";
           try {
             state.documentDetail = await api("/api/workflow/action", {
               method:"POST",
-              body:JSON.stringify({user:state.user.user_email, doctype:detail.doctype, name:detail.name, action, project_code:state.project?.project_code, conversation_id:state.conversationId, request_id:crypto.randomUUID()}),
+              body:JSON.stringify({user:state.user.user_email, doctype:detail.doctype, name:detail.name, action, comment:String(comment || "").trim(), project_code:state.project?.project_code, conversation_id:state.conversationId, request_id:crypto.randomUUID()}),
             });
             renderDocumentDrawer();
             await Promise.all([loadInbox({preserve:true}), loadDocuments({preserve:true})]);
@@ -502,6 +511,21 @@
         if (typeof value === "number") return Number.isInteger(value) ? String(value) : value.toFixed(2);
         if (typeof value === "object") return pretty(value);
         return String(value ?? "-");
+      }
+
+      function itemColumnLabel(doctype, key) {
+        if (doctype === "Material Request" && key === "rate") return "预计单价";
+        if (doctype === "Material Request" && key === "amount") return "预计金额";
+        return ITEM_LABELS[key] || key;
+      }
+
+      function formatItemField(doctype, key, value, row) {
+        if (doctype === "Material Request" && key === "rate" && Number(value || 0) <= 0) return "暂无参考价";
+        if (doctype === "Material Request" && key === "amount" && Number(value || 0) <= 0) {
+          const estimated = Number(row.rate || 0) * Number(row.qty || 0);
+          return estimated > 0 ? formatNumber(estimated) : "—";
+        }
+        return formatField(key, value);
       }
 
       $("previewBtn").onclick = () => run(false);

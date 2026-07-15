@@ -1552,7 +1552,57 @@ def get_document_with_workflow_actions(doctype: str, name: str) -> dict:
             actions = [dict(transition) for transition in get_transitions(doc)]
         except frappe.ValidationError:
             actions = []
-    return {"document": doc.as_dict(), "actions": actions}
+    workflow_history = frappe.get_all(
+        "Workflow Action",
+        filters={"reference_doctype": doctype, "reference_name": name},
+        fields=[
+            "name", "status", "workflow_state", "user", "completed_by",
+            "completed_by_role", "creation", "modified",
+        ],
+        order_by="creation asc",
+    )
+    workflow_comments = frappe.get_all(
+        "Comment",
+        filters={
+            "reference_doctype": doctype,
+            "reference_name": name,
+            "comment_type": "Comment",
+        },
+        fields=["name", "content", "comment_by", "comment_email", "owner", "creation"],
+        order_by="creation asc",
+    )
+    return {
+        "document": doc.as_dict(),
+        "actions": actions,
+        "workflow_history": [dict(row) for row in workflow_history],
+        "workflow_comments": [dict(row) for row in workflow_comments],
+    }
+
+
+@frappe.whitelist()
+def apply_workflow_action_with_comment(
+    doctype: str,
+    name: str,
+    action: str,
+    comment: str | None = None,
+) -> dict:
+    """Apply an allowed workflow action and keep an optional business reason."""
+
+    from frappe.model.workflow import apply_workflow, get_transitions
+
+    doc = frappe.get_doc(doctype, name)
+    doc.check_permission("read")
+    transitions = [dict(transition) for transition in get_transitions(doc)]
+    allowed = {str(transition.get("action")) for transition in transitions if transition.get("action")}
+    if action not in allowed:
+        frappe.throw(frappe._("Action {0} is not allowed in the current workflow state.").format(action))
+    reason = str(comment or "").strip()
+    if "驳回" in action and not reason:
+        frappe.throw(frappe._("A rejection reason is required."))
+    if reason:
+        doc.add_comment("Comment", text=f"工作流动作：{action}\n原因：{reason}")
+    updated = apply_workflow(doc.as_dict(), action)
+    return updated.as_dict() if hasattr(updated, "as_dict") else dict(updated)
 
 
 def _ensure_named_document(doctype: str, name: str, values: dict | None = None):

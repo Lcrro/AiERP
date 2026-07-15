@@ -20,6 +20,7 @@ operations    本地运行、验证、维护和排障
 - [Tool Layer v0.1 清单](planning/tool-layer-v0.1.md)：后端工具层工作队列。
 - [物料主数据与检索 v0.1 计划](planning/item-master-search-v0.1.md)：物料表和检索工作队列。
 - [土木进销存 Agent v1.0](planning/civil-agent-v1.0.md)：当前产品主线、交付阶段和验收口径。
+- [采购闭环与员工工作台 v0.3](planning/procurement-closed-loop-v0.3.md)：从材料申请到收货退货的实施顺序和验收标准。
 - [基础主数据标准](reference/master-data-standard.md)：公司、组织、员工、项目、仓库、供应商等非物料主数据口径。
 
 ## 架构
@@ -39,6 +40,7 @@ operations    本地运行、验证、维护和排障
 - [ERPNext Tool Layer v0.2 模块覆盖](planning/tool-layer-v0.2-module-coverage.md)
 - [物料主数据与检索 v0.1](planning/item-master-search-v0.1.md)
 - [土木进销存 Agent v1.0](planning/civil-agent-v1.0.md)
+- [采购闭环与员工工作台 v0.3](planning/procurement-closed-loop-v0.3.md)
 
 计划文档是按版本组织的工作队列，应该包含开发清单、验收标准和下一步任务。
 

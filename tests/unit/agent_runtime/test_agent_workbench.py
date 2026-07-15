@@ -5,6 +5,8 @@ from pathlib import Path
 import sys
 from types import SimpleNamespace
 
+import pytest
+
 
 SCRIPT = Path(__file__).resolve().parents[3] / "scripts" / "dev" / "agent_workbench.py"
 SPEC = importlib.util.spec_from_file_location("agent_workbench", SCRIPT)
@@ -48,6 +50,27 @@ def test_pending_confirmation_history_is_explicitly_not_created() -> None:
     )
 
     assert result["message"] == "我已准备好创建材料申请草稿，但尚未写入 ERPNext。请确认后再执行。"
+
+
+def test_compact_candidate_keeps_governed_reference_price() -> None:
+    candidates = MODULE.compact_chat_candidates([{
+        "item_code": "MAT-CEM-000008",
+        "sku_name": "水泥 42.5 袋装 50kg",
+        "stock_uom": "包",
+        "estimated_rate": "28.00",
+        "currency": "CNY",
+        "price_basis": "测试参考价",
+        "data": {"private": "discard"},
+    }])
+
+    assert candidates == [{
+        "item_code": "MAT-CEM-000008",
+        "sku_name": "水泥 42.5 袋装 50kg",
+        "stock_uom": "包",
+        "estimated_rate": "28.00",
+        "currency": "CNY",
+        "price_basis": "测试参考价",
+    }]
 
 
 def test_successful_document_is_not_shown_failed_when_final_reply_failed() -> None:
@@ -115,9 +138,9 @@ def test_workbench_workflow_button_executes_erpnext_directly_without_agent() -> 
             calls.append(("get_workflow_actions", doctype, name))
             return SimpleNamespace(ok=True, data=[{"action": "提交申请"}], user_message=None, error=None)
 
-        def apply_workflow(self, doctype, name, action):
-            calls.append(("apply_workflow", doctype, name, action))
-            return SimpleNamespace(ok=True, data={"name": name}, user_message=None, error=None)
+        def call_method(self, method, arguments):
+            calls.append(("call_method", method, arguments))
+            return SimpleNamespace(ok=True, data={"name": arguments["name"]}, user_message=None, error=None)
 
     service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
     service.client = lambda _user: FakeClient()
@@ -133,8 +156,69 @@ def test_workbench_workflow_button_executes_erpnext_directly_without_agent() -> 
     assert result["name"] == "MAT-MR-0001"
     assert calls == [
         ("get_workflow_actions", "Material Request", "MAT-MR-0001"),
-        ("apply_workflow", "Material Request", "MAT-MR-0001", "提交申请"),
+        (
+            "call_method",
+            "agent_bridge.api.apply_workflow_action_with_comment",
+            {"doctype": "Material Request", "name": "MAT-MR-0001", "action": "提交申请", "comment": ""},
+        ),
     ]
+
+
+def test_workbench_rejection_requires_and_forwards_reason() -> None:
+    calls = []
+
+    class FakeClient:
+        def get_workflow_actions(self, doctype, name):
+            return SimpleNamespace(ok=True, data=[{"action": "驳回"}], user_message=None, error=None)
+
+        def call_method(self, method, arguments):
+            calls.append((method, arguments))
+            return SimpleNamespace(ok=True, data={"name": arguments["name"]}, user_message=None, error=None)
+
+    service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
+    service.client = lambda _user: FakeClient()
+    service.document = lambda user, doctype, name: {"doctype": doctype, "name": name, "user": user}
+
+    with pytest.raises(ValueError, match="驳回时必须填写原因"):
+        service.apply_workflow_action("manager@example.com", "Material Request", "MR-1", "驳回")
+
+    service.apply_workflow_action(
+        "manager@example.com",
+        "Material Request",
+        "MR-1",
+        "驳回",
+        comment="规格不明确，请补充。",
+    )
+
+    assert calls == [(
+        "agent_bridge.api.apply_workflow_action_with_comment",
+        {
+            "doctype": "Material Request",
+            "name": "MR-1",
+            "action": "驳回",
+            "comment": "规格不明确，请补充。",
+        },
+    )]
+
+
+def test_document_includes_workflow_history_and_business_comments() -> None:
+    class FakeClient:
+        def call_method(self, method, arguments):
+            assert method == "agent_bridge.api.get_document_with_workflow_actions"
+            return SimpleNamespace(ok=True, data={
+                "document": {"name": "MR-1", "docstatus": 0, "workflow_state": "草稿"},
+                "actions": [{"action": "提交申请"}],
+                "workflow_history": [{"status": "Completed", "completed_by": "manager@example.com"}],
+                "workflow_comments": [{"content": "工作流动作：驳回\n原因：请补充规格。"}],
+            }, user_message=None, error=None)
+
+    service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
+    service.client = lambda _user: FakeClient()
+
+    result = service.document("clerk@example.com", "Material Request", "MR-1")
+
+    assert result["process"]["history"][0]["completed_by"] == "manager@example.com"
+    assert "请补充规格" in result["process"]["comments"][0]["content"]
 
 
 def test_reset_documents_cancels_submitted_documents_before_deleting() -> None:

@@ -238,7 +238,7 @@ def compact_chat_candidates(groups: list[Any] | tuple[Any, ...]) -> list[dict[st
         candidates = [
             {
                 key: row[key]
-                for key in ("item_code", "item_name", "sku_name", "required_specs", "stock_uom", "inventory", "inventory_summary")
+                for key in ("item_code", "item_name", "sku_name", "required_specs", "stock_uom", "estimated_rate", "currency", "price_basis", "inventory", "inventory_summary")
                 if key in row
             }
             for row in rows
@@ -663,6 +663,11 @@ class AgentWorkbenchService:
             raise ValueError(f"无法读取 {doctype} {name}")
         transitions = result.data.get("actions")
         actions = [str(row.get("action")) for row in transitions if row.get("action")] if isinstance(transitions, list) else []
+        process = document_process_summary(doctype, document, actions)
+        history = result.data.get("workflow_history")
+        process["history"] = history if isinstance(history, list) else []
+        comments = result.data.get("workflow_comments")
+        process["comments"] = comments if isinstance(comments, list) else []
         return {
             "doctype": doctype,
             "name": name,
@@ -671,7 +676,7 @@ class AgentWorkbenchService:
                 doctype,
             ),
             "document": document,
-            "process": document_process_summary(doctype, document, actions),
+            "process": process,
         }
 
     def apply_workflow_action(
@@ -681,6 +686,7 @@ class AgentWorkbenchService:
         name: str,
         action: str,
         *,
+        comment: str = "",
         request_id: str = "",
         project: str = "",
         conversation_id: str = "default",
@@ -689,6 +695,8 @@ class AgentWorkbenchService:
             raise ValueError("user、doctype、name 和 action 必填")
         if doctype not in ALLOWED_DOCUMENT_TYPES:
             raise ValueError(f"测试台暂不支持处理 {doctype}")
+        if "驳回" in action and not comment.strip():
+            raise ValueError("驳回时必须填写原因")
         store = None
         session = None
         if request_id:
@@ -704,7 +712,15 @@ class AgentWorkbenchService:
         allowed_actions = {str(row.get("action")) for row in available.data if row.get("action")}
         if action not in allowed_actions:
             raise ValueError(f"当前账号不能对该单据执行“{action}”")
-        result = client.apply_workflow(doctype, name, action)
+        result = client.call_method(
+            "agent_bridge.api.apply_workflow_action_with_comment",
+            {
+                "doctype": doctype,
+                "name": name,
+                "action": action,
+                "comment": comment.strip(),
+            },
+        )
         if not result.ok:
             raise ValueError(result.user_message or result.error or f"工作流动作“{action}”执行失败")
         payload = self.document(user, doctype, name)
@@ -938,6 +954,7 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
                     str(request.get("doctype") or "").strip(),
                     str(request.get("name") or "").strip(),
                     str(request.get("action") or "").strip(),
+                    comment=str(request.get("comment") or "").strip(),
                     request_id=str(request.get("request_id") or "").strip(),
                     project=str(request.get("project_code") or "").strip(),
                     conversation_id=str(request.get("conversation_id") or "default").strip(),

@@ -8,6 +8,7 @@ from nexterp_agent.agent_runtime.deepseek_agent_runtime import (
     AGENT_ACTIONS,
     DeepSeekAgentRuntime,
     ToolDiscoveryIndex,
+    _inject_material_request_reference_prices,
     validate_agent_action,
 )
 from nexterp_agent.agent_runtime.civil_runtime import CivilAgentRuntime, LegacyCivilAgentRuntime
@@ -68,6 +69,37 @@ class FakeERPNextClient:
 class RepeatingPlanner:
     def __call__(self, _messages):
         return {"action": "discover_tools", "summary": "继续查找", "arguments": {"query": "库存", "modules": ["stock"]}}
+
+
+def test_material_request_rate_comes_from_governed_master_data() -> None:
+    call = {
+        "tool": "erpnext.buying.create_material_request_draft",
+        "arguments": {"items": [{"item_code": "MAT-CEM-000008", "qty": 20, "rate": 9999}]},
+    }
+
+    corrections = _inject_material_request_reference_prices(
+        call,
+        {"MAT-CEM-000008": {"estimated_rate": "28.00", "price_basis": "测试参考价"}},
+    )
+
+    assert call["arguments"]["items"][0]["rate"] == 28.0
+    assert corrections == [{
+        "field": "items[0].rate",
+        "value": 28.0,
+        "source": "material_master.estimated_rate",
+        "price_basis": "测试参考价",
+    }]
+
+
+def test_unverified_model_rate_is_removed_when_material_has_no_reference_price() -> None:
+    call = {
+        "tool": "erpnext.buying.create_material_request_draft",
+        "arguments": {"items": [{"item_code": "ITEM-NO-PRICE", "qty": 1, "rate": 88}]},
+    }
+
+    _inject_material_request_reference_prices(call, {})
+
+    assert "rate" not in call["arguments"]["items"][0]
 
 
 def test_public_civil_runtime_defaults_to_deepseek_runtime() -> None:
