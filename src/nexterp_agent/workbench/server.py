@@ -1005,6 +1005,82 @@ class AgentWorkbenchService:
         self._remember_idempotent_result(request_context, request_id, payload)
         return payload
 
+    def record_purchase_receipt_discrepancy(
+        self,
+        user: str,
+        project: str,
+        purchase_receipt: str,
+        description: str,
+        *,
+        items: list[dict[str, Any]] | None = None,
+        discrepancy_type: str = "spec_mismatch",
+        severity: str = "Medium",
+        assigned_to: str = "",
+        request_id: str = "",
+        conversation_id: str = "default",
+    ) -> dict[str, Any]:
+        if not user or not project or not purchase_receipt or not description.strip():
+            raise ValueError("user、project、purchase_receipt 和 description 必填")
+        cached, request_context = self._idempotency_context(user, project, conversation_id, request_id)
+        if cached is not None:
+            return cached
+        arguments = {
+            "purchase_receipt": purchase_receipt,
+            "description": description.strip(),
+            "discrepancy_type": discrepancy_type or "spec_mismatch",
+            "severity": severity or "Medium",
+            "reported_by": user,
+            "comment_email": user,
+            "comment_by": user,
+            "create_todo": True,
+            "prepare_return": True,
+            "items": items or [],
+        }
+        if assigned_to:
+            arguments["assigned_to"] = assigned_to
+        result = ERPNextAdapter(self.client(user)).execute({
+            "tool": "erpnext.buying.record_purchase_receipt_discrepancy",
+            "arguments": arguments,
+        })
+        if not result.ok or not isinstance(result.data, dict):
+            raise ValueError(result.user_message or result.error or "记录到货差异失败")
+        payload = self.document(user, "Purchase Receipt", purchase_receipt)
+        payload["discrepancy"] = result.data
+        self._remember_idempotent_result(request_context, request_id, payload)
+        return payload
+
+    def create_purchase_return_from_receipt(
+        self,
+        user: str,
+        project: str,
+        purchase_receipt: str,
+        reason: str,
+        *,
+        items: list[dict[str, Any]] | None = None,
+        request_id: str = "",
+        conversation_id: str = "default",
+    ) -> dict[str, Any]:
+        if not user or not project or not purchase_receipt or not reason.strip():
+            raise ValueError("user、project、purchase_receipt 和 reason 必填")
+        cached, request_context = self._idempotency_context(user, project, conversation_id, request_id)
+        if cached is not None:
+            return cached
+        result = ERPNextAdapter(self.client(user)).execute({
+            "tool": "erpnext.buying.create_purchase_receipt_return_draft",
+            "arguments": {
+                "purchase_receipt": purchase_receipt,
+                "posting_date": date.today().isoformat(),
+                "reason": reason.strip(),
+                "items": items or [],
+            },
+        })
+        if not result.ok or not isinstance(result.data, dict) or not result.data.get("name"):
+            raise ValueError(result.user_message or result.error or "创建采购退货草稿失败")
+        payload = self.document(user, "Purchase Receipt", str(result.data["name"]))
+        payload["return_against"] = purchase_receipt
+        self._remember_idempotent_result(request_context, request_id, payload)
+        return payload
+
     def _idempotency_context(
         self,
         user: str,
@@ -1643,6 +1719,35 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
                     str(request.get("project_code") or "").strip(),
                     str(request.get("purchase_order") or "").strip(),
                     selected_items=list(request.get("selected_items") or []),
+                    request_id=str(request.get("request_id") or "").strip(),
+                    conversation_id=str(request.get("conversation_id") or "default").strip(),
+                )
+                json_response(self, {"ok": True, **payload})
+                return
+            if self.path == "/api/procurement/discrepancy":
+                request = read_json(self)
+                payload = self.server.service.record_purchase_receipt_discrepancy(  # type: ignore[attr-defined]
+                    str(request.get("user") or "").strip(),
+                    str(request.get("project_code") or "").strip(),
+                    str(request.get("purchase_receipt") or "").strip(),
+                    str(request.get("description") or "").strip(),
+                    items=list(request.get("items") or []),
+                    discrepancy_type=str(request.get("discrepancy_type") or "spec_mismatch").strip(),
+                    severity=str(request.get("severity") or "Medium").strip(),
+                    assigned_to=str(request.get("assigned_to") or "").strip(),
+                    request_id=str(request.get("request_id") or "").strip(),
+                    conversation_id=str(request.get("conversation_id") or "default").strip(),
+                )
+                json_response(self, {"ok": True, **payload})
+                return
+            if self.path == "/api/procurement/purchase-return":
+                request = read_json(self)
+                payload = self.server.service.create_purchase_return_from_receipt(  # type: ignore[attr-defined]
+                    str(request.get("user") or "").strip(),
+                    str(request.get("project_code") or "").strip(),
+                    str(request.get("purchase_receipt") or "").strip(),
+                    str(request.get("reason") or "").strip(),
+                    items=list(request.get("items") or []),
                     request_id=str(request.get("request_id") or "").strip(),
                     conversation_id=str(request.get("conversation_id") or "default").strip(),
                 )

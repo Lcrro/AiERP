@@ -38,8 +38,8 @@
         "Task": ["subject","status","priority","project","owner","modified"],
         "ToDo": ["description","status","reference_type","reference_name","owner","modified"],
       };
-      const ITEM_COLUMNS = ["item_code","item_name","description","qty","received_qty","uom","rate","amount","warehouse","project","schedule_date"];
-      const ITEM_LABELS = {item_code:"物料编码",item_name:"物料名称",description:"描述",qty:"数量",received_qty:"已收数量",uom:"单位",rate:"单价",amount:"金额",warehouse:"仓库",project:"项目",schedule_date:"需求日期"};
+      const ITEM_COLUMNS = ["item_code","item_name","description","qty","received_qty","returned_qty","uom","rate","amount","warehouse","project","schedule_date"];
+      const ITEM_LABELS = {item_code:"物料编码",item_name:"物料名称",description:"描述",qty:"数量",received_qty:"已收数量",returned_qty:"已退数量",uom:"单位",rate:"单价",amount:"金额",warehouse:"仓库",project:"项目",schedule_date:"需求日期"};
 
       async function api(path, options = {}) {
         const response = await fetch(path, {headers:{"Content-Type":"application/json"}, ...options});
@@ -651,6 +651,7 @@
           ${workflowComments.length ? `<h3 class="drawer-section-title">审批备注</h3><div class="workflow-comments">${workflowComments.map(row => `<div class="workflow-comment"><strong>${esc(row.comment_by || row.comment_email || row.owner || "系统")}</strong><p>${esc(row.content || "")}</p><small>${esc(dateShort(row.creation))}</small></div>`).join("")}</div>` : ""}
           ${childRows.length ? `<h3 class="drawer-section-title">明细行 · ${childRows.length}</h3>${detail.doctype === "Material Request" ? `<p class="section-note">材料申请中的价格是测试参考价，用于预计需求金额；供应商报价和采购订单价格才是正式采购价格。</p>` : ""}<div class="items-wrap"><table class="items-table"><thead><tr>${columns.map(key => `<th>${esc(itemColumnLabel(detail.doctype, key))}</th>`).join("")}</tr></thead><tbody>${childRows.map(row => `<tr>${columns.map(key => `<td>${esc(formatItemField(detail.doctype, key, row[key], row))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>` : ""}
           ${purchaseReceiptPreparationHtml(detail)}
+          ${purchaseReturnPreparationHtml(detail)}
           ${rfqQuotationHtml(detail)}
           ${state.developerMode ? `<details class="raw-details"><summary>查看完整单据 JSON</summary><pre>${esc(pretty(doc))}</pre></details>` : ""}`;
         $("submitDocumentDraft")?.addEventListener("click", async () => {
@@ -695,6 +696,8 @@
         document.querySelectorAll("[data-create-purchase-order]").forEach(button => button.onclick = () => createPurchaseOrderFromQuotation(button.dataset.createPurchaseOrder));
         document.querySelectorAll("[data-open-purchase-order]").forEach(button => button.onclick = () => openDocument("Purchase Order", button.dataset.openPurchaseOrder));
         $("createPurchaseReceipt")?.addEventListener("click", createPurchaseReceiptFromOrder);
+        $("recordReceiptDiscrepancy")?.addEventListener("click", recordReceiptDiscrepancy);
+        $("createPurchaseReturn")?.addEventListener("click", createPurchaseReturn);
       }
 
       function purchaseReceiptPreparationHtml(detail) {
@@ -734,6 +737,58 @@
           button.disabled = false;
           button.textContent = "创建采购收货草稿";
         }
+      }
+
+      function purchaseReturnPreparationHtml(detail) {
+        const doc = detail.document || {};
+        if (detail.doctype !== "Purchase Receipt" || Number(doc.docstatus) !== 1 || Number(doc.is_return) === 1) return "";
+        const rows = (doc.items || [])
+          .map(row => ({...row, returnable_qty:Math.max(Number(row.qty || 0) - Number(row.returned_qty || 0), 0)}))
+          .filter(row => row.returnable_qty > 0);
+        if (!rows.length) return `<section class="receipt-section"><h3 class="drawer-section-title">到货差异与退货</h3><div class="message success">这张收货单已无可退数量。</div></section>`;
+        return `<section class="receipt-section"><h3 class="drawer-section-title">到货差异与退货</h3><p class="section-note">先记录规格、质量或数量差异，再按实际退货数量创建退货草稿。提交退货单后库存才会回减。</p><div class="return-form"><label class="form-field"><span>差异类型</span><select id="receiptDiscrepancyType"><option value="spec_mismatch">规格不符</option><option value="quality_issue">质量问题</option><option value="quantity_mismatch">数量差异</option><option value="damaged">运输损坏</option></select></label><label class="form-field"><span>严重程度</span><select id="receiptDiscrepancySeverity"><option>Medium</option><option>High</option><option>Low</option></select></label><label class="form-field return-reason"><span>问题说明 / 退货原因</span><textarea id="receiptReturnReason" rows="2" placeholder="例如：到货水泥强度等级与采购订单不一致，整批退回"></textarea></label></div><div class="receipt-grid">${rows.map(row => `<div class="receipt-row"><span><strong>${esc(row.item_name || row.item_code)}</strong><small>已收 ${esc(formatNumber(row.qty))} ${esc(row.uom || "")} · 已退 ${esc(formatNumber(row.returned_qty || 0))} · 可退 ${esc(formatNumber(row.returnable_qty))}</small></span><label>本次退货<input type="number" min="0" max="${esc(row.returnable_qty)}" step="0.001" value="${esc(row.returnable_qty)}" data-return-qty data-receipt-item="${esc(row.name)}" data-item-code="${esc(row.item_code)}" data-warehouse="${esc(row.warehouse || "")}"></label><span><small>${esc(row.warehouse || "")}</small></span></div>`).join("")}</div><div class="return-actions"><button id="recordReceiptDiscrepancy">只记录差异</button><button id="createPurchaseReturn" class="danger">创建退货草稿</button></div></section>`;
+      }
+
+      function receiptReturnRows() {
+        return [...document.querySelectorAll("[data-return-qty]")].map(input => ({
+          purchase_receipt_item:input.dataset.receiptItem,
+          item_code:input.dataset.itemCode,
+          qty:Number(input.value || 0),
+          warehouse:input.dataset.warehouse,
+        })).filter(row => row.qty > 0);
+      }
+
+      async function recordReceiptDiscrepancy() {
+        const description = String($("receiptReturnReason")?.value || "").trim();
+        if (!description) { window.alert("请填写问题说明。"); return; }
+        const assigned = state.employees.find(employee => /材料设备主管/.test(employee.position || ""))?.user_email || state.user.user_email;
+        if (!window.confirm("确认把这条到货差异写入 ERPNext 评论并创建跟进待办？")) return;
+        try {
+          await api("/api/procurement/discrepancy", {method:"POST", body:JSON.stringify({
+            user:state.user.user_email, project_code:state.project.project_code, conversation_id:state.conversationId,
+            request_id:crypto.randomUUID(), purchase_receipt:state.documentDetail.name, description,
+            discrepancy_type:$("receiptDiscrepancyType")?.value || "spec_mismatch",
+            severity:$("receiptDiscrepancySeverity")?.value || "Medium", assigned_to:assigned, items:receiptReturnRows(),
+          })});
+          window.alert("到货差异已记录，并已创建跟进待办。");
+          await openDocument("Purchase Receipt", state.documentDetail.name);
+        } catch (error) { window.alert(error.message); }
+      }
+
+      async function createPurchaseReturn() {
+        const reason = String($("receiptReturnReason")?.value || "").trim();
+        const items = receiptReturnRows();
+        if (!reason) { window.alert("请填写退货原因。"); return; }
+        if (!items.length) { window.alert("请至少填写一条大于 0 的退货数量。"); return; }
+        if (!window.confirm(`确认创建 ${items.length} 条明细的采购退货草稿？\n\n草稿提交后才会回减库存。`)) return;
+        try {
+          const result = await api("/api/procurement/purchase-return", {method:"POST", body:JSON.stringify({
+            user:state.user.user_email, project_code:state.project.project_code, conversation_id:state.conversationId,
+            request_id:crypto.randomUUID(), purchase_receipt:state.documentDetail.name, reason, items,
+          })});
+          await loadDocuments({preserve:true});
+          await openDocument("Purchase Receipt", result.name);
+        } catch (error) { window.alert(error.message); }
       }
 
       function rfqQuotationHtml(detail) {

@@ -518,6 +518,43 @@ def test_create_purchase_receipt_from_purchase_order_uses_specialized_tool(monke
     assert calls[0]["arguments"]["selected_items"][0]["qty"] == 2
 
 
+def test_purchase_receipt_discrepancy_and_return_use_specialized_tools(monkeypatch) -> None:
+    calls = []
+
+    class FakeAdapter:
+        def __init__(self, client):
+            assert client == "client"
+
+        def execute(self, call):
+            calls.append(call)
+            if call["tool"].endswith("record_purchase_receipt_discrepancy"):
+                return SimpleNamespace(ok=True, data={"status": "Discrepancy Recorded"}, user_message=None, error=None)
+            return SimpleNamespace(ok=True, data={"doctype": "Purchase Receipt", "name": "RET-1"}, user_message=None, error=None)
+
+    service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
+    monkeypatch.setattr(sys.modules[service.__class__.__module__], "ERPNextAdapter", FakeAdapter)
+    service.client = lambda _user: "client"
+    service.document = lambda user, doctype, name: {"user": user, "doctype": doctype, "name": name}
+    service._idempotency_context = lambda *_args: (None, None)
+    service._remember_idempotent_result = lambda *_args: None
+
+    discrepancy = service.record_purchase_receipt_discrepancy(
+        "storekeeper@example.com", "PRJ-HL-13", "PR-1", "规格不符",
+        items=[{"purchase_receipt_item": "PRI-1", "qty": 2}], assigned_to="buyer@example.com",
+    )
+    returned = service.create_purchase_return_from_receipt(
+        "storekeeper@example.com", "PRJ-HL-13", "PR-1", "整批退回",
+        items=[{"purchase_receipt_item": "PRI-1", "qty": 2}],
+    )
+
+    assert discrepancy["discrepancy"]["status"] == "Discrepancy Recorded"
+    assert returned["name"] == "RET-1"
+    assert calls[0]["tool"] == "erpnext.buying.record_purchase_receipt_discrepancy"
+    assert calls[0]["arguments"]["assigned_to"] == "buyer@example.com"
+    assert calls[1]["tool"] == "erpnext.buying.create_purchase_receipt_return_draft"
+    assert calls[1]["arguments"]["reason"] == "整批退回"
+
+
 def test_project_catalog_contains_project_specific_and_organization_employees() -> None:
     projects = {row["project_code"]: row for row in MODULE.project_catalog()}
     names = {row["employee_name"] for row in projects["PRJ-HL-13"]["employees"]}

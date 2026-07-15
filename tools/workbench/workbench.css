@@ -291,4 +291,9 @@
 .receipt-row span, .receipt-row label { display: grid; gap: 4px; }
 .receipt-row small { color: var(--muted); }
 .receipt-row input { width: 100%; }
+.return-form { display: grid; grid-template-columns: 160px 140px minmax(260px, 1fr); gap: 10px; }
+.return-reason { grid-column: auto; }
+.return-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.return-actions .danger { background: #b42318; color: white; border-color: #b42318; }
 @media (max-width: 900px) { .receipt-row { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .return-form { grid-template-columns: 1fr; } }
