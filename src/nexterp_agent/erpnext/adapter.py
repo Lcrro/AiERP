@@ -78,6 +78,7 @@ class ERPNextAdapter(
             "erpnext.attach_file": self._attach_file,
             "erpnext.list_attachments": self._list_attachments,
             "erpnext.delete_attachment": self._delete_attachment,
+            "erpnext.buying.get_pending_procurement_items": self._buying_get_pending_procurement_items,
             "erpnext.buying.search_suppliers": self._buying_search_suppliers,
             "erpnext.buying.search_supplier_scorecards": self._buying_search_supplier_scorecards,
             "erpnext.buying.get_supplier_procurement_profile": self._buying_get_supplier_procurement_profile,

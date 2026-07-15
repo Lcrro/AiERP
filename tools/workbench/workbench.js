@@ -1,8 +1,10 @@
       const state = {
         projects: [], project: null, employees: [], user: null,
-        preview: null, documents: null, inbox: null, lastText: "", executeId: null,
+        preview: null, documents: null, inbox: null, procurement: null, procurementPreparation: null, lastText: "", executeId: null,
         panel: "inbox", technicalView: "toolcall", documentDetail: null, historyToken: 0,
         conversationId: "default", developerMode: false,
+        procurementFilters: {scope:"project", urgency:"", family:"", supplier:"", before:"", view:"rows"},
+        procurementSelected: new Set(),
       };
       const $ = id => document.getElementById(id);
       const WELCOME_HTML = $("messages").innerHTML;
@@ -84,6 +86,9 @@
         state.project = project;
         state.employees = project.employees || [];
         state.documents = null;
+        state.procurement = null;
+        state.procurementPreparation = null;
+        state.procurementSelected.clear();
         $("projectSelect").value = project.project_code;
         $("projectMeta").textContent = `${project.project_name}\n默认仓库：${project.warehouse_code || "未配置"}`;
         renderEmployees();
@@ -112,6 +117,23 @@
         loadHistory(historyToken);
         loadInbox();
         loadDocuments();
+      }
+
+      async function loadPendingProcurement({preserve = false} = {}) {
+        if (!state.user || !state.project) { state.procurement = null; renderOperations(); return; }
+        state.procurement = preserve && state.procurement?.rows
+          ? {...state.procurement, refreshing:true}
+          : {loading:true};
+        renderOperations();
+        try {
+          const filters = state.procurementFilters;
+          state.procurement = await api(`/api/procurement/pending?user=${encodeURIComponent(state.user.user_email)}&project=${encodeURIComponent(state.project.project_code)}&scope=${encodeURIComponent(filters.scope)}&limit=500`);
+          state.procurementSelected.clear();
+          state.procurementPreparation = null;
+        } catch (error) {
+          state.procurement = {error:error.message, rows:[], aggregate:[]};
+        }
+        renderOperations();
       }
 
       function renderContextSummary() {
@@ -324,9 +346,115 @@
       function renderOperations() {
         document.querySelectorAll(".operations-tab").forEach(button => button.classList.toggle("active", button.dataset.panel === state.panel));
         if (state.panel === "inbox") return renderInbox();
+        if (state.panel === "pending") return renderPendingProcurement();
         if (["mine","progress","recent","exceptions"].includes(state.panel)) return renderDocuments(state.panel);
         if (state.panel === "steps") return renderSteps();
         return renderTechnical();
+      }
+
+      function filteredProcurementRows() {
+        const filters = state.procurementFilters;
+        return (state.procurement?.rows || []).filter(row => {
+          if (filters.urgency && row.urgency !== filters.urgency) return false;
+          if (filters.family && row.material_family !== filters.family) return false;
+          if (filters.supplier && !(row.supplier_suggestions || []).some(supplier => supplier.supplier_name === filters.supplier)) return false;
+          if (filters.before && String(row.schedule_date || "").slice(0, 10) > filters.before) return false;
+          return true;
+        });
+      }
+
+      function procurementRowKey(row) {
+        return `${row.material_request || ""}:${row.material_request_item || row.item_code || ""}`;
+      }
+
+      function procurementInventory(row) {
+        const stocks = (row.inventory || []).filter(stock => Number(stock.available_qty || 0) !== 0);
+        if (!stocks.length) return `<span class="stock-chip empty">相关仓库无可用库存</span>`;
+        return stocks.map(stock => `<span class="stock-chip">${esc(String(stock.warehouse || "").replace(/ - [A-Z]+$/, ""))}<strong>${esc(formatNumber(stock.available_qty))}</strong></span>`).join("");
+      }
+
+      function renderPendingProcurement() {
+        if (!state.procurement || state.procurement.loading) {
+          $("operationsBody").innerHTML = `<div class="empty-state">正在汇总已批准的待采购需求...</div>`;
+          return;
+        }
+        if (state.procurement.error) {
+          $("operationsBody").innerHTML = `<div class="message error">${esc(state.procurement.error)}</div>`;
+          return;
+        }
+        const filters = state.procurementFilters;
+        const rows = filteredProcurementRows();
+        const summary = state.procurement.summary || {};
+        const families = state.procurement.filters?.families || [];
+        const suppliers = state.procurement.filters?.suppliers || [];
+        const aggregate = new Map();
+        rows.forEach(row => {
+          const current = aggregate.get(row.item_code) || {...row, total_remaining_qty:0, request_count:0, projects:new Set(), source_rows:[]};
+          current.total_remaining_qty += Number(row.remaining_qty || 0);
+          current.request_count += 1;
+          if (row.project) current.projects.add(row.project);
+          current.source_rows.push(row);
+          if (!current.schedule_date || String(row.schedule_date || "") < String(current.schedule_date)) current.schedule_date = row.schedule_date;
+          aggregate.set(row.item_code, current);
+        });
+        const aggregateRows = [...aggregate.values()].map(row => ({...row, projects:[...row.projects]}));
+        const visibleRows = filters.view === "aggregate" ? aggregateRows : rows;
+        const urgencyLabels = {overdue:"已逾期",urgent:"紧急",soon:"近期",normal:"正常",unknown:"日期待确认"};
+        const options = (values, selected, labels = {}) => values.map(value => `<option value="${esc(value)}" ${value === selected ? "selected" : ""}>${esc(labels[value] || value)}</option>`).join("");
+        const cards = visibleRows.map(row => {
+          const sourceRows = row.source_rows || [row];
+          const keys = sourceRows.map(procurementRowKey);
+          const checked = keys.every(key => state.procurementSelected.has(key));
+          const remaining = filters.view === "aggregate" ? row.total_remaining_qty : row.remaining_qty;
+          const requestText = filters.view === "aggregate" ? `${row.request_count} 条申请 · ${row.projects.length} 个项目` : `${row.material_request} · ${row.project || "未指定项目"}`;
+          const suppliersText = (row.supplier_suggestions || []).map(supplier => `${supplier.supplier_name}${supplier.lead_time_days ? ` · ${supplier.lead_time_days}天` : ""}`).join("；") || "暂无建议供应商";
+          return `<article class="procurement-card ${row.inventory_coverage === "shortage" ? "shortage" : ""}">
+            <label class="procurement-select"><input type="checkbox" data-procurement-keys="${esc(keys.join("|"))}" ${checked ? "checked" : ""}><span></span></label>
+            <div class="procurement-main"><div class="procurement-title"><strong>${esc(row.sku_name || row.item_name || row.item_code)}</strong><span class="urgency ${esc(row.urgency)}">${esc(row.urgency_label)}</span></div>
+              <div class="procurement-spec">${esc(row.required_specs || row.item_code)} · ${esc(row.item_code)}</div>
+              <div class="procurement-qty"><span>申请 ${esc(formatNumber(row.qty ?? remaining))}</span><span>已订 ${esc(formatNumber(row.ordered_qty || 0))}</span><strong>待采 ${esc(formatNumber(remaining))} ${esc(row.uom || "")}</strong></div>
+              <div class="procurement-meta"><span>${esc(requestText)}</span><span>需求 ${esc(String(row.schedule_date || "待确认").slice(0, 10))}</span><span>${esc(row.warehouse || "未指定仓库")}</span></div>
+              <div class="stock-row">${procurementInventory(row)}</div>
+              <div class="supplier-hint">建议供应商：${esc(suppliersText)}</div>
+            </div></article>`;
+        }).join("");
+        const prep = state.procurementPreparation;
+        $("operationsBody").innerHTML = `
+          <div class="panel-toolbar"><strong>待采购${state.procurement.refreshing ? " · 正在同步" : ""}</strong><span><button id="refreshProcurement">刷新</button></span></div>
+          <div class="procurement-summary"><span><strong>${esc(summary.row_count || rows.length)}</strong>需求行</span><span><strong>${esc(summary.urgent_rows || 0)}</strong>紧急</span><span><strong>${esc(summary.shortage_rows || 0)}</strong>库存不足</span></div>
+          <div class="procurement-filters">
+            <select id="procurementScope"><option value="project" ${filters.scope === "project" ? "selected" : ""}>当前项目</option><option value="all" ${filters.scope === "all" ? "selected" : ""}>全部项目</option></select>
+            <select id="procurementUrgency"><option value="">全部紧急度</option>${options(["overdue","urgent","soon","normal","unknown"], filters.urgency, urgencyLabels)}</select>
+            <select id="procurementFamily"><option value="">全部物料族</option>${options(families, filters.family)}</select>
+            <select id="procurementSupplier"><option value="">全部供应商</option>${options(suppliers, filters.supplier)}</select>
+            <input id="procurementBefore" type="date" value="${esc(filters.before)}" title="最晚需求日期">
+            <div class="view-switch"><button data-procurement-view="rows" class="${filters.view === "rows" ? "active" : ""}">逐行</button><button data-procurement-view="aggregate" class="${filters.view === "aggregate" ? "active" : ""}">合并</button></div>
+          </div>
+          ${state.procurement.inventory_error ? `<p class="section-note warning-note">部分库存读取失败：${esc(state.procurement.inventory_error)}</p>` : ""}
+          ${cards || `<div class="empty-state">当前筛选条件下没有待采购需求。</div>`}
+          ${prep ? `<div class="procurement-preparation"><strong>${prep.mode === "rfq" ? "询价准备" : "直接采购准备"}</strong><span>已选择 ${prep.rows.length} 条需求、${prep.itemCount} 种物料。此处仅形成处理清单，尚未创建 ERPNext 单据。</span></div>` : ""}
+          <div class="procurement-actions"><span>已选择 <strong id="procurementSelectedCount">${state.procurementSelected.size}</strong> 行</span><div><button id="prepareRfq">准备询价</button><button id="prepareDirect" class="primary">准备直接采购</button></div></div>`;
+        $("refreshProcurement")?.addEventListener("click", () => loadPendingProcurement({preserve:true}));
+        $("procurementScope").onchange = event => { filters.scope = event.target.value; loadPendingProcurement(); };
+        $("procurementUrgency").onchange = event => { filters.urgency = event.target.value; renderPendingProcurement(); };
+        $("procurementFamily").onchange = event => { filters.family = event.target.value; renderPendingProcurement(); };
+        $("procurementSupplier").onchange = event => { filters.supplier = event.target.value; renderPendingProcurement(); };
+        $("procurementBefore").onchange = event => { filters.before = event.target.value; renderPendingProcurement(); };
+        document.querySelectorAll("[data-procurement-view]").forEach(button => button.onclick = () => { filters.view = button.dataset.procurementView; renderPendingProcurement(); });
+        document.querySelectorAll("[data-procurement-keys]").forEach(input => input.onchange = () => {
+          input.dataset.procurementKeys.split("|").filter(Boolean).forEach(key => input.checked ? state.procurementSelected.add(key) : state.procurementSelected.delete(key));
+          state.procurementPreparation = null;
+          renderPendingProcurement();
+        });
+        $("prepareRfq")?.addEventListener("click", () => prepareProcurementSelection("rfq"));
+        $("prepareDirect")?.addEventListener("click", () => prepareProcurementSelection("direct"));
+      }
+
+      function prepareProcurementSelection(mode) {
+        const rows = (state.procurement?.rows || []).filter(row => state.procurementSelected.has(procurementRowKey(row)));
+        if (!rows.length) { window.alert("请先选择至少一条待采购需求。"); return; }
+        state.procurementPreparation = {mode, rows, itemCount:new Set(rows.map(row => row.item_code)).size};
+        renderPendingProcurement();
       }
 
       function renderInbox() {
@@ -546,7 +674,11 @@
       $("contextToggle").onclick = () => $("contextPanel").classList.toggle("open");
       $("operationsToggle").onclick = () => $("operationsPanel").classList.toggle("open");
       document.querySelectorAll("[data-example]").forEach(button => button.onclick = () => { $("input").value = button.dataset.example; $("input").focus(); });
-      document.querySelectorAll(".operations-tab").forEach(button => button.onclick = () => { state.panel = button.dataset.panel; renderOperations(); });
+      document.querySelectorAll(".operations-tab").forEach(button => button.onclick = () => {
+        state.panel = button.dataset.panel;
+        if (state.panel === "pending" && !state.procurement) loadPendingProcurement();
+        else renderOperations();
+      });
       $("input").addEventListener("keydown", event => {
         if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
           event.preventDefault();

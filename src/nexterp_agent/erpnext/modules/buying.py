@@ -7,6 +7,13 @@ from ..schemas import ToolResult
 from .common import *
 
 class BuyingToolsMixin:
+    def _buying_get_pending_procurement_items(self, args: dict[str, Any]) -> ToolResult:
+        return self.client.get_pending_procurement_items(
+            project=args.get("project"),
+            warehouses=args.get("warehouses"),
+            limit=args.get("limit", 500),
+        )
+
     def _buying_search_suppliers(self, args: dict[str, Any]) -> ToolResult:
         filters: dict[str, Any] = {}
         if args.get("supplier_group"):

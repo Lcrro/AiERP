@@ -34,6 +34,7 @@ def infer_risk_level(tool: str) -> str:
     }:
         return "L0"
     if tool in {
+        "erpnext.buying.get_pending_procurement_items",
         "erpnext.buying.search_suppliers",
         "erpnext.buying.search_supplier_scorecards",
         "erpnext.buying.search_item_suppliers",

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+from datetime import date, timedelta
 from pathlib import Path
 import sys
 from types import SimpleNamespace
@@ -219,6 +220,94 @@ def test_document_includes_workflow_history_and_business_comments() -> None:
 
     assert result["process"]["history"][0]["completed_by"] == "manager@example.com"
     assert "请补充规格" in result["process"]["comments"][0]["content"]
+
+
+def test_pending_procurement_enriches_remaining_demand_inventory_and_supplier() -> None:
+    tomorrow = (date.today() + timedelta(days=1)).isoformat()
+
+    class FakeClient:
+        def get_pending_procurement_items(self, *, project, warehouses, limit):
+            assert project == "PROJ-0010"
+            assert warehouses == ["合流1.3标仓库 - SD", "中心仓 - SD"]
+            assert limit == 500
+            return SimpleNamespace(ok=True, data={
+                "rows": [{
+                    "material_request": "MAT-MR-TEST-1",
+                    "material_request_item": "MRI-1",
+                    "item_code": "MAT-CEM-000008",
+                    "item_name": "水泥 42.5 袋装 50kg",
+                    "qty": 20,
+                    "ordered_qty": 5,
+                    "remaining_qty": 15,
+                    "uom": "包",
+                    "schedule_date": tomorrow,
+                    "warehouse": "合流1.3标仓库 - SD",
+                    "project": "PROJ-0010",
+                    "rate": 28,
+                }],
+                "inventory": [{
+                    "item_code": "MAT-CEM-000008",
+                    "warehouse": "中心仓 - SD",
+                    "actual_qty": 8,
+                    "reserved_qty": 2,
+                }],
+                "summary": {"row_count": 1, "remaining_qty": 15},
+            }, user_message=None, error=None)
+
+    service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
+    service.client = lambda _user: FakeClient()
+    service.erpnext_project_name = lambda _client, _project: "PROJ-0010"
+    service.procurement_inventory_warehouses = lambda _project, include_all=False: [
+        "合流1.3标仓库 - SD", "中心仓 - SD"
+    ]
+
+    result = service.pending_procurement("buyer@example.com", "PRJ-HL-13")
+
+    row = result["rows"][0]
+    assert row["remaining_qty"] == 15
+    assert row["urgency"] == "urgent"
+    assert row["total_available_qty"] == 6
+    assert row["inventory_coverage"] == "shortage"
+    assert row["estimated_amount"] == 420
+    assert {stock["warehouse"] for stock in row["inventory"]} == {
+        "合流1.3标仓库 - SD", "中心仓 - SD"
+    }
+    assert row["supplier_suggestions"][0]["supplier_name"] == "测试综合供应商"
+    assert result["aggregate"][0]["total_remaining_qty"] == 15
+    assert result["summary"]["shortage_rows"] == 1
+
+
+def test_pending_procurement_all_scope_keeps_cross_project_sources() -> None:
+    calls = []
+
+    class FakeClient:
+        def get_pending_procurement_items(self, *, project, warehouses, limit):
+            calls.append((project, warehouses, limit))
+            rows = []
+            for index, project_name in enumerate(("PROJ-0010", "PROJ-0020"), start=1):
+                rows.append({
+                    "material_request": f"MR-{index}",
+                    "material_request_item": f"MRI-{index}",
+                    "item_code": "MAT-CEM-000008",
+                    "qty": 5,
+                    "ordered_qty": 0,
+                    "remaining_qty": 5,
+                    "uom": "包",
+                    "project": project_name,
+                    "schedule_date": "2099-01-01",
+                })
+            return SimpleNamespace(ok=True, data={"rows": rows, "inventory": [], "summary": {}}, user_message=None, error=None)
+
+    service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
+    service.client = lambda _user: FakeClient()
+    service.procurement_inventory_warehouses = lambda _project, include_all=False: ["中心仓 - SD"]
+
+    result = service.pending_procurement("buyer@example.com", "PRJ-HL-13", scope="all")
+
+    assert calls == [(None, ["中心仓 - SD"], 500)]
+    assert len(result["rows"]) == 2
+    assert result["aggregate"][0]["total_remaining_qty"] == 10
+    assert result["aggregate"][0]["projects"] == ["PROJ-0010", "PROJ-0020"]
 
 
 def test_reset_documents_cancels_submitted_documents_before_deleting() -> None:

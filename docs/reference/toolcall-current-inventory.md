@@ -6,9 +6,9 @@
 
 ## 总览
 
-- 生成时间：2026-06-12 10:28:50
-- Tool schema 数：150
-- Adapter handler 数：150
+- 生成时间：2026-07-15
+- Tool schema 数：151
+- Adapter handler 数：151
 - schema 有但 handler 缺失：[]
 - handler 有但 schema 缺失：[]
 
@@ -20,7 +20,7 @@
 | 用户与权限 | 18 |
 | 资产 | 13 |
 | 库存 | 38 |
-| 采购 | 22 |
+| 采购 | 23 |
 | 财务 | 25 |
 | 项目 | 4 |
 
@@ -28,7 +28,7 @@
 
 | 风险等级 | 数量 | 含义 |
 | --- | ---: | --- |
-| `L0` | 71 | 只读查询，不改变 ERPNext 数据。 |
+| `L0` | 72 | 只读查询，不改变 ERPNext 数据。 |
 | `L1` | 12 | 解析、预览、建议、上下文准备，不直接写业务单据。 |
 | `L2` | 5 | 低风险协作写入，例如评论、ToDo、附件、差异记录。 |
 | `L3` | 43 | 创建或更新草稿、主数据草稿、库存/采购/财务草稿。 |
@@ -181,6 +181,7 @@
 | `erpnext.buying.generate_purchase_suggestions` | `L0` | - | 通过 agent_bridge 业务逻辑生成低库存采购建议。 |
 | `erpnext.buying.search_item_suppliers` | `L0` | - | 按父级物料或供应商搜索 Item Supplier 物料供应商记录。 |
 | `erpnext.buying.search_item_prices` | `L0` | - | 按物料、价格清单、供应商、币种和有效期搜索采购 Item Price。 |
+| `erpnext.buying.get_pending_procurement_items` | `L0` | - | 按当前 ERPNext 用户权限汇总已提交材料申请中尚未订购的需求行，并批量返回相关仓库库存。 |
 | `erpnext.buying.get_buying_settings` | `L0` | - | 读取 Buying Settings 采购设置单例。 |
 | `erpnext.buying.run_purchase_analysis` | `L0` | - | 通过规范化报表工具运行标准采购分析报表。 |
 | `erpnext.buying.compare_supplier_quotations` | `L1` | `supplier_quotations` | 预览比较供应商报价总额和物料单价，不定标、不创建采购订单。 |

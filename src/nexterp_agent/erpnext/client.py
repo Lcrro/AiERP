@@ -331,6 +331,18 @@ class ERPNextClient:
             },
         )
 
+    def get_pending_procurement_items(
+        self,
+        *,
+        project: str | None = None,
+        warehouses: list[str] | None = None,
+        limit: int = 500,
+    ) -> ToolResult:
+        return self.call_method(
+            "agent_bridge.api.get_pending_procurement_items",
+            {"project": project, "warehouses": warehouses or [], "limit": limit},
+        )
+
     def create_todo(
         self,
         description: str,

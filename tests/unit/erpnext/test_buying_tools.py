@@ -265,6 +265,9 @@ class BuyingFakeClient:
         self.calls.append(("call_method", method, args, http_method))
         return ToolResult(ok=True, data={"count": 2, "groups": {"Purchase": [{"item_code": "ITEM-001"}]}})
 
+    def get_pending_procurement_items(self, **kwargs) -> ToolResult:
+        return self.call_method("agent_bridge.api.get_pending_procurement_items", kwargs)
+
     def run_report(self, report_name, **kwargs) -> ToolResult:
         self.calls.append(("run_report", report_name, kwargs))
         return ToolResult(ok=True, data={"columns": [], "rows": [{"supplier": "SUP-001"}], "raw": {}})
@@ -272,6 +275,33 @@ class BuyingFakeClient:
     def submit_document(self, doctype, name) -> ToolResult:
         self.calls.append(("submit_document", doctype, name))
         return ToolResult(ok=True, data={"doctype": doctype, "name": name, "docstatus": 1})
+
+
+def test_pending_procurement_items_dispatches_one_permission_scoped_business_query() -> None:
+    client = BuyingFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    result = adapter.execute({
+        "tool": "erpnext.buying.get_pending_procurement_items",
+        "arguments": {
+            "project": "PROJ-0010",
+            "warehouses": ["合流1.3标仓库 - SD", "蕰川路基地仓库 - SD"],
+            "limit": 300,
+        },
+    })
+
+    assert result.ok
+    assert client.calls == [(
+        "call_method",
+        "agent_bridge.api.get_pending_procurement_items",
+        {
+            "project": "PROJ-0010",
+            "warehouses": ["合流1.3标仓库 - SD", "蕰川路基地仓库 - SD"],
+            "limit": 300,
+        },
+        "POST",
+    )]
+    assert ToolCall.from_dict({"tool": "erpnext.buying.get_pending_procurement_items"}).risk_level == "L0"
 
 
 def test_purchase_order_draft_returns_v02_result_shape_and_resolves_items() -> None:

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 from concurrent.futures import ThreadPoolExecutor
+from datetime import date
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
@@ -347,6 +348,25 @@ def document_matches_project(document: dict[str, Any], erpnext_project: str) -> 
     return not document.get("items") and not document.get("project")
 
 
+def _number(value: Any) -> float:
+    try:
+        return float(value or 0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _procurement_urgency(days_remaining: int | None) -> dict[str, str]:
+    if days_remaining is None:
+        return {"code": "unknown", "label": "日期待确认"}
+    if days_remaining < 0:
+        return {"code": "overdue", "label": "已逾期"}
+    if days_remaining <= 2:
+        return {"code": "urgent", "label": "紧急"}
+    if days_remaining <= 7:
+        return {"code": "soon", "label": "近期"}
+    return {"code": "normal", "label": "正常"}
+
+
 class AgentWorkbenchService:
     def __init__(self, profile: str = "civil") -> None:
         self.profile = profile
@@ -509,6 +529,168 @@ class AgentWorkbenchService:
             "items": items,
             "count": len(items),
         }
+
+    def pending_procurement(
+        self,
+        user: str,
+        project: str = "",
+        *,
+        scope: str = "project",
+        limit: int = 500,
+    ) -> dict[str, Any]:
+        if not user:
+            raise ValueError("user 必填")
+        if scope not in {"project", "all"}:
+            raise ValueError("scope 只能是 project 或 all")
+        release = MasterDataRelease()
+        client = self.client(user)
+        erpnext_project = self.erpnext_project_name(client, project) if project and scope == "project" else ""
+        warehouse_names = self.procurement_inventory_warehouses(project, include_all=scope == "all")
+        result = client.get_pending_procurement_items(
+            project=erpnext_project or None,
+            warehouses=warehouse_names,
+            limit=max(1, min(limit, 1000)),
+        )
+        if not result.ok or not isinstance(result.data, dict):
+            raise ValueError(result.user_message or result.error or "无法读取待采购需求")
+
+        materials = {row["item_code"]: row for row in release.materials if row.get("item_code")}
+        suppliers = {row["supplier_code"]: row for row in release.table("suppliers.tsv")}
+        policies_by_item: dict[str, list[dict[str, str]]] = {}
+        for policy in release.table("supplier_item_policies.tsv"):
+            policies_by_item.setdefault(policy.get("item_code", ""), []).append(policy)
+        inventory_by_item: dict[str, list[dict[str, Any]]] = {}
+        for source in result.data.get("inventory") or []:
+            stock = dict(source)
+            stock["available_qty"] = _number(stock.get("actual_qty")) - _number(stock.get("reserved_qty"))
+            inventory_by_item.setdefault(str(stock.get("item_code") or ""), []).append(stock)
+
+        today_value = date.today()
+        rows = []
+        for source in result.data.get("rows") or []:
+            row = dict(source)
+            item_code = str(row.get("item_code") or "")
+            material = materials.get(item_code) or {}
+            inventory = inventory_by_item.get(item_code, [])
+            for warehouse in warehouse_names:
+                if not any(str(stock.get("warehouse") or "") == warehouse for stock in inventory):
+                    inventory.append({
+                        "item_code": item_code,
+                        "warehouse": warehouse,
+                        "actual_qty": 0.0,
+                        "reserved_qty": 0.0,
+                        "available_qty": 0.0,
+                        "projected_qty": 0.0,
+                    })
+            inventory.sort(key=lambda stock: (-_number(stock.get("available_qty")), str(stock.get("warehouse") or "")))
+            schedule_date = str(row.get("schedule_date") or "")[:10]
+            days_remaining = None
+            try:
+                days_remaining = (date.fromisoformat(schedule_date) - today_value).days
+            except ValueError:
+                pass
+            urgency = _procurement_urgency(days_remaining)
+            policies = sorted(
+                policies_by_item.get(item_code, []),
+                key=lambda policy: int(policy.get("preferred_rank") or 999),
+            )
+            supplier_suggestions = [
+                {
+                    "supplier_code": policy.get("supplier_code"),
+                    "supplier_name": (suppliers.get(policy.get("supplier_code", "")) or {}).get("supplier_name") or policy.get("supplier_code"),
+                    "preferred_rank": policy.get("preferred_rank"),
+                    "lead_time_days": policy.get("lead_time_days"),
+                    "default_rate": policy.get("default_rate"),
+                }
+                for policy in policies[:3]
+            ]
+            remaining_qty = _number(row.get("remaining_qty"))
+            total_available = sum(max(0.0, _number(stock.get("available_qty"))) for stock in inventory)
+            row.update({
+                "sku_name": material.get("sku_name") or row.get("item_name") or item_code,
+                "required_specs": material.get("required_specs") or "",
+                "top_group": material.get("top_group") or "未分类",
+                "material_family": material.get("material_family") or "未分类",
+                "purchase_uom": material.get("purchase_uom") or row.get("uom"),
+                "urgency": urgency["code"],
+                "urgency_label": urgency["label"],
+                "days_remaining": days_remaining,
+                "inventory": inventory,
+                "total_available_qty": total_available,
+                "inventory_coverage": "enough" if total_available >= remaining_qty else "shortage",
+                "supplier_suggestions": supplier_suggestions,
+                "estimated_amount": remaining_qty * _number(row.get("rate")),
+            })
+            rows.append(row)
+
+        aggregate: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            item_code = row["item_code"]
+            group = aggregate.setdefault(item_code, {
+                "item_code": item_code,
+                "sku_name": row["sku_name"],
+                "uom": row.get("uom"),
+                "material_family": row["material_family"],
+                "total_remaining_qty": 0.0,
+                "request_count": 0,
+                "projects": set(),
+                "earliest_schedule_date": row.get("schedule_date"),
+                "supplier_suggestions": row["supplier_suggestions"],
+            })
+            group["total_remaining_qty"] += _number(row.get("remaining_qty"))
+            group["request_count"] += 1
+            if row.get("project"):
+                group["projects"].add(row["project"])
+            if row.get("schedule_date") and (not group["earliest_schedule_date"] or row["schedule_date"] < group["earliest_schedule_date"]):
+                group["earliest_schedule_date"] = row["schedule_date"]
+        aggregate_rows = []
+        for group in aggregate.values():
+            group["projects"] = sorted(group["projects"])
+            aggregate_rows.append(group)
+        aggregate_rows.sort(key=lambda row: (str(row.get("earliest_schedule_date") or "9999-12-31"), row["sku_name"]))
+        rows.sort(key=lambda row: (str(row.get("schedule_date") or "9999-12-31"), row["sku_name"]))
+
+        return {
+            "scope": scope,
+            "project": project,
+            "erpnext_project": erpnext_project,
+            "warehouses": warehouse_names,
+            "rows": rows,
+            "aggregate": aggregate_rows,
+            "summary": {
+                **dict(result.data.get("summary") or {}),
+                "shortage_rows": sum(1 for row in rows if row["inventory_coverage"] == "shortage"),
+                "urgent_rows": sum(1 for row in rows if row["urgency"] in {"overdue", "urgent"}),
+                "estimated_amount": sum(_number(row.get("estimated_amount")) for row in rows),
+            },
+            "filters": {
+                "families": sorted({row["material_family"] for row in rows}),
+                "suppliers": sorted({
+                    supplier["supplier_name"]
+                    for row in rows
+                    for supplier in row["supplier_suggestions"]
+                    if supplier.get("supplier_name")
+                }),
+            },
+            "inventory_error": result.data.get("inventory_error"),
+        }
+
+    def procurement_inventory_warehouses(self, project: str, *, include_all: bool = False) -> list[str]:
+        release = MasterDataRelease()
+        codes = ["WH-CENTER", "WH-WCL-BASE"]
+        if include_all:
+            codes.extend(code for code, row in release.warehouses.items() if row.get("is_group") != "1")
+        else:
+            project_row = release.projects.get(project) or {}
+            if project_row.get("default_warehouse_code"):
+                codes.insert(0, project_row["default_warehouse_code"])
+        names = []
+        for code in codes:
+            row = release.warehouses.get(code) or {}
+            name = row.get("erpnext_warehouse_name")
+            if name and name not in names:
+                names.append(name)
+        return names
 
     def documents(
         self,
@@ -898,6 +1080,16 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
                 (query.get("user") or [""])[0],
                 (query.get("project") or [""])[0],
                 limit=int((query.get("limit") or [30])[0]),
+            )
+            json_response(self, {"ok": True, **payload})
+            return
+        if parsed.path == "/api/procurement/pending":
+            query = parse_qs(parsed.query)
+            payload = self.server.service.pending_procurement(  # type: ignore[attr-defined]
+                (query.get("user") or [""])[0],
+                (query.get("project") or [""])[0],
+                scope=(query.get("scope") or ["project"])[0],
+                limit=int((query.get("limit") or [500])[0]),
             )
             json_response(self, {"ok": True, **payload})
             return

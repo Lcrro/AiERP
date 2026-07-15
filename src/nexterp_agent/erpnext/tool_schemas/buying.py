@@ -12,6 +12,18 @@ from .common import (
 
 BUYING_TOOL_SCHEMAS = [
     {
+        "name": "erpnext.buying.get_pending_procurement_items",
+        "description": "Read submitted Purchase Material Request rows with remaining un-ordered quantity and related warehouse inventory. Respects the current ERPNext user's permissions.",
+        "parameters": _object_schema(
+            [],
+            {
+                "project": {"type": "string", "description": "Resolved ERPNext Project name; omit for every project visible to the current user."},
+                "warehouses": {"type": "array", "items": {"type": "string"}, "description": "Resolved ERPNext Warehouse names used for the batch inventory view."},
+                "limit": {"type": "integer", "minimum": 1, "maximum": 1000},
+            },
+        ),
+    },
+    {
         "name": "erpnext.buying.search_suppliers",
         "description": "Search Supplier records by supplier name/group/type with safe fields for buying workflows.",
         "parameters": _object_schema(

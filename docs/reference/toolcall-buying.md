@@ -41,6 +41,7 @@ Purchase Invoice, Payment Entry, and GL-impacting submission are Accounting-owne
 | `erpnext.buying.get_purchase_receipt_return_context` | L1 | Module preview shape | Reads a submitted PR and prepares returnable rows, quantities, reasons, and validation issues. |
 | `erpnext.buying.create_purchase_receipt_return_draft` | L3 | Module draft shape | Creates an `is_return=1` PR return draft with `return_against` and negative item quantities; no stock posting submit. |
 | `erpnext.buying.generate_purchase_suggestions` | L0 | Module action shape | Uses `agent_bridge.api.generate_purchase_suggestions`. |
+| `erpnext.buying.get_pending_procurement_items` | L0 | Pending procurement shape | Reads submitted purchase-type Material Request rows visible to the current ERPNext user, excludes fully ordered rows, calculates remaining quantity, and batch-reads related warehouse inventory. |
 | `erpnext.buying.search_item_suppliers` | L0 | Raw read list | Item Supplier lookup. |
 | `erpnext.buying.search_item_prices` | L0 | Raw read list | Defaults to buying Item Price rows. |
 | `erpnext.buying.get_buying_settings` | L0 | Raw singleton | Reads Buying Settings. |

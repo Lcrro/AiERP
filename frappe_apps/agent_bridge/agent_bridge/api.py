@@ -6,7 +6,7 @@ from pathlib import Path
 
 import frappe
 import frappe.permissions
-from frappe.utils import cint, today
+from frappe.utils import cint, flt, today
 
 
 PERMISSION_ACTIONS = (
@@ -1576,6 +1576,98 @@ def get_document_with_workflow_actions(doctype: str, name: str) -> dict:
         "actions": actions,
         "workflow_history": [dict(row) for row in workflow_history],
         "workflow_comments": [dict(row) for row in workflow_comments],
+    }
+
+
+@frappe.whitelist()
+def get_pending_procurement_items(
+    project: str | None = None,
+    warehouses: list[str] | str | None = None,
+    limit: int = 500,
+) -> dict:
+    """Return permission-scoped submitted Material Request rows still requiring purchase."""
+
+    limit = max(1, min(cint(limit), 1000))
+    if isinstance(warehouses, str):
+        warehouses = frappe.parse_json(warehouses)
+    warehouse_names = [str(value) for value in (warehouses or []) if value]
+    parents = frappe.get_list(
+        "Material Request",
+        filters={"docstatus": 1, "material_request_type": "Purchase"},
+        fields=[
+            "name", "title", "transaction_date", "schedule_date", "status",
+            "workflow_state", "owner", "modified",
+        ],
+        order_by="schedule_date asc, modified desc",
+        limit_page_length=limit,
+    )
+    rows = []
+    for parent in parents:
+        if str(parent.get("status") or "") in {"Stopped", "Cancelled"}:
+            continue
+        doc = frappe.get_doc("Material Request", parent["name"])
+        doc.check_permission("read")
+        for item in doc.items:
+            remaining_qty = max(flt(item.qty) - flt(item.ordered_qty), 0.0)
+            if remaining_qty <= 0:
+                continue
+            if project and str(item.project or "") != project:
+                continue
+            rows.append({
+                "material_request": doc.name,
+                "material_request_item": item.name,
+                "title": doc.title,
+                "transaction_date": doc.transaction_date,
+                "schedule_date": item.schedule_date or doc.schedule_date,
+                "status": doc.status,
+                "workflow_state": doc.workflow_state,
+                "owner": doc.owner,
+                "modified": doc.modified,
+                "item_code": item.item_code,
+                "item_name": item.item_name,
+                "description": item.description,
+                "qty": flt(item.qty),
+                "ordered_qty": flt(item.ordered_qty),
+                "remaining_qty": remaining_qty,
+                "uom": item.uom or item.stock_uom,
+                "warehouse": item.warehouse,
+                "project": item.project,
+                "rate": flt(item.rate),
+                "amount": flt(item.amount),
+            })
+
+    item_codes = sorted({str(row["item_code"]) for row in rows if row.get("item_code")})
+    inventory = []
+    inventory_error = None
+    if item_codes:
+        filters = [["item_code", "in", item_codes]]
+        if warehouse_names:
+            filters.append(["warehouse", "in", warehouse_names])
+        try:
+            inventory = frappe.get_list(
+                "Bin",
+                filters=filters,
+                fields=[
+                    "item_code", "warehouse", "actual_qty", "reserved_qty",
+                    "projected_qty", "ordered_qty", "valuation_rate", "stock_value",
+                ],
+                order_by="actual_qty desc",
+                limit_page_length=max(100, len(item_codes) * max(5, len(warehouse_names))),
+            )
+        except frappe.PermissionError:
+            inventory_error = "当前账号没有读取仓库库存的权限。"
+
+    return {
+        "status": "completed",
+        "rows": [dict(row) for row in rows],
+        "inventory": [dict(row) for row in inventory],
+        "inventory_error": inventory_error,
+        "summary": {
+            "request_count": len({row["material_request"] for row in rows}),
+            "row_count": len(rows),
+            "item_count": len(item_codes),
+            "remaining_qty": sum(flt(row["remaining_qty"]) for row in rows),
+        },
     }
 
 
