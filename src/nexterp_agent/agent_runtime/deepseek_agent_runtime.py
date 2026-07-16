@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from datetime import date
+from datetime import date, datetime
 from copy import deepcopy
 import json
 import re
@@ -78,7 +78,7 @@ def validate_agent_action(payload: dict[str, Any]) -> dict[str, Any]:
     if action not in AGENT_ACTIONS:
         raise ValueError(f"Unsupported DeepSeek action: {action}")
     if not isinstance(payload.get("summary"), str) or not payload["summary"].strip():
-        raise ValueError("DeepSeek action summary is required")
+        payload["summary"] = f"DeepSeek请求执行{action}"
     if not isinstance(payload.get("arguments") or {}, dict):
         raise ValueError("DeepSeek action arguments must be an object")
     arguments = payload.get("arguments") or {}
@@ -189,6 +189,9 @@ class DeepSeekAgentRuntime:
                 return self._save(session, user_text, DeepSeekTurnResult("failed", "没有等待确认的ToolCall。"), request_id)
             call = pending["tool_call"]
             confirmed_call = deepcopy(call)
+            contract = next((item for item in self.discovery.contracts if item.name == call.get("tool")), None)
+            if contract and contract.confirm != "none":
+                _attach_runtime_confirmation(call, user=user, reason=str(pending.get("user_text") or user_text))
             execution = self._execute(call, user=user, profile=profile)
             payload = execution.to_dict()
             tool_results.append(payload)
@@ -255,6 +258,17 @@ class DeepSeekAgentRuntime:
                     if entity_id and entity_id not in resolved_values:
                         session.selected_entities.pop(entity_id, None)
                 session.selected_entities.update(resolved_values)
+                recommended_tools = _document_next_action_tools(observation)
+                if recommended_tools:
+                    contracts = self.discovery.full_contracts(recommended_tools, policy=policy)
+                    contract_observation = {"type": "get_tool_contracts", "contracts": contracts}
+                    steps.append(_step(
+                        "自动读取状态契约",
+                        "get_tool_contracts",
+                        {"tool_names": recommended_tools},
+                        contract_observation,
+                    ))
+                    observations.append(contract_observation)
                 continue
             if kind == "ask_user":
                 questions = tuple(str(value) for value in arguments.get("questions") or [] if str(value).strip())
@@ -268,13 +282,29 @@ class DeepSeekAgentRuntime:
             if kind == "execute_tool":
                 call = deepcopy(arguments.get("tool_call") or arguments)
                 contract = next((item for item in self.discovery.contracts if item.name == call.get("tool")), None) if isinstance(call, dict) else None
+                if (
+                    contract
+                    and contract.expose is ToolExposure.AGENT_VISIBLE
+                    and policy.decide(contract.name, origin="agent").allowed
+                    and contract.name not in _loaded_contract_names(observations)
+                ):
+                    observation = {"type": "get_tool_contracts", "contracts": [_full_contract(contract)]}
+                    steps.append(_step(
+                        "自动读取契约",
+                        "get_tool_contracts",
+                        {"tool_names": [contract.name]},
+                        observation,
+                    ))
+                    observations.append(observation)
+                    continue
                 corrections: list[dict[str, Any]] = []
                 if contract:
                     corrections = _inject_resolved_arguments(call["arguments"], contract, session, observations)
+                    corrections.extend(_inject_source_document_references(call, session, observations))
                     corrections.extend(_inject_material_request_reference_prices(call, self.materials_by_code))
                     if corrections:
                         steps.append(_step("参数编排", "inject_context", {}, {"corrections": corrections}))
-                if confirmed_call == call and tool_results and tool_results[-1].get("ok"):
+                if _same_business_call(confirmed_call, call) and tool_results and tool_results[-1].get("ok"):
                     steps.append(_step("跳过重复动作", kind, call, {"reason": "confirmed_tool_call_already_succeeded"}))
                     result = DeepSeekTurnResult(
                         "completed",
@@ -284,7 +314,13 @@ class DeepSeekAgentRuntime:
                         tool_results=tuple(tool_results),
                     )
                     return self._save(session, user_text, result, request_id)
-                validation_error = self._validate_proposed_call(call, policy=policy, session=session, observations=observations)
+                validation_error = self._validate_proposed_call(
+                    call,
+                    user=user,
+                    policy=policy,
+                    session=session,
+                    observations=observations,
+                )
                 if validation_error:
                     observations.append({"type": "tool_validation_error", "error": validation_error, "tool_call": call})
                     if sum(1 for item in observations if item.get("type") == "tool_validation_error") > MAX_TOOL_REPAIRS:
@@ -319,6 +355,21 @@ class DeepSeekAgentRuntime:
                 result = DeepSeekTurnResult("completed", message, tuple(steps), tool_result=tool_results[-1] if tool_results else None, tool_results=tuple(tool_results))
                 return self._save(session, user_text, result, request_id)
 
+        if confirmed_call is not None and tool_results and tool_results[-1].get("ok"):
+            steps.append(_step(
+                "生成回复降级",
+                "finish_fallback",
+                {"reason": "planner_step_limit_after_success"},
+                {"source": "successful_tool_result"},
+            ))
+            result = DeepSeekTurnResult(
+                "completed",
+                _successful_execution_message(tool_results[-1]),
+                tuple(steps),
+                tool_result=tool_results[-1],
+                tool_results=tuple(tool_results),
+            )
+            return self._save(session, user_text, result, request_id)
         result = DeepSeekTurnResult("failed", f"Agent达到{self.max_steps}步规划上限，已停止执行。", tuple(steps), tool_results=tuple(tool_results))
         return self._save(session, user_text, result, request_id)
 
@@ -330,6 +381,14 @@ class DeepSeekAgentRuntime:
             "你不能猜测ERPNext主键；物料、项目、仓库、供应商、公司、员工和单据号必须先resolve_entities，"
             "或来自runtime_context中已经确认的数据。先discover_tools，再get_tool_contracts，拿到契约后才能execute_tool。"
             "只读工具可直接执行；写工具会由Runtime暂停并要求用户确认。候选不唯一时ask_user。"
+            "用户明确要求写操作时，不要再用ask_user口头确认，也不要自行填写confirmation；直接生成业务ToolCall，"
+            "Runtime会展示业务摘要并在用户点击确认执行时生成审计确认元数据，确保员工只确认一次。"
+            "单据启用ERPNext Workflow时，禁止使用任何submit_document工具；必须先执行erpnext.get_workflow_actions，"
+            "再使用erpnext.apply_workflow执行当前账号真实可用的动作。反之，实时单据快照没有workflow_state且docstatus=0时，"
+            "说明该单据未启用工作流：禁止调用get_workflow_actions或apply_workflow，必须发现并使用所属模块的submit_document工具。"
+            "会话中的历史单号只能作为候选线索；对‘刚才的单据’或任何后续单据操作，必须重新resolve_entities(kind=document)"
+            "读取ERPNext实时快照后再规划，禁止沿用旧对话中的状态。用户已经明确说出询价、下单、收货或退货时，"
+            "不得再反问要做哪一种操作；应先发现并读取对应工具契约，只追问契约真正缺少的业务信息。"
             "物料解析结果会自动附带候选SKU在各仓库的实时库存；必须结合候选匹配度和库存分布比较推荐，"
             "当物料resolution.selection_required为true，或存在多个用途/规格/单位不同的相关SKU时，必须ask_user，"
             "并在message或questions中列出最多5个相关候选的SKU名称、编码、关键规格、单位和各仓可用库存；"
@@ -411,7 +470,22 @@ class DeepSeekAgentRuntime:
                     resolution = {"status": "needs_clarification", "question": "请同时说明单据类型和单号。"}
                 else:
                     lookup = self.client_factory(user).get_document(doctype, name)
-                    resolution = {"status": "resolved", "value": name, "label": name, "confidence": 1.0, "reason": "ERPNext单据精确核对"} if lookup.ok else {"status": "not_found", "question": f"没有找到或无权访问{doctype} {name}。", "reason": lookup.user_message or lookup.error}
+                    resolution = (
+                        {
+                            "status": "resolved",
+                            "value": name,
+                            "label": name,
+                            "confidence": 1.0,
+                            "reason": "ERPNext单据精确核对并读取实时状态",
+                            "row": _compact_document_snapshot(lookup.data),
+                        }
+                        if lookup.ok and isinstance(lookup.data, dict)
+                        else {
+                            "status": "not_found",
+                            "question": f"没有找到或无权访问{doctype} {name}。",
+                            "reason": lookup.user_message or lookup.error,
+                        }
+                    )
                 results.append({"id": entity_id, "kind": kind, "query": query, "resolution": resolution})
                 continue
             try:
@@ -460,7 +534,15 @@ class DeepSeekAgentRuntime:
                     related.append(name)
         return related
 
-    def _validate_proposed_call(self, call: Any, *, policy, session: RuntimeSessionState, observations: list[dict[str, Any]]) -> str | None:
+    def _validate_proposed_call(
+        self,
+        call: Any,
+        *,
+        user: str,
+        policy,
+        session: RuntimeSessionState,
+        observations: list[dict[str, Any]],
+    ) -> str | None:
         if not isinstance(call, dict) or not isinstance(call.get("tool"), str) or not isinstance(call.get("arguments") or {}, dict):
             return "ToolCall必须包含tool和arguments。"
         names = {contract.name: contract for contract in self.discovery.contracts}
@@ -470,17 +552,26 @@ class DeepSeekAgentRuntime:
         decision = policy.decide(call["tool"], origin="agent")
         if not decision.allowed:
             return f"当前岗位不能使用工具：{call['tool']}。"
-        loaded_contracts = {
-            item.get("name")
-            for observation in observations if observation.get("type") == "get_tool_contracts"
-            for item in observation.get("contracts") or []
-        }
+        loaded_contracts = _loaded_contract_names(observations)
         if call["tool"] not in loaded_contracts:
             return f"执行前必须先读取工具契约：{call['tool']}。"
         schema = next(schema for schema in ERPNext_TOOL_SCHEMAS if schema["name"] == call["tool"])["parameters"]
-        schema_error = _validate_json_value(call["arguments"], schema, "arguments")
+        validation_arguments = deepcopy(call["arguments"])
+        if contract.confirm != "none" and "confirmation" in schema.get("properties", {}) and not validation_arguments.get("confirmation"):
+            validation_arguments["confirmation"] = _runtime_confirmation(user=user, reason="等待用户在Runtime确认")
+        schema_error = _validate_json_value(validation_arguments, schema, "arguments")
         if schema_error:
             return schema_error
+        if call["tool"].endswith(".submit_document") and self.client_factory is not None:
+            doctype = str(call["arguments"].get("doctype") or "")
+            name = str(call["arguments"].get("name") or "")
+            if doctype and name:
+                detail = self.client_factory(user).get_document(doctype, name)
+                if detail.ok and isinstance(detail.data, dict) and str(detail.data.get("workflow_state") or "").strip():
+                    return (
+                        f"{doctype} {name} 已启用ERPNext工作流，不能使用{call['tool']}。"
+                        "请先读取erpnext.get_workflow_actions，再通过erpnext.apply_workflow执行当前账号可用动作。"
+                    )
         allowed = _allowed_entity_values(session, observations)
         for key, value in _walk_arguments(call["arguments"]):
             kind = SENSITIVE_ENTITY_FIELDS.get(key)
@@ -548,6 +639,16 @@ def _full_contract(contract: ToolContract) -> dict[str, Any]:
     return {"name": contract.name, "purpose": contract.purpose, "risk_level": contract.risk_level, "confirm": contract.confirm, "business_contract": list(contract.business_contract), "parameters": [asdict(param) for param in contract.parameters]}
 
 
+def _loaded_contract_names(observations: list[dict[str, Any]]) -> set[str]:
+    return {
+        str(item.get("name"))
+        for observation in observations
+        if observation.get("type") == "get_tool_contracts"
+        for item in observation.get("contracts") or []
+        if item.get("name")
+    }
+
+
 def _tokens(value: str) -> list[str]:
     text = str(value).lower()
     tokens = re.findall(r"[a-z0-9_.]+", text)
@@ -571,7 +672,7 @@ def _successful_execution_message(payload: dict[str, Any]) -> str:
     data = payload.get("data") if isinstance(payload.get("data"), dict) else {}
     doctype = str(data.get("doctype") or "ERPNext单据")
     name = str(data.get("name") or "").strip()
-    status = str(data.get("status") or "").strip()
+    status = str(data.get("workflow_state") or data.get("status") or "").strip()
     target = f"{doctype} {name}".strip()
     return f"{target} 已执行成功" + (f"，当前状态：{status}。" if status else "。")
 
@@ -579,6 +680,34 @@ def _successful_execution_message(payload: dict[str, Any]) -> str:
 def _pending_confirmation_message(summary: str) -> str:
     action = str(summary or "执行这项操作").strip().rstrip("。")
     return f"我已准备好{action}，但尚未写入 ERPNext。请确认后再执行。"
+
+
+def _runtime_confirmation(*, user: str, reason: str) -> dict[str, Any]:
+    return {
+        "confirmed": True,
+        "confirmed_by": user,
+        "confirmed_at": datetime.now().astimezone().isoformat(),
+        "confirmation_text": "用户通过员工工作台明确确认执行",
+        "reason": reason.strip() or "执行已确认的业务操作",
+    }
+
+
+def _attach_runtime_confirmation(call: dict[str, Any], *, user: str, reason: str) -> None:
+    arguments = call.get("arguments")
+    if isinstance(arguments, dict):
+        arguments["confirmation"] = _runtime_confirmation(user=user, reason=reason)
+
+
+def _same_business_call(left: Any, right: Any) -> bool:
+    if not isinstance(left, dict) or not isinstance(right, dict):
+        return False
+    left_copy = deepcopy(left)
+    right_copy = deepcopy(right)
+    for value in (left_copy, right_copy):
+        arguments = value.get("arguments")
+        if isinstance(arguments, dict):
+            arguments.pop("confirmation", None)
+    return left_copy == right_copy
 
 
 def _require_selection_for_shared_item_name(
@@ -621,8 +750,65 @@ def _resolved_entity_values(observation: dict[str, Any]) -> dict[str, Any]:
         if resolution.get("status") in {"resolved", "ready"}:
             value = resolution.get("value") or (resolution.get("resolved") or {}).get("item_code")
             if value:
-                values[entity["id"]] = {"kind": entity["kind"], "value": value, "label": resolution.get("label")}
+                values[entity["id"]] = {
+                    "kind": entity["kind"],
+                    "value": value,
+                    "label": resolution.get("label"),
+                    "row": resolution.get("row") or resolution.get("resolved"),
+                }
     return values
+
+
+def _compact_document_snapshot(document: dict[str, Any]) -> dict[str, Any]:
+    fields = (
+        "doctype", "name", "title", "owner", "docstatus", "status", "workflow_state",
+        "company", "supplier", "material_request_type", "transaction_date", "schedule_date", "modified",
+    )
+    snapshot = {field: document.get(field) for field in fields if document.get(field) not in (None, "")}
+    if int(document.get("docstatus") or 0) == 0:
+        if str(document.get("workflow_state") or "").strip():
+            snapshot["allowed_next_actions"] = ["erpnext.get_workflow_actions", "erpnext.apply_workflow"]
+        else:
+            submit_tool = _submit_tool_for_doctype(str(document.get("doctype") or ""))
+            if submit_tool:
+                snapshot["allowed_next_actions"] = [submit_tool]
+    rows = document.get("items")
+    if isinstance(rows, list):
+        item_fields = (
+            "name", "item_code", "item_name", "qty", "uom", "stock_uom", "warehouse", "project",
+            "rate", "amount", "ordered_qty", "received_qty", "material_request", "purchase_order",
+        )
+        snapshot["items"] = [
+            {field: row.get(field) for field in item_fields if row.get(field) not in (None, "")}
+            for row in rows[:50]
+            if isinstance(row, dict)
+        ]
+    return snapshot
+
+
+def _submit_tool_for_doctype(doctype: str) -> str | None:
+    if doctype in {"Material Request", "Request for Quotation", "Supplier Quotation", "Purchase Order", "Purchase Receipt"}:
+        return "erpnext.buying.submit_document"
+    if doctype in {"Stock Entry", "Stock Reconciliation"}:
+        return "erpnext.stock.submit_document"
+    if doctype in {"Purchase Invoice", "Sales Invoice", "Journal Entry", "Payment Entry"}:
+        return "erpnext.accounting.submit_document"
+    if doctype == "Asset":
+        return "erpnext.assets.submit_document"
+    return None
+
+
+def _document_next_action_tools(observation: dict[str, Any]) -> list[str]:
+    names: list[str] = []
+    for entity in observation.get("entities") or []:
+        if not isinstance(entity, dict) or entity.get("kind") != "document":
+            continue
+        resolution = entity.get("resolution") or {}
+        row = resolution.get("row") or {}
+        for name in row.get("allowed_next_actions") or []:
+            if isinstance(name, str) and name and name not in names:
+                names.append(name)
+    return names[:5]
 
 
 def _allowed_entity_values(session: RuntimeSessionState, observations: list[dict[str, Any]]) -> dict[str, set[str]]:
@@ -638,10 +824,14 @@ def _allowed_entity_values(session: RuntimeSessionState, observations: list[dict
     for item in session.selected_entities.values():
         if isinstance(item, dict) and item.get("kind") in allowed and item.get("value"):
             allowed[item["kind"]].add(str(item["value"]))
+        if isinstance(item, dict) and item.get("kind") == "document":
+            _merge_document_snapshot_values(allowed, item.get("row"))
     for observation in observations:
         for item in _resolved_entity_values(observation).values():
             if item["kind"] in allowed:
                 allowed[item["kind"]].add(str(item["value"]))
+            if item.get("kind") == "document":
+                _merge_document_snapshot_values(allowed, item.get("row"))
     return allowed
 
 
@@ -654,10 +844,30 @@ def _resolved_values_by_kind(session: RuntimeSessionState, observations: list[di
     for item in session.selected_entities.values():
         if isinstance(item, dict) and item.get("kind") and item.get("value"):
             values.setdefault(str(item["kind"]), set()).add(str(item["value"]))
+        if isinstance(item, dict) and item.get("kind") == "document":
+            _merge_document_snapshot_values(values, item.get("row"))
     for observation in observations:
         for item in _resolved_entity_values(observation).values():
             values.setdefault(str(item["kind"]), set()).add(str(item["value"]))
+            if item.get("kind") == "document":
+                _merge_document_snapshot_values(values, item.get("row"))
     return values
+
+
+def _merge_document_snapshot_values(target: dict[str, set[str]], snapshot: Any) -> None:
+    if not isinstance(snapshot, dict):
+        return
+    for field, kind in (("company", "company"), ("supplier", "supplier")):
+        value = snapshot.get(field)
+        if value:
+            target.setdefault(kind, set()).add(str(value))
+    for row in snapshot.get("items") or []:
+        if not isinstance(row, dict):
+            continue
+        for field, kind in (("item_code", "item"), ("project", "project"), ("warehouse", "warehouse")):
+            value = row.get(field)
+            if value:
+                target.setdefault(kind, set()).add(str(value))
 
 
 def _inject_resolved_arguments(arguments: dict[str, Any], contract: ToolContract, session: RuntimeSessionState, observations: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -682,6 +892,74 @@ def _inject_resolved_arguments(arguments: dict[str, Any], contract: ToolContract
         elif "." not in parameter.name and arguments.get(parameter.name) in (None, ""):
             arguments[parameter.name] = resolved
             corrections.append({"field": parameter.name, "value": resolved, "source": parameter.resolver})
+    return corrections
+
+
+def _inject_source_document_references(
+    call: dict[str, Any],
+    session: RuntimeSessionState,
+    observations: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    source_config = {
+        "erpnext.buying.create_request_for_quotation_draft": (
+            "Material Request",
+            "material_request",
+            "material_request_item",
+        ),
+        "erpnext.buying.create_supplier_quotation_draft": (
+            "Request for Quotation",
+            "request_for_quotation",
+            "request_for_quotation_item",
+        ),
+    }
+    config = source_config.get(str(call.get("tool") or ""))
+    arguments = call.get("arguments")
+    if not config or not isinstance(arguments, dict) or not isinstance(arguments.get("items"), list):
+        return []
+    source_doctype, parent_field, row_field = config
+    snapshots: list[dict[str, Any]] = []
+    selected = list(session.selected_entities.values())
+    for observation in observations:
+        selected.extend(_resolved_entity_values(observation).values())
+    for entity in reversed(selected):
+        row = entity.get("row") if isinstance(entity, dict) and entity.get("kind") == "document" else None
+        if isinstance(row, dict) and row.get("doctype") == source_doctype:
+            snapshots.append(row)
+    if not snapshots:
+        return []
+
+    corrections: list[dict[str, Any]] = []
+    for index, item in enumerate(arguments["items"]):
+        if not isinstance(item, dict) or item.get(parent_field) or item.get(row_field):
+            continue
+        item_code = str(item.get("item_code") or "")
+        unique_matches: dict[tuple[str, str], tuple[dict[str, Any], dict[str, Any]]] = {}
+        for snapshot in snapshots:
+            for source_row in snapshot.get("items") or []:
+                if (
+                    isinstance(source_row, dict)
+                    and source_row.get("name")
+                    and (not item_code or str(source_row.get("item_code") or "") == item_code)
+                ):
+                    key = (str(snapshot.get("name") or ""), str(source_row["name"]))
+                    unique_matches[key] = (snapshot, source_row)
+        matches = list(unique_matches.values())
+        if len(matches) != 1:
+            continue
+        snapshot, source_row = matches[0]
+        for field, value in (
+            (parent_field, snapshot.get("name")),
+            (row_field, source_row.get("name")),
+            ("project", source_row.get("project")),
+            ("warehouse", source_row.get("warehouse")),
+        ):
+            if value and item.get(field) in (None, ""):
+                item[field] = value
+                corrections.append({
+                    "field": f"items[{index}].{field}",
+                    "value": value,
+                    "source": f"{source_doctype}.live_snapshot",
+                })
     return corrections
 
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -8,11 +9,19 @@ from nexterp_agent.agent_runtime.deepseek_agent_runtime import (
     AGENT_ACTIONS,
     DeepSeekAgentRuntime,
     ToolDiscoveryIndex,
+    _attach_runtime_confirmation,
+    _allowed_entity_values,
+    _compact_document_snapshot,
+    _document_next_action_tools,
+    _same_business_call,
     _inject_material_request_reference_prices,
+    _inject_source_document_references,
+    _resolved_entity_values,
+    _successful_execution_message,
     validate_agent_action,
 )
 from nexterp_agent.agent_runtime.civil_runtime import CivilAgentRuntime, LegacyCivilAgentRuntime
-from nexterp_agent.agent_runtime.session import RuntimeSessionStore
+from nexterp_agent.agent_runtime.session import RuntimeSessionState, RuntimeSessionStore
 from nexterp_agent.agent_runtime.tool_access import make_tool_access_policy
 from nexterp_agent.master_data import MasterDataRelease
 from nexterp_agent.erpnext.schemas import ToolResult
@@ -152,6 +161,177 @@ def test_project_profile_can_discover_material_request_submit_tool() -> None:
     cards = ToolDiscoveryIndex().discover("提交材料申请单据", policy=policy, modules=["buying"], limit=8)
 
     assert "erpnext.buying.submit_document" in {card["name"] for card in cards}
+
+
+def test_workflow_document_direct_submit_is_rejected_before_confirmation() -> None:
+    class WorkflowClient:
+        def get_document(self, doctype, name):
+            return ToolResult(ok=True, data={"doctype": doctype, "name": name, "workflow_state": "草稿"})
+
+    runtime = DeepSeekAgentRuntime(client_factory=lambda _user: WorkflowClient())
+    call = {
+        "tool": "erpnext.buying.submit_document",
+        "arguments": {
+            "doctype": "Material Request",
+            "name": "MAT-MR-TEST-0001",
+            "confirmation": {
+                "confirmed": True,
+                "confirmed_by": "EMP-MAOXIAOQUAN",
+                "confirmed_at": "2026-07-15T10:00:00",
+                "confirmation_text": "提交申请",
+                "reason": "测试工作流保护",
+            },
+        },
+    }
+    session = RuntimeSessionState(
+        user="mao.xiaoquan@stec-up.local",
+        profile="project",
+        documents={"Material Request": ["MAT-MR-TEST-0001"]},
+    )
+    observations = [{
+        "type": "get_tool_contracts",
+        "contracts": [{"name": "erpnext.buying.submit_document"}],
+    }]
+
+    error = runtime._validate_proposed_call(
+        call,
+        user=session.user,
+        policy=make_tool_access_policy("project"),
+        session=session,
+        observations=observations,
+    )
+
+    assert "已启用ERPNext工作流" in str(error)
+    assert "erpnext.get_workflow_actions" in str(error)
+
+
+def test_success_message_prefers_workflow_state_over_generic_document_status() -> None:
+    message = _successful_execution_message({
+        "data": {
+            "doctype": "Material Request",
+            "name": "MAT-MR-0001",
+            "status": "Draft",
+            "workflow_state": "待材料设备主管审批",
+        }
+    })
+
+    assert message == "Material Request MAT-MR-0001 已执行成功，当前状态：待材料设备主管审批。"
+
+
+def test_document_resolution_returns_live_compact_snapshot() -> None:
+    class DocumentClient:
+        def get_document(self, doctype, name):
+            return ToolResult(ok=True, data={
+                "doctype": doctype,
+                "name": name,
+                "status": "Pending",
+                "workflow_state": "已批准",
+                "docstatus": 1,
+                "items": [{
+                    "name": "MRI-1",
+                    "item_code": "MAT-CEM-000008",
+                    "qty": 1,
+                    "uom": "包",
+                    "project": "PROJ-0010",
+                    "private_field": "discard",
+                }],
+                "private_field": "discard",
+            })
+
+    runtime = DeepSeekAgentRuntime(client_factory=lambda _user: DocumentClient())
+    session = RuntimeSessionState(user="pan.feng@stec-up.local", profile="procurement")
+
+    result = runtime._resolve_entities(
+        {"entities": [{"id": "request", "kind": "document", "doctype": "Material Request", "query": "MAT-MR-0001"}]},
+        user=session.user,
+        today=date(2026, 7, 15),
+        session=session,
+    )
+
+    snapshot = result["entities"][0]["resolution"]["row"]
+    assert snapshot["workflow_state"] == "已批准"
+    assert snapshot["items"] == [{
+        "name": "MRI-1",
+        "item_code": "MAT-CEM-000008",
+        "qty": 1,
+        "uom": "包",
+        "project": "PROJ-0010",
+    }]
+    assert "private_field" not in snapshot
+
+    session.selected_entities.update(_resolved_entity_values(result))
+    allowed = _allowed_entity_values(session, [])
+    assert "MAT-CEM-000008" in allowed["item"]
+    assert "PROJ-0010" in allowed["project"]
+
+
+def test_execute_tool_progressively_discloses_missing_contract(tmp_path: Path) -> None:
+    tool = "erpnext.stock.get_balance"
+    planner = PlannerSequence([
+        {
+            "action": "execute_tool",
+            "summary": "尝试查询库存",
+            "arguments": {"tool_call": {"tool": tool, "arguments": {"item_code": "ITEM-1", "warehouse": "WH-1"}}},
+        },
+        {
+            "action": "ask_user",
+            "summary": "等待真实实体",
+            "arguments": {"questions": ["请选择真实物料和仓库。"]},
+        },
+    ])
+    runtime = DeepSeekAgentRuntime(planner=planner, session_store=RuntimeSessionStore(tmp_path))
+
+    result = runtime.run_once("查询库存", user="mao.xiaoquan@stec-up.local")
+
+    assert result.status == "needs_clarification"
+    disclosure = next(step for step in result.steps if step["label"] == "自动读取契约")
+    assert disclosure["payload"]["tool_names"] == [tool]
+    assert tool in planner.messages[1][1]["content"]
+
+
+def test_rfq_arguments_inherit_material_request_source_rows() -> None:
+    session = RuntimeSessionState(
+        user="pan.feng@stec-up.local",
+        profile="procurement",
+        selected_entities={
+            "request": {
+                "kind": "document",
+                "value": "MAT-MR-0001",
+                "row": {
+                    "doctype": "Material Request",
+                    "name": "MAT-MR-0001",
+                    "items": [{
+                        "name": "MRI-1",
+                        "item_code": "MAT-CEM-000008",
+                        "qty": 1,
+                        "project": "PROJ-0010",
+                        "warehouse": "合流1.3标仓库 - SD",
+                    }],
+                },
+            }
+        },
+    )
+    call = {
+        "tool": "erpnext.buying.create_request_for_quotation_draft",
+        "arguments": {"items": [{"item_code": "MAT-CEM-000008", "qty": 1}]},
+    }
+
+    corrections = _inject_source_document_references(call, session, [])
+
+    assert call["arguments"]["items"][0] == {
+        "item_code": "MAT-CEM-000008",
+        "qty": 1,
+        "material_request": "MAT-MR-0001",
+        "material_request_item": "MRI-1",
+        "project": "PROJ-0010",
+        "warehouse": "合流1.3标仓库 - SD",
+    }
+    assert {row["field"] for row in corrections} == {
+        "items[0].material_request",
+        "items[0].material_request_item",
+        "items[0].project",
+        "items[0].warehouse",
+    }
 
 
 def test_write_tool_is_paused_with_resolved_entities(tmp_path: Path) -> None:
@@ -367,6 +547,39 @@ def test_successful_write_is_not_reported_failed_when_finish_json_is_invalid(tmp
     assert any(step["label"] == "生成回复降级" for step in completed.steps)
 
 
+def test_successful_write_falls_back_to_tool_result_at_planner_step_limit(tmp_path: Path) -> None:
+    release = MasterDataRelease()
+    material = release.materials[0]
+    tool = "erpnext.buying.create_material_request_draft"
+    call = {
+        "tool": tool,
+        "arguments": {"schedule_date": "2026-07-14", "items": [{"item_code": material["item_code"], "qty": 1}]},
+    }
+    planner = PlannerSequence([
+        {"action": "get_tool_contracts", "summary": "读取契约", "arguments": {"tool_names": [tool]}},
+        {"action": "resolve_entities", "summary": "解析物料", "arguments": {"entities": [
+            {"id": "item", "kind": "item", "query": material["item_code"]},
+        ]}},
+        {"action": "execute_tool", "summary": "创建草稿", "arguments": {"tool_call": call}},
+        {"action": "discover_tools", "summary": "继续规划", "arguments": {"query": "后续操作", "modules": ["buying"]}},
+    ])
+    runtime = DeepSeekAgentRuntime(
+        release=release,
+        planner=planner,
+        client_factory=lambda _user: FakeERPNextClient(),
+        session_store=RuntimeSessionStore(tmp_path),
+        max_steps=4,
+    )
+
+    preview = runtime.run_once("创建草稿", user="mao.xiaoquan@stec-up.local")
+    completed = runtime.run_once("确认创建", user="mao.xiaoquan@stec-up.local", execute=True)
+
+    assert preview.status == "needs_confirmation"
+    assert completed.status == "completed"
+    assert "MAT-MR-TEST-0001" in completed.message
+    assert any(step["result"].get("source") == "successful_tool_result" for step in completed.steps if step["label"] == "生成回复降级")
+
+
 def test_confirmation_does_not_reconfirm_identical_successful_tool_call(tmp_path: Path) -> None:
     release = MasterDataRelease()
     material = release.materials[0]
@@ -400,3 +613,93 @@ def test_confirmation_does_not_reconfirm_identical_successful_tool_call(tmp_path
     assert completed.status == "completed"
     assert completed.tool_result["ok"] is True
     assert any(step["label"] == "跳过重复动作" for step in completed.steps)
+
+
+def test_system_prompt_distinguishes_workflow_from_plain_submit(tmp_path):
+    runtime = DeepSeekAgentRuntime(planner=lambda _messages: {}, session_store=RuntimeSessionStore(tmp_path))
+    session = RuntimeSessionState(user="pan.feng@stec-up.local", profile="procurement")
+
+    messages = runtime._messages(
+        "提交询价单",
+        {"user_email": session.user, "position": "材料设备主管"},
+        session,
+        date(2026, 7, 16),
+        [],
+        [],
+    )
+
+    assert "没有workflow_state且docstatus=0" in messages[0]["content"]
+    assert "禁止调用get_workflow_actions或apply_workflow" in messages[0]["content"]
+    assert "submit_document工具" in messages[0]["content"]
+
+
+def test_confirmation_gated_call_is_validated_before_runtime_adds_audit_metadata(tmp_path):
+    runtime = DeepSeekAgentRuntime(planner=lambda _messages: {}, session_store=RuntimeSessionStore(tmp_path))
+    session = RuntimeSessionState(user="pan.feng@stec-up.local", profile="procurement")
+    session.documents["Request for Quotation"] = ["PUR-RFQ-2026-00003"]
+    call = {
+        "tool": "erpnext.buying.submit_document",
+        "arguments": {"doctype": "Request for Quotation", "name": "PUR-RFQ-2026-00003"},
+    }
+    observations = [{
+        "type": "get_tool_contracts",
+        "contracts": [{"name": "erpnext.buying.submit_document"}],
+    }]
+
+    error = runtime._validate_proposed_call(
+        call,
+        user=session.user,
+        policy=make_tool_access_policy("procurement"),
+        session=session,
+        observations=observations,
+    )
+
+    assert error is None
+    assert "confirmation" not in call["arguments"]
+    _attach_runtime_confirmation(call, user=session.user, reason="提交询价单")
+    assert call["arguments"]["confirmation"]["confirmed"] is True
+    assert call["arguments"]["confirmation"]["confirmed_by"] == session.user
+    assert call["arguments"]["confirmation"]["reason"] == "提交询价单"
+
+
+def test_missing_action_summary_is_repaired_for_audit() -> None:
+    action = validate_agent_action({"action": "finish", "arguments": {"message": "完成"}})
+
+    assert action["summary"] == "DeepSeek请求执行finish"
+
+
+def test_business_call_comparison_ignores_runtime_confirmation_metadata() -> None:
+    left = {"tool": "erpnext.buying.submit_document", "arguments": {
+        "doctype": "Purchase Order", "name": "PUR-ORD-2026-00006",
+        "confirmation": {"confirmed_at": "old"},
+    }}
+    right = {"tool": "erpnext.buying.submit_document", "arguments": {
+        "doctype": "Purchase Order", "name": "PUR-ORD-2026-00006",
+        "confirmation": {"confirmed_at": "new"},
+    }}
+
+    assert _same_business_call(left, right) is True
+
+
+def test_document_snapshot_discloses_only_state_valid_submit_path() -> None:
+    plain = _compact_document_snapshot({
+        "doctype": "Purchase Order",
+        "name": "PUR-ORD-2026-00006",
+        "docstatus": 0,
+        "status": "Draft",
+    })
+    workflow = _compact_document_snapshot({
+        "doctype": "Material Request",
+        "name": "MAT-MR-2026-00021",
+        "docstatus": 0,
+        "workflow_state": "待材料设备主管审批",
+    })
+
+    assert plain["allowed_next_actions"] == ["erpnext.buying.submit_document"]
+    assert workflow["allowed_next_actions"] == ["erpnext.get_workflow_actions", "erpnext.apply_workflow"]
+
+    observation = {"entities": [{
+        "kind": "document",
+        "resolution": {"status": "resolved", "row": plain},
+    }]}
+    assert _document_next_action_tools(observation) == ["erpnext.buying.submit_document"]
