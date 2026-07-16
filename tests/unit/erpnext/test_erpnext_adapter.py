@@ -286,3 +286,4 @@ def test_classify_error_maps_common_frappe_failures() -> None:
     assert classify_error(403, {}, "Not permitted") == "permission_error"
     assert classify_error(404, {}, "Not found") == "not_found"
     assert classify_error(500, {"exc_type": "ValidationError"}, "ValidationError") == "validation_error"
+    assert classify_error(417, {"exc_type": "LinkExistsError"}, "Cannot delete linked document") == "link_validation_error"

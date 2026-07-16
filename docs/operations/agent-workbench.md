@@ -64,3 +64,14 @@ POST /api/session/reset
 ```
 
 审批通知、Workflow Action 和操作记录均以 ERPNext 为准。
+
+## 采购闭环验收
+
+先加载 `.env` 并确保 ERPNext 开发账套运行，再执行：
+
+```powershell
+python scripts\acceptance\procurement_closed_loop.py prepare
+python scripts\acceptance\procurement_closed_loop.py all
+```
+
+也可以分别运行 `run`、`verify` 和 `cleanup`。`all` 会依次准备、创建采购闭环、验证来源关系和库存回零，并清理测试交易。ERPNext 因总账或库存账审计关系不允许删除的交易会保留为已取消单据，这是正常的审计行为。

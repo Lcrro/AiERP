@@ -998,7 +998,7 @@ def classify_error(status_code: int | None, payload: Any, error: str) -> str:
         return "duplicate_error"
     if "mandatory" in combined or "missing" in combined and "argument" in combined:
         return "missing_argument"
-    if "linkvalidationerror" in combined or "could not find" in combined:
+    if "linkvalidationerror" in combined or "linkexistserror" in combined or "could not find" in combined:
         return "link_validation_error"
     if "validationerror" in combined or "validation" in combined:
         return "validation_error"
