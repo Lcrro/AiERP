@@ -208,6 +208,11 @@ WORKBENCH_ROLE_VIEWS: dict[str, dict[str, Any]] = {
         "recommended_panels": ["recent", "exceptions"],
         "focus": "协助确认技术规格和处理到货技术差异",
     },
+    "财务人员": {
+        "default_panel": "recent",
+        "recommended_panels": ["recent", "progress", "exceptions"],
+        "focus": "核对采购收货与发票，处理应付和付款业务",
+    },
 }
 
 
@@ -1207,32 +1212,57 @@ class AgentWorkbenchService:
             for doctype, label, project_child in doctypes
         ]
         loaded: dict[str, dict[str, Any]] = {}
-        with ThreadPoolExecutor(max_workers=min(8, len(document_specs))) as executor:
-            futures = {
-                doctype: executor.submit(
-                    self._load_document_group,
-                    user,
-                    doctype,
-                    label,
-                    project_child,
-                    erpnext_project,
-                    page_size,
-                    (page - 1) * page_size,
-                    status,
-                    user if mine_only else "",
-                )
-                for doctype, label, project_child in document_specs
-            }
-            for doctype, future in futures.items():
-                try:
-                    loaded[doctype] = future.result()
-                except Exception as exc:
-                    loaded[doctype] = {
-                        "doctype": doctype,
-                        "label": next(label for candidate, label, _ in document_specs if candidate == doctype),
-                        "error": str(exc),
-                        "documents": [],
-                    }
+        try:
+            batch = client.call_method(
+                "agent_bridge.api.list_workbench_documents",
+                {
+                    "doctypes": [doctype for doctype, _, _ in document_specs],
+                    "project": erpnext_project,
+                    "status": status,
+                    "owner": user if mine_only else "",
+                    "limit": page_size,
+                    "offset": (page - 1) * page_size,
+                },
+            )
+        except (AttributeError, TypeError):
+            batch = None
+        if batch and batch.ok and isinstance(batch.data, dict):
+            batch_groups = batch.data.get("groups") if isinstance(batch.data.get("groups"), dict) else {}
+            batch_errors = batch.data.get("errors") if isinstance(batch.data.get("errors"), dict) else {}
+            for doctype, label, _ in document_specs:
+                loaded[doctype] = {
+                    "doctype": doctype,
+                    "label": label,
+                    "error": batch_errors.get(doctype),
+                    "documents": [dict(row) for row in batch_groups.get(doctype, []) if isinstance(row, dict)],
+                }
+        else:
+            with ThreadPoolExecutor(max_workers=min(8, len(document_specs))) as executor:
+                futures = {
+                    doctype: executor.submit(
+                        self._load_document_group,
+                        user,
+                        doctype,
+                        label,
+                        project_child,
+                        erpnext_project,
+                        page_size,
+                        (page - 1) * page_size,
+                        status,
+                        user if mine_only else "",
+                    )
+                    for doctype, label, project_child in document_specs
+                }
+                for doctype, future in futures.items():
+                    try:
+                        loaded[doctype] = future.result()
+                    except Exception as exc:
+                        loaded[doctype] = {
+                            "doctype": doctype,
+                            "label": next(label for candidate, label, _ in document_specs if candidate == doctype),
+                            "error": str(exc),
+                            "documents": [],
+                        }
         modules: list[dict[str, Any]] = []
         for module_code, module_label, doctypes in DOCUMENT_MODULES:
             if module_code != module:
@@ -1296,6 +1326,19 @@ class AgentWorkbenchService:
         erpnext_project: str,
     ) -> list[dict[str, Any]]:
         client = self.client(user)
+        names = [str(row.get("name") or "") for row in rows if row.get("name")]
+        try:
+            result = client.call_method(
+                "agent_bridge.api.filter_documents_by_project",
+                {"doctype": doctype, "names": names, "project": erpnext_project},
+            )
+        except (AttributeError, TypeError):
+            result = None
+        if result and result.ok and isinstance(result.data, dict):
+            matched_names = {str(value) for value in result.data.get("names", [])}
+            return [row for row in rows if str(row.get("name") or "") in matched_names]
+
+        # Compatibility path for older sandboxes that have not synced agent_bridge yet.
         detail_cache: dict[tuple[str, str], dict[str, Any] | None] = {}
 
         def detail(document_type: str, name: str) -> dict[str, Any] | None:

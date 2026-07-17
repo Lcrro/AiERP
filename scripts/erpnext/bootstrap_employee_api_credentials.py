@@ -28,6 +28,12 @@ def main() -> int:
     parser.add_argument("--profile", default="civil")
     parser.add_argument("--env-file", type=Path, default=REPO_ROOT / ".env")
     parser.add_argument("--output", type=Path, default=REPO_ROOT / ".secrets" / "erpnext-civil-users.json")
+    parser.add_argument(
+        "--user",
+        action="append",
+        default=[],
+        help="Generate credentials only for this user. Repeat for multiple users.",
+    )
     args = parser.parse_args()
     load_dotenv(args.env_file)
     prefix = f"NEXTERP_{args.profile.upper()}_"
@@ -38,7 +44,19 @@ def main() -> int:
         host_header=os.getenv(prefix + "HOST_HEADER"),
     )
     users: dict[str, dict[str, str]] = {}
-    for employee in MasterDataRelease().employees.values():
+    if args.output.exists():
+        existing = json.loads(args.output.read_text(encoding="utf-8"))
+        if isinstance(existing, dict) and isinstance(existing.get("users"), dict):
+            users.update(existing["users"])
+    employees = list(MasterDataRelease().employees.values())
+    if args.user:
+        requested = set(args.user)
+        employees = [employee for employee in employees if employee["user_email"] in requested]
+        found = {employee["user_email"] for employee in employees}
+        missing = sorted(requested - found)
+        if missing:
+            raise RuntimeError(f"Unknown employee users: {', '.join(missing)}")
+    for employee in employees:
         user = employee["user_email"]
         result = client.call_method("frappe.core.doctype.user.user.generate_keys", {"user": user})
         if not result.ok or not isinstance(result.data, dict):

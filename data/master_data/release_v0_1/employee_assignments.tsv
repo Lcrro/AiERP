@@ -8,4 +8,5 @@ ASG-HYH-HL-PM	EMP-HUYINHU	project	PRJ-HL-13	合流1.3标	项目经理	ROLE-PROJ-
 ASG-MXQ-WCL-MAT	EMP-MAOXIAOQUAN	base	PRJ-WCL-BASE	蕰川路基地	材料员	ROLE-MATERIAL-CLERK	0	1	2026-07-01		按现有名单推测；兼任蕰川路基地材料员。
 ASG-LZH-WCL-TECH	EMP-LIANGZHIHUA	base	PRJ-WCL-BASE	蕰川路基地	技术负责人	ROLE-TECH-LEAD	1	1	2026-07-01		按现有名单推测；蕰川路基地技术负责人。
 ASG-XPQ-UP-OPS	EMP-XUPUQI	organization	DEPT-UP	UP事业部	经营主管	ROLE-OPS-MGR	1	1	2026-07-01		按现有名单推测；UP事业部经营主管。
+ASG-FWQ-UP-FIN	EMP-FANGWENQIAN	organization	DEPT-UP	UP事业部	财务人员	ROLE-FINANCE	1	1	2026-07-01		用户新增；UP事业部财务人员，业务范围覆盖事业部管理的各项目。
 ASG-XF-IT-ADMIN	EMP-XUFENG	organization	DEPT-IT	系统管理	系统管理员	ROLE-SYSADMIN	1	1	2026-07-01		按现有名单推测；系统管理员候选，用于测试账套初始化。

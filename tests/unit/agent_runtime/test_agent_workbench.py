@@ -20,9 +20,9 @@ SPEC.loader.exec_module(MODULE)
 def test_employee_catalog_does_not_expose_credentials() -> None:
     employees = MODULE.employee_catalog()
 
-    assert len(employees) == 7
+    assert len(employees) == 8
     assert all("api_key" not in employee and "api_secret" not in employee for employee in employees)
-    assert {employee["employee_name"] for employee in employees} >= {"张振光", "潘丰", "毛晓泉", "胡银虎"}
+    assert {employee["employee_name"] for employee in employees} >= {"张振光", "潘丰", "毛晓泉", "胡银虎", "方文倩"}
 
 
 def test_result_document_links_build_internal_workbench_route() -> None:
@@ -676,6 +676,28 @@ def test_documents_are_loaded_by_module_with_page_offset() -> None:
     assert all(call[1:] == (10, 20, "Draft", "buyer@example.com") for call in calls)
 
 
+def test_documents_use_one_module_batch_request_when_bridge_supports_it() -> None:
+    calls = []
+
+    class FakeClient:
+        def call_method(self, method, arguments):
+            calls.append((method, arguments))
+            return SimpleNamespace(ok=True, data={
+                "groups": {"Material Request": [{"name": "MR-1"}]},
+                "errors": {},
+            })
+
+    service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
+    service._project_name_cache = {}
+    service.client = lambda _user: FakeClient()
+    service.erpnext_project_name = lambda _client, _project: "ERP-PROJECT"
+    result = service.documents("buyer@example.com", "PRJ-HL-13", module="buying")
+
+    assert len(calls) == 1
+    assert calls[0][0] == "agent_bridge.api.list_workbench_documents"
+    assert result["modules"][0]["groups"][0]["documents"] == [{"name": "MR-1"}]
+
+
 def test_supplier_quotation_project_scope_follows_rfq_and_material_request() -> None:
     documents = {
         ("Supplier Quotation", "SQ-1"): {
@@ -715,6 +737,37 @@ def test_supplier_quotation_project_scope_follows_rfq_and_material_request() -> 
     )
 
     assert rows == [{"name": "SQ-1"}]
+
+
+def test_project_document_filter_uses_one_bridge_request() -> None:
+    calls = []
+
+    class FakeClient:
+        def call_method(self, method, arguments):
+            calls.append((method, arguments))
+            return SimpleNamespace(ok=True, data={"names": ["MR-2"]})
+
+        def get_document(self, _doctype, _name):
+            raise AssertionError("batch bridge path must not fetch documents one by one")
+
+    service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
+    service.client = lambda _user: FakeClient()
+    rows = service.filter_parent_documents_by_project(
+        "buyer@example.com",
+        "Material Request",
+        [{"name": "MR-1"}, {"name": "MR-2"}],
+        "ERP-PROJECT",
+    )
+
+    assert rows == [{"name": "MR-2"}]
+    assert calls == [(
+        "agent_bridge.api.filter_documents_by_project",
+        {
+            "doctype": "Material Request",
+            "names": ["MR-1", "MR-2"],
+            "project": "ERP-PROJECT",
+        },
+    )]
 
 
 def test_inbox_uses_open_erpnext_workflow_actions_and_real_transitions() -> None:

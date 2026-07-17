@@ -109,6 +109,7 @@ PROFILE_ALIASES = {
     "technical_agent": "technical",
     "material_clerk_agent": "project",
     "admin_agent": "system_admin",
+    "finance_agent": "finance",
 }
 
 

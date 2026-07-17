@@ -6,4 +6,5 @@ EMP-MAOXIAOQUAN	毛晓泉	男	DEPT-HL-13	材料员	ROLE-MATERIAL-CLERK	mao.xiaoq
 EMP-HUYINHU	胡银虎	男	DEPT-HL-13	项目经理	ROLE-PROJ-MGR	hu.yinhu@stec-up.local		PRJ-HL-13	WH-HL-13	active	用户确认；合流1.3标项目经理。
 EMP-LIANGZHIHUA	梁志华	男	DEPT-WCL-BASE	技术负责人	ROLE-TECH-LEAD	liang.zhihua@stec-up.local		PRJ-WCL-BASE	WH-WCL-BASE	active	按现有名单推测；蕰川路基地技术负责人。
 EMP-XUPUQI	徐溥祺	男	DEPT-UP	经营主管	ROLE-OPS-MGR	xu.puqi@stec-up.local				active	按现有名单推测；UP事业部经营主管。
+EMP-FANGWENQIAN	方文倩	女	DEPT-UP	财务人员	ROLE-FINANCE	fang.wenqian@stec-up.local		PRJ-HL-13	WH-HL-13	active	用户新增；UP事业部财务人员，负责各项目采购财务核对与应付业务。
 EMP-XUFENG	许峰	男	DEPT-IT	系统管理员	ROLE-SYSADMIN	xu.feng@stec-up.local				candidate	按现有名单推测；系统管理员候选，用于测试账套初始化和权限配置。

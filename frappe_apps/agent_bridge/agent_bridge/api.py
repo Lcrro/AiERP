@@ -1547,6 +1547,265 @@ MATERIAL_REQUEST_APPROVAL_ROLES = {
     "project_manager": "STEC Project Manager",
 }
 
+PROJECT_SCOPED_DOCUMENT_TYPES = {
+    "Material Request",
+    "Request for Quotation",
+    "Supplier Quotation",
+    "Purchase Order",
+    "Purchase Receipt",
+    "Purchase Invoice",
+    "Stock Entry",
+}
+
+WORKBENCH_DOCUMENT_FIELDS = {
+    "Material Request": ["name", "title", "status", "workflow_state", "transaction_date", "schedule_date", "owner", "modified", "docstatus"],
+    "Request for Quotation": ["name", "status", "transaction_date", "owner", "modified", "docstatus"],
+    "Supplier Quotation": ["name", "supplier", "status", "transaction_date", "valid_till", "grand_total", "currency", "owner", "modified", "docstatus"],
+    "Purchase Order": ["name", "supplier", "status", "transaction_date", "grand_total", "currency", "owner", "modified", "docstatus"],
+    "Purchase Receipt": ["name", "supplier", "status", "posting_date", "grand_total", "currency", "owner", "modified", "docstatus", "is_return", "return_against"],
+    "Stock Entry": ["name", "stock_entry_type", "purpose", "posting_date", "owner", "modified", "docstatus"],
+    "Purchase Invoice": ["name", "supplier", "status", "posting_date", "grand_total", "currency", "owner", "modified", "docstatus"],
+    "Payment Entry": ["name", "party", "payment_type", "posting_date", "paid_amount", "paid_from_account_currency", "owner", "modified", "docstatus"],
+    "Task": ["name", "subject", "status", "priority", "owner", "modified", "docstatus"],
+    "ToDo": ["name", "description", "status", "reference_type", "reference_name", "owner", "modified"],
+}
+
+
+def _child_rows(doctype: str, names: list[str]) -> list[dict]:
+    if not names:
+        return []
+    meta = frappe.get_meta(doctype)
+    items_field = meta.get_field("items")
+    if not items_field or not items_field.options:
+        return []
+    child_doctype = items_field.options
+    child_meta = frappe.get_meta(child_doctype)
+    relation_fields = [
+        "project",
+        "material_request",
+        "material_request_item",
+        "request_for_quotation",
+        "request_for_quotation_item",
+        "purchase_order",
+        "purchase_order_item",
+    ]
+    fields = ["parent", "name"] + [field for field in relation_fields if child_meta.has_field(field)]
+    return [
+        dict(row)
+        for row in frappe.get_all(
+            child_doctype,
+            filters={"parent": ["in", names]},
+            fields=fields,
+            limit_page_length=0,
+        )
+    ]
+
+
+def _project_scoped_names(doctype: str, names: list[str], project: str) -> set[str]:
+    """Resolve project lineage with batched child-table reads."""
+
+    matched: set[str] = set()
+    meta = frappe.get_meta(doctype)
+    if meta.has_field("project"):
+        matched.update(
+            str(row["name"])
+            for row in frappe.get_all(
+                doctype,
+                filters={"name": ["in", names], "project": project},
+                fields=["name"],
+                limit_page_length=0,
+            )
+        )
+    rows = _child_rows(doctype, names)
+    matched.update(str(row["parent"]) for row in rows if str(row.get("project") or "") == project)
+
+    rfq_names = sorted({str(row.get("request_for_quotation") or "") for row in rows if row.get("request_for_quotation")})
+    rfq_rows = _child_rows("Request for Quotation", rfq_names)
+    po_names = sorted({str(row.get("purchase_order") or "") for row in rows if row.get("purchase_order")})
+    po_rows = _child_rows("Purchase Order", po_names)
+    relation_rows = rows + rfq_rows + po_rows
+    mr_names = sorted({str(row.get("material_request") or "") for row in relation_rows if row.get("material_request")})
+    mr_rows = _child_rows("Material Request", mr_names)
+    mr_items = {
+        (str(row["parent"]), str(row["name"]))
+        for row in mr_rows
+        if str(row.get("project") or "") == project
+    }
+    mr_parents = {parent for parent, _ in mr_items}
+
+    rfq_project_items = {
+        (str(row["parent"]), str(row["name"]))
+        for row in rfq_rows
+        if str(row.get("project") or "") == project
+        or (
+            str(row.get("material_request") or "") in mr_parents
+            and (
+                not row.get("material_request_item")
+                or (str(row.get("material_request")), str(row.get("material_request_item"))) in mr_items
+            )
+        )
+    }
+    rfq_parents = {parent for parent, _ in rfq_project_items}
+
+    po_project_items = {
+        (str(row["parent"]), str(row["name"]))
+        for row in po_rows
+        if str(row.get("project") or "") == project
+        or str(row.get("material_request") or "") in mr_parents
+        or str(row.get("request_for_quotation") or "") in rfq_parents
+    }
+    po_parents = {parent for parent, _ in po_project_items}
+
+    for row in rows:
+        if str(row.get("material_request") or "") in mr_parents:
+            item_name = str(row.get("material_request_item") or "")
+            if not item_name or (str(row.get("material_request")), item_name) in mr_items:
+                matched.add(str(row["parent"]))
+                continue
+        if str(row.get("request_for_quotation") or "") in rfq_parents:
+            item_name = str(row.get("request_for_quotation_item") or "")
+            if not item_name or (str(row.get("request_for_quotation")), item_name) in rfq_project_items:
+                matched.add(str(row["parent"]))
+                continue
+        if str(row.get("purchase_order") or "") in po_parents:
+            item_name = str(row.get("purchase_order_item") or "")
+            if not item_name or (str(row.get("purchase_order")), item_name) in po_project_items:
+                matched.add(str(row["parent"]))
+    return matched
+
+
+@frappe.whitelist()
+def filter_documents_by_project(doctype: str, names: list[str] | str, project: str) -> dict:
+    """Return permitted parent names related to a project in one HTTP request."""
+
+    if doctype not in PROJECT_SCOPED_DOCUMENT_TYPES:
+        frappe.throw(f"Unsupported project-scoped DocType: {doctype}")
+    if isinstance(names, str):
+        names = frappe.parse_json(names)
+    requested_names = [str(value) for value in (names or []) if value]
+    if not project or not requested_names:
+        return {"names": []}
+
+    cache: dict[tuple[str, str], object | None] = {}
+
+    def load(document_type: str, name: str):
+        key = (document_type, name)
+        if key in cache:
+            return cache[key]
+        try:
+            doc = frappe.get_doc(document_type, name)
+            doc.check_permission("read")
+        except (frappe.DoesNotExistError, frappe.PermissionError):
+            doc = None
+        cache[key] = doc
+        return doc
+
+    def material_request_matches(name: str, item_name: str = "") -> bool:
+        doc = load("Material Request", name)
+        if not doc:
+            return False
+        if str(doc.get("project") or "") == project:
+            return True
+        return any(
+            (not item_name or str(item.get("name") or "") == item_name)
+            and str(item.get("project") or "") == project
+            for item in (doc.get("items") or [])
+        )
+
+    def rfq_matches(name: str, item_name: str = "") -> bool:
+        doc = load("Request for Quotation", name)
+        if not doc:
+            return False
+        for item in doc.get("items") or []:
+            if item_name and str(item.get("name") or "") != item_name:
+                continue
+            if str(item.get("project") or "") == project:
+                return True
+            material_request = str(item.get("material_request") or "")
+            if material_request and material_request_matches(
+                material_request,
+                str(item.get("material_request_item") or ""),
+            ):
+                return True
+        return False
+
+    def matches(name: str) -> bool:
+        doc = load(doctype, name)
+        if not doc:
+            return False
+        if str(doc.get("project") or "") == project:
+            return True
+        for item in doc.get("items") or []:
+            if str(item.get("project") or "") == project:
+                return True
+            material_request = str(item.get("material_request") or "")
+            if material_request and material_request_matches(
+                material_request,
+                str(item.get("material_request_item") or ""),
+            ):
+                return True
+            request_for_quotation = str(item.get("request_for_quotation") or "")
+            if request_for_quotation and rfq_matches(
+                request_for_quotation,
+                str(item.get("request_for_quotation_item") or ""),
+            ):
+                return True
+        return False
+
+    return {"names": [name for name in requested_names if matches(name)]}
+
+
+@frappe.whitelist()
+def list_workbench_documents(
+    doctypes: list[str] | str,
+    project: str | None = None,
+    status: str | None = None,
+    owner: str | None = None,
+    limit: int = 20,
+    offset: int = 0,
+) -> dict:
+    """Load several permission-scoped workbench lists in one HTTP request."""
+
+    if isinstance(doctypes, str):
+        doctypes = frappe.parse_json(doctypes)
+    requested = [str(value) for value in (doctypes or []) if value]
+    unsupported = [doctype for doctype in requested if doctype not in WORKBENCH_DOCUMENT_FIELDS]
+    if unsupported:
+        frappe.throw(f"Unsupported workbench DocTypes: {', '.join(unsupported)}")
+    limit = max(1, min(cint(limit), 50))
+    offset = max(0, cint(offset))
+    groups: dict[str, list[dict]] = {}
+    errors: dict[str, str] = {}
+    for doctype in requested:
+        filters = {}
+        if owner:
+            filters["owner"] = owner
+        if status and status not in {"all", "open"}:
+            field = "workflow_state" if doctype == "Material Request" and status.startswith("待") else "status"
+            filters[field] = status
+        if project and doctype == "Task":
+            filters["project"] = project
+        try:
+            rows = [
+                dict(row)
+                for row in frappe.get_list(
+                    doctype,
+                    filters=filters,
+                    fields=WORKBENCH_DOCUMENT_FIELDS[doctype],
+                    order_by="modified desc",
+                    limit_start=offset,
+                    limit_page_length=limit,
+                )
+            ]
+            if project and doctype in PROJECT_SCOPED_DOCUMENT_TYPES:
+                matched = _project_scoped_names(doctype, [row["name"] for row in rows], project)
+                rows = [row for row in rows if row["name"] in matched]
+            groups[doctype] = rows
+        except Exception as exc:
+            groups[doctype] = []
+            errors[doctype] = str(exc)
+    return {"groups": groups, "errors": errors}
+
 
 @frappe.whitelist()
 def get_document_with_workflow_actions(doctype: str, name: str) -> dict:

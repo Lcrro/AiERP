@@ -35,12 +35,14 @@ EXPECTED_TOOLS = {
     "project_agent": ("erpnext.projects.create_material_issue_draft",),
     "technical_agent": ("erpnext.stock.get_balance",),
     "material_clerk_agent": ("erpnext.buying.create_material_request_draft",),
+    "finance_agent": ("erpnext.accounting.accounts_payable",),
 }
 
 BLOCKED_TOOLS = {
     "operations_agent": ("erpnext.buying.create_purchase_order_draft",),
     "technical_agent": ("erpnext.projects.create_material_issue_draft",),
     "material_clerk_agent": ("erpnext.buying.create_purchase_order_draft",),
+    "finance_agent": ("erpnext.buying.create_purchase_order_draft",),
 }
 
 

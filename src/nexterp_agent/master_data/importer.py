@@ -66,6 +66,7 @@ DESIGNATION_MAP = {
     "材料员": "Administrative Assistant",
     "经营主管": "Chief Operating Officer",
     "系统管理员": "Software Developer",
+    "财务人员": "Accountant",
 }
 
 

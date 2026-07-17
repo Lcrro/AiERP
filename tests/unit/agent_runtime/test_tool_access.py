@@ -30,6 +30,7 @@ def test_master_data_profile_names_map_to_business_tool_policies() -> None:
     operations = make_tool_access_policy("operations_agent")
     technical = make_tool_access_policy("technical_agent")
     admin = make_tool_access_policy("admin_agent")
+    finance = make_tool_access_policy("finance_agent")
 
     assert manager.decide("erpnext.accounting.accounts_payable").allowed
     assert equipment.decide("erpnext.buying.create_purchase_order_draft").allowed
@@ -41,3 +42,5 @@ def test_master_data_profile_names_map_to_business_tool_policies() -> None:
     assert technical.decide("erpnext.stock.get_balance").allowed
     assert not technical.decide("erpnext.projects.create_material_issue_draft").allowed
     assert admin.decide("erpnext.users.preview_effective_permissions").allowed
+    assert finance.decide("erpnext.accounting.accounts_payable").allowed
+    assert not finance.decide("erpnext.buying.create_purchase_order_draft").allowed

@@ -5,3 +5,11 @@ PRJ-HL-13	ASG-MXQ-HL-MAT	合流1.3标	EMP-MAOXIAOQUAN	材料员	active	由 emplo
 PRJ-HL-13	ASG-HYH-HL-PM	合流1.3标	EMP-HUYINHU	项目经理	active	由用户确认的有效项目任职关系生成。
 PRJ-WCL-BASE	ASG-MXQ-WCL-MAT	蕰川路基地	EMP-MAOXIAOQUAN	材料员	active	由 employee_assignments.tsv 中的有效项目/基地任职关系生成。
 PRJ-WCL-BASE	ASG-LZH-WCL-TECH	蕰川路基地	EMP-LIANGZHIHUA	技术负责人	active	由 employee_assignments.tsv 中的有效项目/基地任职关系生成。
+PRJ-NJ-P1	ASG-FWQ-UP-FIN	南京一期	EMP-FANGWENQIAN	财务人员	active	UP事业部财务人员，覆盖事业部管理项目。
+PRJ-NJ-NH	ASG-FWQ-UP-FIN	南京南湖	EMP-FANGWENQIAN	财务人员	active	UP事业部财务人员，覆盖事业部管理项目。
+PRJ-TH-12	ASG-FWQ-UP-FIN	泰和1.2标	EMP-FANGWENQIAN	财务人员	active	UP事业部财务人员，覆盖事业部管理项目。
+PRJ-LH-12	ASG-FWQ-UP-FIN	龙华1.2标	EMP-FANGWENQIAN	财务人员	active	UP事业部财务人员，覆盖事业部管理项目。
+PRJ-YB-11	ASG-FWQ-UP-FIN	迎宾1.1标	EMP-FANGWENQIAN	财务人员	active	UP事业部财务人员，覆盖事业部管理项目。
+PRJ-ZB-12	ASG-FWQ-UP-FIN	竹白1.2标	EMP-FANGWENQIAN	财务人员	active	UP事业部财务人员，覆盖事业部管理项目。
+PRJ-HL-13	ASG-FWQ-UP-FIN	合流1.3标	EMP-FANGWENQIAN	财务人员	active	UP事业部财务人员，覆盖事业部管理项目。
+PRJ-WCL-BASE	ASG-FWQ-UP-FIN	蕰川路基地	EMP-FANGWENQIAN	财务人员	active	UP事业部财务人员，覆盖事业部管理项目。
