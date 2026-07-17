@@ -22,6 +22,7 @@ operations    本地运行、验证、维护和排障
 - [土木进销存 Agent v1.0](planning/civil-agent-v1.0.md)：当前产品主线、交付阶段和验收口径。
 - [采购闭环与员工工作台 v0.3](planning/procurement-closed-loop-v0.3.md)：从材料申请到收货退货的实施顺序和验收标准。
 - [库存调拨与项目领料 v0.4](planning/stock-movement-project-issue-v0.4.md)：采购收货后从基地仓到项目仓和项目成本的库存闭环。
+- [员工 Agent 全功能验收 v0.5](planning/employee-agent-full-acceptance-v0.5.md)：按员工角色逐项验证工作台、Agent、ERPNext 权限和业务闭环。
 - [基础主数据标准](reference/master-data-standard.md)：公司、组织、员工、项目、仓库、供应商等非物料主数据口径。
 
 ## 架构

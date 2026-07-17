@@ -20,3 +20,24 @@ def test_project_profile_can_issue_and_submit_but_not_create_transfer() -> None:
     assert policy.decide("erpnext.projects.verify_material_issue_cost_impact").allowed
     assert policy.decide("erpnext.stock.submit_document").allowed
     assert not policy.decide("erpnext.stock.create_transfer_draft").allowed
+
+
+def test_master_data_profile_names_map_to_business_tool_policies() -> None:
+    manager = make_tool_access_policy("manager_agent")
+    equipment = make_tool_access_policy("material_equipment_agent")
+    project_manager = make_tool_access_policy("project_agent")
+    material_clerk = make_tool_access_policy("material_clerk_agent")
+    operations = make_tool_access_policy("operations_agent")
+    technical = make_tool_access_policy("technical_agent")
+    admin = make_tool_access_policy("admin_agent")
+
+    assert manager.decide("erpnext.accounting.accounts_payable").allowed
+    assert equipment.decide("erpnext.buying.create_purchase_order_draft").allowed
+    assert equipment.decide("erpnext.stock.create_transfer_draft").allowed
+    assert project_manager.decide("erpnext.projects.create_material_issue_draft").allowed
+    assert material_clerk.decide("erpnext.buying.create_material_request_draft").allowed
+    assert operations.decide("erpnext.buying.run_purchase_analysis").allowed
+    assert not operations.decide("erpnext.buying.create_purchase_order_draft").allowed
+    assert technical.decide("erpnext.stock.get_balance").allowed
+    assert not technical.decide("erpnext.projects.create_material_issue_draft").allowed
+    assert admin.decide("erpnext.users.preview_effective_permissions").allowed

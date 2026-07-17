@@ -93,6 +93,24 @@ STOCK_MOVEMENT_TOOLS = frozenset(
     }
 )
 
+PROJECT_READ_TOOLS = frozenset(
+    {
+        "erpnext.projects.get_project_cost_context",
+        "erpnext.projects.get_material_issue_context",
+        "erpnext.projects.verify_material_issue_cost_impact",
+    }
+)
+
+PROFILE_ALIASES = {
+    "manager_agent": "manager",
+    "material_equipment_agent": "procurement",
+    "operations_agent": "operations",
+    "project_agent": "project",
+    "technical_agent": "technical",
+    "material_clerk_agent": "project",
+    "admin_agent": "system_admin",
+}
+
 
 def infer_tool_exposure(tool_name: str) -> ToolExposure:
     if tool_name in DEVELOPER_ONLY_TOOLS:
@@ -173,6 +191,7 @@ def make_tool_access_policy(
     allow_developer_tools: bool = False,
 ) -> ToolAccessPolicy:
     profile_key = profile_name.lower().strip()
+    profile_key = PROFILE_ALIASES.get(profile_key, profile_key)
     extra = frozenset(extra_allowed_tools)
     blocked = frozenset(blocked_tools)
 
@@ -245,6 +264,43 @@ def make_tool_access_policy(
                     "erpnext.buying.create_material_request_draft",
                     "erpnext.buying.submit_document",
                     "erpnext.stock.submit_document",
+                }
+            )
+            | extra,
+            blocked_tools=blocked,
+            allow_runtime_internal=allow_runtime_internal,
+            allow_developer_tools=allow_developer_tools,
+        )
+
+    if profile_key in {"technical", "技术", "技术负责人"}:
+        return ToolAccessPolicy(
+            profile_name=profile_name,
+            allowed_tools=COMMON_AGENT_TOOLS | STOCK_READ_TOOLS | PROJECT_READ_TOOLS | extra,
+            blocked_tools=blocked,
+            allow_runtime_internal=allow_runtime_internal,
+            allow_developer_tools=allow_developer_tools,
+        )
+
+    if profile_key in {"operations", "经营", "经营主管"}:
+        return ToolAccessPolicy(
+            profile_name=profile_name,
+            allowed_tools=COMMON_AGENT_TOOLS
+            | STOCK_READ_TOOLS
+            | PROJECT_READ_TOOLS
+            | frozenset(
+                {
+                    "erpnext.buying.get_pending_procurement_items",
+                    "erpnext.buying.search_suppliers",
+                    "erpnext.buying.search_supplier_scorecards",
+                    "erpnext.buying.get_supplier_procurement_profile",
+                    "erpnext.buying.compare_supplier_quotations",
+                    "erpnext.buying.search_item_suppliers",
+                    "erpnext.buying.search_item_prices",
+                    "erpnext.buying.run_purchase_analysis",
+                    "erpnext.accounting.general_ledger",
+                    "erpnext.accounting.accounts_receivable",
+                    "erpnext.accounting.accounts_payable",
+                    "erpnext.accounting.financial_report",
                 }
             )
             | extra,

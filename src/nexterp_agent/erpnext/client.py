@@ -996,10 +996,10 @@ def classify_error(status_code: int | None, payload: Any, error: str) -> str:
         return "not_found"
     if "duplicate" in combined or "duplicateentryerror" in combined:
         return "duplicate_error"
-    if "mandatory" in combined or "missing" in combined and "argument" in combined:
-        return "missing_argument"
     if "linkvalidationerror" in combined or "linkexistserror" in combined or "could not find" in combined:
         return "link_validation_error"
+    if "mandatory" in combined or "missing" in combined and "argument" in combined:
+        return "missing_argument"
     if "validationerror" in combined or "validation" in combined:
         return "validation_error"
     if status_code and status_code >= 400:
@@ -1016,7 +1016,7 @@ def build_user_message(status_code: int | None, payload: Any, error: str) -> str
         "validation_error": "ERPNext 校验失败，请检查字段和值是否符合单据要求。",
         "duplicate_error": "ERPNext 中已经存在重复数据。",
         "missing_argument": "工具调用缺少必要参数。",
-        "link_validation_error": "关联字段引用的数据不存在或不正确。",
+        "link_validation_error": "单据关联的数据不存在、不正确，或仍被其他业务记录引用。",
         "http_error": "ERPNext 请求失败。",
         "network_error": "无法连接 ERPNext，请检查网络或服务状态。",
         "unknown_error": "ERPNext 返回了未分类错误。",

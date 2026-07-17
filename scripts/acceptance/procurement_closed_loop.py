@@ -97,7 +97,7 @@ def run(service: AgentWorkbenchService) -> dict[str, Any]:
             "schedule_date": schedule_date,
             "items": [{
                 "item_code": ITEM_CODE,
-                "qty": 1,
+                "qty": 2,
                 "uom": "包",
                 "warehouse": WAREHOUSE,
                 "project": ERP_PROJECT,
@@ -125,6 +125,16 @@ def run(service: AgentWorkbenchService) -> dict[str, Any]:
     rfq_doc = _document(service, USERS["manager"], "Request for Quotation", rfq)
     rfq_item = str(rfq_doc["items"][0]["name"])
 
+    sq_a_payload = service.create_supplier_quotation(
+        USERS["manager"], PROJECT_CODE, rfq, "SUP-TEST-A",
+        [{"request_for_quotation_item": rfq_item, "rate": 29.4, "schedule_date": schedule_date}],
+        valid_till=valid_till,
+        terms="月结30天；采购闭环自动验收。",
+    )
+    sq_a = str(sq_a_payload["name"])
+    report["documents"].append({"doctype": "Supplier Quotation", "name": sq_a, "user": USERS["manager"]})
+    service.submit_document(USERS["manager"], "Supplier Quotation", sq_a, project=PROJECT_CODE)
+
     sq_payload = service.create_supplier_quotation(
         USERS["manager"], PROJECT_CODE, rfq, "SUP-TEST-B",
         [{"request_for_quotation_item": rfq_item, "rate": 26.8, "schedule_date": schedule_date}],
@@ -135,15 +145,38 @@ def run(service: AgentWorkbenchService) -> dict[str, Any]:
     report["documents"].append({"doctype": "Supplier Quotation", "name": sq, "user": USERS["manager"]})
     service.submit_document(USERS["manager"], "Supplier Quotation", sq, project=PROJECT_CODE)
 
+    comparison = service.compare_supplier_quotations(USERS["manager"], [sq_a, sq])
+    report["quotation_comparison"] = comparison
+    recommended = str((comparison.get("recommendation") or {}).get("supplier_quotation") or "")
+    if recommended != sq:
+        raise RuntimeError(f"报价比较未推荐低价报价：expected={sq}, actual={recommended}")
+
     po_payload = service.create_purchase_order_from_supplier_quotation(USERS["manager"], PROJECT_CODE, sq)
     po = str(po_payload["name"])
     report["documents"].append({"doctype": "Purchase Order", "name": po, "user": USERS["manager"]})
     service.submit_document(USERS["manager"], "Purchase Order", po, project=PROJECT_CODE)
 
-    receipt_payload = service.create_purchase_receipt_from_purchase_order(USERS["manager"], PROJECT_CODE, po)
+    receipt_payload = service.create_purchase_receipt_from_purchase_order(
+        USERS["manager"], PROJECT_CODE, po,
+        selected_items=[{"item_code": ITEM_CODE, "qty": 1}],
+    )
     receipt = str(receipt_payload["name"])
     report["documents"].append({"doctype": "Purchase Receipt", "name": receipt, "user": USERS["manager"]})
     service.submit_document(USERS["manager"], "Purchase Receipt", receipt, project=PROJECT_CODE)
+
+    discrepancy_payload = service.record_purchase_receipt_discrepancy(
+        USERS["manager"], PROJECT_CODE, receipt,
+        "采购闭环自动验收：到货规格与订单不一致，要求退回本次到货。",
+        items=[{"item_code": ITEM_CODE, "qty": 1, "reason": "规格不符"}],
+        discrepancy_type="spec_mismatch",
+        severity="High",
+        assigned_to=USERS["manager"],
+    )
+    discrepancy = discrepancy_payload.get("discrepancy") or {}
+    report["discrepancy"] = discrepancy
+    for doctype, value in (("Comment", discrepancy.get("comment")), ("ToDo", discrepancy.get("todo"))):
+        if isinstance(value, dict) and value.get("name"):
+            report["documents"].append({"doctype": doctype, "name": str(value["name"]), "user": USERS["manager"]})
 
     return_payload = service.create_purchase_return_from_receipt(
         USERS["manager"], PROJECT_CODE, receipt, "采购闭环自动验收：规格与订单不一致。",
@@ -155,6 +188,7 @@ def run(service: AgentWorkbenchService) -> dict[str, Any]:
     report["names"] = {
         "material_request": mr,
         "request_for_quotation": rfq,
+        "supplier_quotation_a": sq_a,
         "supplier_quotation": sq,
         "purchase_order": po,
         "purchase_receipt": receipt,
@@ -172,6 +206,7 @@ def verify(service: AgentWorkbenchService, report: dict[str, Any] | None = None)
         key: _document(service, USERS["manager"], "Purchase Receipt" if key in {"purchase_receipt", "purchase_return"} else {
             "material_request": "Material Request",
             "request_for_quotation": "Request for Quotation",
+            "supplier_quotation_a": "Supplier Quotation",
             "supplier_quotation": "Supplier Quotation",
             "purchase_order": "Purchase Order",
         }[key], name)
@@ -181,9 +216,21 @@ def verify(service: AgentWorkbenchService, report: dict[str, Any] | None = None)
         "all_submitted": all(int(document.get("docstatus") or 0) == 1 for document in documents.values()),
         "material_request_approved": documents["material_request"].get("workflow_state") == "已批准",
         "rfq_source": documents["request_for_quotation"]["items"][0].get("material_request") == names["material_request"],
+        "quotation_a_source": documents["supplier_quotation_a"]["items"][0].get("request_for_quotation") == names["request_for_quotation"],
         "quotation_source": documents["supplier_quotation"]["items"][0].get("request_for_quotation") == names["request_for_quotation"],
+        "two_quotations": len({names["supplier_quotation_a"], names["supplier_quotation"]}) == 2,
+        "comparison_recommended_lower_quote": (
+            (report.get("quotation_comparison") or {}).get("recommendation") or {}
+        ).get("supplier_quotation") == names["supplier_quotation"],
         "order_source": documents["purchase_order"]["items"][0].get("supplier_quotation") == names["supplier_quotation"],
         "receipt_source": documents["purchase_receipt"]["items"][0].get("purchase_order") == names["purchase_order"],
+        "partial_receipt": (
+            float(documents["purchase_order"]["items"][0].get("qty") or 0) == 2
+            and float(documents["purchase_receipt"]["items"][0].get("qty") or 0) == 1
+        ),
+        "receipt_ratio_restored_after_return": float(documents["purchase_order"].get("per_received") or 0) == 0,
+        "discrepancy_comment_created": bool((report.get("discrepancy") or {}).get("comment")),
+        "discrepancy_todo_created": bool((report.get("discrepancy") or {}).get("todo")),
         "return_source": documents["purchase_return"].get("return_against") == names["purchase_receipt"],
         "return_negative_qty": float(documents["purchase_return"]["items"][0].get("qty") or 0) == -1,
         "inventory_restored": _actual_qty(service) == float(report.get("baseline_qty") or 0),
