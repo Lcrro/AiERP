@@ -163,6 +163,20 @@ def test_project_profile_can_discover_material_request_submit_tool() -> None:
     assert "erpnext.buying.submit_document" in {card["name"] for card in cards}
 
 
+def test_procurement_profile_can_discover_specialized_transfer_tools() -> None:
+    policy = make_tool_access_policy("procurement")
+    cards = ToolDiscoveryIndex().discover(
+        "从基地仓调拨物料到项目仓并检查库存",
+        policy=policy,
+        modules=["stock"],
+        limit=8,
+    )
+
+    names = {card["name"] for card in cards}
+    assert "erpnext.stock.get_transfer_context" in names
+    assert "erpnext.stock.create_transfer_draft" in names
+
+
 def test_workflow_document_direct_submit_is_rejected_before_confirmation() -> None:
     class WorkflowClient:
         def get_document(self, doctype, name):

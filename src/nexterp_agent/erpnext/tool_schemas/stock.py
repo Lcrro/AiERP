@@ -94,6 +94,48 @@ STOCK_TOOL_SCHEMAS = [
         ),
     },
     {
+        "name": "erpnext.stock.get_transfer_context",
+        "description": "Preview a warehouse-to-warehouse material transfer using live source and target Bin quantities. Read-only L1 preparation.",
+        "parameters": _object_schema(
+            ["source_warehouse", "target_warehouse", "items"],
+            {
+                "source_warehouse": {"type": "string", "description": "Existing ERPNext source Warehouse link value."},
+                "target_warehouse": {"type": "string", "description": "Existing ERPNext target Warehouse link value."},
+                "items": {"type": "array", "minItems": 1, "items": STOCK_ENTRY_ITEM_SCHEMA},
+            },
+        ),
+    },
+    {
+        "name": "erpnext.stock.create_transfer_draft",
+        "description": "Create a validated Material Transfer Stock Entry draft after checking live source availability. Draft only; submission is separate L4.",
+        "parameters": _object_schema(
+            ["source_warehouse", "target_warehouse", "items"],
+            {
+                "source_warehouse": {"type": "string", "description": "Existing ERPNext source Warehouse link value."},
+                "target_warehouse": {"type": "string", "description": "Existing ERPNext target Warehouse link value."},
+                "company": {"type": "string"},
+                "posting_date": {"type": "string"},
+                "posting_time": {"type": "string"},
+                "project": {"type": "string", "description": "Optional target ERPNext Project link applied to transfer item rows."},
+                "cost_center": {"type": "string", "description": "Optional project Cost Center link applied to transfer item rows."},
+                "remarks": {"type": "string", "maxLength": 500},
+                "require_available_stock": {"type": "boolean", "description": "Defaults to true and blocks drafts whose source stock is insufficient."},
+                "items": {"type": "array", "minItems": 1, "items": STOCK_ENTRY_ITEM_SCHEMA},
+            },
+        ),
+    },
+    {
+        "name": "erpnext.stock.verify_transfer_impact",
+        "description": "Verify a submitted Material Transfer against its Stock Ledger entries in the source and target warehouses. Read-only L0.",
+        "parameters": _object_schema(
+            ["stock_entry"],
+            {
+                "stock_entry": {"type": "string", "description": "Existing submitted Stock Entry name."},
+                "limit": {"type": "integer", "minimum": 1, "maximum": 500},
+            },
+        ),
+    },
+    {
         "name": "erpnext.stock.create_reconciliation_draft",
         "description": "Create a Stock Reconciliation draft for physical count or inventory adjustment. L3 draft only; submission changes quantity/value and is L4.",
         "parameters": _object_schema(

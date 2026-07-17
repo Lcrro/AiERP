@@ -1334,3 +1334,117 @@ tools:
           - "必须包含 confirmed_by、confirmed_at、confirmation_text 和 reason。"
           - "库存盘点/数量调整提交应包含 supervisor approval_reference。"
         repair: ["ask_clarification", "validate_before_execute", "permission_denied"]
+
+  erpnext.stock.get_transfer_context:
+    purpose: "L1：在创建库存调拨前，读取源仓和目标仓的实时库存，检查调拨后余额与缺料。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "采购主管", "项目经理"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Bin", "Item", "Warehouse", "Project"]
+    audit_fields: ["source_warehouse", "target_warehouse", "project", "items"]
+    repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute", "permission_denied"]
+    business_contract:
+      - "只做调拨预览，不创建 Stock Entry，也不改变库存。"
+      - "源仓和目标仓必须分别解析为真实 Warehouse.name，且不能相同。"
+      - "必须展示每项物料的源仓可用量、目标仓现存量、调拨后余额和缺料量。"
+      - "库存不足时不得把缺料隐藏为可调拨数量。"
+    parameters:
+      source_warehouse:
+        required: yes
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints: ["必须是已存在的源仓库全称。", "不得与目标仓相同。"]
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      target_warehouse:
+        required: yes
+        source: "Warehouse Resolver / Project Context"
+        resolver: warehouse
+        constraints: ["必须是已存在的目标仓库全称。", "项目调拨优先使用项目默认仓库。"]
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      items:
+        required: yes
+        source: "Item Resolver + 用户数量"
+        resolver: item
+        constraints: ["至少一行。", "item_code 必须来自 Item Resolver。", "qty 必须大于 0。"]
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+
+  erpnext.stock.create_transfer_draft:
+    purpose: "L3：把基地或中心仓物料调拨到项目仓，创建 Material Transfer Stock Entry 草稿；不立即移动库存。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "采购主管"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Stock Entry", "Stock Entry Detail", "Bin", "Item", "Warehouse", "Project", "Cost Center"]
+    audit_fields: ["source_warehouse", "target_warehouse", "company", "posting_date", "project", "cost_center", "items", "remarks"]
+    repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "创建前必须先调用 get_transfer_context，并确认源仓、目标仓、物料、数量和实时可用库存。"
+      - "默认禁止库存不足时创建调拨草稿；不得通过负库存绕过。"
+      - "该工具只创建 Material Transfer 草稿，提交后才实际扣减源仓并增加目标仓库存。"
+      - "项目调拨应写入 project 和项目成本中心，便于项目维度查询和审计。"
+    parameters:
+      source_warehouse:
+        required: yes
+        source: "Warehouse Resolver"
+        resolver: warehouse
+        constraints: ["必须是已存在的源仓库全称。", "不得与目标仓相同。"]
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      target_warehouse:
+        required: yes
+        source: "Warehouse Resolver / Project Context"
+        resolver: warehouse
+        constraints: ["必须是已存在的目标仓库全称。", "不得与源仓相同。"]
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      company:
+        source: "Runtime Context / Company Resolver"
+        resolver: company
+        constraints: ["如填写，必须是 ERPNext Company.name 全称。"]
+      project:
+        source: "Project Resolver / Runtime Context"
+        resolver: project
+        constraints: ["如填写，必须是已存在的 ERPNext Project.name。"]
+      cost_center:
+        source: "Project Context / Cost Center Resolver"
+        resolver: cost_center
+        constraints: ["如填写，必须是当前公司可用的成本中心。"]
+      posting_date:
+        source: "Date Resolver"
+        resolver: date
+        constraints: ["必须是 ISO 日期。"]
+      items:
+        required: yes
+        source: "Item Resolver + 已确认调拨数量"
+        resolver: item
+        constraints: ["至少一行。", "item_code 必须来自 Item Resolver。", "qty 必须大于 0。"]
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+      require_available_stock:
+        source: "Runtime 默认值"
+        constraints: ["默认 true；一般业务不得改为 false。"]
+      remarks:
+        source: "用户说明 / Runtime 摘要"
+        constraints: ["应说明调拨项目和用途。"]
+
+  erpnext.stock.verify_transfer_impact:
+    purpose: "L0：核对已提交库存调拨是否正确扣减源仓并增加目标仓库存。"
+    expose: agent_visible
+    allowed_roles: ["仓管", "仓库主管", "采购", "采购主管", "项目经理", "管理层"]
+    confirm: none
+    backend_mapping:
+      doctypes: ["Stock Entry", "Stock Entry Detail", "Stock Ledger Entry"]
+    audit_fields: ["stock_entry", "source_warehouse", "target_warehouse", "project", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只读核验库存影响，不修改单据或库存。"
+      - "未提交的草稿应明确说明尚未产生 Stock Ledger Entry。"
+      - "已提交单据必须逐项核对源仓负数量和目标仓正数量。"
+    parameters:
+      stock_entry:
+        required: yes
+        source: "Document Resolver / 最近单号"
+        resolver: docname
+        constraints: ["必须是已存在的 Stock Entry.name。"]
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      limit:
+        source: "Runtime 默认值"
+        constraints: ["取值 1 至 500；只用于限制台账读取行数。"]

@@ -33,6 +33,21 @@ def test_stock_get_balance_contract_has_business_constraints() -> None:
     assert params["warehouse"].resolver == "warehouse"
 
 
+def test_stock_transfer_contract_requires_resolved_warehouses_and_confirmation() -> None:
+    contract = get_tool_contract("erpnext.stock.create_transfer_draft")
+
+    assert contract.expose is ToolExposure.AGENT_VISIBLE
+    assert contract.confirm == "user_confirm"
+    assert "采购" in contract.allowed_roles
+    assert "Stock Entry" in contract.backend_mapping.doctypes
+
+    params = {param.name: param for param in contract.parameters}
+    assert params["source_warehouse"].resolver == "warehouse"
+    assert params["target_warehouse"].resolver == "warehouse"
+    assert params["project"].resolver == "project"
+    assert params["items"].resolver == "item"
+
+
 def test_generic_create_document_is_developer_only() -> None:
     contract = get_tool_contract("erpnext.create_document")
 

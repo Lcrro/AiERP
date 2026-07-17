@@ -103,6 +103,177 @@ class StockToolsMixin:
             summary=f"Created Stock Entry draft with {len(data['items'])} item rows.",
         )
 
+    def _stock_get_transfer_context(self, args: dict[str, Any]) -> ToolResult:
+        source_warehouse = str(args["source_warehouse"])
+        target_warehouse = str(args["target_warehouse"])
+        if source_warehouse == target_warehouse:
+            return ToolResult(
+                ok=False,
+                error="Source and target warehouses must be different.",
+                error_type="validation_error",
+                user_message="调出仓库和调入仓库不能相同。",
+            )
+
+        rows: list[dict[str, Any]] = []
+        shortages: list[dict[str, Any]] = []
+        for source_item in args["items"]:
+            item = self._normalize_stock_item_row(source_item)
+            item_code = item.get("item_code")
+            if not item_code:
+                return _item_resolution_error("库存调拨预检中存在无法解析 item_code 的行。")
+            qty = _float_or_none(item.get("qty"))
+            if qty is None or qty <= 0:
+                return ToolResult(
+                    ok=False,
+                    error="Transfer quantity must be greater than zero.",
+                    error_type="validation_error",
+                    user_message=f"物料 {item_code} 的调拨数量必须大于 0。",
+                )
+            source_result = self.client.get_stock_balance(item_code, warehouse=source_warehouse, limit=10)
+            if not source_result.ok:
+                return source_result
+            target_result = self.client.get_stock_balance(item_code, warehouse=target_warehouse, limit=10)
+            if not target_result.ok:
+                return target_result
+            source_qty = _warehouse_available_qty(source_result.data, source_warehouse)
+            target_qty = _warehouse_available_qty(target_result.data, target_warehouse)
+            shortage_qty = max(qty - source_qty, 0.0)
+            row = {
+                "item_code": item_code,
+                "qty": round(qty, 6),
+                "uom": item.get("uom") or item.get("stock_uom"),
+                "source_warehouse": source_warehouse,
+                "target_warehouse": target_warehouse,
+                "source_available_qty": round(source_qty, 6),
+                "target_available_qty": round(target_qty, 6),
+                "source_after_transfer_qty": round(source_qty - qty, 6),
+                "target_after_transfer_qty": round(target_qty + qty, 6),
+                "shortage_qty": round(shortage_qty, 6),
+                "can_transfer": shortage_qty <= 0,
+            }
+            rows.append(row)
+            if shortage_qty > 0:
+                shortages.append(row)
+
+        return ToolResult(
+            ok=True,
+            data={
+                "doctype": "Stock Entry",
+                "purpose": "Material Transfer",
+                "status": "Has Shortage" if shortages else "Ready",
+                "source_warehouse": source_warehouse,
+                "target_warehouse": target_warehouse,
+                "items": rows,
+                "shortages": shortages,
+                "summary": f"Prepared transfer preview for {len(rows)} item row(s); {len(shortages)} shortage row(s).",
+                "next_actions": ["create_transfer_draft"] if not shortages else ["review_shortages", "reduce_quantity_or_replenish_source"],
+                "risk": {"level": "L1", "writes_document": False, "moves_stock": False},
+            },
+        )
+
+    def _stock_create_transfer_draft(self, args: dict[str, Any]) -> ToolResult:
+        context = self._stock_get_transfer_context(args)
+        if not context.ok:
+            return context
+        context_data = context.data if isinstance(context.data, dict) else {}
+        shortages = context_data.get("shortages") or []
+        if shortages and args.get("require_available_stock", True):
+            return ToolResult(
+                ok=False,
+                error="Insufficient stock for material transfer draft.",
+                error_type="insufficient_stock",
+                user_message="调出仓库库存不足，默认不会创建调拨草稿。请减少数量或先补充来源仓库存。",
+                data={
+                    **context_data,
+                    "status": "Blocked By Shortage",
+                    "next_actions": ["review_shortages", "reduce_quantity_or_replenish_source"],
+                },
+            )
+
+        source_warehouse = str(args["source_warehouse"])
+        target_warehouse = str(args["target_warehouse"])
+        items = []
+        for source_item in args["items"]:
+            item = self._normalize_stock_item_row(source_item)
+            if not item.get("project"):
+                item["project"] = args.get("project")
+            if not item.get("cost_center"):
+                item["cost_center"] = args.get("cost_center")
+            items.append(_stock_transfer_item(item, source_warehouse, target_warehouse))
+        data = {
+            "stock_entry_type": "Material Transfer",
+            "purpose": "Material Transfer",
+            "company": args.get("company"),
+            "posting_date": args.get("posting_date"),
+            "posting_time": args.get("posting_time"),
+            "remarks": args.get("remarks") or f"Material transfer from {source_warehouse} to {target_warehouse}",
+            "items": items,
+        }
+        result = self.client.create_stock_entry_draft(_without_empty(data))
+        wrapped = _stock_draft_result(
+            result,
+            doctype="Stock Entry",
+            summary=f"Created material transfer draft from {source_warehouse} to {target_warehouse} with {len(items)} item row(s).",
+        )
+        if wrapped.ok and isinstance(wrapped.data, dict):
+            wrapped.data.update({"purpose": "Material Transfer", "source_warehouse": source_warehouse, "target_warehouse": target_warehouse})
+            wrapped.debug["transfer_context"] = context_data
+        return wrapped
+
+    def _stock_verify_transfer_impact(self, args: dict[str, Any]) -> ToolResult:
+        stock_entry = str(args["stock_entry"])
+        document = self.client.get_document("Stock Entry", stock_entry)
+        if not document.ok:
+            return document
+        doc = document.data if isinstance(document.data, dict) else {}
+        ledger = self.client.get_stock_ledger_entries(
+            voucher_type="Stock Entry",
+            voucher_no=stock_entry,
+            limit=args.get("limit", 500),
+        )
+        if not ledger.ok:
+            return ledger
+        ledger_rows = [row for row in ledger.data if isinstance(row, dict)] if isinstance(ledger.data, list) else []
+        item_rows = [row for row in doc.get("items") or [] if isinstance(row, dict)]
+        expected = _expected_transfer_ledger_rows(item_rows)
+        actual = _actual_transfer_ledger_rows(ledger_rows)
+        comparisons = []
+        for key, expected_qty in expected.items():
+            actual_qty = actual.get(key, 0.0)
+            comparisons.append({
+                "item_code": key[0],
+                "warehouse": key[1],
+                "expected_qty": round(expected_qty, 6),
+                "actual_qty": round(actual_qty, 6),
+                "qty_delta": round(actual_qty - expected_qty, 6),
+                "matched": abs(actual_qty - expected_qty) < 0.000001,
+            })
+        warnings = []
+        purpose = doc.get("purpose") or doc.get("stock_entry_type")
+        if purpose != "Material Transfer":
+            warnings.append({"type": "not_material_transfer", "message": "Stock Entry is not a Material Transfer."})
+        if doc.get("docstatus") != 1:
+            warnings.append({"type": "not_submitted", "message": "Stock Entry is not submitted."})
+        if doc.get("docstatus") == 1 and not ledger_rows:
+            warnings.append({"type": "no_stock_ledger_entries", "message": "Submitted transfer has no Stock Ledger Entry rows."})
+        if any(not row["matched"] for row in comparisons):
+            warnings.append({"type": "quantity_mismatch", "message": "Transfer item quantities do not match Stock Ledger entries."})
+        return ToolResult(
+            ok=True,
+            data={
+                "doctype": "Stock Entry",
+                "name": stock_entry,
+                "purpose": purpose,
+                "docstatus": doc.get("docstatus"),
+                "status": "Verified" if not warnings else "Needs Review",
+                "comparisons": comparisons,
+                "warnings": warnings,
+                "summary": f"Verified material transfer {stock_entry}: {len(comparisons)} warehouse impact row(s).",
+                "risk": {"level": "L0", "writes_document": False, "moves_stock": False},
+            },
+            debug={"raw_stock_entry": doc, "raw_stock_ledger_entries": ledger_rows},
+        )
+
     def _stock_create_reconciliation_draft(self, args: dict[str, Any]) -> ToolResult:
         data = dict(args)
         data["items"] = [self._normalize_stock_item_row(item) for item in args["items"]]
@@ -746,6 +917,63 @@ class StockToolsMixin:
             "voucher_detail_no",
         }
         return _without_empty({field: row.get(field) for field in allowed_fields})
+
+
+def _warehouse_available_qty(data: Any, warehouse: str) -> float:
+    rows = data if isinstance(data, list) else [data] if isinstance(data, dict) else []
+    total = 0.0
+    for row in rows:
+        if not isinstance(row, dict) or str(row.get("warehouse") or "") != warehouse:
+            continue
+        actual_qty = _float_or_none(row.get("actual_qty")) or 0.0
+        reserved_qty = _float_or_none(row.get("reserved_qty")) or 0.0
+        total += max(actual_qty - reserved_qty, 0.0)
+    return total
+
+
+def _stock_transfer_item(item: dict[str, Any], source_warehouse: str, target_warehouse: str) -> dict[str, Any]:
+    allowed_fields = {
+        "item_code",
+        "qty",
+        "uom",
+        "stock_uom",
+        "conversion_factor",
+        "basic_rate",
+        "batch_no",
+        "serial_no",
+        "description",
+        "project",
+        "cost_center",
+    }
+    row = {field: item.get(field) for field in allowed_fields}
+    row.update({"s_warehouse": source_warehouse, "t_warehouse": target_warehouse})
+    return _without_empty(row)
+
+
+def _expected_transfer_ledger_rows(items: list[dict[str, Any]]) -> dict[tuple[str, str], float]:
+    expected: dict[tuple[str, str], float] = {}
+    for row in items:
+        item_code = str(row.get("item_code") or "")
+        qty = _float_or_none(row.get("transfer_qty") or row.get("qty")) or 0.0
+        source = str(row.get("s_warehouse") or "")
+        target = str(row.get("t_warehouse") or "")
+        if item_code and source:
+            expected[(item_code, source)] = expected.get((item_code, source), 0.0) - qty
+        if item_code and target:
+            expected[(item_code, target)] = expected.get((item_code, target), 0.0) + qty
+    return expected
+
+
+def _actual_transfer_ledger_rows(rows: list[dict[str, Any]]) -> dict[tuple[str, str], float]:
+    actual: dict[tuple[str, str], float] = {}
+    for row in rows:
+        item_code = str(row.get("item_code") or "")
+        warehouse = str(row.get("warehouse") or "")
+        if not item_code or not warehouse:
+            continue
+        key = (item_code, warehouse)
+        actual[key] = actual.get(key, 0.0) + (_float_or_none(row.get("actual_qty")) or 0.0)
+    return actual
 
 
 def _quality_inspection_reading(row: dict[str, Any]) -> dict[str, Any]:

@@ -79,6 +79,17 @@ STOCK_READ_TOOLS = frozenset(
         "erpnext.stock.list_warehouses",
         "erpnext.stock.list_item_groups",
         "erpnext.stock.list_uoms",
+        "erpnext.stock.get_transfer_context",
+        "erpnext.stock.verify_transfer_impact",
+    }
+)
+
+STOCK_MOVEMENT_TOOLS = frozenset(
+    {
+        "erpnext.stock.get_transfer_context",
+        "erpnext.stock.create_transfer_draft",
+        "erpnext.stock.verify_transfer_impact",
+        "erpnext.stock.submit_document",
     }
 )
 
@@ -186,7 +197,11 @@ def make_tool_access_policy(
     if profile_key in {"procurement", "buying", "buyer", "采购", "采购员", "采购主管"}:
         return ToolAccessPolicy(
             profile_name=profile_name,
-            allowed_tools=COMMON_AGENT_TOOLS | _tools_with_prefix("erpnext.buying.") | STOCK_READ_TOOLS | extra,
+            allowed_tools=COMMON_AGENT_TOOLS
+            | _tools_with_prefix("erpnext.buying.")
+            | STOCK_READ_TOOLS
+            | STOCK_MOVEMENT_TOOLS
+            | extra,
             blocked_tools=blocked,
             allow_runtime_internal=allow_runtime_internal,
             allow_developer_tools=allow_developer_tools,
@@ -229,6 +244,7 @@ def make_tool_access_policy(
                 {
                     "erpnext.buying.create_material_request_draft",
                     "erpnext.buying.submit_document",
+                    "erpnext.stock.submit_document",
                 }
             )
             | extra,

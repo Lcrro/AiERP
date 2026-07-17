@@ -52,6 +52,7 @@ STOCK_ENTRY_ITEM_SCHEMA = {
         "serial_no": {"type": "string"},
         "expense_account": {"type": "string"},
         "cost_center": {"type": "string"},
+        "project": {"type": "string", "description": "Optional existing ERPNext Project link for project-scoped inventory traceability."},
         "description": {"type": "string"},
     },
 }

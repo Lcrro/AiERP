@@ -1,6 +1,6 @@
       const state = {
         projects: [], project: null, employees: [], user: null,
-        preview: null, documents: null, inbox: null, procurement: null, procurementPreparation: null, lastText: "", executeId: null,
+        preview: null, documents: null, stockDocuments: null, inbox: null, procurement: null, procurementPreparation: null, lastText: "", executeId: null,
         panel: "inbox", technicalView: "toolcall", documentDetail: null, quotationContext: null, historyToken: 0,
         conversationId: "default", developerMode: false,
         procurementFilters: {scope:"project", urgency:"", family:"", supplier:"", before:"", view:"rows"},
@@ -38,8 +38,8 @@
         "Task": ["subject","status","priority","project","owner","modified"],
         "ToDo": ["description","status","reference_type","reference_name","owner","modified"],
       };
-      const ITEM_COLUMNS = ["item_code","item_name","description","qty","received_qty","returned_qty","uom","rate","amount","warehouse","project","schedule_date"];
-      const ITEM_LABELS = {item_code:"物料编码",item_name:"物料名称",description:"描述",qty:"数量",received_qty:"已收数量",returned_qty:"已退数量",uom:"单位",rate:"单价",amount:"金额",warehouse:"仓库",project:"项目",schedule_date:"需求日期"};
+      const ITEM_COLUMNS = ["item_code","item_name","description","qty","received_qty","returned_qty","uom","rate","amount","s_warehouse","t_warehouse","warehouse","project","schedule_date"];
+      const ITEM_LABELS = {item_code:"物料编码",item_name:"物料名称",description:"描述",qty:"数量",received_qty:"已收数量",returned_qty:"已退数量",uom:"单位",rate:"单价",amount:"金额",s_warehouse:"调出仓库",t_warehouse:"调入仓库",warehouse:"仓库",project:"项目",schedule_date:"需求日期"};
 
       async function api(path, options = {}) {
         const response = await fetch(path, {headers:{"Content-Type":"application/json"}, ...options});
@@ -87,6 +87,7 @@
         state.project = project;
         state.employees = project.employees || [];
         state.documents = null;
+        state.stockDocuments = null;
         state.procurement = null;
         state.procurementPreparation = null;
         state.procurementSelected.clear();
@@ -157,6 +158,20 @@
           state.documents = await api(`/api/documents?user=${encodeURIComponent(state.user.user_email)}&project=${encodeURIComponent(state.project.project_code)}&module=buying&page=1&page_size=20`);
         } catch (error) {
           state.documents = {error:error.message};
+        }
+        renderOperations();
+      }
+
+      async function loadStockDocuments({preserve = false} = {}) {
+        if (!state.user || !state.project) { state.stockDocuments = null; renderOperations(); return; }
+        state.stockDocuments = preserve && state.stockDocuments?.modules
+          ? {...state.stockDocuments, refreshing:true}
+          : {loading:true};
+        renderOperations();
+        try {
+          state.stockDocuments = await api(`/api/documents?user=${encodeURIComponent(state.user.user_email)}&project=${encodeURIComponent(state.project.project_code)}&module=stock&page=1&page_size=30`);
+        } catch (error) {
+          state.stockDocuments = {error:error.message};
         }
         renderOperations();
       }
@@ -314,6 +329,7 @@
           $("confirmBar").classList.remove("visible");
           prependCreatedDocuments(result.document_links || []);
           void loadDocuments({preserve:true});
+          if (state.stockDocuments) void loadStockDocuments({preserve:true});
           void loadInbox({preserve:true});
         }
         renderOperations();
@@ -351,6 +367,7 @@
         document.querySelectorAll(".operations-tab").forEach(button => button.classList.toggle("active", button.dataset.panel === state.panel));
         if (state.panel === "inbox") return renderInbox();
         if (state.panel === "pending") return renderPendingProcurement();
+        if (state.panel === "stock") return renderStockDocuments();
         if (["mine","progress","recent","exceptions"].includes(state.panel)) return renderDocuments(state.panel);
         if (state.panel === "steps") return renderSteps();
         return renderTechnical();
@@ -567,6 +584,23 @@
         bindDocumentButtons($("operationsBody"));
       }
 
+      function renderStockDocuments() {
+        const source = state.stockDocuments;
+        if (!source || source.loading) {
+          $("operationsBody").innerHTML = `<div class="empty-state">正在读取当前员工可见的库存移动...</div>`;
+          return;
+        }
+        if (source.error) {
+          $("operationsBody").innerHTML = `<div class="message error">${esc(source.error)}</div>`;
+          return;
+        }
+        const groups = (source.modules || []).flatMap(module => module.groups || []);
+        const count = groups.reduce((sum, group) => sum + (group.documents || []).length, 0);
+        $("operationsBody").innerHTML = `<div class="panel-toolbar"><strong>库存作业${source.refreshing ? " · 正在同步" : ""}</strong><span><button id="refreshStockDocuments">刷新</button></span></div><p class="section-note">领料和调拨统一使用 ERPNext 库存移动。草稿复核后提交才会改变库存。</p>${count ? groups.map(group => `<div class="doctype-group"><div class="doctype-head"><span>${esc(group.label)}</span><span>${group.documents.length}</span></div>${group.error ? `<div class="empty-state">${esc(group.error)}</div>` : group.documents.map(document => `<button class="doc-row" data-doctype="${esc(group.doctype || "")}" data-name="${esc(document.name)}"><span><strong>${esc(document.name)}</strong><small>${esc(docSubtitle(document))}</small></span><span class="doc-row-status"><span>${esc(statusText(document))}</span><small>${esc(dateShort(document.modified))}</small></span></button>`).join("")}</div>`).join("") : `<div class="empty-state">当前项目还没有可见的领料或调拨单。</div>`}`;
+        $("refreshStockDocuments")?.addEventListener("click", () => loadStockDocuments({preserve:true}));
+        bindDocumentButtons($("operationsBody"));
+      }
+
       function inferDoctype(label) {
         return ({"材料申请":"Material Request","询价单":"Request for Quotation","供应商报价":"Supplier Quotation","采购订单":"Purchase Order","采购收货":"Purchase Receipt","库存移动":"Stock Entry","采购发票":"Purchase Invoice","付款单":"Payment Entry","任务":"Task","待办":"ToDo"})[label] || "";
       }
@@ -668,7 +702,7 @@
               body:JSON.stringify({user:state.user.user_email, doctype:detail.doctype, name:detail.name, project_code:state.project?.project_code, conversation_id:state.conversationId, request_id:crypto.randomUUID()}),
             });
             renderDocumentDrawer();
-            await Promise.all([loadInbox({preserve:true}), loadDocuments({preserve:true})]);
+            await Promise.all([loadInbox({preserve:true}), loadDocuments({preserve:true}), state.stockDocuments ? loadStockDocuments({preserve:true}) : Promise.resolve()]);
           } catch (error) {
             window.alert(error.message);
             await openDocument(detail.doctype, detail.name);
@@ -687,7 +721,7 @@
               body:JSON.stringify({user:state.user.user_email, doctype:detail.doctype, name:detail.name, action, comment:String(comment || "").trim(), project_code:state.project?.project_code, conversation_id:state.conversationId, request_id:crypto.randomUUID()}),
             });
             renderDocumentDrawer();
-            await Promise.all([loadInbox({preserve:true}), loadDocuments({preserve:true})]);
+            await Promise.all([loadInbox({preserve:true}), loadDocuments({preserve:true}), state.stockDocuments ? loadStockDocuments({preserve:true}) : Promise.resolve()]);
           } catch (error) {
             window.alert(error.message);
             await openDocument(detail.doctype, detail.name);
@@ -926,6 +960,7 @@
       document.querySelectorAll(".operations-tab").forEach(button => button.onclick = () => {
         state.panel = button.dataset.panel;
         if (state.panel === "pending" && !state.procurement) loadPendingProcurement();
+        else if (state.panel === "stock" && !state.stockDocuments) loadStockDocuments();
         else renderOperations();
       });
       $("input").addEventListener("keydown", event => {

@@ -42,6 +42,17 @@ class StockFakeClient:
                     ],
                 },
             )
+        if doctype == "Stock Entry" and name == "MAT-STE-TRANSFER-1":
+            return ToolResult(
+                ok=True,
+                data={
+                    "doctype": "Stock Entry",
+                    "name": name,
+                    "docstatus": 1,
+                    "purpose": "Material Transfer",
+                    "items": [{"item_code": "ITEM-001", "qty": 2, "s_warehouse": "Stores - A", "t_warehouse": "Stores - B"}],
+                },
+            )
         return ToolResult(ok=False, error_type="not_found")
 
     def search_documents(self, doctype, **kwargs) -> ToolResult:
@@ -103,6 +114,14 @@ class StockFakeClient:
         self.calls.append(("get_stock_ledger_entries", kwargs))
         if kwargs.get("voucher_type") == "Purchase Receipt":
             return ToolResult(ok=True, data=[{"item_code": "ITEM-001", "warehouse": "Stores - A", "actual_qty": 5, "stock_value_difference": 50}])
+        if kwargs.get("voucher_no") == "MAT-STE-TRANSFER-1":
+            return ToolResult(
+                ok=True,
+                data=[
+                    {"item_code": "ITEM-001", "warehouse": "Stores - A", "actual_qty": -2, "stock_value_difference": -20},
+                    {"item_code": "ITEM-001", "warehouse": "Stores - B", "actual_qty": 2, "stock_value_difference": 20},
+                ],
+            )
         return ToolResult(ok=True, data=[{"item_code": "ITEM-001", "actual_qty": -2, "stock_value_difference": -20}])
 
     def get_stock_settings(self) -> ToolResult:
@@ -353,6 +372,99 @@ def test_stock_entry_draft_returns_v02_result_shape() -> None:
         "requires_confirmation_for_submit": True,
         "submit_tool": "erpnext.stock.submit_document",
     }
+
+
+def test_stock_transfer_context_reports_live_source_and_target_quantities() -> None:
+    client = StockFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    result = adapter.execute(
+        {
+            "tool": "erpnext.stock.get_transfer_context",
+            "arguments": {
+                "source_warehouse": "Stores - A",
+                "target_warehouse": "Stores - B",
+                "items": [{"item_code": "ITEM-001", "qty": 2}],
+            },
+        }
+    )
+
+    assert result.ok
+    assert result.data["status"] == "Ready"
+    assert result.data["items"][0]["source_available_qty"] == 5
+    assert result.data["items"][0]["source_after_transfer_qty"] == 3
+    assert result.data["items"][0]["target_after_transfer_qty"] == 7
+
+
+def test_stock_transfer_draft_uses_validated_warehouses() -> None:
+    client = StockFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    result = adapter.execute(
+        {
+            "tool": "erpnext.stock.create_transfer_draft",
+            "arguments": {
+                "source_warehouse": "Stores - A",
+                "target_warehouse": "Stores - B",
+                "items": [{"item_code": "ITEM-001", "qty": 2, "uom": "Nos"}],
+            },
+        }
+    )
+
+    assert result.ok
+    assert result.data["purpose"] == "Material Transfer"
+    assert result.data["source_warehouse"] == "Stores - A"
+    assert result.data["target_warehouse"] == "Stores - B"
+    created = [call for call in client.calls if call[0] == "create_stock_entry_draft"][-1][1]
+    assert created["purpose"] == "Material Transfer"
+    assert created["items"] == [{"item_code": "ITEM-001", "qty": 2, "uom": "Nos", "s_warehouse": "Stores - A", "t_warehouse": "Stores - B"}]
+
+
+def test_stock_transfer_draft_blocks_shortage_and_same_warehouse() -> None:
+    client = StockFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    shortage = adapter.execute(
+        {
+            "tool": "erpnext.stock.create_transfer_draft",
+            "arguments": {
+                "source_warehouse": "Stores - A",
+                "target_warehouse": "Stores - B",
+                "items": [{"item_code": "ITEM-001", "qty": 8}],
+            },
+        }
+    )
+    same = adapter.execute(
+        {
+            "tool": "erpnext.stock.get_transfer_context",
+            "arguments": {
+                "source_warehouse": "Stores - A",
+                "target_warehouse": "Stores - A",
+                "items": [{"item_code": "ITEM-001", "qty": 1}],
+            },
+        }
+    )
+
+    assert not shortage.ok and shortage.error_type == "insufficient_stock"
+    assert not same.ok and same.error_type == "validation_error"
+    assert not any(call[0] == "create_stock_entry_draft" for call in client.calls)
+
+
+def test_stock_transfer_impact_matches_both_warehouses() -> None:
+    client = StockFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    result = adapter.execute(
+        {
+            "tool": "erpnext.stock.verify_transfer_impact",
+            "arguments": {"stock_entry": "MAT-STE-TRANSFER-1"},
+        }
+    )
+
+    assert result.ok
+    assert result.data["status"] == "Verified"
+    assert len(result.data["comparisons"]) == 2
+    assert all(row["matched"] for row in result.data["comparisons"])
 
 
 def test_stock_reconciliation_draft_requires_resolved_item() -> None:
