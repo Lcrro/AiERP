@@ -10,7 +10,7 @@
 - Tool schema 与 Adapter handler：`155 / 155`
 - 主数据来源：`data/master_data/` 与 `data/material_master/`
 - Agent 主入口：`DeepSeekAgentRuntime`
-- 测试：`278 passed, 3 skipped`
+- 测试：`281 passed, 3 skipped`
 
 ## 已具备
 
@@ -36,6 +36,7 @@
 - 库存调拨闭环：可预检源仓与目标仓库存、创建 Material Transfer 草稿、提交并核对两端库存台账。
 - 项目领料闭环：可从项目仓创建 Material Issue，提交后核对库存台账、项目和成本中心归集。
 - 库存闭环真实验收已完成：基地入库、调拨至项目仓、项目领料、影响核验和取消回零全部通过。
+- Civil 测试账套已建立黄金基线：保留项目、员工、仓库、物料、供应商和价格主数据，业务单据为零；支持约 34 秒一键还原并同步清空工作台会话。
 
 ## 数据状态
 
@@ -43,6 +44,7 @@
 - 历史业务模拟的脚本、报告、网页、会话和 ERPNext 交易记录已清理。
 - ERPNext 中对应旧仓库、项目、供应商、账号、库存台账和删除审计记录均为零。
 - Runtime 会话目录已重置，员工下次操作会建立新会话。
+- 黄金基线保存在本机 `.secrets/civil-baselines/golden/`，包含校验和与主数据数量指纹，不进入 Git。
 
 ## 下一步
 

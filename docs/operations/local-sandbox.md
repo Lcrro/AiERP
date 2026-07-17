@@ -40,6 +40,38 @@ http://localhost:8002
 The `civil` profile points at this independent site. It contains the current UP
 division master data used by the employee Agent workbench.
 
+## Civil Golden Baseline
+
+The `fac.localhost` test site can be restored to a clean, reproducible state
+without deleting and rebuilding documents through the API one by one. The
+baseline contains master data and test users, but no business transactions.
+
+Create or replace the local golden baseline only after confirming that the site
+has no business documents:
+
+```powershell
+.\scripts\test_env\create_civil_baseline.ps1
+```
+
+Restore the site and clear workbench conversations before a new test cycle:
+
+```powershell
+.\scripts\test_env\reset_civil_sandbox.ps1 -Confirm RESET-CIVIL-SANDBOX
+```
+
+Both scripts refuse to operate on any site other than `fac.localhost`. Backup
+archives and their manifest are stored below `.secrets/civil-baselines/golden`
+and are intentionally excluded from Git because the database snapshot contains
+local test credentials. The reset script restores ERPNext through Bench, clears
+the database using the site's own local credentials, clears ERPNext cache,
+removes local workbench session files, and verifies that the business-document
+inventory is zero. Database credentials are never printed or copied into the
+repository.
+
+Use this snapshot reset for sequential local acceptance tests. Parallel tests
+should use separate ERPNext sites cloned from the same golden baseline so that
+workers never share database state.
+
 ## Start Sandbox
 
 From PowerShell:

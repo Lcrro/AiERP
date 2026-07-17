@@ -17,5 +17,11 @@ if (-not (Test-Path $target)) {
     throw "WSL bridge target not found: $target"
 }
 
-Copy-Item -Path (Join-Path $source "api.py") -Destination (Join-Path $target "api.py") -Force
-Write-Host "Synced $AppName api.py to $target"
+$files = @("api.py", "test_env.py")
+foreach ($file in $files) {
+    $sourceFile = Join-Path $source $file
+    if (Test-Path $sourceFile) {
+        Copy-Item -Path $sourceFile -Destination (Join-Path $target $file) -Force
+    }
+}
+Write-Host "Synced $AppName runtime files to $target"
