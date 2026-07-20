@@ -25,12 +25,14 @@ LAST_REPORT_PATH = ROOT / "data" / "runtime" / "agent_write_capabilities_last_re
 PROJECT_CODE = "PRJ-HL-13"
 ERP_PROJECT = "PROJ-0010"
 WAREHOUSE = "合流1.3标仓库 - SD"
+SOURCE_WAREHOUSE = "蕰川路基地仓库 - SD"
 COMPANY = "STEC (Demo)"
 ITEM_CODE = "MAT-CEM-000008"
 SUPPLIER = "测试建材供应商甲"
 USERS = {
     "project_manager": "hu.yinhu@stec-up.local",
     "buying_manager": "pan.feng@stec-up.local",
+    "project_clerk": "mao.xiaoquan@stec-up.local",
     "finance": "fang.wenqian@stec-up.local",
 }
 
@@ -70,19 +72,36 @@ def _agent_write(
     text: str,
     run_id: str,
 ) -> dict[str, Any]:
-    service.reset_session(user, PROJECT_CODE, conversation_id)
-    runtime = service.runtime(service.scoped_session_store(user, PROJECT_CODE, conversation_id))
-    preview = runtime.run_once(
-        text,
-        user=user,
-        today=date.today(),
-        request_id=f"{run_id}-preview-{conversation_id}",
-        context=_context(),
-    ).to_dict()
-    if preview.get("status") != "needs_confirmation" or not preview.get("pending_tool_call"):
-        raise RuntimeError(
-            f"Agent 未生成待确认写操作：status={preview.get('status')}, message={preview.get('message')}"
+    preview_failures: list[dict[str, Any]] = []
+    preview: dict[str, Any] = {}
+    runtime = None
+    for attempt in range(1, 3):
+        service.reset_session(user, PROJECT_CODE, conversation_id)
+        runtime = service.runtime(service.scoped_session_store(user, PROJECT_CODE, conversation_id))
+        preview = runtime.run_once(
+            text,
+            user=user,
+            today=date.today(),
+            request_id=f"{run_id}-preview-{conversation_id}-{attempt}",
+            context=_context(),
+        ).to_dict()
+        if preview.get("status") == "needs_confirmation" and preview.get("pending_tool_call"):
+            break
+        preview_failures.append(
+            {
+                "attempt": attempt,
+                "status": preview.get("status"),
+                "message": preview.get("message"),
+                "planner_actions": [
+                    step.get("action")
+                    for step in preview.get("steps") or []
+                    if step.get("label") == "DeepSeek规划"
+                ],
+            }
         )
+    else:
+        raise RuntimeError(f"Agent 两次均未生成待确认写操作：{preview_failures}")
+    assert runtime is not None
     confirmed = runtime.run_once(
         "确认执行",
         user=user,
@@ -97,6 +116,8 @@ def _agent_write(
             f"Agent 写操作失败：status={confirmed.get('status')}, message={confirmed.get('message')}"
         )
     return {
+        "preview_attempts": len(preview_failures) + 1,
+        "preview_failures": preview_failures,
         "preview": preview,
         "confirmed": confirmed,
         "tool_call": preview["pending_tool_call"],
@@ -118,6 +139,43 @@ def _append_document(
     _save(report)
 
 
+def _balance(service: AgentWorkbenchService, user: str, warehouse: str) -> float:
+    result = service.client(user).get_stock_balance(ITEM_CODE, warehouse=warehouse, limit=10)
+    if not result.ok:
+        raise RuntimeError(result.user_message or result.error or "读取库存失败")
+    rows = result.data if isinstance(result.data, list) else []
+    for row in rows:
+        if isinstance(row, dict) and row.get("warehouse") == warehouse:
+            return float(row.get("actual_qty") or 0)
+    return 0.0
+
+
+def _stock_confirmation(user: str, run_id: str, reason: str) -> dict[str, Any]:
+    return {
+        "confirmed": True,
+        "confirmed_by": user,
+        "confirmed_at": datetime.now().astimezone().isoformat(),
+        "confirmation_text": "已确认提交 Agent 库存写入验收单据",
+        "reason": reason,
+        "approval_reference": run_id,
+    }
+
+
+def _submit_stock_entry(adapter: ERPNextAdapter, user: str, name: str, run_id: str, reason: str) -> None:
+    result = adapter.execute(
+        {
+            "tool": "erpnext.stock.submit_document",
+            "arguments": {
+                "doctype": "Stock Entry",
+                "name": name,
+                "confirmation": _stock_confirmation(user, run_id, reason),
+            },
+        }
+    )
+    if not result.ok:
+        raise RuntimeError(result.user_message or result.error or f"提交库存单据 {name} 失败")
+
+
 def prepare(service: AgentWorkbenchService) -> dict[str, Any]:
     run_id = f"agent-e2e-{datetime.now().strftime('%Y%m%d%H%M%S')}-{uuid4().hex[:6]}"
     checks: dict[str, bool] = {}
@@ -128,6 +186,7 @@ def prepare(service: AgentWorkbenchService) -> dict[str, Any]:
     for doctype, name in (
         ("Project", ERP_PROJECT),
         ("Warehouse", WAREHOUSE),
+        ("Warehouse", SOURCE_WAREHOUSE),
         ("Item", ITEM_CODE),
         ("Supplier", SUPPLIER),
     ):
@@ -143,6 +202,10 @@ def prepare(service: AgentWorkbenchService) -> dict[str, Any]:
         "checks": checks,
         "documents": [],
         "cases": {},
+        "initial_balances": {
+            "source": _balance(service, USERS["buying_manager"], SOURCE_WAREHOUSE),
+            "target": _balance(service, USERS["buying_manager"], WAREHOUSE),
+        },
     }
     _save(report)
 
@@ -260,6 +323,144 @@ def run_project(service: AgentWorkbenchService, report: dict[str, Any]) -> dict[
     return report["cases"]["project_task"]
 
 
+def run_stock(service: AgentWorkbenchService, report: dict[str, Any]) -> dict[str, Any]:
+    run_id = str(report["run_id"])
+    stock_user = USERS["buying_manager"]
+    clerk_user = USERS["project_clerk"]
+    stock_adapter = ERPNextAdapter(service.client(stock_user))
+    clerk_adapter = ERPNextAdapter(service.client(clerk_user))
+    baseline = {
+        "source": _balance(service, stock_user, SOURCE_WAREHOUSE),
+        "target": _balance(service, stock_user, WAREHOUSE),
+    }
+    report["stock_baseline"] = baseline
+    _save(report)
+
+    seed = _require_tool(
+        stock_adapter.execute(
+            {
+                "tool": "erpnext.stock.create_entry_draft",
+                "arguments": {
+                    "stock_entry_type": "Material Receipt",
+                    "purpose": "Material Receipt",
+                    "company": COMPANY,
+                    "posting_date": date.today().isoformat(),
+                    "remarks": f"{run_id} 建立库存写入验收来源库存。",
+                    "items": [
+                        {
+                            "item_code": ITEM_CODE,
+                            "qty": 3,
+                            "uom": "包",
+                            "t_warehouse": SOURCE_WAREHOUSE,
+                            "basic_rate": 28,
+                        }
+                    ],
+                },
+            }
+        ),
+        "创建库存来源夹具",
+    )
+    seed_name = str(seed["name"])
+    _append_document(
+        report,
+        doctype="Stock Entry",
+        name=seed_name,
+        user=stock_user,
+        purpose="stock_fixture",
+    )
+    _submit_stock_entry(stock_adapter, stock_user, seed_name, run_id, "建立库存写入验收来源库存")
+
+    transfer_result = _agent_write(
+        service,
+        user=stock_user,
+        conversation_id=f"{run_id}-stock-transfer",
+        text=(
+            f"请把2包水泥42.5袋装50kg（{ITEM_CODE}）从{SOURCE_WAREHOUSE}"
+            f"调拨到{WAREHOUSE}，归属当前合流项目，先创建调拨草稿。"
+        ),
+        run_id=run_id,
+    )
+    transfer_data = transfer_result["tool_result"].get("data") or {}
+    transfer_name = str(transfer_data.get("name") or "")
+    if not transfer_name:
+        raise RuntimeError("库存调拨验收未返回 Stock Entry 名称")
+    _append_document(
+        report,
+        doctype="Stock Entry",
+        name=transfer_name,
+        user=stock_user,
+        purpose="agent_stock_transfer",
+    )
+    _submit_stock_entry(stock_adapter, stock_user, transfer_name, run_id, "确认基地仓调拨到项目仓")
+    transfer_impact = stock_adapter.execute(
+        {"tool": "erpnext.stock.verify_transfer_impact", "arguments": {"stock_entry": transfer_name}}
+    )
+    if not transfer_impact.ok:
+        raise RuntimeError(transfer_impact.user_message or transfer_impact.error or "调拨影响核验失败")
+
+    issue_result = _agent_write(
+        service,
+        user=clerk_user,
+        conversation_id=f"{run_id}-project-issue",
+        text=(
+            f"合流项目班组从{WAREHOUSE}领用1包水泥42.5袋装50kg（{ITEM_CODE}），"
+            "请创建项目领料草稿。"
+        ),
+        run_id=run_id,
+    )
+    issue_data = issue_result["tool_result"].get("data") or {}
+    issue_name = str(issue_data.get("name") or "")
+    if not issue_name:
+        raise RuntimeError("项目领料验收未返回 Stock Entry 名称")
+    _append_document(
+        report,
+        doctype="Stock Entry",
+        name=issue_name,
+        user=clerk_user,
+        purpose="agent_project_issue",
+    )
+    _submit_stock_entry(clerk_adapter, clerk_user, issue_name, run_id, "确认合流项目材料领用")
+    issue_impact = clerk_adapter.execute(
+        {
+            "tool": "erpnext.projects.verify_material_issue_cost_impact",
+            "arguments": {"stock_entry": issue_name, "project": ERP_PROJECT},
+        }
+    )
+    if not issue_impact.ok:
+        raise RuntimeError(issue_impact.user_message or issue_impact.error or "项目领料影响核验失败")
+
+    balances = {
+        "source": _balance(service, stock_user, SOURCE_WAREHOUSE),
+        "target": _balance(service, stock_user, WAREHOUSE),
+    }
+    transfer_payload = transfer_impact.data if isinstance(transfer_impact.data, dict) else {}
+    issue_payload = issue_impact.data if isinstance(issue_impact.data, dict) else {}
+    transfer_verification = (transfer_result["confirmed"].get("tool_result") or {}).get("verification", {})
+    issue_verification = (issue_result["confirmed"].get("tool_result") or {}).get("verification", {})
+    checks = {
+        "transfer_tool": transfer_result["tool_call"].get("tool") == "erpnext.stock.create_transfer_draft",
+        "issue_tool": issue_result["tool_call"].get("tool") == "erpnext.projects.create_material_issue_draft",
+        "transfer_readback": bool(transfer_verification.get("ok")),
+        "issue_readback": bool(issue_verification.get("ok")),
+        "transfer_ledger": transfer_payload.get("status") == "Verified"
+        and all(row.get("matched") for row in transfer_payload.get("comparisons") or []),
+        "issue_project": issue_payload.get("docstatus") == 1 and bool(issue_payload.get("items")),
+        "source_balance": balances["source"] == baseline["source"] + 1,
+        "target_balance": balances["target"] == baseline["target"] + 1,
+    }
+    report["cases"]["stock"] = {
+        "ok": all(checks.values()),
+        "checks": checks,
+        "baseline": baseline,
+        "balances": balances,
+        "seed": seed_name,
+        "transfer": transfer_name,
+        "issue": issue_name,
+    }
+    _save(report)
+    return report["cases"]["stock"]
+
+
 def run_finance(service: AgentWorkbenchService, report: dict[str, Any]) -> dict[str, Any]:
     run_id = str(report["run_id"])
     receipt = str(report.get("fixture", {}).get("purchase_receipt") or "")
@@ -365,7 +566,7 @@ def verify(service: AgentWorkbenchService, report: dict[str, Any] | None = None)
             }
         )
     cases = report.get("cases") or {}
-    expected_cases = {"project_task", "finance"}
+    expected_cases = {"project_task", "stock", "finance"}
     result = {
         "ok": expected_cases.issubset(cases) and all(bool(cases[name].get("ok")) for name in expected_cases)
         and all(row["exists"] for row in document_checks),
@@ -423,20 +624,36 @@ def cleanup(service: AgentWorkbenchService, report: dict[str, Any] | None = None
             delete_errors.append(result.user_message or result.error)
         if not deleted:
             exists = any(service.client(user).get_document(doctype, name).ok for user in candidates)
-            if exists and docstatus == 1:
+            if exists and docstatus in {1, 2}:
                 retained_cancelled.append({"doctype": doctype, "name": name, "errors": delete_errors})
             elif exists:
                 failed.append({"doctype": doctype, "name": name, "stage": "delete", "errors": delete_errors})
 
+    stock_restored = True
+    if isinstance(report.get("initial_balances"), dict):
+        baseline = report["initial_balances"]
+        restored = {
+            "source": _balance(service, USERS["buying_manager"], SOURCE_WAREHOUSE),
+            "target": _balance(service, USERS["buying_manager"], WAREHOUSE),
+        }
+        stock_restored = restored == {
+            "source": float(baseline.get("source") or 0),
+            "target": float(baseline.get("target") or 0),
+        }
+    else:
+        restored = None
+
     for user in USERS.values():
-        for suffix in ("project-task", "purchase-invoice", "supplier-payment"):
+        for suffix in ("project-task", "stock-transfer", "project-issue", "purchase-invoice", "supplier-payment"):
             service.reset_session(user, PROJECT_CODE, f"{report.get('run_id')}-{suffix}")
     result = {
-        "ok": not failed,
+        "ok": not failed and stock_restored,
         "run_id": report.get("run_id"),
         "removed": removed,
         "retained_cancelled": retained_cancelled,
         "failed": failed,
+        "stock_restored": stock_restored,
+        "restored_balances": restored,
     }
     if result["ok"]:
         REPORT_PATH.unlink(missing_ok=True)
@@ -451,14 +668,16 @@ def run_all(service: AgentWorkbenchService) -> dict[str, Any]:
     prepared = prepare(service)
     report = _load()
     project = run_project(service, report)
+    stock = run_stock(service, report)
     finance = run_finance(service, report)
     verification = verify(service, report)
     cleanup_result = cleanup(service, report)
     result = {
-        "ok": bool(project.get("ok")) and bool(finance.get("ok")) and bool(verification.get("ok"))
+        "ok": bool(project.get("ok")) and bool(stock.get("ok")) and bool(finance.get("ok")) and bool(verification.get("ok"))
         and bool(cleanup_result.get("ok")),
         "prepared": prepared,
         "project": project,
+        "stock": stock,
         "finance": finance,
         "verification": verification,
         "cleanup": cleanup_result,
@@ -470,7 +689,7 @@ def run_all(service: AgentWorkbenchService) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run repeatable real-DeepSeek Agent write acceptance tests.")
-    parser.add_argument("command", choices=["prepare", "project", "finance", "verify", "cleanup", "all"])
+    parser.add_argument("command", choices=["prepare", "project", "stock", "finance", "verify", "cleanup", "all"])
     args = parser.parse_args()
     load_dotenv(ROOT / ".env")
     service = AgentWorkbenchService("civil")
@@ -479,6 +698,9 @@ def main() -> int:
     elif args.command == "project":
         report = _load()
         result = run_project(service, report)
+    elif args.command == "stock":
+        report = _load()
+        result = run_stock(service, report)
     elif args.command == "finance":
         report = _load()
         result = run_finance(service, report)
