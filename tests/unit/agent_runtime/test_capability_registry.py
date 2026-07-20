@@ -98,7 +98,35 @@ def test_capability_discovery_is_permission_filtered_and_limited() -> None:
 
     assert 1 <= len(cards) <= 5
     assert all(card["module"] == "projects" for card in cards)
+    assert all(card["match_score"] > 0 for card in cards)
     assert all(policy.decide(registry.get(card["capability_id"]).tool, origin="agent").allowed for card in cards)
+
+
+def test_capability_discovery_does_not_pad_with_zero_score_results() -> None:
+    registry = CapabilityRegistry()
+    policy = make_tool_access_policy("project")
+
+    assert registry.discover("完全无关的火星业务", policy=policy, modules=["stock"], limit=5) == []
+
+
+def test_unique_capability_discovery_auto_loads_guide(tmp_path: Path) -> None:
+    planner = PlannerSequence([
+        {
+            "action": "discover_capabilities",
+            "summary": "查找材料申请能力",
+            "arguments": {"query": "创建采购类型材料申请草稿", "modules": ["buying"]},
+        },
+        {"action": "ask_user", "summary": "询问物料", "arguments": {"questions": ["需要什么物料？"]}},
+    ])
+    runtime = DeepSeekAgentRuntime(planner=planner, session_store=RuntimeSessionStore(tmp_path))
+
+    result = runtime.run_once("帮我创建材料申请", user="mao.xiaoquan@stec-up.local")
+
+    assert result.status == "needs_clarification"
+    discovery = next(step["result"] for step in result.steps if step["label"] == "发现业务能力")
+    assert discovery["auto_loaded_guide"]["capability_id"] == "material_request.create"
+    assert "material_request.create" in planner.messages[1][1]["content"]
+    assert not any(step["action"] == "get_capability_guide" for step in result.steps)
 
 
 def test_runtime_initial_prompt_uses_progressive_capability_disclosure(tmp_path: Path) -> None:

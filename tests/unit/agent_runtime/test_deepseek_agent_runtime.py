@@ -598,7 +598,15 @@ def test_repeated_read_only_business_action_is_executed_once(tmp_path: Path) -> 
         "arguments": {"business_intent": {"goal": "query_project_cost", "from_date": "2026-07-01"}},
     }
     runtime = DeepSeekAgentRuntime(
-        planner=PlannerSequence([action, varied_action]),
+        planner=PlannerSequence([
+            action,
+            varied_action,
+            {
+                "action": "finish",
+                "summary": "回复项目成本",
+                "arguments": {"message": "当前项目暂无已记录的领料、收货或任务成本。"},
+            },
+        ]),
         client_factory=lambda _user: client,
         session_store=RuntimeSessionStore(tmp_path),
     )
@@ -610,7 +618,8 @@ def test_repeated_read_only_business_action_is_executed_once(tmp_path: Path) -> 
     )
     assert result.status == "completed"
     assert len(result.tool_results) == 1
-    assert any(step["label"] == "跳过重复业务查询" for step in result.steps)
+    assert result.message == "当前项目暂无已记录的领料、收货或任务成本。"
+    assert any(step["label"] == "要求生成最终回复" for step in result.steps)
 
 
 def test_runtime_stops_after_configured_deepseek_decision_count(tmp_path: Path) -> None:

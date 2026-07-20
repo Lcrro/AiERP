@@ -308,8 +308,12 @@ class CapabilityRegistry:
             text = f"{definition.capability_id} {definition.goal} {definition.module} {definition.purpose}".lower()
             score = sum(4 if token in definition.capability_id else 1 for token in query_tokens if token in text)
             ranked.append((score, definition))
+        ranked = [row for row in ranked if row[0] > 0]
         ranked.sort(key=lambda row: (-row[0], row[1].capability_id))
-        return [definition.card() for _, definition in ranked[: max(1, min(int(limit), 5))]]
+        return [
+            {**definition.card(), "match_score": score}
+            for score, definition in ranked[: max(1, min(int(limit), 5))]
+        ]
 
     def guides(self, capability_ids: list[str], *, policy: Any) -> list[dict[str, Any]]:
         guides = []

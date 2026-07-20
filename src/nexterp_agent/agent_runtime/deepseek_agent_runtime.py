@@ -307,6 +307,14 @@ class DeepSeekAgentRuntime:
             steps.append(_step("DeepSeek规划", action["action"], action.get("arguments") or {}, {"summary": action["summary"]}))
             kind = action["action"]
             arguments = action.get("arguments") or {}
+            if _successful_read_requires_finish(observations, self.capabilities) and kind != "finish":
+                observation = {
+                    "type": "completion_required",
+                    "error": "只读业务查询已经成功，本轮只能根据现有真实结果返回finish，禁止再次规划或查询。",
+                }
+                steps.append(_step("要求生成最终回复", "completion_required", arguments, observation))
+                observations.append(observation)
+                continue
             fingerprint = _agent_action_fingerprint(action)
             action_occurrences[fingerprint] = action_occurrences.get(fingerprint, 0) + 1
             if action_occurrences[fingerprint] == 2:
@@ -337,11 +345,22 @@ class DeepSeekAgentRuntime:
                     modules=arguments.get("modules"),
                     limit=5,
                 )
+                auto_guide = _auto_load_capability_guide(
+                    capability_cards,
+                    registry=self.capabilities,
+                    policy=policy,
+                    session=session,
+                )
                 observation = {
                     "type": kind,
                     "tools": cards,
                     "capabilities": capability_cards,
-                    "instruction": "若存在匹配的 Capability，优先加载其 Guide；tools 仅用于尚未能力化的普通查询。",
+                    "auto_loaded_guide": auto_guide,
+                    "instruction": (
+                        "唯一匹配的 Capability Guide 已自动加载，请直接解析实体并提交业务意图。"
+                        if auto_guide
+                        else "若存在匹配的 Capability，优先加载其 Guide；tools 仅用于尚未能力化的普通查询。"
+                    ),
                 }
                 steps.append(_step("发现工具", kind, arguments, observation))
                 observations.append(observation)
@@ -353,7 +372,22 @@ class DeepSeekAgentRuntime:
                     modules=arguments.get("modules"),
                     limit=int(arguments.get("limit") or 5),
                 )
-                observation = {"type": kind, "capabilities": cards}
+                auto_guide = _auto_load_capability_guide(
+                    cards,
+                    registry=self.capabilities,
+                    policy=policy,
+                    session=session,
+                )
+                observation = {
+                    "type": kind,
+                    "capabilities": cards,
+                    "auto_loaded_guide": auto_guide,
+                    "instruction": (
+                        "唯一匹配的 Capability Guide 已自动加载，请勿再次调用 get_capability_guide。"
+                        if auto_guide
+                        else "请从候选中选择能力并加载 Guide。"
+                    ),
+                }
                 steps.append(_step("发现业务能力", kind, arguments, observation))
                 observations.append(observation)
                 continue
@@ -790,12 +824,14 @@ class DeepSeekAgentRuntime:
         session.business_state["verified_actions"] = history[-20:]
 
     def _messages(self, user_text: str, employee: dict[str, str], session: RuntimeSessionState, today: date, observations: list[dict[str, Any]], steps: list[dict[str, Any]]) -> list[dict[str, str]]:
+        finish_only = _successful_read_requires_finish(observations, self.capabilities)
         system = (
             "你是懂业务的ERPNext员工助理，只返回协议中的单个JSON动作。"
             "负责理解目标、提取用户明确表达的信息、比较候选和友好追问；不要承担ERP事务编排。"
             "任何ERPNext主键必须来自resolve_entities或已确认上下文，禁止猜测。"
             "已确认上下文中的runtime_project是当前ERPNext项目主键；用户没有明确说另一个项目时直接使用，不要重复解析或追问。"
-            "采购、库存、财务与项目业务先discover_capabilities，再get_capability_guide；按Guide要求resolve_entities后，"
+            "采购、库存、财务与项目业务先discover_capabilities；若结果已包含auto_loaded_guide，直接按Guide解析实体，"
+            "否则再get_capability_guide；按Guide要求resolve_entities后，"
             "使用propose_business_action提交capability_id和业务意图。不得猜测Capability，也不得直接调用其底层写工具。"
             "未能力化的普通查询才使用discover_tools、get_tool_contracts和execute_tool。"
             "Runtime负责读取来源单据、限制合法下一步、编译ToolCall和等待一次用户确认。"
@@ -807,6 +843,11 @@ class DeepSeekAgentRuntime:
             "候选不唯一时ask_user并展示最相关候选；完成后只引用observation中的真实数字、状态和单号。"
             "summary仅用于审计；ask_user.message和finish.message要自然、简洁、可行动。不要展示隐藏思维过程。"
         )
+        if finish_only:
+            system += (
+                "当前只读业务查询已经成功并返回真实结果。下一动作只能是finish：直接回答用户的问题，"
+                "不得再次发现能力、解析实体、提交业务意图或执行工具。"
+            )
         active_capability_id = str(session.business_state.get("active_capability_id") or "")
         active_capability_guide = None
         if active_capability_id:
@@ -814,9 +855,7 @@ class DeepSeekAgentRuntime:
                 active_capability_guide = self.capabilities.get(active_capability_id).guide()
             except ValueError:
                 active_capability_guide = None
-        protocol = {
-            "action_schema": {"action": "discover_capabilities | get_capability_guide | discover_tools | get_tool_contracts | resolve_entities | propose_business_action | execute_tool | ask_user | finish", "summary": "可审计的简短动作说明", "arguments": "必须符合对应action_schemas"},
-            "action_schemas": {
+        action_schemas = {
                 "discover_capabilities": {"query": "描述所需业务能力，必填", "modules": ["stock | buying | accounting | projects"], "limit": "1-5"},
                 "get_capability_guide": {"capability_ids": ["从discover_capabilities结果逐字复制，最多3个"]},
                 "discover_tools": {"query": "描述所需业务能力，必填", "modules": ["generic | users | assets | stock | buying | accounting | projects"], "limit": "1-8"},
@@ -826,7 +865,14 @@ class DeepSeekAgentRuntime:
                 "execute_tool": {"tool_call": {"tool": "已读取契约的工具名", "arguments": {}}},
                 "ask_user": {"message": "可直接展示给员工的自然回复", "questions": ["员工可直接回答的最少必要问题"], "candidates": ["从observation复制的相关候选，可省略并由Runtime补齐"]},
                 "finish": {"message": "基于真实observation的最终答复"},
+            }
+        protocol = {
+            "action_schema": {
+                "action": "finish" if finish_only else "discover_capabilities | get_capability_guide | discover_tools | get_tool_contracts | resolve_entities | propose_business_action | execute_tool | ask_user | finish",
+                "summary": "可审计的简短动作说明",
+                "arguments": "必须符合对应action_schemas",
             },
+            "action_schemas": {"finish": action_schemas["finish"]} if finish_only else action_schemas,
             "modules": MODULE_DESCRIPTIONS,
             "active_capability_guide": active_capability_guide,
             "active_capability_draft": _capability_draft(session, active_capability_id),
@@ -1714,13 +1760,62 @@ def _observation_candidates(observations: list[dict[str, Any]]) -> list[dict[str
 
 
 def _loaded_capability_ids(observations: list[dict[str, Any]]) -> set[str]:
-    return {
+    loaded = {
         str(guide.get("capability_id"))
         for observation in observations
         if observation.get("type") == "get_capability_guide"
         for guide in observation.get("guides") or []
         if isinstance(guide, dict) and guide.get("capability_id")
     }
+    loaded.update(
+        str(guide.get("capability_id"))
+        for observation in observations
+        for guide in [observation.get("auto_loaded_guide")]
+        if isinstance(guide, dict) and guide.get("capability_id")
+    )
+    return loaded
+
+
+def _successful_read_requires_finish(
+    observations: list[dict[str, Any]],
+    registry: CapabilityRegistry,
+) -> bool:
+    """Return true once the current read capability has produced a real result."""
+    for observation in reversed(observations):
+        if observation.get("type") != "tool_result":
+            continue
+        capability_id = str(observation.get("capability") or "")
+        result = observation.get("result")
+        if not capability_id or not isinstance(result, dict) or not result.get("ok"):
+            return False
+        try:
+            return not registry.get(capability_id).write
+        except ValueError:
+            return False
+    return False
+
+
+def _auto_load_capability_guide(
+    cards: list[dict[str, Any]],
+    *,
+    registry: CapabilityRegistry,
+    policy: Any,
+    session: RuntimeSessionState,
+) -> dict[str, Any] | None:
+    if not cards:
+        return None
+    first_score = int(cards[0].get("match_score") or 0)
+    second_score = int(cards[1].get("match_score") or 0) if len(cards) > 1 else 0
+    if first_score < 2 or (second_score and first_score < second_score * 2):
+        return None
+    capability_id = str(cards[0].get("capability_id") or "")
+    guides = registry.guides([capability_id], policy=policy)
+    if not guides:
+        return None
+    if session.business_state.get("active_capability_id") != capability_id:
+        _clear_capability_draft(session)
+    session.business_state["active_capability_id"] = capability_id
+    return guides[0]
 
 
 def _agent_action_fingerprint(action: dict[str, Any]) -> str:
