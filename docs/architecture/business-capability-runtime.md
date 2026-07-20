@@ -122,7 +122,22 @@ src/nexterp_agent/agent_runtime/business_capabilities/finance.py
 
 财务模型不能填写应付科目、银行科目或总账分录。付款草稿调用 ERPNext 标准付款生成方法取得会计账户和发票分配关系；取消单据由 ERPNext 执行正式取消与反向会计影响，并继续受会计期间、关联单据和员工权限约束。
 
-项目的其他业务按相同方式增加独立能力包，不把所有模块塞进一个总提示词。
+## 当前项目能力
+
+| 业务目标 | 确定性能力 | 关键边界 |
+| --- | --- | --- |
+| 查询项目成本上下文 | `project.cost.query` | 只读取真实 Project、Task、Stock Entry 和 Purchase Receipt |
+| 查询项目异常 | `project.exceptions.query` | 按实时项目日期、任务日期、状态和进度生成异常信号，不保存第二套状态 |
+| 创建项目任务 | `project.task.create` | 项目来自当前确认上下文，任务标题由用户说明，创建前确认 |
+| 更新项目任务 | `project.task.update` | Task 必须实时解析，只允许状态、进度、优先级、计划日期和描述 |
+
+实现位于：
+
+```text
+src/nexterp_agent/agent_runtime/business_capabilities/projects.py
+```
+
+同一用户轮次内，同一个只读业务目标最多执行一次。即使模型轻微改变可选参数，Runtime 也不会重复查询 ERPNext；模型只能基于第一次真实结果完成回复。
 
 ## 上下文与记忆
 

@@ -21,6 +21,13 @@ from .finance import (
     FinanceCapabilityGraph,
     verify_finance_result,
 )
+from .projects import (
+    PROJECT_GOALS,
+    ProjectBusinessIntentDraft,
+    ProjectCapabilityCompiler,
+    ProjectCapabilityGraph,
+    verify_project_result,
+)
 
 __all__ = [
     "BusinessIntentDraft",
@@ -40,4 +47,9 @@ __all__ = [
     "FinanceCapabilityCompiler",
     "FinanceCapabilityGraph",
     "verify_finance_result",
+    "PROJECT_GOALS",
+    "ProjectBusinessIntentDraft",
+    "ProjectCapabilityCompiler",
+    "ProjectCapabilityGraph",
+    "verify_project_result",
 ]

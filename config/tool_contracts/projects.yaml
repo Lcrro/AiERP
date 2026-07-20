@@ -1,6 +1,61 @@
 version: 1
 module: projects
 tools:
+  erpnext.projects.get_project_exceptions:
+    purpose: "L0：读取项目延期、逾期任务和进度缺失异常。"
+    expose: agent_visible
+    allowed_roles: ["项目经理", "管理层"]
+    confirm: none
+    backend_mapping: {doctypes: ["Project", "Task"]}
+    audit_fields: ["project", "as_of_date", "limit"]
+    repair: ["resolve_entity", "ask_clarification", "permission_denied"]
+    business_contract:
+      - "只读取实时 Project 和 Task，不写入人工判断的第二套异常状态。"
+      - "项目必须来自 Project Resolver，截止日必须是 ISO 日期。"
+    parameters:
+      project: {required: yes, source: "Project Resolver", resolver: project}
+      as_of_date: {source: "Runtime current_date", resolver: date}
+      limit: {source: "Runtime 默认值"}
+
+  erpnext.projects.create_task:
+    purpose: "L3：在真实项目下创建任务。"
+    expose: agent_visible
+    allowed_roles: ["项目经理", "技术负责人"]
+    confirm: user_confirm
+    backend_mapping: {doctypes: ["Project", "Task"]}
+    audit_fields: ["project", "subject", "description", "priority", "exp_start_date", "exp_end_date"]
+    repair: ["resolve_entity", "ask_clarification", "erpnext_validation_error"]
+    business_contract:
+      - "project 必须来自 Project Resolver；任务标题必须由用户说明。"
+      - "任务默认 Open，不允许模型设置创建人、owner 或其他系统字段。"
+    parameters:
+      project: {required: yes, source: "Project Resolver", resolver: project}
+      subject: {required: yes, source: "用户明确说明"}
+      description: {source: "用户说明"}
+      priority: {source: "用户说明 / 默认 Medium"}
+      exp_start_date: {source: "Date Resolver", resolver: date}
+      exp_end_date: {source: "Date Resolver", resolver: date}
+
+  erpnext.projects.update_task:
+    purpose: "L3：更新任务状态、进度、优先级、计划日期或描述。"
+    expose: agent_visible
+    allowed_roles: ["项目经理", "技术负责人"]
+    confirm: user_confirm
+    backend_mapping: {doctypes: ["Task"]}
+    audit_fields: ["task", "status", "progress", "priority", "exp_start_date", "exp_end_date", "description"]
+    repair: ["resolve_entity", "ask_clarification", "erpnext_validation_error"]
+    business_contract:
+      - "task 必须来自 Document Resolver；至少提供一项受控变更。"
+      - "禁止改变任务所属项目、owner 或系统审计字段。"
+    parameters:
+      task: {required: yes, source: "Document Resolver", resolver: docname}
+      status: {source: "用户明确说明"}
+      progress: {source: "用户明确说明"}
+      priority: {source: "用户明确说明"}
+      exp_start_date: {source: "Date Resolver", resolver: date}
+      exp_end_date: {source: "Date Resolver", resolver: date}
+      description: {source: "用户说明"}
+
   erpnext.projects.get_project_cost_context:
     purpose: "L0：读取项目成本上下文，汇总 Project、Task、Stock Entry 和 Purchase Receipt 相关记录。"
     expose: agent_visible

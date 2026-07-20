@@ -469,6 +469,102 @@ def test_finance_invoice_from_receipt_confirms_and_verifies_lineage(tmp_path: Pa
     assert "purchase_receipt_lineage_preserved" in completed.tool_result["verification"]["checks"]
 
 
+def test_project_task_business_action_confirms_and_verifies_project(tmp_path: Path) -> None:
+    class ProjectTaskClient:
+        def __init__(self):
+            self.created = []
+
+        def get_logged_user(self):
+            return ToolResult(ok=True, data="hu.yinhu@stec-up.local")
+
+        def get_document(self, doctype, name):
+            if (doctype, name) == ("Project", "PROJ-0010"):
+                return ToolResult(ok=True, data={"doctype": doctype, "name": name, "project_name": "合流1.3标", "status": "Open"})
+            if (doctype, name) == ("Task", "TASK-NEW-001"):
+                return ToolResult(ok=True, data={
+                    "doctype": doctype, "name": name, "project": "PROJ-0010", "subject": "完成井壁验收",
+                    "status": "Open", "priority": "High", "exp_end_date": "2026-07-22",
+                })
+            raise AssertionError((doctype, name))
+
+        def create_document(self, doctype, data):
+            assert doctype == "Task"
+            self.created.append(data)
+            return ToolResult(ok=True, data={"doctype": doctype, "name": "TASK-NEW-001"})
+
+    planner = PlannerSequence([{
+        "action": "propose_business_action",
+        "summary": "准备项目任务",
+        "arguments": {"business_intent": {
+            "goal": "create_project_task", "subject": "完成井壁验收", "priority": "High",
+            "exp_end_date": "2026-07-22",
+        }},
+    }])
+    store = RuntimeSessionStore(tmp_path)
+    client = ProjectTaskClient()
+    runtime = DeepSeekAgentRuntime(planner=planner, client_factory=lambda _user: client, session_store=store)
+
+    preview = runtime.run_once(
+        "创建任务：7月22日前完成井壁验收，高优先级",
+        user="hu.yinhu@stec-up.local",
+        today=date(2026, 7, 20),
+        context={"project_code": "PRJ-HL-13", "erpnext_project": "PROJ-0010", "warehouse": "合流1.3标仓库 - SD"},
+    )
+    assert preview.status == "needs_confirmation"
+    assert preview.pending_tool_call["tool"] == "erpnext.projects.create_task"
+    assert client.created == []
+
+    completed = runtime.run_once("确认", user="hu.yinhu@stec-up.local", execute=True, today=date(2026, 7, 20))
+    assert completed.status == "completed"
+    assert len(client.created) == 1
+    assert completed.tool_result["verification"]["ok"] is True
+    assert "task_fields_verified" in completed.tool_result["verification"]["checks"]
+
+
+def test_repeated_read_only_business_action_is_executed_once(tmp_path: Path) -> None:
+    class ProjectReadClient:
+        def __init__(self):
+            self.project_reads = 0
+
+        def get_logged_user(self):
+            return ToolResult(ok=True, data="hu.yinhu@stec-up.local")
+
+        def get_document(self, doctype, name):
+            assert (doctype, name) == ("Project", "PROJ-0010")
+            self.project_reads += 1
+            return ToolResult(ok=True, data={"doctype": doctype, "name": name, "status": "Open"})
+
+        def search_documents(self, doctype, **_kwargs):
+            assert doctype in {"Task", "Stock Entry", "Purchase Receipt"}
+            return ToolResult(ok=True, data=[])
+
+    action = {
+        "action": "propose_business_action",
+        "summary": "查询项目成本",
+        "arguments": {"business_intent": {"goal": "query_project_cost"}},
+    }
+    client = ProjectReadClient()
+    varied_action = {
+        "action": "propose_business_action",
+        "summary": "换日期再次查询项目成本",
+        "arguments": {"business_intent": {"goal": "query_project_cost", "from_date": "2026-07-01"}},
+    }
+    runtime = DeepSeekAgentRuntime(
+        planner=PlannerSequence([action, varied_action]),
+        client_factory=lambda _user: client,
+        session_store=RuntimeSessionStore(tmp_path),
+    )
+    result = runtime.run_once(
+        "查看当前项目成本",
+        user="hu.yinhu@stec-up.local",
+        today=date(2026, 7, 20),
+        context={"project_code": "PRJ-HL-13", "erpnext_project": "PROJ-0010"},
+    )
+    assert result.status == "completed"
+    assert len(result.tool_results) == 1
+    assert any(step["label"] == "跳过重复业务查询" for step in result.steps)
+
+
 def test_runtime_stops_after_configured_deepseek_decision_count(tmp_path: Path) -> None:
     runtime = DeepSeekAgentRuntime(planner=RepeatingPlanner(), session_store=RuntimeSessionStore(tmp_path), max_steps=2)
     result = runtime.run_once("查库存", user="mao.xiaoquan@stec-up.local")

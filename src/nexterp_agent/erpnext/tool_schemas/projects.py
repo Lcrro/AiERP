@@ -24,6 +24,49 @@ PROJECT_MATERIAL_ISSUE_ITEM_SCHEMA = {
 
 PROJECTS_TOOL_SCHEMAS = [
     {
+        "name": "erpnext.projects.get_project_exceptions",
+        "description": "Read overdue tasks, delayed project dates, and project progress/cost warning signals. Read-only.",
+        "parameters": _object_schema(
+            ["project"],
+            {
+                "project": {"type": "string"},
+                "as_of_date": {"type": "string"},
+                "limit": {"type": "integer", "minimum": 1, "maximum": 200},
+            },
+        ),
+    },
+    {
+        "name": "erpnext.projects.create_task",
+        "description": "Create one ERPNext Task under a resolved project. Requires confirmation.",
+        "parameters": _object_schema(
+            ["project", "subject"],
+            {
+                "project": {"type": "string"},
+                "subject": {"type": "string", "minLength": 1, "maxLength": 140},
+                "description": {"type": "string", "maxLength": 2000},
+                "priority": {"type": "string", "enum": ["Low", "Medium", "High", "Urgent"]},
+                "exp_start_date": {"type": "string"},
+                "exp_end_date": {"type": "string"},
+            },
+        ),
+    },
+    {
+        "name": "erpnext.projects.update_task",
+        "description": "Update controlled planning fields on an existing ERPNext Task. Requires confirmation.",
+        "parameters": _object_schema(
+            ["task"],
+            {
+                "task": {"type": "string"},
+                "status": {"type": "string", "enum": ["Open", "Working", "Pending Review", "Overdue", "Completed", "Cancelled"]},
+                "progress": {"type": "number", "minimum": 0, "maximum": 100},
+                "priority": {"type": "string", "enum": ["Low", "Medium", "High", "Urgent"]},
+                "exp_start_date": {"type": "string"},
+                "exp_end_date": {"type": "string"},
+                "description": {"type": "string", "maxLength": 2000},
+            },
+        ),
+    },
+    {
         "name": "erpnext.projects.get_project_cost_context",
         "description": "Read project cost context from Project, Task, Stock Entry, and Purchase Receipt records.",
         "parameters": _object_schema(

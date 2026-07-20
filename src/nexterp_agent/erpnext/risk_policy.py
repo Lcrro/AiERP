@@ -69,6 +69,7 @@ def infer_risk_level(tool: str) -> str:
         "erpnext.assets.get_financial_snapshot",
         "erpnext.assets.get_depreciation_schedule",
         "erpnext.projects.get_project_cost_context",
+        "erpnext.projects.get_project_exceptions",
         "erpnext.projects.verify_material_issue_cost_impact",
     }:
         return "L0"
@@ -168,6 +169,8 @@ def infer_risk_level(tool: str) -> str:
         "erpnext.assets.create_repair_draft",
         "erpnext.assets.create_value_adjustment_draft",
         "erpnext.projects.create_material_issue_draft",
+        "erpnext.projects.create_task",
+        "erpnext.projects.update_task",
     }:
         return "L3"
     if tool in {

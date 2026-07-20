@@ -55,12 +55,20 @@ class ProjectsFakeClient:
                     ],
                 },
             )
+        if doctype == "Task" and name == "TASK-001":
+            return ToolResult(ok=True, data={
+                "doctype": "Task", "name": name, "project": "PROJ-001", "subject": "Foundation",
+                "status": "Working", "progress": 40, "exp_start_date": "2026-06-01", "exp_end_date": "2026-06-20",
+            })
         return ToolResult(ok=False, error_type="not_found", error="not found")
 
     def search_documents(self, doctype, **kwargs) -> ToolResult:
         self.calls.append(("search_documents", doctype, kwargs))
         if doctype == "Task":
-            return ToolResult(ok=True, data=[{"name": "TASK-001", "subject": "Foundation", "status": "Working", "progress": 40}])
+            return ToolResult(ok=True, data=[{
+                "name": "TASK-001", "subject": "Foundation", "status": "Working", "priority": "High",
+                "progress": 40, "exp_end_date": "2026-06-20",
+            }])
         if doctype == "Stock Entry":
             return ToolResult(ok=True, data=[{"name": "STE-001", "purpose": "Material Issue", "docstatus": 1}])
         if doctype == "Purchase Receipt":
@@ -89,6 +97,14 @@ class ProjectsFakeClient:
         self.calls.append(("create_stock_entry_draft", data))
         return ToolResult(ok=True, data={"doctype": "Stock Entry", "name": "MAT-STE-0001", "docstatus": 0})
 
+    def create_document(self, doctype, data) -> ToolResult:
+        self.calls.append(("create_document", doctype, data))
+        return ToolResult(ok=True, data={"doctype": doctype, "name": "TASK-NEW-001"})
+
+    def update_document(self, doctype, name, data) -> ToolResult:
+        self.calls.append(("update_document", doctype, name, data))
+        return ToolResult(ok=True, data={"doctype": doctype, "name": name, **data})
+
 
 def test_project_cost_context_reads_project_related_documents() -> None:
     client = ProjectsFakeClient()
@@ -116,19 +132,51 @@ def test_project_cost_context_reads_project_related_documents() -> None:
         {
             "filters": {"project": "PROJ-001", "company": "Acme", "posting_date": ["between", ["2026-06-01", "2026-06-30"]]},
             "fields": [
-                "name",
-                "stock_entry_type",
-                "purpose",
-                "posting_date",
-                "docstatus",
-                "company",
-                "project",
-                "modified",
+                "name", "stock_entry_type", "purpose", "posting_date", "docstatus", "company", "project", "modified",
             ],
             "limit": 20,
             "order_by": "posting_date desc, modified desc",
         },
     )
+
+
+def test_project_exceptions_detect_overdue_tasks_and_project_date() -> None:
+    result = ERPNextAdapter(ProjectsFakeClient()).execute({
+        "tool": "erpnext.projects.get_project_exceptions",
+        "arguments": {"project": "PROJ-001", "as_of_date": "2026-09-01"},
+    })
+    assert result.ok
+    assert result.data["status"] == "Review Required"
+    assert {signal["type"] for signal in result.data["signals"]} == {
+        "project_end_date_overdue", "overdue_tasks",
+    }
+    assert result.data["overdue_tasks"][0]["name"] == "TASK-001"
+
+
+def test_create_project_task_uses_resolved_project_and_controlled_fields() -> None:
+    client = ProjectsFakeClient()
+    result = ERPNextAdapter(client).execute({
+        "tool": "erpnext.projects.create_task",
+        "arguments": {
+            "project": "PROJ-001", "subject": "完成井壁验收", "priority": "High",
+            "exp_start_date": "2026-07-20", "exp_end_date": "2026-07-22",
+        },
+    })
+    assert result.ok
+    assert client.calls[-1] == ("create_document", "Task", {
+        "doctype": "Task", "project": "PROJ-001", "subject": "完成井壁验收",
+        "priority": "High", "status": "Open", "exp_start_date": "2026-07-20", "exp_end_date": "2026-07-22",
+    })
+
+
+def test_update_project_task_only_updates_allowed_fields() -> None:
+    client = ProjectsFakeClient()
+    result = ERPNextAdapter(client).execute({
+        "tool": "erpnext.projects.update_task",
+        "arguments": {"task": "TASK-001", "status": "Completed", "progress": 100},
+    })
+    assert result.ok
+    assert client.calls[-1] == ("update_document", "Task", "TASK-001", {"status": "Completed", "progress": 100})
 
 
 def test_project_material_issue_context_reports_shortages() -> None:
@@ -253,6 +301,9 @@ def test_project_material_issue_cost_impact_verifies_submitted_stock_entry() -> 
 
 
 def test_project_tools_infer_expected_risk_levels() -> None:
+    assert ToolCall.from_dict({"tool": "erpnext.projects.get_project_exceptions"}).risk_level == "L0"
+    assert ToolCall.from_dict({"tool": "erpnext.projects.create_task"}).risk_level == "L3"
+    assert ToolCall.from_dict({"tool": "erpnext.projects.update_task"}).risk_level == "L3"
     assert ToolCall.from_dict({"tool": "erpnext.projects.get_project_cost_context"}).risk_level == "L0"
     assert ToolCall.from_dict({"tool": "erpnext.projects.get_material_issue_context"}).risk_level == "L1"
     assert ToolCall.from_dict({"tool": "erpnext.projects.create_material_issue_draft"}).risk_level == "L3"

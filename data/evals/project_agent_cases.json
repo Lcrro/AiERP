@@ -1,0 +1,30 @@
+[
+  {
+    "id": "project_cost_context",
+    "user": "hu.yinhu@stec-up.local",
+    "project_code": "PRJ-HL-13",
+    "erpnext_project": "PROJ-0010",
+    "warehouse": "合流1.3标仓库 - SD",
+    "text": "看看合流项目当前的项目成本情况",
+    "expected_status": ["completed"]
+  },
+  {
+    "id": "project_exception_summary",
+    "user": "hu.yinhu@stec-up.local",
+    "project_code": "PRJ-HL-13",
+    "erpnext_project": "PROJ-0010",
+    "warehouse": "合流1.3标仓库 - SD",
+    "text": "今天项目有哪些延期任务或进度异常",
+    "expected_status": ["completed"]
+  },
+  {
+    "id": "project_task_missing_subject",
+    "user": "hu.yinhu@stec-up.local",
+    "project_code": "PRJ-HL-13",
+    "erpnext_project": "PROJ-0010",
+    "warehouse": "合流1.3标仓库 - SD",
+    "text": "帮我新建一个项目任务，高优先级，后天完成",
+    "expected_status": ["needs_clarification"],
+    "must_ask_question": true
+  }
+]

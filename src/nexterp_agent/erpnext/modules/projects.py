@@ -7,6 +7,105 @@ from .common import *
 
 
 class ProjectsToolsMixin:
+    def _projects_get_project_exceptions(self, args: dict[str, Any]) -> ToolResult:
+        project_name = args["project"]
+        as_of = args.get("as_of_date")
+        project_result = self.client.get_document("Project", project_name)
+        if not project_result.ok:
+            return project_result
+        project = project_result.data if isinstance(project_result.data, dict) else {}
+        task_result = self.client.search_documents(
+            "Task",
+            filters={"project": project_name},
+            fields=["name", "subject", "status", "priority", "progress", "exp_end_date", "modified"],
+            limit=args.get("limit", 100),
+            order_by="exp_end_date asc, priority desc",
+        )
+        if not task_result.ok:
+            return task_result
+        tasks = [row for row in (task_result.data if isinstance(task_result.data, list) else []) if isinstance(row, dict)]
+        active_statuses = {"Open", "Working", "Pending Review", "Overdue"}
+        overdue = [
+            row for row in tasks
+            if row.get("status") in active_statuses and row.get("exp_end_date") and as_of and str(row["exp_end_date"]) < str(as_of)
+        ]
+        due_without_progress = [
+            row for row in tasks
+            if row.get("status") in active_statuses and row.get("exp_end_date") and not row.get("progress")
+        ]
+        project_delayed = bool(
+            as_of
+            and project.get("expected_end_date")
+            and str(project["expected_end_date"]) < str(as_of)
+            and project.get("status") not in {"Completed", "Cancelled"}
+        )
+        signals = []
+        if project_delayed:
+            signals.append({"type": "project_end_date_overdue", "expected_end_date": project.get("expected_end_date")})
+        if overdue:
+            signals.append({"type": "overdue_tasks", "count": len(overdue)})
+        if due_without_progress:
+            signals.append({"type": "tasks_without_progress", "count": len(due_without_progress)})
+        return ToolResult(ok=True, data={
+            "doctype": "Project",
+            "name": project.get("name") or project_name,
+            "status": "Review Required" if signals else "No Exceptions",
+            "as_of_date": as_of,
+            "project": _clean_mapping({
+                "project_name": project.get("project_name"),
+                "project_status": project.get("status"),
+                "expected_end_date": project.get("expected_end_date"),
+                "percent_complete": project.get("percent_complete"),
+                "total_costing_amount": project.get("total_costing_amount"),
+                "total_billing_amount": project.get("total_billing_amount"),
+            }),
+            "signals": signals,
+            "overdue_tasks": overdue,
+            "tasks_without_progress": due_without_progress,
+            "risk": {"level": "L0", "writes_document": False},
+        })
+
+    def _projects_create_task(self, args: dict[str, Any]) -> ToolResult:
+        project_result = self.client.get_document("Project", args["project"])
+        if not project_result.ok:
+            return project_result
+        if args.get("exp_start_date") and args.get("exp_end_date") and args["exp_start_date"] > args["exp_end_date"]:
+            return ToolResult(ok=False, error_type="validation_error", error="Task start date is after end date.", user_message="任务开始日期不能晚于结束日期。")
+        data = _without_empty({
+            "doctype": "Task",
+            "project": args["project"],
+            "subject": args["subject"],
+            "description": args.get("description"),
+            "priority": args.get("priority") or "Medium",
+            "status": "Open",
+            "exp_start_date": args.get("exp_start_date"),
+            "exp_end_date": args.get("exp_end_date"),
+        })
+        return _module_doc_result(
+            self.client.create_document("Task", data),
+            "Task",
+            "L3",
+            f"Created task under project {args['project']}.",
+            ["review_task", "assign_owner"],
+            requires_confirmation_for_submit=False,
+        )
+
+    def _projects_update_task(self, args: dict[str, Any]) -> ToolResult:
+        task_result = self.client.get_document("Task", args["task"])
+        if not task_result.ok:
+            return task_result
+        task = task_result.data if isinstance(task_result.data, dict) else {}
+        allowed = {"status", "progress", "priority", "exp_start_date", "exp_end_date", "description"}
+        changes = _without_empty({field: args.get(field) for field in allowed})
+        if not changes:
+            return ToolResult(ok=False, error_type="missing_argument", error="No task changes supplied.", user_message="请至少说明一项要修改的任务内容。")
+        start = changes.get("exp_start_date") or task.get("exp_start_date")
+        end = changes.get("exp_end_date") or task.get("exp_end_date")
+        if start and end and str(start) > str(end):
+            return ToolResult(ok=False, error_type="validation_error", error="Task start date is after end date.", user_message="任务开始日期不能晚于结束日期。")
+        result = self.client.update_document("Task", args["task"], changes)
+        return _module_doc_result(result, "Task", "L3", f"Updated task {args['task']}.", ["review_task"], requires_confirmation_for_submit=False)
+
     def _projects_get_project_cost_context(self, args: dict[str, Any]) -> ToolResult:
         project_name = args["project"]
         project_result = self.client.get_document("Project", project_name)
