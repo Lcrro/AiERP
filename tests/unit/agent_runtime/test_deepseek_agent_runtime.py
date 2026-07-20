@@ -543,7 +543,7 @@ def test_project_task_business_action_confirms_and_verifies_project(tmp_path: Pa
         "action": "propose_business_action",
         "summary": "准备项目任务",
         "arguments": {"business_intent": {
-            "goal": "create_project_task", "subject": "完成井壁验收", "priority": "High",
+            "goal": "create_project_task", "project": "PRJ-HL-13", "subject": "完成井壁验收", "priority": "High",
             "exp_end_date": "2026-07-22",
         }},
     }])
@@ -559,6 +559,7 @@ def test_project_task_business_action_confirms_and_verifies_project(tmp_path: Pa
     )
     assert preview.status == "needs_confirmation"
     assert preview.pending_tool_call["tool"] == "erpnext.projects.create_task"
+    assert preview.pending_tool_call["arguments"]["project"] == "PROJ-0010"
     assert client.created == []
 
     completed = runtime.run_once("确认", user="hu.yinhu@stec-up.local", execute=True, today=date(2026, 7, 20))

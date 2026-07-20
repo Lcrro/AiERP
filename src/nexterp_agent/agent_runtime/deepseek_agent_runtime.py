@@ -428,6 +428,7 @@ class DeepSeekAgentRuntime:
                         )
                     saved_draft = _capability_draft(session, capability_id)
                     merged_intent = _merge_capability_intent(saved_draft, raw_intent)
+                    merged_intent = _normalize_runtime_entity_aliases(merged_intent, session)
                     definition, intent = self.capabilities.parse_intent(capability_id, merged_intent)
                     validated_intent = _canonical_intent_payload(intent)
                     session.business_state["capability_draft"] = {
@@ -1773,6 +1774,37 @@ def _merge_capability_intent(previous: dict[str, Any], update: dict[str, Any]) -
         else:
             merged[key] = deepcopy(value)
     return merged
+
+
+def _normalize_runtime_entity_aliases(payload: dict[str, Any], session: RuntimeSessionState) -> dict[str, Any]:
+    """Translate the selected UI project alias into the live ERPNext Link value."""
+    normalized = deepcopy(payload)
+    runtime_project = session.selected_entities.get("runtime_project")
+    if not isinstance(runtime_project, dict) or not runtime_project.get("value"):
+        return normalized
+    value = str(runtime_project["value"])
+    row = runtime_project.get("row") if isinstance(runtime_project.get("row"), dict) else {}
+    aliases = {
+        str(candidate).strip()
+        for candidate in (
+            value,
+            runtime_project.get("label"),
+            row.get("project_code"),
+            session.selected_project_code,
+        )
+        if str(candidate or "").strip()
+    }
+
+    def normalize_project_field(container: dict[str, Any]) -> None:
+        project = str(container.get("project") or "").strip()
+        if project in aliases:
+            container["project"] = value
+
+    normalize_project_field(normalized)
+    for item in normalized.get("items") or []:
+        if isinstance(item, dict):
+            normalize_project_field(item)
+    return normalized
 
 
 def _compact_validation_error(error: ValidationError) -> str:

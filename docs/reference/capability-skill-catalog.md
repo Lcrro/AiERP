@@ -34,3 +34,10 @@ python scripts/acceptance/capability_runtime_stability.py --rounds 4
 ```
 
 默认运行 5 个场景各 4 次，只执行查询或写入预览，不确认写单。报告保存到 `data/runtime/capability_runtime_stability_report.json`。
+
+基准使用严格执行证据，而不是把“模型发现过某项 Capability”视为成功：
+
+- 写能力必须生成预期的待确认 ToolCall。
+- 读能力必须执行预期 ToolCall，或取得被明确允许的实时 Resolver 结果（例如候选物料及批量库存）。
+- 报告分别统计直接成功、修复后成功、失败类型、字段修复、重复动作、P50/P95 步数与耗时。
+- 任一底层写工具绕过 Capability 的行为都会使整次基准失败。

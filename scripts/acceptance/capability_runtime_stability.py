@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 from dataclasses import dataclass
 from datetime import date, datetime
 import json
@@ -37,7 +38,10 @@ class BenchmarkCase:
     user: str
     text: str
     expected_capability: str
+    expected_tool: str
+    mode: str
     accepted_statuses: tuple[str, ...]
+    allow_resolver_inventory: bool = False
 
 
 CASES = (
@@ -46,6 +50,8 @@ CASES = (
         "mao.xiaoquan@stec-up.local",
         "为合流1.3标创建材料申请：物料 MAT-CEM-000008，20包，送合流1.3标仓库，需求日期2026-07-25。",
         "material_request.create",
+        "erpnext.buying.create_material_request_draft",
+        "preview",
         ("needs_confirmation",),
     ),
     BenchmarkCase(
@@ -53,13 +59,18 @@ CASES = (
         "mao.xiaoquan@stec-up.local",
         "查询物料 MAT-CEM-000008 在合流1.3标仓库的实时库存。",
         "stock.balance.query",
+        "erpnext.stock.get_item_locations",
+        "read",
         ("completed",),
+        allow_resolver_inventory=True,
     ),
     BenchmarkCase(
         "project_task_preview",
         "hu.yinhu@stec-up.local",
         "为合流1.3标创建任务：检查开工材料，优先级High，计划2026-07-21开始，2026-07-23完成。",
         "project.task.create",
+        "erpnext.projects.create_task",
+        "preview",
         ("needs_confirmation",),
     ),
     BenchmarkCase(
@@ -67,6 +78,8 @@ CASES = (
         "hu.yinhu@stec-up.local",
         "查询合流1.3标从2026-07-01到2026-07-20的项目成本。",
         "project.cost.query",
+        "erpnext.projects.get_project_cost_context",
+        "read",
         ("completed",),
     ),
     BenchmarkCase(
@@ -74,33 +87,150 @@ CASES = (
         "fang.wenqian@stec-up.local",
         "查询 STEC (Demo) 截至2026-07-20的应付账款。",
         "finance.accounts_payable.query",
+        "erpnext.accounting.accounts_payable",
+        "read",
         ("completed",),
     ),
 )
 
 
-def _capabilities(steps: list[dict[str, Any]]) -> list[str]:
+def _selected_capabilities(steps: list[dict[str, Any]]) -> list[str]:
     values: list[str] = []
     for step in steps:
         result = step.get("result") if isinstance(step.get("result"), dict) else {}
-        arguments = step.get("arguments") if isinstance(step.get("arguments"), dict) else {}
-        for card in result.get("capabilities") or []:
-            if isinstance(card, dict):
-                capability_id = str(card.get("capability_id") or "").strip()
-                if capability_id and capability_id not in values:
-                    values.append(capability_id)
-        candidates = (
-            result.get("capability"),
-            arguments.get("capability_id"),
-            (arguments.get("intent") or {}).get("capability_id")
-            if isinstance(arguments.get("intent"), dict)
-            else None,
-        )
+        prepared = result.get("prepared_action") if isinstance(result.get("prepared_action"), dict) else {}
+        candidates = (result.get("capability"), prepared.get("capability"))
         for value in candidates:
             text = str(value or "").strip()
             if text and text not in values:
                 values.append(text)
     return values
+
+
+def _executed_tools(steps: list[dict[str, Any]]) -> list[str]:
+    values: list[str] = []
+    for step in steps:
+        if step.get("action") != "execute_tool" or not isinstance(step.get("payload"), dict):
+            continue
+        payload = step["payload"]
+        value = str(payload.get("tool") or (payload.get("tool_call") or {}).get("tool") or "").strip()
+        if value and value not in values:
+            values.append(value)
+    return values
+
+
+def _has_resolver_inventory_evidence(steps: list[dict[str, Any]]) -> bool:
+    return any(
+        step.get("action") == "resolve_entities"
+        and isinstance(step.get("result"), dict)
+        and step["result"].get("type") == "resolve_entities"
+        and isinstance(step["result"].get("inventory_query"), dict)
+        and step["result"]["inventory_query"].get("status") == "completed"
+        for step in steps
+    )
+
+
+def _repair_category(step: dict[str, Any]) -> str | None:
+    result = step.get("result") if isinstance(step.get("result"), dict) else {}
+    result_type = str(result.get("type") or "")
+    if result_type == "tool_validation_error":
+        return "tool_schema"
+    if result_type != "business_action_error":
+        return None
+    error = str(result.get("error") or "")
+    if "Resolver" in error or "resolve_entities" in error or "真实值" in error:
+        return "resolver_required"
+    if result.get("questions") or any(token in error for token in ("缺少", "不能为空", "required")):
+        return "missing_field"
+    if any(token in error for token in ("状态不能", "不一致", "失效", "不能超过", "尚未提交")):
+        return "business_precondition"
+    return "business_validation"
+
+
+def _failure_category(
+    *,
+    result: dict[str, Any],
+    case: BenchmarkCase,
+    selected_capabilities: list[str],
+    executed_tools: list[str],
+    resolver_inventory_evidence: bool,
+    bypass_attempts: int,
+) -> str:
+    if bypass_attempts:
+        return "capability_bypass"
+    status = str(result.get("status") or "")
+    message = str(result.get("message") or "")
+    if status == "failed":
+        lowered = message.lower()
+        if any(token in lowered for token in ("network", "timeout", "deepseek", "连接", "服务不可用")):
+            return "external_service"
+        if any(token in message for token in ("步数", "上限", "无进展", "重复")):
+            return "planner_non_convergence"
+        return "runtime_failed"
+    if status not in case.accepted_statuses:
+        return "unexpected_status"
+    if case.allow_resolver_inventory and resolver_inventory_evidence:
+        return "none"
+    if case.expected_capability not in selected_capabilities:
+        return "capability_not_selected"
+    if case.mode == "read" and case.expected_tool not in executed_tools:
+        return "tool_not_executed"
+    pending = result.get("pending_tool_call") if isinstance(result.get("pending_tool_call"), dict) else {}
+    if case.mode == "preview" and pending.get("tool") != case.expected_tool:
+        return "wrong_pending_tool"
+    return "none"
+
+
+def _percentile(values: list[float], percentile: float) -> float:
+    if not values:
+        return 0.0
+    ordered = sorted(values)
+    index = max(0, min(len(ordered) - 1, int((len(ordered) - 1) * percentile + 0.999999)))
+    return round(float(ordered[index]), 2)
+
+
+def summarize_results(results: list[dict[str, Any]]) -> dict[str, Any]:
+    total = len(results)
+    successes = sum(1 for result in results if result["success"])
+    per_case: dict[str, Any] = {}
+    for case_id in sorted({str(result["case_id"]) for result in results}):
+        rows = [result for result in results if result["case_id"] == case_id]
+        case_successes = sum(1 for row in rows if row["success"])
+        per_case[case_id] = {
+            "total": len(rows),
+            "successes": case_successes,
+            "success_rate": round(case_successes / len(rows), 4),
+            "clean_successes": sum(1 for row in rows if row["outcome"] == "clean_success"),
+            "recovered_successes": sum(1 for row in rows if row["outcome"] == "recovered_success"),
+            "failure_categories": dict(Counter(row["failure_category"] for row in rows if not row["success"])),
+            "average_steps": round(statistics.fmean(row["step_count"] for row in rows), 2),
+            "p50_elapsed_ms": _percentile([row["elapsed_ms"] for row in rows], 0.50),
+            "p95_elapsed_ms": _percentile([row["elapsed_ms"] for row in rows], 0.95),
+            "total_repairs": sum(row["repair_count"] for row in rows),
+            "total_repeats": sum(row["repeat_count"] for row in rows),
+        }
+    return {
+        "total": total,
+        "successes": successes,
+        "success_rate": round(successes / total, 4) if total else 0,
+        "clean_successes": sum(1 for result in results if result["outcome"] == "clean_success"),
+        "recovered_successes": sum(1 for result in results if result["outcome"] == "recovered_success"),
+        "failure_categories": dict(Counter(result["failure_category"] for result in results if not result["success"])),
+        "status_counts": dict(Counter(str(result.get("status") or "unknown") for result in results)),
+        "average_steps": round(statistics.fmean(result["step_count"] for result in results), 2) if total else 0,
+        "p50_steps": _percentile([result["step_count"] for result in results], 0.50),
+        "p95_steps": _percentile([result["step_count"] for result in results], 0.95),
+        "average_elapsed_ms": round(statistics.fmean(result["elapsed_ms"] for result in results), 2) if total else 0,
+        "p50_elapsed_ms": _percentile([result["elapsed_ms"] for result in results], 0.50),
+        "p95_elapsed_ms": _percentile([result["elapsed_ms"] for result in results], 0.95),
+        "total_repairs": sum(result["repair_count"] for result in results),
+        "repair_categories": dict(
+            Counter(category for result in results for category in result.get("repair_categories") or [])
+        ),
+        "total_repeats": sum(result["repeat_count"] for result in results),
+        "total_bypass_attempts": sum(result["bypass_attempts"] for result in results),
+        "per_case": per_case,
+    }
 
 
 def _count_observation(steps: list[dict[str, Any]], observation_type: str) -> int:
@@ -132,19 +262,23 @@ def run_case(
     elapsed_ms = round((perf_counter() - started) * 1000, 2)
     raw_steps = result.get("steps")
     steps = list(raw_steps) if isinstance(raw_steps, (list, tuple)) else []
-    capabilities = _capabilities(steps)
+    capabilities = _selected_capabilities(steps)
+    executed_tools = _executed_tools(steps)
+    resolver_inventory_evidence = _has_resolver_inventory_evidence(steps)
     bypass_attempts = _count_observation(steps, "capability_required")
-    repairs = (
-        _count_observation(steps, "business_action_error")
-        + _count_observation(steps, "tool_validation_error")
-    )
+    repair_categories = [category for step in steps if (category := _repair_category(step))]
+    repairs = len(repair_categories)
     repeats = sum(1 for step in steps if step.get("action") == "no_progress")
-    success = (
-        result.get("status") in case.accepted_statuses
-        and case.expected_capability in capabilities
-        and bypass_attempts == 0
-        and result.get("status") != "failed"
+    failure_category = _failure_category(
+        result=result,
+        case=case,
+        selected_capabilities=capabilities,
+        executed_tools=executed_tools,
+        resolver_inventory_evidence=resolver_inventory_evidence,
+        bypass_attempts=bypass_attempts,
     )
+    success = failure_category == "none"
+    outcome = "recovered_success" if success and (repairs or repeats) else "clean_success" if success else "failed"
     service.reset_session(case.user, PROJECT_CODE, conversation_id)
     return {
         "case_id": case.case_id,
@@ -153,9 +287,28 @@ def run_case(
         "status": result.get("status"),
         "message": result.get("message"),
         "expected_capability": case.expected_capability,
-        "observed_capabilities": capabilities,
+        "expected_tool": case.expected_tool,
+        "mode": case.mode,
+        "selected_capabilities": capabilities,
+        "executed_tools": executed_tools,
+        "resolver_inventory_evidence": resolver_inventory_evidence,
+        "execution_evidence": (
+            "resolver_inventory"
+            if resolver_inventory_evidence and case.allow_resolver_inventory
+            else "pending_tool_call"
+            if case.mode == "preview" and isinstance(result.get("pending_tool_call"), dict)
+            else "execute_tool"
+            if case.expected_tool in executed_tools
+            else "none"
+        ),
+        "pending_tool": (result.get("pending_tool_call") or {}).get("tool")
+        if isinstance(result.get("pending_tool_call"), dict)
+        else None,
+        "outcome": outcome,
+        "failure_category": failure_category,
         "step_count": len(steps),
         "repair_count": repairs,
+        "repair_categories": repair_categories,
         "repeat_count": repeats,
         "bypass_attempts": bypass_attempts,
         "elapsed_ms": elapsed_ms,
@@ -200,19 +353,15 @@ def run(rounds: int, case_id: str | None = None) -> dict[str, Any]:
         for round_number in range(1, rounds + 1)
         for case in selected_cases
     ]
-    successes = sum(1 for result in results if result["success"])
-    total = len(results)
+    summary = summarize_results(results)
+    total = summary["total"]
+    minimum_successes = max(1, total - 1)
     report = {
-        "ok": successes >= max(1, total - 1),
-        "target": "at least 19/20 for the default four rounds",
-        "total": total,
-        "successes": successes,
-        "success_rate": round(successes / total, 4) if total else 0,
-        "average_steps": round(statistics.fmean(result["step_count"] for result in results), 2),
-        "average_elapsed_ms": round(statistics.fmean(result["elapsed_ms"] for result in results), 2),
-        "total_repairs": sum(result["repair_count"] for result in results),
-        "total_repeats": sum(result["repeat_count"] for result in results),
-        "total_bypass_attempts": sum(result["bypass_attempts"] for result in results),
+        "ok": summary["successes"] >= minimum_successes and summary["total_bypass_attempts"] == 0,
+        "benchmark_version": "2",
+        "generated_at": datetime.now().astimezone().isoformat(),
+        "target": f"at least {minimum_successes}/{total}, with no capability bypass",
+        **summary,
         "results": results,
     }
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
