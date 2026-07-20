@@ -354,6 +354,121 @@ def test_stock_transfer_shortage_is_blocked_before_confirmation(tmp_path: Path) 
     assert any(step["label"] == "库存预检未通过" for step in result.steps)
 
 
+def test_finance_accounts_payable_executes_read_only_without_confirmation(tmp_path: Path) -> None:
+    class FinanceReadClient:
+        def get_logged_user(self):
+            return ToolResult(ok=True, data="fang.wenqian@stec-up.local")
+
+        def run_report(self, report_name, *, filters=None):
+            assert report_name == "Accounts Payable"
+            assert filters == {"company": "STEC (Demo)", "to_date": "2026-07-20"}
+            return ToolResult(ok=True, data={
+                "columns": [],
+                "result": [{"supplier": "测试供应商", "outstanding_amount": 1200}],
+            })
+
+    planner = PlannerSequence([
+        {
+            "action": "propose_business_action",
+            "summary": "查询当前应付",
+            "arguments": {"business_intent": {"goal": "query_accounts_payable"}},
+        },
+        {"action": "finish", "summary": "回复应付", "arguments": {"message": "当前测试供应商应付1200元。"}},
+    ])
+    runtime = DeepSeekAgentRuntime(
+        planner=planner,
+        client_factory=lambda _user: FinanceReadClient(),
+        session_store=RuntimeSessionStore(tmp_path),
+    )
+
+    result = runtime.run_once(
+        "查一下今天的应付账款",
+        user="fang.wenqian@stec-up.local",
+        today=date(2026, 7, 20),
+        context={"company": "STEC (Demo)"},
+    )
+
+    assert result.status == "completed"
+    assert result.pending_tool_call is None
+    assert result.tool_results[0]["ok"] is True
+    assert result.message == "当前测试供应商应付1200元。"
+
+
+def test_finance_invoice_from_receipt_confirms_and_verifies_lineage(tmp_path: Path) -> None:
+    class FinanceWriteClient:
+        def __init__(self):
+            self.created = []
+
+        def get_logged_user(self):
+            return ToolResult(ok=True, data="fang.wenqian@stec-up.local")
+
+        def get_document(self, doctype, name):
+            if (doctype, name) == ("Purchase Receipt", "PRE-001"):
+                return ToolResult(ok=True, data={
+                    "doctype": doctype,
+                    "name": name,
+                    "docstatus": 1,
+                    "supplier": "测试供应商",
+                    "company": "STEC (Demo)",
+                    "currency": "CNY",
+                    "is_return": 0,
+                    "items": [{
+                        "name": "PRE-ITEM-001",
+                        "item_code": "SAFE-000001",
+                        "qty": 100,
+                        "billed_qty": 0,
+                        "rate": 3,
+                        "amount": 300,
+                        "warehouse": "合流1.3标仓库 - SD",
+                    }],
+                })
+            if (doctype, name) == ("Purchase Invoice", "PINV-001"):
+                return ToolResult(ok=True, data={
+                    "doctype": doctype,
+                    "name": name,
+                    "docstatus": 0,
+                    "items": [{"purchase_receipt": "PRE-001", "purchase_receipt_item": "PRE-ITEM-001"}],
+                })
+            raise AssertionError((doctype, name))
+
+        def create_document(self, doctype, data):
+            assert doctype == "Purchase Invoice"
+            self.created.append(data)
+            return ToolResult(ok=True, data={"doctype": doctype, "name": "PINV-001", "docstatus": 0})
+
+    planner = PlannerSequence([{
+        "action": "propose_business_action",
+        "summary": "按收货单准备采购发票",
+        "arguments": {"business_intent": {
+            "goal": "create_purchase_invoice_from_receipt",
+            "source_documents": [{"doctype": "Purchase Receipt", "name": "PRE-001"}],
+            "bill_no": "SUP-INV-1001",
+            "bill_date": "2026-07-19",
+        }},
+    }])
+    store = RuntimeSessionStore(tmp_path)
+    state = RuntimeSessionState(user="fang.wenqian@stec-up.local", profile="finance")
+    state.selected_entities["receipt"] = {"kind": "document", "value": "PRE-001"}
+    store.save(state)
+    client = FinanceWriteClient()
+    runtime = DeepSeekAgentRuntime(planner=planner, client_factory=lambda _user: client, session_store=store)
+
+    preview = runtime.run_once(
+        "按收货单PRE-001开票，发票号SUP-INV-1001，日期7月19日",
+        user=state.user,
+        today=date(2026, 7, 20),
+    )
+    assert preview.status == "needs_confirmation"
+    assert preview.pending_tool_call["tool"] == "erpnext.accounting.create_purchase_invoice_from_purchase_receipt_draft"
+    assert client.created == []
+
+    completed = runtime.run_once("确认", user=state.user, execute=True, today=date(2026, 7, 20))
+    assert completed.status == "completed"
+    assert len(client.created) == 1
+    assert completed.tool_result["verification"]["ok"] is True
+    assert "purchase_receipt_lineage_preserved" in completed.tool_result["verification"]["checks"]
+
+
 def test_runtime_stops_after_configured_deepseek_decision_count(tmp_path: Path) -> None:
     runtime = DeepSeekAgentRuntime(planner=RepeatingPlanner(), session_store=RuntimeSessionStore(tmp_path), max_steps=2)
     result = runtime.run_once("查库存", user="mao.xiaoquan@stec-up.local")

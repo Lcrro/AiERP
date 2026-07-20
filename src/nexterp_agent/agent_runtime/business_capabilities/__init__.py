@@ -14,6 +14,13 @@ from .stock import (
     StockCapabilityGraph,
     verify_stock_result,
 )
+from .finance import (
+    FINANCE_GOALS,
+    FinanceBusinessIntentDraft,
+    FinanceCapabilityCompiler,
+    FinanceCapabilityGraph,
+    verify_finance_result,
+)
 
 __all__ = [
     "BusinessIntentDraft",
@@ -28,4 +35,9 @@ __all__ = [
     "StockCapabilityCompiler",
     "StockCapabilityGraph",
     "verify_stock_result",
+    "FINANCE_GOALS",
+    "FinanceBusinessIntentDraft",
+    "FinanceCapabilityCompiler",
+    "FinanceCapabilityGraph",
+    "verify_finance_result",
 ]

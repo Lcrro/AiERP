@@ -213,6 +213,22 @@ ACCOUNTING_TOOL_SCHEMAS = [
         ),
     },
     {
+        "name": "erpnext.accounting.create_supplier_payment_from_purchase_invoice_draft",
+        "description": "Create a Payment Entry draft from one submitted Purchase Invoice using ERPNext account defaults and invoice references. Does not submit payment.",
+        "parameters": _object_schema(
+            ["purchase_invoice"],
+            {
+                "purchase_invoice": {"type": "string"},
+                "posting_date": {"type": "string"},
+                "paid_amount": {"type": "number", "exclusiveMinimum": 0},
+                "bank_account": {"type": "string"},
+                "reference_no": {"type": "string"},
+                "reference_date": {"type": "string"},
+                "remarks": {"type": "string", "maxLength": 500},
+            },
+        ),
+    },
+    {
         "name": "erpnext.accounting.create_period_closing_voucher_draft",
         "description": "Create a Period Closing Voucher draft only. Submitting period close is a separate high-risk financial action requiring confirmation metadata.",
         "parameters": _object_schema(["data"], {"data": {"type": "object"}}),
@@ -309,6 +325,19 @@ ACCOUNTING_TOOL_SCHEMAS = [
             {
                 "doctype": {"enum": ["Journal Entry", "Payment Entry", "Sales Invoice", "Purchase Invoice", "Period Closing Voucher"]},
                 "name": {"type": "string"},
+                "confirmation": CONFIRMATION_SCHEMA,
+            },
+        ),
+    },
+    {
+        "name": "erpnext.accounting.cancel_financial_document",
+        "description": "L5_FINANCIAL. Cancel a submitted financial document so ERPNext performs its standard ledger reversal, after explicit finance confirmation.",
+        "parameters": _object_schema(
+            ["doctype", "name", "confirmation"],
+            {
+                "doctype": {"enum": ["Journal Entry", "Payment Entry", "Sales Invoice", "Purchase Invoice", "Period Closing Voucher"]},
+                "name": {"type": "string"},
+                "reason": {"type": "string", "maxLength": 500},
                 "confirmation": CONFIRMATION_SCHEMA,
             },
         ),

@@ -16,6 +16,7 @@ def infer_risk_level(tool: str) -> str:
     if tool in {
         "erpnext.accounting.submit_financial_document",
         "erpnext.accounting.apply_bank_reconciliation",
+        "erpnext.accounting.cancel_financial_document",
     }:
         return "L5_FINANCIAL"
     if tool in {
@@ -142,6 +143,7 @@ def infer_risk_level(tool: str) -> str:
         "erpnext.accounting.create_sales_invoice_draft",
         "erpnext.accounting.create_purchase_invoice_draft",
         "erpnext.accounting.create_purchase_invoice_from_purchase_receipt_draft",
+        "erpnext.accounting.create_supplier_payment_from_purchase_invoice_draft",
         "erpnext.accounting.create_period_closing_voucher_draft",
         "erpnext.accounting.create_budget_draft",
         "erpnext.accounting.update_budget_draft",

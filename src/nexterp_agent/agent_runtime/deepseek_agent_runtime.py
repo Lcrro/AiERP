@@ -17,6 +17,9 @@ from .candidate_inventory import enrich_item_entity_results
 from .business_capabilities import (
     BusinessIntentDraft,
     CapabilityCompilationError,
+    FINANCE_GOALS,
+    FinanceBusinessIntentDraft,
+    FinanceCapabilityCompiler,
     PreparedBusinessAction,
     ProcurementCapabilityCompiler,
     ProcurementCapabilityGraph,
@@ -24,6 +27,7 @@ from .business_capabilities import (
     StockBusinessIntentDraft,
     StockCapabilityCompiler,
     canonical_tool_call_hash,
+    verify_finance_result,
     verify_procurement_result,
     verify_stock_result,
 )
@@ -538,22 +542,26 @@ class DeepSeekAgentRuntime:
         return self._save(session, user_text, result, request_id)
 
     @staticmethod
-    def _parse_business_intent(payload: dict[str, Any]) -> BusinessIntentDraft | StockBusinessIntentDraft:
+    def _parse_business_intent(
+        payload: dict[str, Any],
+    ) -> BusinessIntentDraft | StockBusinessIntentDraft | FinanceBusinessIntentDraft:
         goal = str(payload.get("goal") or "")
         if goal in STOCK_GOALS:
             return StockBusinessIntentDraft.from_dict(payload)
+        if goal in FINANCE_GOALS:
+            return FinanceBusinessIntentDraft.from_dict(payload)
         return BusinessIntentDraft.from_dict(payload)
 
     def _compile_business_action(
         self,
-        intent: BusinessIntentDraft | StockBusinessIntentDraft,
+        intent: BusinessIntentDraft | StockBusinessIntentDraft | FinanceBusinessIntentDraft,
         *,
         user: str,
         session: RuntimeSessionState,
         observations: list[dict[str, Any]],
         today: date,
     ) -> PreparedBusinessAction:
-        if isinstance(intent, BusinessIntentDraft):
+        if isinstance(intent, (BusinessIntentDraft, FinanceBusinessIntentDraft)):
             allowed_documents = _allowed_entity_values(session, observations).get("document") or set()
             for source in intent.source_documents:
                 if source.name not in allowed_documents:
@@ -561,7 +569,11 @@ class DeepSeekAgentRuntime:
                         f"来源单据 {source.name} 尚未通过实体解析。",
                         questions=(f"请先核对来源单据 {source.name}。",),
                     )
-            compiler = ProcurementCapabilityCompiler(self._business_document_loader(user))
+            compiler = (
+                FinanceCapabilityCompiler(self._business_document_loader(user))
+                if isinstance(intent, FinanceBusinessIntentDraft)
+                else ProcurementCapabilityCompiler(self._business_document_loader(user))
+            )
         else:
             compiler = StockCapabilityCompiler(self._business_document_loader(user))
         return compiler.compile(
@@ -607,6 +619,8 @@ class DeepSeekAgentRuntime:
         try:
             if prepared.goal in STOCK_GOALS:
                 return verify_stock_result(prepared, payload, self._business_document_loader(user))
+            if prepared.goal in FINANCE_GOALS:
+                return verify_finance_result(prepared, payload, self._business_document_loader(user))
             return verify_procurement_result(prepared, payload, self._business_document_loader(user))
         except CapabilityCompilationError as exc:
             return {"ok": False, "reason": str(exc), "checks": []}
@@ -635,7 +649,7 @@ class DeepSeekAgentRuntime:
             "你是懂业务的ERPNext员工助理，只返回协议中的单个JSON动作。"
             "负责理解目标、提取用户明确表达的信息、比较候选和友好追问；不要承担ERP事务编排。"
             "任何ERPNext主键必须来自resolve_entities或已确认上下文，禁止猜测。"
-            "普通查询先discover_tools和get_tool_contracts，再execute_tool。采购与库存标准业务动作无需发现底层工具，"
+            "普通查询先discover_tools和get_tool_contracts，再execute_tool。采购、库存与财务标准业务动作无需发现底层工具，"
             "应先resolve_entities，再直接使用propose_business_action。"
             "Runtime负责读取来源单据、限制合法下一步、编译ToolCall和等待一次用户确认。"
             "收到business_action_error时，若信息可从原话解析，应调用Resolver或修正业务意图；只有用户确实没说时才ask_user。"
@@ -653,10 +667,10 @@ class DeepSeekAgentRuntime:
                 "get_tool_contracts": {"tool_names": ["从discover_tools结果逐字复制的工具名，最多5个"]},
                 "resolve_entities": {"entities": [{"id": "本轮唯一标识", "kind": "item | project | warehouse | supplier | company | employee | date | uom | document", "query": "用户原话或待核对主键", "specs": {}, "qty": "kind=item时可提供需求数量", "uom": "kind=item时可提供用户单位", "doctype": "kind=document时必填"}]},
                 "propose_business_action": {"business_intent": {
-                    "goal": "create_material_request | create_rfq_from_material_request | create_supplier_quotation_from_rfq | compare_supplier_quotations | create_purchase_order_from_supplier_quotation | create_purchase_order_from_material_request | create_purchase_receipt_from_purchase_order | create_purchase_return_from_receipt | query_stock_balance | create_stock_transfer | create_project_material_issue | create_stock_reconciliation",
+                    "goal": "create_material_request | create_rfq_from_material_request | create_supplier_quotation_from_rfq | compare_supplier_quotations | create_purchase_order_from_supplier_quotation | create_purchase_order_from_material_request | create_purchase_receipt_from_purchase_order | create_purchase_return_from_receipt | query_stock_balance | create_stock_transfer | create_project_material_issue | create_stock_reconciliation | query_accounts_payable | create_purchase_invoice_from_receipt | create_supplier_payment_from_invoice | cancel_financial_document",
                     "source_documents": [{"doctype": "已解析单据类型", "name": "已解析单号"}],
                     "items": [{"item_code": "已解析物料编码", "source_row": "可选来源行name", "qty": "正数", "uom": "单位", "rate": "报价", "warehouse": "已解析仓库", "project": "已解析项目", "schedule_date": "YYYY-MM-DD", "reason": "退货原因"}],
-                    "suppliers": ["已解析Supplier.name"], "company": "已确认Company.name", "project": "已确认Project.name", "warehouse": "已确认Warehouse.name", "source_warehouse": "已解析源Warehouse.name", "target_warehouse": "已解析目标Warehouse.name", "schedule_date": "YYYY-MM-DD", "valid_till": "YYYY-MM-DD", "posting_date": "YYYY-MM-DD", "currency": "币种", "message": "业务说明", "remarks": "库存动作说明", "full_return": "boolean", "include_zero": "boolean", "require_available_stock": "boolean",
+                    "suppliers": ["已解析Supplier.name"], "supplier": "已解析Supplier.name", "company": "已确认Company.name", "project": "已确认Project.name", "warehouse": "已确认Warehouse.name", "source_warehouse": "已解析源Warehouse.name", "target_warehouse": "已解析目标Warehouse.name", "schedule_date": "YYYY-MM-DD", "valid_till": "YYYY-MM-DD", "posting_date": "YYYY-MM-DD", "from_date": "YYYY-MM-DD", "to_date": "YYYY-MM-DD", "bill_no": "用户提供的供应商发票号", "bill_date": "YYYY-MM-DD", "paid_amount": "正数", "reference_no": "用户提供的付款参考号", "reference_date": "YYYY-MM-DD", "reason": "用户说明的冲销原因", "currency": "币种", "message": "业务说明", "remarks": "业务说明", "full_return": "boolean", "include_zero": "boolean", "require_available_stock": "boolean",
                     "provenance": {"字段名": "user | resolver | runtime_context | source_document | system_default"}
                 }},
                 "execute_tool": {"tool_call": {"tool": "已读取契约的工具名", "arguments": {}}},

@@ -322,6 +322,81 @@ class AccountingToolsMixin:
             draft_result.debug["purchase_receipt_context"] = context
         return draft_result
 
+    def _accounting_create_supplier_payment_from_purchase_invoice_draft(self, args: dict[str, Any]) -> ToolResult:
+        purchase_invoice = args["purchase_invoice"]
+        invoice_result = self.client.get_document("Purchase Invoice", purchase_invoice)
+        if not invoice_result.ok:
+            return invoice_result
+        invoice = invoice_result.data if isinstance(invoice_result.data, dict) else {}
+        if int(invoice.get("docstatus") or 0) != 1:
+            return ToolResult(
+                ok=False,
+                error=f"Purchase Invoice {purchase_invoice} is not submitted.",
+                error_type="validation_error",
+                user_message="只有已提交的采购发票才能生成付款草稿。",
+            )
+        outstanding = _float_or_none(invoice.get("outstanding_amount")) or 0.0
+        if outstanding <= 0:
+            return ToolResult(
+                ok=False,
+                error=f"Purchase Invoice {purchase_invoice} has no outstanding amount.",
+                error_type="validation_error",
+                user_message="该采购发票没有未付金额，无需创建付款草稿。",
+            )
+        paid_amount = _float_or_none(args.get("paid_amount"))
+        if paid_amount is not None and (paid_amount <= 0 or paid_amount > outstanding):
+            return ToolResult(
+                ok=False,
+                error="Paid amount must be positive and cannot exceed invoice outstanding amount.",
+                error_type="validation_error",
+                user_message=f"付款金额必须大于0且不能超过未付金额 {outstanding:g}。",
+            )
+        method_args = {
+            "dt": "Purchase Invoice",
+            "dn": purchase_invoice,
+        }
+        if paid_amount is not None:
+            method_args["party_amount"] = paid_amount
+        if args.get("bank_account"):
+            method_args["bank_account"] = args["bank_account"]
+        generated = self.client.call_method(
+            "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
+            method_args,
+        )
+        if not generated.ok:
+            return generated
+        data = dict(generated.data) if isinstance(generated.data, dict) else {}
+        if not data:
+            return ToolResult(
+                ok=False,
+                error="ERPNext returned an empty Payment Entry draft.",
+                error_type="validation_error",
+                user_message="ERPNext 未能生成付款草稿，请检查发票、账户和公司默认配置。",
+            )
+        data.pop("name", None)
+        data["doctype"] = "Payment Entry"
+        data["docstatus"] = 0
+        if args.get("posting_date"):
+            data["posting_date"] = args["posting_date"]
+        if args.get("reference_no"):
+            data["reference_no"] = args["reference_no"]
+        if args.get("reference_date"):
+            data["reference_date"] = args["reference_date"]
+        if args.get("remarks"):
+            data["remarks"] = args["remarks"]
+        draft = _module_doc_result(
+            self.client.create_document("Payment Entry", data),
+            "Payment Entry",
+            "L3",
+            f"Created supplier Payment Entry draft from Purchase Invoice {purchase_invoice}.",
+            ["review_payment_accounts", "review_allocation", "confirm_submit"],
+            requires_confirmation_for_submit=True,
+        )
+        if draft.ok and isinstance(draft.data, dict):
+            draft.data["source_purchase_invoice"] = purchase_invoice
+            draft.data["outstanding_before_payment"] = outstanding
+        return draft
+
     def _accounting_create_period_closing_voucher_draft(self, args: dict[str, Any]) -> ToolResult:
         data = _draft_doc("Period Closing Voucher", args["data"])
         return _module_doc_result(
@@ -578,6 +653,38 @@ class AccountingToolsMixin:
             "L5_FINANCIAL",
             f"Submitted {doctype}.",
             ["audit_posting", "review_gl_impact"],
+            requires_confirmation_for_submit=True,
+        )
+
+    def _accounting_cancel_financial_document(self, args: dict[str, Any]) -> ToolResult:
+        doctype = args["doctype"]
+        if doctype not in ACCOUNTING_SUBMITTABLE_DOCTYPES:
+            return ToolResult(
+                ok=False,
+                error=f"Unsupported financial cancel DocType: {doctype}",
+                error_type="validation_error",
+                user_message="此财务取消工具只支持日记账、付款、销售发票、采购发票和期末结转单。",
+            )
+        guard = _require_financial_confirmation(doctype, args.get("confirmation"))
+        if guard:
+            return guard
+        current = self.client.get_document(doctype, args["name"])
+        if not current.ok:
+            return current
+        document = current.data if isinstance(current.data, dict) else {}
+        if int(document.get("docstatus") or 0) != 1:
+            return ToolResult(
+                ok=False,
+                error=f"{doctype} {args['name']} is not submitted.",
+                error_type="validation_error",
+                user_message="只有已提交的财务单据才能执行取消冲销。",
+            )
+        return _module_doc_result(
+            self.client.cancel_document(doctype, args["name"]),
+            doctype,
+            "L5_FINANCIAL",
+            f"Cancelled {doctype}; ERPNext applied its standard reversal.",
+            ["audit_reversal", "review_gl_impact"],
             requires_confirmation_for_submit=True,
         )
 

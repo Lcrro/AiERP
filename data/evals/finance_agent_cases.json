@@ -1,0 +1,31 @@
+[
+  {
+    "id": "finance_accounts_payable_today",
+    "user": "fang.wenqian@stec-up.local",
+    "project_code": "PRJ-HL-13",
+    "erpnext_project": "PROJ-0010",
+    "warehouse": "合流1.3标仓库 - SD",
+    "text": "查一下公司截至今天的应付账款",
+    "expected_status": ["completed"]
+  },
+  {
+    "id": "finance_invoice_missing_receipt",
+    "user": "fang.wenqian@stec-up.local",
+    "project_code": "PRJ-HL-13",
+    "erpnext_project": "PROJ-0010",
+    "warehouse": "合流1.3标仓库 - SD",
+    "text": "帮我按采购收货生成采购发票草稿",
+    "expected_status": ["needs_clarification"],
+    "must_ask_question": true
+  },
+  {
+    "id": "finance_cancel_missing_document",
+    "user": "fang.wenqian@stec-up.local",
+    "project_code": "PRJ-HL-13",
+    "erpnext_project": "PROJ-0010",
+    "warehouse": "合流1.3标仓库 - SD",
+    "text": "刚才那张付款单录错了，需要冲销",
+    "expected_status": ["needs_clarification"],
+    "must_ask_question": true
+  }
+]

@@ -105,7 +105,24 @@ src/nexterp_agent/agent_runtime/business_capabilities/procurement.py
 src/nexterp_agent/agent_runtime/business_capabilities/stock.py
 ```
 
-财务和项目的其他业务按相同方式增加独立能力包，不把所有模块塞进一个总提示词。
+## 当前财务能力
+
+| 业务目标 | 确定性能力 | 关键边界 |
+| --- | --- | --- |
+| 查询应付账款 | `finance.accounts_payable.query` | 只读；公司和供应商必须是真实主键 |
+| 收货单生成采购发票 | `finance.purchase_invoice.from_receipt` | 来源必须是已提交采购收货；供应商发票号和日期由用户提供 |
+| 采购发票生成付款草稿 | `finance.supplier_payment.from_invoice` | 来源必须已提交且存在未付金额；收付款账户由 ERPNext 生成 |
+| 取消冲销财务单据 | `finance.document.cancel` | 只允许白名单财务单据；必须已提交、说明原因并执行财务级确认 |
+
+实现位于：
+
+```text
+src/nexterp_agent/agent_runtime/business_capabilities/finance.py
+```
+
+财务模型不能填写应付科目、银行科目或总账分录。付款草稿调用 ERPNext 标准付款生成方法取得会计账户和发票分配关系；取消单据由 ERPNext 执行正式取消与反向会计影响，并继续受会计期间、关联单据和员工权限约束。
+
+项目的其他业务按相同方式增加独立能力包，不把所有模块塞进一个总提示词。
 
 ## 上下文与记忆
 

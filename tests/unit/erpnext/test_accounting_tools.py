@@ -49,7 +49,15 @@ class AccountingFakeClient:
                 },
             )
         if doctype in {"Sales Invoice", "Purchase Invoice"}:
-            return ToolResult(ok=True, data={"name": name, "grand_total": 100, "outstanding_amount": 100})
+            return ToolResult(ok=True, data={
+                "doctype": doctype,
+                "name": name,
+                "docstatus": 1,
+                "supplier": "SUP-001" if doctype == "Purchase Invoice" else None,
+                "company": "Acme",
+                "grand_total": 100,
+                "outstanding_amount": 100,
+            })
         if doctype == "Purchase Receipt" and name == "PR-001":
             return ToolResult(
                 ok=True,
@@ -125,6 +133,23 @@ class AccountingFakeClient:
                     "unallocated_amount": 0,
                 },
             )
+        if method == "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry":
+            return ToolResult(ok=True, data={
+                "doctype": "Payment Entry",
+                "payment_type": "Pay",
+                "party_type": "Supplier",
+                "party": "SUP-001",
+                "company": "Acme",
+                "paid_from": "Creditors - A",
+                "paid_to": "Bank - A",
+                "paid_amount": args.get("party_amount") or 100,
+                "received_amount": args.get("party_amount") or 100,
+                "references": [{
+                    "reference_doctype": "Purchase Invoice",
+                    "reference_name": args["dn"],
+                    "allocated_amount": args.get("party_amount") or 100,
+                }],
+            })
         return ToolResult(ok=True, data={"method": method})
 
 
@@ -402,6 +427,85 @@ def test_purchase_invoice_from_purchase_receipt_blocks_overbilling() -> None:
     assert client.calls == [("get_document", "Purchase Receipt", "PR-001")]
 
 
+def test_supplier_payment_from_purchase_invoice_uses_erpnext_generated_accounts() -> None:
+    client = AccountingFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    result = adapter.execute({
+        "tool": "erpnext.accounting.create_supplier_payment_from_purchase_invoice_draft",
+        "arguments": {
+            "purchase_invoice": "PINV-001",
+            "posting_date": "2026-07-20",
+            "paid_amount": 60,
+            "reference_no": "BANK-REF-1",
+            "reference_date": "2026-07-20",
+        },
+    })
+
+    assert result.ok
+    assert result.data["doctype"] == "Payment Entry"
+    assert result.data["source_purchase_invoice"] == "PINV-001"
+    assert result.data["outstanding_before_payment"] == 100
+    created = client.calls[-1]
+    assert created[0:2] == ("create_document", "Payment Entry")
+    payment = created[2]
+    assert payment["paid_from"] == "Creditors - A"
+    assert payment["paid_to"] == "Bank - A"
+    assert payment["references"] == [{
+        "reference_doctype": "Purchase Invoice",
+        "reference_name": "PINV-001",
+        "allocated_amount": 60,
+    }]
+    assert payment["docstatus"] == 0
+
+
+def test_supplier_payment_rejects_amount_above_outstanding() -> None:
+    client = AccountingFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    result = adapter.execute({
+        "tool": "erpnext.accounting.create_supplier_payment_from_purchase_invoice_draft",
+        "arguments": {"purchase_invoice": "PINV-001", "paid_amount": 101},
+    })
+
+    assert not result.ok
+    assert result.error_type == "validation_error"
+    assert client.calls == [("get_document", "Purchase Invoice", "PINV-001")]
+
+
+def test_cancel_financial_document_requires_confirmation_and_submitted_document() -> None:
+    client = AccountingFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    blocked = adapter.execute({
+        "tool": "erpnext.accounting.cancel_financial_document",
+        "arguments": {"doctype": "Purchase Invoice", "name": "PINV-001", "reason": "重复发票"},
+    })
+    assert not blocked.ok
+    assert blocked.error_type == "financial_confirmation_required"
+
+    allowed = adapter.execute({
+        "tool": "erpnext.accounting.cancel_financial_document",
+        "arguments": {
+            "doctype": "Purchase Invoice",
+            "name": "PINV-001",
+            "reason": "重复发票",
+            "confirmation": {
+                "confirmed_by": "finance@example.com",
+                "confirmed_at": "2026-07-20T10:00:00Z",
+                "confirmation_text": "确认冲销采购发票 PINV-001",
+                "reason": "重复发票",
+            },
+        },
+    })
+    assert allowed.ok
+    assert allowed.data["docstatus"] == 2
+    assert client.calls[-2:] == [
+        ("get_document", "Purchase Invoice", "PINV-001"),
+        ("cancel_document", "Purchase Invoice", "PINV-001"),
+    ]
+
+
 def test_financial_submit_requires_confirmation_metadata() -> None:
     client = AccountingFakeClient()
     adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
@@ -658,6 +762,7 @@ def test_accounting_tools_infer_expected_risk_levels() -> None:
     assert ToolCall.from_dict({"tool": "erpnext.accounting.get_report_filters"}).risk_level == "L0"
     assert ToolCall.from_dict({"tool": "erpnext.accounting.create_sales_invoice_draft"}).risk_level == "L3"
     assert ToolCall.from_dict({"tool": "erpnext.accounting.create_purchase_invoice_from_purchase_receipt_draft"}).risk_level == "L3"
+    assert ToolCall.from_dict({"tool": "erpnext.accounting.create_supplier_payment_from_purchase_invoice_draft"}).risk_level == "L3"
     assert ToolCall.from_dict({"tool": "erpnext.accounting.create_period_closing_voucher_draft"}).risk_level == "L3"
     assert ToolCall.from_dict({"tool": "erpnext.accounting.prepare_payment_allocation"}).risk_level == "L1"
     assert ToolCall.from_dict({"tool": "erpnext.accounting.prepare_invoice_taxes"}).risk_level == "L1"
@@ -666,5 +771,6 @@ def test_accounting_tools_infer_expected_risk_levels() -> None:
     assert ToolCall.from_dict({"tool": "erpnext.accounting.create_budget_draft"}).risk_level == "L3"
     assert ToolCall.from_dict({"tool": "erpnext.accounting.update_budget_draft"}).risk_level == "L3"
     assert ToolCall.from_dict({"tool": "erpnext.accounting.submit_financial_document"}).risk_level == "L5_FINANCIAL"
+    assert ToolCall.from_dict({"tool": "erpnext.accounting.cancel_financial_document"}).risk_level == "L5_FINANCIAL"
     assert ToolCall.from_dict({"tool": "erpnext.submit_document", "arguments": {"doctype": "Payment Entry"}}).risk_level == "L5_FINANCIAL"
     assert ToolCall.from_dict({"tool": "erpnext.submit_document"}).risk_level == "L4"

@@ -1018,3 +1018,78 @@ tools:
         constraints:
           - "必须包含财务确认元数据，且确认摘要覆盖 doctype、name 和财务影响。"
         repair: ["ask_clarification", "permission_denied", "validate_before_execute"]
+
+  erpnext.accounting.create_supplier_payment_from_purchase_invoice_draft:
+    purpose: "L3：从已提交采购发票生成供应商付款草稿，账户和引用由 ERPNext 生成。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Purchase Invoice", "Payment Entry", "Payment Entry Reference"]
+      methods: ["erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry"]
+    audit_fields: ["purchase_invoice", "posting_date", "paid_amount", "bank_account", "reference_no", "reference_date", "remarks"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "purchase_invoice 必须是已提交且存在未付金额的采购发票。"
+      - "付款账户、应付账户、币种和发票引用由 ERPNext get_payment_entry 生成，模型不得自行编造。"
+      - "paid_amount 如填写必须大于0且不超过发票未付金额；不填写时默认使用 ERPNext 建议金额。"
+      - "只创建 Payment Entry 草稿；财务过账必须另行使用 submit_financial_document 并再次确认。"
+    parameters:
+      purchase_invoice:
+        required: yes
+        source: "Purchase Invoice Resolver"
+        resolver: purchase_invoice
+        constraints: ["必须是 ERPNext Purchase Invoice.name，且 docstatus=1、outstanding_amount>0。"]
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      posting_date:
+        source: "Date Resolver / 系统日期"
+        resolver: date
+        constraints: ["必须是 ISO 日期。"]
+        repair: ["inject_context", "ask_clarification"]
+      paid_amount:
+        source: "用户明确金额 / 发票未付金额"
+        constraints: ["必须大于0且不超过发票未付金额。"]
+        repair: ["ask_clarification", "validate_before_execute"]
+      bank_account:
+        source: "ERPNext Bank Account Resolver"
+        resolver: bank_account
+        constraints: ["如指定，必须是有权使用的 ERPNext Bank Account.name。"]
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+
+  erpnext.accounting.cancel_financial_document:
+    purpose: "L5_FINANCIAL：取消已提交财务单据，由 ERPNext 执行标准总账冲销。"
+    expose: agent_visible
+    allowed_roles: ["财务"]
+    confirm: financial_confirm
+    backend_mapping:
+      doctypes: ["Journal Entry", "Payment Entry", "Sales Invoice", "Purchase Invoice", "Period Closing Voucher"]
+      notes: "调用 ERPNext cancel；期间锁定、后续单据和权限由 ERPNext 最终校验。"
+    audit_fields: ["doctype", "name", "reason", "confirmation"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "permission_denied", "erpnext_validation_error"]
+    business_contract:
+      - "只允许取消 schema 白名单中的已提交财务单据。"
+      - "必须展示单据、金额、日期、冲销原因和总账影响，并获得 financial_confirm。"
+      - "这不是删除记录；ERPNext 保留取消状态和反向总账审计。"
+      - "冻结期间、已被后续单据引用或无取消权限时必须停止，不得绕过。"
+    parameters:
+      doctype:
+        required: yes
+        source: "Runtime 枚举 / 单据快照"
+        constraints: ["只能使用 schema 枚举值。"]
+        repair: ["validate_before_execute"]
+      name:
+        required: yes
+        source: "Financial Document Resolver"
+        resolver: financial_document
+        constraints: ["必须是已解析且实时读取为 docstatus=1 的财务单据。"]
+        repair: ["resolve_entity", "present_candidates", "ask_clarification"]
+      reason:
+        required: yes
+        source: "用户明确说明"
+        constraints: ["必须说明业务冲销原因，不得由模型虚构。"]
+        repair: ["ask_clarification"]
+      confirmation:
+        required: yes
+        source: "Financial Confirmation"
+        constraints: ["必须绑定 doctype、name、reason 和财务影响摘要。"]
+        repair: ["ask_clarification", "permission_denied", "validate_before_execute"]
