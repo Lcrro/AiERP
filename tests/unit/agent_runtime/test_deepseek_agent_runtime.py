@@ -198,6 +198,162 @@ def test_procurement_write_is_compiled_and_confirmation_is_hash_bound(tmp_path: 
     assert client.created == []
 
 
+def test_stock_balance_business_action_executes_read_only_without_confirmation(tmp_path: Path) -> None:
+    class StockReadClient:
+        def get_logged_user(self):
+            return ToolResult(ok=True, data="mao.xiaoquan@stec-up.local")
+
+        def get_item_stock_locations(self, item_code, *, include_zero=False, limit=100):
+            assert (item_code, include_zero, limit) == ("SAFE-000001", False, 200)
+            return ToolResult(ok=True, data=[{
+                "item_code": item_code,
+                "warehouse": "合流1.3标仓库 - SD",
+                "actual_qty": 12,
+            }])
+
+    planner = PlannerSequence([
+        {
+            "action": "propose_business_action",
+            "summary": "查询手套库存",
+            "arguments": {"business_intent": {
+                "goal": "query_stock_balance",
+                "items": [{"item_code": "SAFE-000001"}],
+            }},
+        },
+        {"action": "finish", "summary": "回复库存", "arguments": {"message": "合流1.3标仓库现有12双。"}},
+    ])
+    store = RuntimeSessionStore(tmp_path)
+    state = RuntimeSessionState(user="mao.xiaoquan@stec-up.local", profile="project")
+    state.selected_entities["gloves"] = {"kind": "item", "value": "SAFE-000001"}
+    store.save(state)
+    runtime = DeepSeekAgentRuntime(
+        planner=planner,
+        client_factory=lambda _user: StockReadClient(),
+        session_store=store,
+    )
+
+    result = runtime.run_once("查帆布手套库存", user=state.user, today=date(2026, 7, 20))
+
+    assert result.status == "completed"
+    assert result.message == "合流1.3标仓库现有12双。"
+    assert result.tool_results[0]["data"][0]["actual_qty"] == 12
+    assert store.load(state.user, profile="project").pending_action is None
+
+
+def test_stock_transfer_business_action_confirms_executes_and_reads_back(tmp_path: Path) -> None:
+    class StockWriteClient:
+        def __init__(self):
+            self.created = []
+
+        def get_logged_user(self):
+            return ToolResult(ok=True, data="pan.feng@stec-up.local")
+
+        def get_stock_balance(self, item_code, *, warehouse=None, limit=100):
+            qty = 200 if warehouse == "蕰川路基地仓库 - SD" else 0
+            return ToolResult(ok=True, data=[{"item_code": item_code, "warehouse": warehouse, "actual_qty": qty}])
+
+        def create_stock_entry_draft(self, data):
+            self.created.append(data)
+            return ToolResult(ok=True, data={"doctype": "Stock Entry", "name": "MAT-STE-TEST-0001", "docstatus": 0})
+
+        def get_document(self, doctype, name):
+            assert (doctype, name) == ("Stock Entry", "MAT-STE-TEST-0001")
+            return ToolResult(ok=True, data={
+                "doctype": doctype,
+                "name": name,
+                "docstatus": 0,
+                "items": [{
+                    "item_code": "SAFE-000001",
+                    "qty": 100,
+                    "s_warehouse": "蕰川路基地仓库 - SD",
+                    "t_warehouse": "合流1.3标仓库 - SD",
+                }],
+            })
+
+    planner = PlannerSequence([{
+        "action": "propose_business_action",
+        "summary": "准备库存调拨",
+        "arguments": {"business_intent": {
+            "goal": "create_stock_transfer",
+            "company": "STEC (Demo)",
+            "source_warehouse": "蕰川路基地仓库 - SD",
+            "target_warehouse": "合流1.3标仓库 - SD",
+            "items": [{"item_code": "SAFE-000001", "qty": 100, "uom": "双"}],
+        }},
+    }])
+    store = RuntimeSessionStore(tmp_path)
+    state = RuntimeSessionState(user="pan.feng@stec-up.local", profile="procurement")
+    state.selected_entities.update({
+        "item": {"kind": "item", "value": "SAFE-000001"},
+        "source": {"kind": "warehouse", "value": "蕰川路基地仓库 - SD"},
+        "target": {"kind": "warehouse", "value": "合流1.3标仓库 - SD"},
+    })
+    store.save(state)
+    client = StockWriteClient()
+    runtime = DeepSeekAgentRuntime(planner=planner, client_factory=lambda _user: client, session_store=store)
+
+    preview = runtime.run_once("把100双手套从基地调到合流仓库", user=state.user, today=date(2026, 7, 20))
+    assert preview.status == "needs_confirmation"
+    assert preview.pending_tool_call["tool"] == "erpnext.stock.create_transfer_draft"
+    assert client.created == []
+
+    completed = runtime.run_once("确认", user=state.user, execute=True, today=date(2026, 7, 20))
+    assert completed.status == "completed"
+    assert len(client.created) == 1
+    assert completed.tool_result["verification"]["ok"] is True
+    assert "transfer_warehouses_match" in completed.tool_result["verification"]["checks"]
+
+
+def test_stock_transfer_shortage_is_blocked_before_confirmation(tmp_path: Path) -> None:
+    class EmptyStockClient:
+        def get_logged_user(self):
+            return ToolResult(ok=True, data="pan.feng@stec-up.local")
+
+        def get_stock_balance(self, item_code, *, warehouse=None, limit=100):
+            return ToolResult(ok=True, data=[{"item_code": item_code, "warehouse": warehouse, "actual_qty": 0}])
+
+        def create_stock_entry_draft(self, _data):
+            raise AssertionError("shortage must block draft creation")
+
+    planner = PlannerSequence([
+        {
+            "action": "propose_business_action",
+            "summary": "准备调拨",
+            "arguments": {"business_intent": {
+                "goal": "create_stock_transfer",
+                "source_warehouse": "蕰川路基地仓库 - SD",
+                "target_warehouse": "合流1.3标仓库 - SD",
+                "items": [{"item_code": "SAFE-000001", "qty": 100, "uom": "双"}],
+            }},
+        },
+        {
+            "action": "ask_user",
+            "summary": "说明缺料",
+            "arguments": {"questions": ["基地仓库存为0，是否改为采购？"]},
+        },
+    ])
+    store = RuntimeSessionStore(tmp_path)
+    state = RuntimeSessionState(user="pan.feng@stec-up.local", profile="procurement")
+    state.selected_entities.update({
+        "item": {"kind": "item", "value": "SAFE-000001"},
+        "source": {"kind": "warehouse", "value": "蕰川路基地仓库 - SD"},
+        "target": {"kind": "warehouse", "value": "合流1.3标仓库 - SD"},
+    })
+    store.save(state)
+    runtime = DeepSeekAgentRuntime(
+        planner=planner,
+        client_factory=lambda _user: EmptyStockClient(),
+        session_store=store,
+    )
+
+    result = runtime.run_once("调拨100双手套", user=state.user, today=date(2026, 7, 20))
+
+    assert result.status == "needs_clarification"
+    assert result.pending_tool_call is None
+    assert result.questions == ("基地仓库存为0，是否改为采购？",)
+    assert any(step["label"] == "库存预检未通过" for step in result.steps)
+
+
 def test_runtime_stops_after_configured_deepseek_decision_count(tmp_path: Path) -> None:
     runtime = DeepSeekAgentRuntime(planner=RepeatingPlanner(), session_store=RuntimeSessionStore(tmp_path), max_steps=2)
     result = runtime.run_once("查库存", user="mao.xiaoquan@stec-up.local")

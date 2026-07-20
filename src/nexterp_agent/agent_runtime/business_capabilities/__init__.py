@@ -7,6 +7,13 @@ from .procurement import (
     canonical_tool_call_hash,
     verify_procurement_result,
 )
+from .stock import (
+    STOCK_GOALS,
+    StockBusinessIntentDraft,
+    StockCapabilityCompiler,
+    StockCapabilityGraph,
+    verify_stock_result,
+)
 
 __all__ = [
     "BusinessIntentDraft",
@@ -16,4 +23,9 @@ __all__ = [
     "PreparedBusinessAction",
     "canonical_tool_call_hash",
     "verify_procurement_result",
+    "STOCK_GOALS",
+    "StockBusinessIntentDraft",
+    "StockCapabilityCompiler",
+    "StockCapabilityGraph",
+    "verify_stock_result",
 ]

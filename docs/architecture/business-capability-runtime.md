@@ -90,7 +90,22 @@
 src/nexterp_agent/agent_runtime/business_capabilities/procurement.py
 ```
 
-后续库存、财务和项目业务按相同方式增加独立能力包，不把所有模块塞进一个总提示词。
+## 当前库存能力
+
+| 业务目标 | 确定性能力 | 确认前实时检查 |
+| --- | --- | --- |
+| 查询物料各仓库存 | `stock.balance.query` | Resolver 可在候选阶段批量读取相关仓库；单物料能力走实时 Bin 查询 |
+| 仓库间调拨 | `stock.transfer.create` | 校验源仓与目标仓，并读取源仓可用量和目标仓现存量 |
+| 项目领料 | `stock.project_issue.create` | 读取项目、成本中心和来源仓可用量，缺料时不显示写入确认 |
+| 库存盘点调整 | `stock.reconciliation.create` | 校验实盘数量非负；提交库存影响仍需单独确认 |
+
+实现位于：
+
+```text
+src/nexterp_agent/agent_runtime/business_capabilities/stock.py
+```
+
+财务和项目的其他业务按相同方式增加独立能力包，不把所有模块塞进一个总提示词。
 
 ## 上下文与记忆
 

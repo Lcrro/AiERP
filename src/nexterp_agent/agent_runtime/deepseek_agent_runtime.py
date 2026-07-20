@@ -20,8 +20,12 @@ from .business_capabilities import (
     PreparedBusinessAction,
     ProcurementCapabilityCompiler,
     ProcurementCapabilityGraph,
+    STOCK_GOALS,
+    StockBusinessIntentDraft,
+    StockCapabilityCompiler,
     canonical_tool_call_hash,
     verify_procurement_result,
+    verify_stock_result,
 )
 from .deepseek_material_request import DeepSeekSettings, call_deepseek_json
 from .resolvers import EntityResolverRegistry, ResolutionResult
@@ -336,8 +340,8 @@ class DeepSeekAgentRuntime:
                 continue
             if kind == "propose_business_action":
                 try:
-                    intent = BusinessIntentDraft.from_dict(arguments.get("business_intent") or {})
-                    prepared = self._compile_procurement_action(
+                    intent = self._parse_business_intent(arguments.get("business_intent") or {})
+                    prepared = self._compile_business_action(
                         intent,
                         user=user,
                         session=session,
@@ -377,6 +381,28 @@ class DeepSeekAgentRuntime:
                     steps.append(_step("业务预检", kind, prepared.to_dict(), observation))
                     observations.append(observation)
                     continue
+                preflight_call = _business_preflight_call(prepared)
+                if preflight_call:
+                    preflight = self._execute(preflight_call, user=user, profile=profile)
+                    preflight_payload = preflight.to_dict()
+                    tool_results.append(preflight_payload)
+                    steps.append(_step("实时业务预检", "execute_tool", preflight_call, preflight_payload))
+                    preflight_data = preflight_payload.get("data") if isinstance(preflight_payload.get("data"), dict) else {}
+                    shortages = preflight_data.get("shortages") if isinstance(preflight_data, dict) else []
+                    if not preflight.ok or (shortages and call.get("arguments", {}).get("require_available_stock", True)):
+                        observation = {
+                            "type": "business_action_error",
+                            "error": preflight.user_message or preflight.error or "实时库存预检未通过。",
+                            "preflight": _safe_tool_result(preflight_payload),
+                        }
+                        steps.append(_step("库存预检未通过", "business_preflight", prepared.to_dict(), observation))
+                        observations.append(observation)
+                        continue
+                    observations.append({
+                        "type": "business_preflight",
+                        "tool_call": preflight_call,
+                        "result": _safe_tool_result(preflight_payload),
+                    })
                 prepared_payload = prepared.to_dict()
                 steps.append(_step("业务能力编译", kind, {"intent": intent.to_dict()}, prepared_payload))
                 if prepared.write:
@@ -511,23 +537,33 @@ class DeepSeekAgentRuntime:
         result = DeepSeekTurnResult("failed", f"Agent达到{self.max_steps}步规划上限，已停止执行。", tuple(steps), tool_results=tuple(tool_results))
         return self._save(session, user_text, result, request_id)
 
-    def _compile_procurement_action(
+    @staticmethod
+    def _parse_business_intent(payload: dict[str, Any]) -> BusinessIntentDraft | StockBusinessIntentDraft:
+        goal = str(payload.get("goal") or "")
+        if goal in STOCK_GOALS:
+            return StockBusinessIntentDraft.from_dict(payload)
+        return BusinessIntentDraft.from_dict(payload)
+
+    def _compile_business_action(
         self,
-        intent: BusinessIntentDraft,
+        intent: BusinessIntentDraft | StockBusinessIntentDraft,
         *,
         user: str,
         session: RuntimeSessionState,
         observations: list[dict[str, Any]],
         today: date,
     ) -> PreparedBusinessAction:
-        allowed_documents = _allowed_entity_values(session, observations).get("document") or set()
-        for source in intent.source_documents:
-            if source.name not in allowed_documents:
-                raise CapabilityCompilationError(
-                    f"来源单据 {source.name} 尚未通过实体解析。",
-                    questions=(f"请先核对来源单据 {source.name}。",),
-                )
-        compiler = ProcurementCapabilityCompiler(self._business_document_loader(user))
+        if isinstance(intent, BusinessIntentDraft):
+            allowed_documents = _allowed_entity_values(session, observations).get("document") or set()
+            for source in intent.source_documents:
+                if source.name not in allowed_documents:
+                    raise CapabilityCompilationError(
+                        f"来源单据 {source.name} 尚未通过实体解析。",
+                        questions=(f"请先核对来源单据 {source.name}。",),
+                    )
+            compiler = ProcurementCapabilityCompiler(self._business_document_loader(user))
+        else:
+            compiler = StockCapabilityCompiler(self._business_document_loader(user))
         return compiler.compile(
             intent,
             runtime_context={
@@ -569,6 +605,8 @@ class DeepSeekAgentRuntime:
             write=bool(raw.get("write", True)),
         )
         try:
+            if prepared.goal in STOCK_GOALS:
+                return verify_stock_result(prepared, payload, self._business_document_loader(user))
             return verify_procurement_result(prepared, payload, self._business_document_loader(user))
         except CapabilityCompilationError as exc:
             return {"ok": False, "reason": str(exc), "checks": []}
@@ -597,7 +635,7 @@ class DeepSeekAgentRuntime:
             "你是懂业务的ERPNext员工助理，只返回协议中的单个JSON动作。"
             "负责理解目标、提取用户明确表达的信息、比较候选和友好追问；不要承担ERP事务编排。"
             "任何ERPNext主键必须来自resolve_entities或已确认上下文，禁止猜测。"
-            "普通查询先discover_tools和get_tool_contracts，再execute_tool。采购写操作无需发现底层工具，"
+            "普通查询先discover_tools和get_tool_contracts，再execute_tool。采购与库存标准业务动作无需发现底层工具，"
             "应先resolve_entities，再直接使用propose_business_action。"
             "Runtime负责读取来源单据、限制合法下一步、编译ToolCall和等待一次用户确认。"
             "收到business_action_error时，若信息可从原话解析，应调用Resolver或修正业务意图；只有用户确实没说时才ask_user。"
@@ -615,10 +653,10 @@ class DeepSeekAgentRuntime:
                 "get_tool_contracts": {"tool_names": ["从discover_tools结果逐字复制的工具名，最多5个"]},
                 "resolve_entities": {"entities": [{"id": "本轮唯一标识", "kind": "item | project | warehouse | supplier | company | employee | date | uom | document", "query": "用户原话或待核对主键", "specs": {}, "qty": "kind=item时可提供需求数量", "uom": "kind=item时可提供用户单位", "doctype": "kind=document时必填"}]},
                 "propose_business_action": {"business_intent": {
-                    "goal": "create_material_request | create_rfq_from_material_request | create_supplier_quotation_from_rfq | compare_supplier_quotations | create_purchase_order_from_supplier_quotation | create_purchase_order_from_material_request | create_purchase_receipt_from_purchase_order | create_purchase_return_from_receipt",
+                    "goal": "create_material_request | create_rfq_from_material_request | create_supplier_quotation_from_rfq | compare_supplier_quotations | create_purchase_order_from_supplier_quotation | create_purchase_order_from_material_request | create_purchase_receipt_from_purchase_order | create_purchase_return_from_receipt | query_stock_balance | create_stock_transfer | create_project_material_issue | create_stock_reconciliation",
                     "source_documents": [{"doctype": "已解析单据类型", "name": "已解析单号"}],
                     "items": [{"item_code": "已解析物料编码", "source_row": "可选来源行name", "qty": "正数", "uom": "单位", "rate": "报价", "warehouse": "已解析仓库", "project": "已解析项目", "schedule_date": "YYYY-MM-DD", "reason": "退货原因"}],
-                    "suppliers": ["已解析Supplier.name"], "company": "已确认Company.name", "project": "已确认Project.name", "warehouse": "已确认Warehouse.name", "schedule_date": "YYYY-MM-DD", "valid_till": "YYYY-MM-DD", "posting_date": "YYYY-MM-DD", "currency": "币种", "message": "业务说明", "full_return": "boolean",
+                    "suppliers": ["已解析Supplier.name"], "company": "已确认Company.name", "project": "已确认Project.name", "warehouse": "已确认Warehouse.name", "source_warehouse": "已解析源Warehouse.name", "target_warehouse": "已解析目标Warehouse.name", "schedule_date": "YYYY-MM-DD", "valid_till": "YYYY-MM-DD", "posting_date": "YYYY-MM-DD", "currency": "币种", "message": "业务说明", "remarks": "库存动作说明", "full_return": "boolean", "include_zero": "boolean", "require_available_stock": "boolean",
                     "provenance": {"字段名": "user | resolver | runtime_context | source_document | system_default"}
                 }},
                 "execute_tool": {"tool_call": {"tool": "已读取契约的工具名", "arguments": {}}},
@@ -1402,6 +1440,30 @@ def _inject_material_request_reference_prices(
                 "source": "removed_unverified_model_rate",
             })
     return corrections
+
+
+def _business_preflight_call(prepared: PreparedBusinessAction) -> dict[str, Any] | None:
+    """Return a read-only live-state check that must pass before showing confirmation."""
+    arguments = prepared.tool_call.get("arguments") or {}
+    if prepared.goal == "create_stock_transfer":
+        return {
+            "tool": "erpnext.stock.get_transfer_context",
+            "arguments": {
+                "source_warehouse": arguments.get("source_warehouse"),
+                "target_warehouse": arguments.get("target_warehouse"),
+                "items": deepcopy(arguments.get("items") or []),
+            },
+        }
+    if prepared.goal == "create_project_material_issue":
+        return {
+            "tool": "erpnext.projects.get_material_issue_context",
+            "arguments": {
+                "project": arguments.get("project"),
+                "source_warehouse": arguments.get("source_warehouse"),
+                "items": deepcopy(arguments.get("items") or []),
+            },
+        }
+    return None
 
 
 def _walk_arguments(value: Any):

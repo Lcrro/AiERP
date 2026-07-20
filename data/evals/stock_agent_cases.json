@@ -1,0 +1,31 @@
+[
+  {
+    "id": "stock_exact_cement_locations",
+    "user": "mao.xiaoquan@stec-up.local",
+    "project_code": "PRJ-HL-13",
+    "erpnext_project": "PROJ-0010",
+    "warehouse": "合流1.3标仓库 - SD",
+    "text": "查询水泥42.5袋装50kg在各仓库的实时库存",
+    "expected_status": ["completed"]
+  },
+  {
+    "id": "stock_transfer_preview",
+    "user": "pan.feng@stec-up.local",
+    "project_code": "PRJ-HL-13",
+    "erpnext_project": "PROJ-0010",
+    "warehouse": "合流1.3标仓库 - SD",
+    "text": "把2包水泥42.5袋装50kg从蕰川路基地仓库调拨到合流1.3标仓库，先准备调拨草稿",
+    "expected_status": ["needs_clarification"],
+    "must_ask_question": true
+  },
+  {
+    "id": "project_issue_missing_quantity",
+    "user": "mao.xiaoquan@stec-up.local",
+    "project_code": "PRJ-HL-13",
+    "erpnext_project": "PROJ-0010",
+    "warehouse": "合流1.3标仓库 - SD",
+    "text": "从合流1.3标仓库给合流项目领用水泥42.5袋装50kg",
+    "expected_status": ["needs_clarification"],
+    "must_ask_question": true
+  }
+]
