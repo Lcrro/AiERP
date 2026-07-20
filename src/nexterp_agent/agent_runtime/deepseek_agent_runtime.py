@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from copy import deepcopy
 import json
 import re
@@ -46,6 +46,7 @@ from .tool_gateway import ToolGateway, ToolSession
 MAX_AGENT_STEPS = 10
 MAX_MODEL_RETRIES = 1
 MAX_TOOL_REPAIRS = 2
+PENDING_CONFIRMATION_TTL_MINUTES = 30
 AGENT_ACTIONS = frozenset({
     "discover_tools", "discover_capabilities", "get_tool_contracts", "get_capability_guide",
     "resolve_entities", "propose_business_action", "execute_tool", "ask_user", "finish",
@@ -187,10 +188,17 @@ class DeepSeekAgentRuntime:
             return _result_from_dict(session.idempotency_results[request_id])
 
         selected_context = dict(context or {})
+        conversation_id = str(selected_context.get("conversation_id") or "default")
+        previous_conversation_id = str(session.business_state.get("conversation_id") or conversation_id)
+        if previous_conversation_id != conversation_id:
+            _clear_capability_draft(session)
+            session.pending_action = None
+        session.business_state["conversation_id"] = conversation_id
         if selected_context.get("project_code"):
             selected_project_code = str(selected_context["project_code"])
             if session.selected_project_code and session.selected_project_code != selected_project_code:
                 _clear_capability_draft(session)
+                session.pending_action = None
             session.selected_project_code = selected_project_code
         if selected_context.get("erpnext_project"):
             session.selected_entities["runtime_project"] = {
@@ -218,6 +226,10 @@ class DeepSeekAgentRuntime:
             pending = session.pending_action
             if not isinstance(pending, dict) or not isinstance(pending.get("tool_call"), dict):
                 return self._save(session, user_text, DeepSeekTurnResult("failed", "没有等待确认的ToolCall。"), request_id)
+            binding_error = _pending_binding_error(pending, session=session, user=user, profile=profile)
+            if binding_error:
+                session.pending_action = None
+                return self._save(session, user_text, DeepSeekTurnResult("failed", binding_error), request_id)
             call = pending["tool_call"]
             pending_hash = str(pending.get("confirmation_hash") or "")
             if pending_hash and canonical_tool_call_hash(call) != pending_hash:
@@ -500,7 +512,7 @@ class DeepSeekAgentRuntime:
                 intent_payload = _canonical_intent_payload(intent)
                 steps.append(_step("业务能力编译", kind, {"intent": intent_payload}, prepared_payload))
                 if prepared.write:
-                    session.pending_action = {
+                    session.pending_action = _bind_pending_action({
                         "tool_call": call,
                         "steps": steps,
                         "observations": observations,
@@ -508,7 +520,7 @@ class DeepSeekAgentRuntime:
                         "capability": prepared.capability,
                         "prepared_action": prepared_payload,
                         "confirmation_hash": prepared.confirmation_hash,
-                    }
+                    }, session=session, user=user, profile=profile)
                     result = DeepSeekTurnResult(
                         "needs_confirmation",
                         prepared.summary,
@@ -631,7 +643,12 @@ class DeepSeekAgentRuntime:
                     continue
                 contract = next(contract for contract in self.discovery.contracts if contract.name == call["tool"])
                 if contract.confirm != "none":
-                    session.pending_action = {"tool_call": call, "steps": steps, "observations": observations, "user_text": user_text}
+                    session.pending_action = _bind_pending_action(
+                        {"tool_call": call, "steps": steps, "observations": observations, "user_text": user_text},
+                        session=session,
+                        user=user,
+                        profile=profile,
+                    )
                     result = DeepSeekTurnResult(
                         "needs_confirmation",
                         _pending_confirmation_message(action["summary"]),
@@ -1230,6 +1247,66 @@ def _successful_execution_message(payload: dict[str, Any]) -> str:
 def _pending_confirmation_message(summary: str) -> str:
     action = str(summary or "执行这项操作").strip().rstrip("。")
     return f"我已准备好{action}，但尚未写入 ERPNext。请确认后再执行。"
+
+
+def _bind_pending_action(
+    pending: dict[str, Any],
+    *,
+    session: RuntimeSessionState,
+    user: str,
+    profile: str,
+) -> dict[str, Any]:
+    payload = deepcopy(pending)
+    call = payload.get("tool_call")
+    if isinstance(call, dict):
+        payload.setdefault("confirmation_hash", canonical_tool_call_hash(call))
+    now = datetime.now().astimezone()
+    runtime_project = session.selected_entities.get("runtime_project") or {}
+    payload["binding"] = {
+        "user": user,
+        "profile": profile,
+        "session_id": session.session_id,
+        "conversation_id": str(session.business_state.get("conversation_id") or "default"),
+        "project_code": session.selected_project_code,
+        "erpnext_project": runtime_project.get("value") if isinstance(runtime_project, dict) else None,
+        "created_at": now.isoformat(),
+        "expires_at": (now + timedelta(minutes=PENDING_CONFIRMATION_TTL_MINUTES)).isoformat(),
+    }
+    return payload
+
+
+def _pending_binding_error(
+    pending: dict[str, Any],
+    *,
+    session: RuntimeSessionState,
+    user: str,
+    profile: str,
+) -> str | None:
+    binding = pending.get("binding")
+    if not isinstance(binding, dict):
+        return "该待确认操作来自旧会话，已失效。请重新预览。"
+    expected = {
+        "user": user,
+        "profile": profile,
+        "session_id": session.session_id,
+        "conversation_id": str(session.business_state.get("conversation_id") or "default"),
+        "project_code": session.selected_project_code,
+    }
+    runtime_project = session.selected_entities.get("runtime_project") or {}
+    expected["erpnext_project"] = runtime_project.get("value") if isinstance(runtime_project, dict) else None
+    for field, value in expected.items():
+        if binding.get(field) != value:
+            return "待确认操作的员工、项目或会话已经变化，已取消执行。请重新预览。"
+    try:
+        expires_at = datetime.fromisoformat(str(binding.get("expires_at") or ""))
+    except ValueError:
+        return "待确认操作缺少有效期限，已取消执行。请重新预览。"
+    now = datetime.now().astimezone()
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.astimezone()
+    if expires_at <= now:
+        return "待确认操作已超过30分钟有效期，已取消执行。请重新预览。"
+    return None
 
 
 def _runtime_confirmation(*, user: str, reason: str) -> dict[str, Any]:

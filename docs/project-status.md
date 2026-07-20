@@ -10,7 +10,7 @@
 - Tool schema 与 Adapter handler：`160 / 160`
 - 主数据来源：`data/master_data/` 与 `data/material_master/`
 - Agent 主入口：`DeepSeekAgentRuntime`
-- 测试：`363 passed, 3 skipped`
+- 测试：`367 passed, 3 skipped`
 
 ## 已具备
 
@@ -26,6 +26,7 @@
 - Agent 无进展检测：重复发现、Guide、Resolver 和只读动作会被识别并提前终止，保留 10 步总上限。
 - Capability Runtime 真实 DeepSeek 稳定性基准 `20 / 20` 通过：平均 10.1 个审计步骤，5 次字段修复，1 次重复动作被识别，底层写入绕过为 0。
 - Capability 多轮草稿：已确认字段按结构保存，后续只补缺失字段即可；切换项目/能力、只读成功或写入成功后自动清理，避免旧上下文污染。
+- 待确认操作不可跨会话转移：ToolCall 同时绑定员工、岗位、会话、conversation、项目和 30 分钟有效期；切换上下文、创建新会话或过期后禁止执行并清除旧动作。
 - 真实 DeepSeek 多轮材料申请验证通过：首轮只提供物料与日期时追问数量，次轮仅补“20包”即可生成完整确认 ToolCall，项目、仓库、日期、物料和单位均正确保留；未写入 ERPNext。
 - Agent 失败回归库已建立：首批 8 个历史错误覆盖动作格式、参数边界、跨轮字段保留、Capability 旁路和无进展循环；真实基准失败自动进入本地候选报告，审查后才能晋升为固定测试。
 - 测试已分层：日常使用 `unit` 或 Agent 模块测试，阶段边界运行全量；真实 DeepSeek 和 ERPNext 写入验收通过独立命令显式触发，避免每次修改都产生费用或测试单据。

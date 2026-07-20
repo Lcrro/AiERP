@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import re
 from typing import Any
+from uuid import uuid4
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -16,6 +17,7 @@ DEFAULT_SESSION_DIR = REPO_ROOT / "data" / "runtime" / "sessions"
 class RuntimeSessionState:
     user: str
     profile: str
+    session_id: str = field(default_factory=lambda: uuid4().hex)
     company: str | None = None
     selected_project_code: str | None = None
     selected_warehouse_name: str | None = None

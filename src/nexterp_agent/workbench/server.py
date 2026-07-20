@@ -1636,6 +1636,7 @@ class AgentWorkbenchService:
             "project_code": project_code or None,
             "erpnext_project": erpnext_project or None,
             "warehouse": self.erpnext_warehouse_name(str(payload.get("warehouse") or "")) or None,
+            "conversation_id": conversation_id,
         }
         result = self.runtime(store).run_once(text, user=user, execute=execute, request_id=request_id, context=context)
         response = result.to_dict()

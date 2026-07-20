@@ -28,6 +28,10 @@ Registry 中 15 个写能力对应的底层 ToolCall 已禁止经通用 `execute
 - 只读操作成功后清除草稿；执行失败则保留，允许下一轮修复。
 - Prompt 只披露当前 Capability 草稿，不混入其他项目或能力的历史字段。
 
+### 不可转移的确认
+
+待确认 ToolCall 除规范化哈希外，还绑定员工、岗位、Runtime 会话 ID、浏览器 conversation、项目代码和 ERPNext 项目主键。确认有效期为 30 分钟。切换员工、项目、conversation、新建会话或超过有效期后，旧确认立即失效且不能写入 ERPNext。确认执行仍使用原始 ToolCall，不重新让模型规划。
+
 实现位置：
 
 ```text

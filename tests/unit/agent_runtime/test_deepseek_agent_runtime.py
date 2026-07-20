@@ -10,12 +10,14 @@ from nexterp_agent.agent_runtime.deepseek_agent_runtime import (
     DeepSeekAgentRuntime,
     ToolDiscoveryIndex,
     _attach_runtime_confirmation,
+    _bind_pending_action,
     _allowed_entity_values,
     _compact_document_snapshot,
     _compact_agent_observation,
     _document_snapshots_from_observation,
     _document_next_action_tools,
     _same_business_call,
+    _pending_binding_error,
     _inject_material_request_reference_prices,
     _inject_operational_dates,
     _inject_resolved_arguments,
@@ -1277,6 +1279,81 @@ def test_business_call_comparison_ignores_runtime_confirmation_metadata() -> Non
     }}
 
     assert _same_business_call(left, right) is True
+
+
+def test_pending_confirmation_is_bound_to_session_and_project() -> None:
+    session = RuntimeSessionState(user="mao.xiaoquan@stec-up.local", profile="project")
+    session.selected_project_code = "PRJ-HL-13"
+    session.business_state["conversation_id"] = "conversation-a"
+    session.selected_entities["runtime_project"] = {"value": "PROJ-0010"}
+    pending = _bind_pending_action(
+        {"tool_call": {"tool": "erpnext.buying.create_material_request_draft", "arguments": {}}},
+        session=session,
+        user=session.user,
+        profile=session.profile,
+    )
+
+    assert _pending_binding_error(pending, session=session, user=session.user, profile=session.profile) is None
+    session.selected_project_code = "PRJ-NJ-01"
+    error = _pending_binding_error(pending, session=session, user=session.user, profile=session.profile)
+    assert error and "项目或会话已经变化" in error
+
+
+def test_pending_confirmation_cannot_move_to_a_new_session() -> None:
+    original = RuntimeSessionState(user="mao.xiaoquan@stec-up.local", profile="project")
+    pending = _bind_pending_action(
+        {"tool_call": {"tool": "erpnext.buying.create_material_request_draft", "arguments": {}}},
+        session=original,
+        user=original.user,
+        profile=original.profile,
+    )
+    replacement = RuntimeSessionState(user=original.user, profile=original.profile)
+
+    error = _pending_binding_error(pending, session=replacement, user=replacement.user, profile=replacement.profile)
+
+    assert error and "项目或会话已经变化" in error
+
+
+def test_pending_confirmation_expires() -> None:
+    session = RuntimeSessionState(user="mao.xiaoquan@stec-up.local", profile="project")
+    pending = _bind_pending_action(
+        {"tool_call": {"tool": "erpnext.buying.create_material_request_draft", "arguments": {}}},
+        session=session,
+        user=session.user,
+        profile=session.profile,
+    )
+    pending["binding"]["expires_at"] = "2000-01-01T00:00:00+08:00"
+
+    error = _pending_binding_error(pending, session=session, user=session.user, profile=session.profile)
+
+    assert error and "超过30分钟有效期" in error
+
+
+def test_expired_pending_confirmation_is_not_executed(tmp_path: Path) -> None:
+    user = "mao.xiaoquan@stec-up.local"
+    store = RuntimeSessionStore(tmp_path)
+    session = RuntimeSessionState(user=user, profile="project")
+    session.pending_action = _bind_pending_action(
+        {"tool_call": {"tool": "erpnext.buying.create_material_request_draft", "arguments": {}}},
+        session=session,
+        user=user,
+        profile="project",
+    )
+    session.pending_action["binding"]["expires_at"] = "2000-01-01T00:00:00+08:00"
+    store.save(session)
+    client = FakeERPNextClient()
+    runtime = DeepSeekAgentRuntime(
+        planner=PlannerSequence([]),
+        client_factory=lambda _user: client,
+        session_store=store,
+    )
+
+    result = runtime.run_once("确认执行", user=user, execute=True)
+
+    assert result.status == "failed"
+    assert "超过30分钟有效期" in result.message
+    assert client.created == []
+    assert store.load(user, profile="project").pending_action is None
 
 
 def test_document_snapshot_discloses_only_state_valid_submit_path() -> None:
