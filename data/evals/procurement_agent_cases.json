@@ -1,0 +1,40 @@
+[
+  {
+    "id": "mr_exact_cement",
+    "user": "mao.xiaoquan@stec-up.local",
+    "project_code": "PRJ-HL-13",
+    "erpnext_project": "PROJ-0010",
+    "warehouse": "合流1.3标仓库 - SD",
+    "text": "后天需要2包水泥42.5袋装50kg，请准备一张材料申请草稿",
+    "expected_status": ["needs_confirmation"],
+    "expected_goal": "create_material_request",
+    "expected_tool": "erpnext.buying.create_material_request_draft",
+    "expected_values": {
+      "item_code": "MAT-CEM-000008",
+      "qty": 2,
+      "uom": "包",
+      "project": "PROJ-0010",
+      "warehouse": "合流1.3标仓库 - SD"
+    }
+  },
+  {
+    "id": "mr_ambiguous_gloves",
+    "user": "mao.xiaoquan@stec-up.local",
+    "project_code": "PRJ-HL-13",
+    "erpnext_project": "PROJ-0010",
+    "warehouse": "合流1.3标仓库 - SD",
+    "text": "后天需要100双帆布手套，帮我准备材料申请",
+    "expected_status": ["needs_clarification"],
+    "must_have_candidates": true
+  },
+  {
+    "id": "mr_missing_quantity",
+    "user": "mao.xiaoquan@stec-up.local",
+    "project_code": "PRJ-HL-13",
+    "erpnext_project": "PROJ-0010",
+    "warehouse": "合流1.3标仓库 - SD",
+    "text": "后天需要水泥42.5袋装50kg，帮我准备材料申请",
+    "expected_status": ["needs_clarification"],
+    "must_ask_question": true
+  }
+]

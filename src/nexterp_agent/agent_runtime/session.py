@@ -26,6 +26,7 @@ class RuntimeSessionState:
     selected_entities: dict[str, dict[str, Any]] = field(default_factory=dict)
     agent_steps: list[dict[str, Any]] = field(default_factory=list)
     pending_action: dict[str, Any] | None = None
+    business_state: dict[str, Any] = field(default_factory=dict)
     updated_at: str | None = None
 
     def remember_document(self, doctype: str, name: str) -> None:

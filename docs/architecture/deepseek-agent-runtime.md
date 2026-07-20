@@ -2,7 +2,7 @@
 
 ## 目标
 
-员工自然语言由 DeepSeek 自主拆解为连续动作。Runtime 不使用关键词路由、固定意图枚举或按业务意图编写的 `if/elif` 流程。
+员工自然语言由 DeepSeek 自主拆解为连续动作。Runtime 不使用关键词路由。对于采购写操作，DeepSeek 输出有限的结构化业务目标，由业务能力层根据 ERPNext 实时状态编译成 ToolCall；模型不再直接承担事务编排。
 
 ```text
 用户 -> DeepSeek 动作 -> 工具发现/契约/Resolver -> ToolGateway -> ERPNext -> DeepSeek
@@ -15,6 +15,7 @@
 - `discover_tools`：从当前岗位可用工具中检索紧凑工具卡。
 - `get_tool_contracts`：按需读取最多五个完整工具契约。
 - `resolve_entities`：核对物料、项目、仓库、供应商、公司、员工、日期、单位或单据。
+- `propose_business_action`：提交结构化业务意图，由确定性能力图和编译器生成采购 ToolCall。
 - `execute_tool`：提出一个已读取契约且通过主键与 Schema 校验的 ToolCall。
 - `ask_user`：候选不唯一或关键信息缺失时追问。
 - `finish`：依据真实 ToolResult 生成最终回复。
@@ -31,6 +32,8 @@ DeepSeek 负责理解、规划、选工具和解释结果。以下能力保持�
 - ToolGateway 核对员工 API 身份。
 - ERPNext 执行最终角色权限和业务校验。
 - 所有写操作保存为 `pending_action`，用户确认后执行原 ToolCall。
+- 业务写操作的确认绑定到规范化 ToolCall 摘要，确认后参数变化会自动取消执行。
+- 执行成功后重新读取 ERPNext 单据，核对单号、类型和来源行关系。
 - `request_id` 防止重复执行。
 
 旧 `CivilAgentRuntime` 作为 `LegacyCivilAgentRuntime` 仅供回归测试。默认 `CivilAgentRuntime` 是 `DeepSeekAgentRuntime` 的兼容名称。
@@ -55,3 +58,5 @@ DeepSeek 负责理解、规划、选工具和解释结果。以下能力保持�
 ## 审计
 
 每轮保存当前项目、仓库、已确认实体、历史单号、待确认动作和 Agent 步骤。网页只展示可审计的动作摘要、参数和 observation，不展示模型隐藏思维过程。
+
+业务能力层的详细边界和采购能力清单见 [业务能力 Runtime](business-capability-runtime.md)。

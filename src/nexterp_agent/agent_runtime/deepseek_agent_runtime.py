@@ -14,6 +14,15 @@ from nexterp_agent.item_master.release_resolver import ReleaseMaterialResolver
 from nexterp_agent.master_data import MasterDataRelease
 
 from .candidate_inventory import enrich_item_entity_results
+from .business_capabilities import (
+    BusinessIntentDraft,
+    CapabilityCompilationError,
+    PreparedBusinessAction,
+    ProcurementCapabilityCompiler,
+    ProcurementCapabilityGraph,
+    canonical_tool_call_hash,
+    verify_procurement_result,
+)
 from .deepseek_material_request import DeepSeekSettings, call_deepseek_json
 from .resolvers import EntityResolverRegistry, ResolutionResult
 from .session import RuntimeSessionState, RuntimeSessionStore
@@ -25,7 +34,7 @@ from .tool_gateway import ToolGateway, ToolSession
 MAX_AGENT_STEPS = 10
 MAX_MODEL_RETRIES = 1
 MAX_TOOL_REPAIRS = 2
-AGENT_ACTIONS = frozenset({"discover_tools", "get_tool_contracts", "resolve_entities", "execute_tool", "ask_user", "finish"})
+AGENT_ACTIONS = frozenset({"discover_tools", "get_tool_contracts", "resolve_entities", "propose_business_action", "execute_tool", "ask_user", "finish"})
 MODULE_DESCRIPTIONS = {
     "generic": "通用文档、评论、待办和附件",
     "users": "用户、角色和权限",
@@ -90,6 +99,8 @@ def validate_agent_action(payload: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("resolve_entities.arguments.entities must be a non-empty array")
     if action == "execute_tool" and not isinstance(arguments.get("tool_call"), dict):
         raise ValueError("execute_tool.arguments.tool_call is required")
+    if action == "propose_business_action" and not isinstance(arguments.get("business_intent"), dict):
+        raise ValueError("propose_business_action.arguments.business_intent is required")
     if action == "ask_user" and (not isinstance(arguments.get("questions"), list) or not arguments["questions"]):
         raise ValueError("ask_user.arguments.questions must be a non-empty array")
     if action == "finish" and not str(arguments.get("message") or "").strip():
@@ -151,6 +162,7 @@ class DeepSeekAgentRuntime:
         self.material_resolver = ReleaseMaterialResolver(self.release.material_release_path)
         self.materials_by_code = {row["item_code"]: row for row in self.release.materials if row.get("item_code")}
         self.discovery = ToolDiscoveryIndex()
+        self.procurement_graph = ProcurementCapabilityGraph()
         self.max_steps = max_steps
 
     def run_once(
@@ -174,8 +186,20 @@ class DeepSeekAgentRuntime:
         selected_context = dict(context or {})
         if selected_context.get("project_code"):
             session.selected_project_code = str(selected_context["project_code"])
+        if selected_context.get("erpnext_project"):
+            session.selected_entities["runtime_project"] = {
+                "kind": "project",
+                "value": str(selected_context["erpnext_project"]),
+                "label": str(selected_context.get("project_code") or selected_context["erpnext_project"]),
+                "row": {"project_code": selected_context.get("project_code")},
+            }
         if selected_context.get("warehouse"):
             session.selected_warehouse_name = str(selected_context["warehouse"])
+            session.selected_entities["runtime_warehouse"] = {
+                "kind": "warehouse",
+                "value": str(selected_context["warehouse"]),
+                "label": str(selected_context["warehouse"]),
+            }
         policy = make_tool_access_policy(profile)
         steps: list[dict[str, Any]] = []
         observations: list[dict[str, Any]] = []
@@ -188,6 +212,15 @@ class DeepSeekAgentRuntime:
             if not isinstance(pending, dict) or not isinstance(pending.get("tool_call"), dict):
                 return self._save(session, user_text, DeepSeekTurnResult("failed", "没有等待确认的ToolCall。"), request_id)
             call = pending["tool_call"]
+            pending_hash = str(pending.get("confirmation_hash") or "")
+            if pending_hash and canonical_tool_call_hash(call) != pending_hash:
+                session.pending_action = None
+                return self._save(
+                    session,
+                    user_text,
+                    DeepSeekTurnResult("failed", "待确认操作在确认前发生变化，已取消执行。请重新预览。"),
+                    request_id,
+                )
             confirmed_call = deepcopy(call)
             contract = next((item for item in self.discovery.contracts if item.name == call.get("tool")), None)
             if contract and contract.confirm != "none":
@@ -202,6 +235,29 @@ class DeepSeekAgentRuntime:
             self._remember_result(session, payload)
             if not execution.ok and execution.error_type in {"permission_error", "auth_error"}:
                 result = DeepSeekTurnResult("failed", execution.user_message or execution.error or "ERPNext拒绝执行。", tuple(steps), tool_result=payload, tool_results=tuple(tool_results))
+                return self._save(session, user_text, result, request_id)
+            if execution.ok:
+                verification = self._verify_prepared_action(pending, payload, user=user)
+                if verification:
+                    payload["verification"] = verification
+                    steps.append(_step("执行后回读", "verify_result", {"capability": pending.get("capability")}, verification))
+                    self._remember_verified_business_action(session, pending, payload, verification)
+                    if not verification.get("ok"):
+                        result = DeepSeekTurnResult(
+                            "completed",
+                            f"{_successful_execution_message(payload)} 但执行后回读未完全通过，请人工检查该单据。",
+                            tuple(steps),
+                            tool_result=payload,
+                            tool_results=tuple(tool_results),
+                        )
+                        return self._save(session, user_text, result, request_id)
+                result = DeepSeekTurnResult(
+                    "completed",
+                    _successful_execution_message(payload),
+                    tuple(steps),
+                    tool_result=payload,
+                    tool_results=tuple(tool_results),
+                )
                 return self._save(session, user_text, result, request_id)
             observations.append({"type": "tool_result", "tool_call": call, "result": _safe_tool_result(payload)})
 
@@ -258,6 +314,14 @@ class DeepSeekAgentRuntime:
                     if entity_id and entity_id not in resolved_values:
                         session.selected_entities.pop(entity_id, None)
                 session.selected_entities.update(resolved_values)
+                document_snapshots = _document_snapshots_from_observation(observation)
+                if document_snapshots:
+                    capability_observation = {
+                        "type": "legal_business_capabilities",
+                        "capabilities": self.procurement_graph.legal_actions(document_snapshots),
+                    }
+                    steps.append(_step("判断合法业务动作", "capability_graph", {}, capability_observation))
+                    observations.append(capability_observation)
                 recommended_tools = _document_next_action_tools(observation)
                 if recommended_tools:
                     contracts = self.discovery.full_contracts(recommended_tools, policy=policy)
@@ -269,6 +333,79 @@ class DeepSeekAgentRuntime:
                         contract_observation,
                     ))
                     observations.append(contract_observation)
+                continue
+            if kind == "propose_business_action":
+                try:
+                    intent = BusinessIntentDraft.from_dict(arguments.get("business_intent") or {})
+                    prepared = self._compile_procurement_action(
+                        intent,
+                        user=user,
+                        session=session,
+                        observations=observations,
+                        today=today,
+                    )
+                except (ValueError, CapabilityCompilationError) as exc:
+                    questions = tuple(getattr(exc, "questions", ()) or ())
+                    observation = {
+                        "type": "business_action_error",
+                        "error": str(exc),
+                        "questions": list(questions),
+                    }
+                    steps.append(_step("业务预检", kind, arguments, observation))
+                    observations.append(observation)
+                    continue
+                call = deepcopy(prepared.tool_call)
+                contract = next((item for item in self.discovery.contracts if item.name == call.get("tool")), None)
+                if contract and contract.name not in _loaded_contract_names(observations):
+                    contract_observation = {"type": "get_tool_contracts", "contracts": [_full_contract(contract)]}
+                    steps.append(_step(
+                        "业务能力读取契约",
+                        "get_tool_contracts",
+                        {"tool_names": [contract.name]},
+                        contract_observation,
+                    ))
+                    observations.append(contract_observation)
+                validation_error = self._validate_proposed_call(
+                    call,
+                    user=user,
+                    policy=policy,
+                    session=session,
+                    observations=observations,
+                )
+                if validation_error:
+                    observation = {"type": "business_action_error", "error": validation_error, "tool_call": call}
+                    steps.append(_step("业务预检", kind, prepared.to_dict(), observation))
+                    observations.append(observation)
+                    continue
+                prepared_payload = prepared.to_dict()
+                steps.append(_step("业务能力编译", kind, {"intent": intent.to_dict()}, prepared_payload))
+                if prepared.write:
+                    session.pending_action = {
+                        "tool_call": call,
+                        "steps": steps,
+                        "observations": observations,
+                        "user_text": user_text,
+                        "capability": prepared.capability,
+                        "prepared_action": prepared_payload,
+                        "confirmation_hash": prepared.confirmation_hash,
+                    }
+                    result = DeepSeekTurnResult(
+                        "needs_confirmation",
+                        prepared.summary,
+                        tuple(steps),
+                        pending_tool_call=call,
+                        tool_call=call,
+                        tool_calls=(call,),
+                        tool_results=tuple(tool_results),
+                        intent=intent.to_dict(),
+                    )
+                    return self._save(session, user_text, result, request_id=None)
+                execution = self._execute(call, user=user, profile=profile)
+                payload = execution.to_dict()
+                tool_results.append(payload)
+                steps.append(_step("ERPNext执行", "execute_tool", call, payload))
+                self._remember_result(session, payload)
+                observations.append({"type": "tool_result", "tool_call": call, "result": _safe_tool_result(payload)})
                 continue
             if kind == "ask_user":
                 questions = tuple(str(value) for value in arguments.get("questions") or [] if str(value).strip())
@@ -300,6 +437,7 @@ class DeepSeekAgentRuntime:
                 corrections: list[dict[str, Any]] = []
                 if contract:
                     corrections = _inject_resolved_arguments(call["arguments"], contract, session, observations)
+                    corrections.extend(_inject_operational_dates(call, today))
                     corrections.extend(_inject_source_document_references(call, session, observations))
                     corrections.extend(_inject_material_request_reference_prices(call, self.materials_by_code))
                     if corrections:
@@ -373,37 +511,116 @@ class DeepSeekAgentRuntime:
         result = DeepSeekTurnResult("failed", f"Agent达到{self.max_steps}步规划上限，已停止执行。", tuple(steps), tool_results=tuple(tool_results))
         return self._save(session, user_text, result, request_id)
 
+    def _compile_procurement_action(
+        self,
+        intent: BusinessIntentDraft,
+        *,
+        user: str,
+        session: RuntimeSessionState,
+        observations: list[dict[str, Any]],
+        today: date,
+    ) -> PreparedBusinessAction:
+        allowed_documents = _allowed_entity_values(session, observations).get("document") or set()
+        for source in intent.source_documents:
+            if source.name not in allowed_documents:
+                raise CapabilityCompilationError(
+                    f"来源单据 {source.name} 尚未通过实体解析。",
+                    questions=(f"请先核对来源单据 {source.name}。",),
+                )
+        compiler = ProcurementCapabilityCompiler(self._business_document_loader(user))
+        return compiler.compile(
+            intent,
+            runtime_context={
+                "company": session.company,
+                "project": _single_resolved_value("project", session, observations),
+                "warehouse": _single_resolved_value("warehouse", session, observations),
+            },
+            today=today,
+        )
+
+    def _business_document_loader(self, user: str):
+        if self.client_factory is None:
+            raise CapabilityCompilationError("当前 Runtime 没有 ERPNext 客户端，无法读取业务单据。")
+        client = self.client_factory(user)
+
+        def load(doctype: str, name: str) -> dict[str, Any]:
+            result = client.get_document(doctype, name)
+            if not result.ok or not isinstance(result.data, dict):
+                raise CapabilityCompilationError(result.user_message or result.error or f"无法读取 {doctype} {name}")
+            snapshot = dict(result.data)
+            snapshot.setdefault("doctype", doctype)
+            snapshot.setdefault("name", name)
+            return snapshot
+
+        return load
+
+    def _verify_prepared_action(self, pending: dict[str, Any], payload: dict[str, Any], *, user: str) -> dict[str, Any] | None:
+        raw = pending.get("prepared_action")
+        if not isinstance(raw, dict):
+            return None
+        prepared = PreparedBusinessAction(
+            capability=str(raw.get("capability") or ""),
+            goal=str(raw.get("goal") or ""),
+            tool_call=deepcopy(raw.get("tool_call") or {}),
+            summary=str(raw.get("summary") or ""),
+            field_sources=dict(raw.get("field_sources") or {}),
+            preflight_checks=tuple(raw.get("preflight_checks") or ()),
+            confirmation_hash=str(raw.get("confirmation_hash") or ""),
+            write=bool(raw.get("write", True)),
+        )
+        try:
+            return verify_procurement_result(prepared, payload, self._business_document_loader(user))
+        except CapabilityCompilationError as exc:
+            return {"ok": False, "reason": str(exc), "checks": []}
+
+    @staticmethod
+    def _remember_verified_business_action(
+        session: RuntimeSessionState,
+        pending: dict[str, Any],
+        payload: dict[str, Any],
+        verification: dict[str, Any],
+    ) -> None:
+        data = payload.get("data") if isinstance(payload.get("data"), dict) else {}
+        history = session.business_state.setdefault("verified_actions", [])
+        history.append({
+            "capability": pending.get("capability"),
+            "doctype": data.get("doctype"),
+            "name": data.get("name"),
+            "status": data.get("status"),
+            "verified": bool(verification.get("ok")),
+            "checks": list(verification.get("checks") or []),
+        })
+        session.business_state["verified_actions"] = history[-20:]
+
     def _messages(self, user_text: str, employee: dict[str, str], session: RuntimeSessionState, today: date, observations: list[dict[str, Any]], steps: list[dict[str, Any]]) -> list[dict[str, str]]:
         system = (
-            "你是ERPNext企业员工自主Agent。你必须通过JSON动作逐步工作，不得输出动作之外的正文。"
-            "summary只用于审计，不会展示给员工；ask_user.message和finish.message必须像一名懂业务的工作助理，"
-            "先简短说明你已理解和查到了什么，再提出员工能直接回答的问题，禁止使用‘询问数量’之类流程节点措辞。"
-            "你不能猜测ERPNext主键；物料、项目、仓库、供应商、公司、员工和单据号必须先resolve_entities，"
-            "或来自runtime_context中已经确认的数据。先discover_tools，再get_tool_contracts，拿到契约后才能execute_tool。"
-            "只读工具可直接执行；写工具会由Runtime暂停并要求用户确认。候选不唯一时ask_user。"
-            "用户明确要求写操作时，不要再用ask_user口头确认，也不要自行填写confirmation；直接生成业务ToolCall，"
-            "Runtime会展示业务摘要并在用户点击确认执行时生成审计确认元数据，确保员工只确认一次。"
+            "你是懂业务的ERPNext员工助理，只返回协议中的单个JSON动作。"
+            "负责理解目标、提取用户明确表达的信息、比较候选和友好追问；不要承担ERP事务编排。"
+            "任何ERPNext主键必须来自resolve_entities或已确认上下文，禁止猜测。"
+            "普通查询先discover_tools和get_tool_contracts，再execute_tool。采购写操作无需发现底层工具，"
+            "应先resolve_entities，再直接使用propose_business_action。"
+            "Runtime负责读取来源单据、限制合法下一步、编译ToolCall和等待一次用户确认。"
+            "收到business_action_error时，若信息可从原话解析，应调用Resolver或修正业务意图；只有用户确实没说时才ask_user。"
             "单据启用ERPNext Workflow时，禁止使用任何submit_document工具；必须先执行erpnext.get_workflow_actions，"
             "再使用erpnext.apply_workflow执行当前账号真实可用的动作。反之，实时单据快照没有workflow_state且docstatus=0时，"
             "说明该单据未启用工作流：禁止调用get_workflow_actions或apply_workflow，必须发现并使用所属模块的submit_document工具。"
-            "会话中的历史单号只能作为候选线索；对‘刚才的单据’或任何后续单据操作，必须重新resolve_entities(kind=document)"
-            "读取ERPNext实时快照后再规划，禁止沿用旧对话中的状态。用户已经明确说出询价、下单、收货或退货时，"
-            "不得再反问要做哪一种操作；应先发现并读取对应工具契约，只追问契约真正缺少的业务信息。"
-            "物料解析结果会自动附带候选SKU在各仓库的实时库存；必须结合候选匹配度和库存分布比较推荐，"
-            "当物料resolution.selection_required为true，或存在多个用途/规格/单位不同的相关SKU时，必须ask_user，"
-            "并在message或questions中列出最多5个相关候选的SKU名称、编码、关键规格、单位和各仓可用库存；"
-            "同时合并追问数量等其他缺失信息，不得只问数量，也不得列出名称仅包含查询词但不是同一种物料的候选。"
-            "不得再次逐个查询这些候选的库存。用户明确说出物料需求数量和单位时，"
-            "resolve_entities中的对应item必须填写qty和uom，不得省略。"
-            "完成后finish，并只引用observation中的真实数字、状态和单号。不要展示隐藏思维过程。"
-            "必须严格使用action_schemas中给出的字段名，不得用type/value/materials/items等替代entities中的kind/query。"
+            "历史单号只是线索，后续操作必须重新resolve_entities(kind=document)读取实时状态。"
+            "候选不唯一时ask_user并展示最相关候选；完成后只引用observation中的真实数字、状态和单号。"
+            "summary仅用于审计；ask_user.message和finish.message要自然、简洁、可行动。不要展示隐藏思维过程。"
         )
         protocol = {
-            "action_schema": {"action": "discover_tools | get_tool_contracts | resolve_entities | execute_tool | ask_user | finish", "summary": "可审计的简短动作说明", "arguments": "必须符合对应action_schemas"},
+            "action_schema": {"action": "discover_tools | get_tool_contracts | resolve_entities | propose_business_action | execute_tool | ask_user | finish", "summary": "可审计的简短动作说明", "arguments": "必须符合对应action_schemas"},
             "action_schemas": {
                 "discover_tools": {"query": "描述所需业务能力，必填", "modules": ["generic | users | assets | stock | buying | accounting | projects"], "limit": "1-8"},
                 "get_tool_contracts": {"tool_names": ["从discover_tools结果逐字复制的工具名，最多5个"]},
                 "resolve_entities": {"entities": [{"id": "本轮唯一标识", "kind": "item | project | warehouse | supplier | company | employee | date | uom | document", "query": "用户原话或待核对主键", "specs": {}, "qty": "kind=item时可提供需求数量", "uom": "kind=item时可提供用户单位", "doctype": "kind=document时必填"}]},
+                "propose_business_action": {"business_intent": {
+                    "goal": "create_material_request | create_rfq_from_material_request | create_supplier_quotation_from_rfq | compare_supplier_quotations | create_purchase_order_from_supplier_quotation | create_purchase_order_from_material_request | create_purchase_receipt_from_purchase_order | create_purchase_return_from_receipt",
+                    "source_documents": [{"doctype": "已解析单据类型", "name": "已解析单号"}],
+                    "items": [{"item_code": "已解析物料编码", "source_row": "可选来源行name", "qty": "正数", "uom": "单位", "rate": "报价", "warehouse": "已解析仓库", "project": "已解析项目", "schedule_date": "YYYY-MM-DD", "reason": "退货原因"}],
+                    "suppliers": ["已解析Supplier.name"], "company": "已确认Company.name", "project": "已确认Project.name", "warehouse": "已确认Warehouse.name", "schedule_date": "YYYY-MM-DD", "valid_till": "YYYY-MM-DD", "posting_date": "YYYY-MM-DD", "currency": "币种", "message": "业务说明", "full_return": "boolean",
+                    "provenance": {"字段名": "user | resolver | runtime_context | source_document | system_default"}
+                }},
                 "execute_tool": {"tool_call": {"tool": "已读取契约的工具名", "arguments": {}}},
                 "ask_user": {"message": "可直接展示给员工的自然回复", "questions": ["员工可直接回答的最少必要问题"], "candidates": ["从observation复制的相关候选，可省略并由Runtime补齐"]},
                 "finish": {"message": "基于真实observation的最终答复"},
@@ -413,10 +630,12 @@ class DeepSeekAgentRuntime:
                 "current_date": today.isoformat(), "employee": employee, "profile": session.profile,
                 "company": session.company, "selected_project_code": session.selected_project_code,
                 "selected_warehouse_name": session.selected_warehouse_name,
-                "confirmed_entities": session.selected_entities, "documents": session.documents,
-                "recent_turns": session.turns[-6:],
+                "confirmed_entities": _compact_confirmed_entities(session.selected_entities),
+                "documents": {key: values[-3:] for key, values in session.documents.items()},
+                "verified_business_actions": (session.business_state.get("verified_actions") or [])[-5:],
+                "recent_turns": _compact_recent_turns(session.turns),
             },
-            "observations": observations[-12:],
+            "observations": [_compact_agent_observation(item) for item in observations[-8:]],
             "step_count": len(steps),
         }
         return [{"role": "system", "content": system}, {"role": "system", "content": json.dumps(protocol, ensure_ascii=False)}, {"role": "user", "content": user_text}]
@@ -562,6 +781,9 @@ class DeepSeekAgentRuntime:
         schema_error = _validate_json_value(validation_arguments, schema, "arguments")
         if schema_error:
             return schema_error
+        source_error = _source_document_tool_error(call["tool"], session, observations)
+        if source_error:
+            return source_error
         if call["tool"].endswith(".submit_document") and self.client_factory is not None:
             doctype = str(call["arguments"].get("doctype") or "")
             name = str(call["arguments"].get("name") or "")
@@ -614,7 +836,16 @@ class DeepSeekAgentRuntime:
 
     @staticmethod
     def _profile_for_employee(employee: dict[str, str]) -> str:
-        return {"ROLE-GM": "manager", "ROLE-MAT-EQP-MGR": "procurement", "ROLE-OPS-MGR": "manager", "ROLE-PROJ-MGR": "project", "ROLE-TECH-LEAD": "project", "ROLE-MATERIAL-CLERK": "project", "ROLE-SYSADMIN": "system_admin"}.get(employee["role_code"], "project")
+        return {
+            "ROLE-GM": "manager",
+            "ROLE-MAT-EQP-MGR": "procurement",
+            "ROLE-OPS-MGR": "operations",
+            "ROLE-PROJ-MGR": "project",
+            "ROLE-TECH-LEAD": "technical",
+            "ROLE-MATERIAL-CLERK": "project",
+            "ROLE-FINANCE": "finance",
+            "ROLE-SYSADMIN": "system_admin",
+        }.get(employee["role_code"], "project")
 
     def _save(self, session: RuntimeSessionState, user_text: str, result: DeepSeekTurnResult, request_id: str | None) -> DeepSeekTurnResult:
         payload = result.to_dict()
@@ -649,6 +880,11 @@ def _loaded_contract_names(observations: list[dict[str, Any]]) -> set[str]:
     }
 
 
+def _single_resolved_value(kind: str, session: RuntimeSessionState, observations: list[dict[str, Any]]) -> str | None:
+    values = _resolved_values_by_kind(session, observations).get(kind) or set()
+    return next(iter(values)) if len(values) == 1 else None
+
+
 def _tokens(value: str) -> list[str]:
     text = str(value).lower()
     tokens = re.findall(r"[a-z0-9_.]+", text)
@@ -666,6 +902,134 @@ def _safe_tool_result(payload: dict[str, Any]) -> dict[str, Any]:
     if isinstance(safe.get("data"), list):
         safe["row_count"] = len(safe["data"])
     return safe
+
+
+def _document_snapshots_from_observation(observation: dict[str, Any]) -> list[dict[str, Any]]:
+    snapshots: list[dict[str, Any]] = []
+    for entity in observation.get("entities") or []:
+        if not isinstance(entity, dict) or entity.get("kind") != "document":
+            continue
+        resolution = entity.get("resolution")
+        if not isinstance(resolution, dict) or resolution.get("status") != "resolved":
+            continue
+        row = resolution.get("row")
+        candidate = resolution.get("candidate")
+        if not isinstance(row, dict) and not isinstance(candidate, dict):
+            candidates = resolution.get("candidates") or []
+            candidate = candidates[0] if len(candidates) == 1 and isinstance(candidates[0], dict) else None
+        if not isinstance(row, dict) and isinstance(candidate, dict):
+            row = candidate.get("row") or candidate
+        if isinstance(row, dict):
+            snapshots.append(dict(row))
+    return snapshots
+
+
+def _compact_confirmed_entities(entities: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    compact: dict[str, dict[str, Any]] = {}
+    for key, entity in list(entities.items())[-20:]:
+        if not isinstance(entity, dict):
+            continue
+        compact[key] = {
+            field: entity.get(field)
+            for field in ("kind", "value", "label", "confidence", "reason", "row")
+            if entity.get(field) not in (None, "", [], {})
+        }
+    return compact
+
+
+def _compact_recent_turns(turns: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    result = []
+    for turn in turns[-4:]:
+        payload = turn.get("result") if isinstance(turn.get("result"), dict) else {}
+        result.append({
+            "user_text": str(turn.get("user_text") or "")[:300],
+            "status": payload.get("status"),
+            "message": str(payload.get("message") or "")[:400],
+            "documents": [
+                {"doctype": data.get("doctype"), "name": data.get("name")}
+                for item in payload.get("tool_results") or []
+                if isinstance(item, dict)
+                for data in [item.get("data")]
+                if isinstance(data, dict) and data.get("name")
+            ][:5],
+        })
+    return result
+
+
+def _compact_agent_observation(observation: dict[str, Any]) -> dict[str, Any]:
+    kind = str(observation.get("type") or "")
+    if kind == "resolve_entities":
+        return {
+            "type": kind,
+            "entities": [
+                _compact_entity_resolution(item)
+                for item in observation.get("entities") or []
+                if isinstance(item, dict)
+            ],
+            "inventory_query": observation.get("inventory_query"),
+        }
+    if kind == "get_tool_contracts":
+        return {
+            "type": kind,
+            "contracts": [
+                {
+                    "name": item.get("name"),
+                    "purpose": item.get("purpose"),
+                    "confirm": item.get("confirm"),
+                    "business_contract": (item.get("business_contract") or [])[:4],
+                    "parameters": (item.get("parameters") or [])[:20],
+                }
+                for item in observation.get("contracts") or []
+                if isinstance(item, dict)
+            ],
+        }
+    if kind == "tool_result":
+        return {
+            "type": kind,
+            "tool_call": observation.get("tool_call"),
+            "result": _safe_tool_result(observation.get("result") or {}),
+        }
+    return observation
+
+
+def _compact_entity_resolution(entity: dict[str, Any]) -> dict[str, Any]:
+    resolution = entity.get("resolution") if isinstance(entity.get("resolution"), dict) else {}
+    compact_resolution = {
+        field: resolution.get(field)
+        for field in ("status", "value", "label", "confidence", "reason", "question", "decision_reason")
+        if resolution.get(field) not in (None, "", [], {})
+    }
+    row = resolution.get("row")
+    if isinstance(row, dict):
+        compact_resolution["row"] = row
+    resolved = resolution.get("resolved")
+    if isinstance(resolved, dict):
+        compact_resolution["resolved"] = _compact_material_candidate(resolved)
+    candidates = resolution.get("candidates") or []
+    compact_resolution["candidates"] = [
+        _compact_material_candidate(candidate)
+        for candidate in candidates[:5]
+        if isinstance(candidate, dict)
+    ]
+    return {
+        "id": entity.get("id"),
+        "kind": entity.get("kind"),
+        "query": entity.get("query"),
+        "requested_qty": entity.get("requested_qty"),
+        "requested_uom": entity.get("requested_uom"),
+        "resolution": compact_resolution,
+    }
+
+
+def _compact_material_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
+    return {
+        field: candidate.get(field)
+        for field in (
+            "value", "label", "item_code", "item_name", "sku_name", "required_specs",
+            "stock_uom", "score", "confidence", "match_reason", "inventory_summary",
+        )
+        if candidate.get(field) not in (None, "", [], {})
+    }
 
 
 def _successful_execution_message(payload: dict[str, Any]) -> str:
@@ -815,8 +1179,6 @@ def _allowed_entity_values(session: RuntimeSessionState, observations: list[dict
     allowed: dict[str, set[str]] = {kind: set() for kind in set(SENSITIVE_ENTITY_FIELDS.values())}
     if session.company:
         allowed["company"].add(session.company)
-    if session.selected_project_code:
-        allowed["project"].add(session.selected_project_code)
     if session.selected_warehouse_name:
         allowed["warehouse"].add(session.selected_warehouse_name)
     for names in session.documents.values():
@@ -870,11 +1232,36 @@ def _merge_document_snapshot_values(target: dict[str, set[str]], snapshot: Any) 
                 target.setdefault(kind, set()).add(str(value))
 
 
+def _source_document_tool_error(tool: str, session: RuntimeSessionState, observations: list[dict[str, Any]]) -> str | None:
+    doctypes: set[str] = set()
+    selected = list(session.selected_entities.values())
+    for observation in observations:
+        selected.extend(_resolved_entity_values(observation).values())
+    for entity in selected:
+        row = entity.get("row") if isinstance(entity, dict) and entity.get("kind") == "document" else None
+        if isinstance(row, dict) and row.get("doctype"):
+            doctypes.add(str(row["doctype"]))
+    preferred = {
+        ("erpnext.buying.create_purchase_order_draft", "Supplier Quotation"):
+            "erpnext.buying.create_purchase_order_from_supplier_quotation_draft",
+        ("erpnext.buying.create_purchase_order_draft", "Material Request"):
+            "erpnext.buying.create_purchase_order_from_material_request_draft",
+        ("erpnext.buying.create_purchase_receipt_draft", "Purchase Order"):
+            "erpnext.buying.create_purchase_receipt_from_purchase_order_draft",
+        ("erpnext.accounting.create_purchase_invoice_draft", "Purchase Receipt"):
+            "erpnext.accounting.create_purchase_invoice_from_purchase_receipt_draft",
+    }
+    for (generic_tool, source_doctype), source_tool in preferred.items():
+        if tool == generic_tool and source_doctype in doctypes:
+            return f"已解析到{source_doctype}来源单据，必须使用{source_tool}保留来源引用。"
+    return None
+
+
 def _inject_resolved_arguments(arguments: dict[str, Any], contract: ToolContract, session: RuntimeSessionState, observations: list[dict[str, Any]]) -> list[dict[str, Any]]:
     values = _resolved_values_by_kind(session, observations)
     corrections: list[dict[str, Any]] = []
     for parameter in contract.parameters:
-        if not parameter.resolver or parameter.name in {"items", "suppliers", "data"}:
+        if not parameter.resolver or parameter.name in {"items", "selected_items", "suppliers", "data"}:
             continue
         candidates = values.get(parameter.resolver) or set()
         if len(candidates) != 1:
@@ -886,12 +1273,27 @@ def _inject_resolved_arguments(arguments: dict[str, Any], contract: ToolContract
             if not isinstance(collection, list):
                 continue
             for index, row in enumerate(collection):
-                if isinstance(row, dict) and row.get(field_name) in (None, ""):
+                if isinstance(row, dict) and row.get(field_name) != resolved:
                     row[field_name] = resolved
                     corrections.append({"field": f"{collection_name}[{index}].{field_name}", "value": resolved, "source": parameter.resolver})
-        elif "." not in parameter.name and arguments.get(parameter.name) in (None, ""):
+        elif "." not in parameter.name and arguments.get(parameter.name) != resolved:
             arguments[parameter.name] = resolved
             corrections.append({"field": parameter.name, "value": resolved, "source": parameter.resolver})
+    return corrections
+
+
+def _inject_operational_dates(call: dict[str, Any], today: date) -> list[dict[str, Any]]:
+    """Keep system business dates separate from user-supplied need/validity dates."""
+    arguments = call.get("arguments")
+    tool = str(call.get("tool") or "")
+    if not tool.startswith(("erpnext.buying.create_", "erpnext.accounting.create_")) or not isinstance(arguments, dict):
+        return []
+    corrections: list[dict[str, Any]] = []
+    current_date = today.isoformat()
+    for field in ("transaction_date", "posting_date"):
+        if field in arguments and arguments.get(field) != current_date:
+            arguments[field] = current_date
+            corrections.append({"field": field, "value": current_date, "source": "runtime.today"})
     return corrections
 
 

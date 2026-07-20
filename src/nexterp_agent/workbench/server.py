@@ -537,6 +537,18 @@ class AgentWorkbenchService:
             return str(result.data[0]["name"])
         return project_code
 
+    @staticmethod
+    def erpnext_warehouse_name(warehouse_value: str) -> str:
+        value = str(warehouse_value or "").strip()
+        for warehouse in MasterDataRelease().warehouses.values():
+            if value in {
+                warehouse.get("warehouse_code"),
+                warehouse.get("warehouse_name"),
+                warehouse.get("erpnext_warehouse_name"),
+            }:
+                return str(warehouse.get("erpnext_warehouse_name") or value)
+        return value
+
     def inbox(self, user: str, project: str = "", *, limit: int = 30) -> dict[str, Any]:
         if not user:
             raise ValueError("user 必填")
@@ -1613,9 +1625,17 @@ class AgentWorkbenchService:
             raise ValueError("text 必填")
         execute = bool(payload.get("execute"))
         request_id = str(payload.get("request_id") or "").strip() or None
+        erpnext_project = ""
+        if project_code:
+            project_key = (user, project_code)
+            erpnext_project = self._project_name_cache.get(project_key, "")
+            if not erpnext_project:
+                erpnext_project = self.erpnext_project_name(self.client(user), project_code)
+                self._project_name_cache[project_key] = erpnext_project
         context = {
             "project_code": project_code or None,
-            "warehouse": str(payload.get("warehouse") or "").strip() or None,
+            "erpnext_project": erpnext_project or None,
+            "warehouse": self.erpnext_warehouse_name(str(payload.get("warehouse") or "")) or None,
         }
         result = self.runtime(store).run_once(text, user=user, execute=execute, request_id=request_id, context=context)
         response = result.to_dict()

@@ -462,6 +462,48 @@ tools:
         constraints:
           - "如填写，必须是 ERPNext Warehouse.name 全称。"
 
+  erpnext.buying.create_purchase_order_from_supplier_quotation_draft:
+    purpose: "L3：从已提交供应商报价单创建采购订单草稿，保留报价、询价和材料申请来源引用。"
+    expose: agent_visible
+    allowed_roles: ["采购"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Supplier Quotation", "Supplier Quotation Item", "Purchase Order", "Purchase Order Item"]
+      methods: ["get_document", "create_document"]
+      notes: "优先用于用户已经选定供应商报价的场景，并校验剩余可下单数量。"
+    audit_fields: ["supplier_quotation", "transaction_date", "schedule_date", "selected_items"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "inject_context", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "supplier_quotation 必须是已提交的 Supplier Quotation。"
+      - "采购订单必须继承报价供应商、价格以及可用的询价和材料申请行引用。"
+      - "selected_items 为空时使用全部剩余可下单行；指定数量不得超过报价剩余数量。"
+      - "生成的采购订单仍是草稿，正式下单必须另行提交。"
+    parameters:
+      supplier_quotation:
+        required: yes
+        source: "Supplier Quotation Resolver"
+        resolver: supplier_quotation
+        constraints:
+          - "必须是 ERPNext Supplier Quotation.name 全称且 docstatus=1。"
+        repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
+      transaction_date:
+        required: conditional
+        source: "Runtime Today"
+        constraints:
+          - "默认使用当前业务日期。"
+      schedule_date:
+        required: conditional
+        source: "Date Resolver / 报价默认"
+        resolver: date
+      selected_items:
+        source: "源 Supplier Quotation 行选择"
+        constraints:
+          - "为空表示全部剩余可下单行。"
+      "selected_items[].warehouse":
+        required: conditional
+        source: "Warehouse Resolver / 源报价行"
+        resolver: warehouse
+
   erpnext.buying.create_purchase_order_from_material_request_draft:
     purpose: "L3：从已提交采购类材料申请创建采购订单草稿，保留源单行引用。"
     expose: agent_visible

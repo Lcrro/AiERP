@@ -23,6 +23,7 @@ operations    本地运行、验证、维护和排障
 - [采购闭环与员工工作台 v0.3](planning/procurement-closed-loop-v0.3.md)：从材料申请到收货退货的实施顺序和验收标准。
 - [库存调拨与项目领料 v0.4](planning/stock-movement-project-issue-v0.4.md)：采购收货后从基地仓到项目仓和项目成本的库存闭环。
 - [员工 Agent 全功能验收 v0.5](planning/employee-agent-full-acceptance-v0.5.md)：按员工角色逐项验证工作台、Agent、ERPNext 权限和业务闭环。
+- [Agent Runtime 可靠性 v0.6](planning/agent-runtime-reliability-v0.6.md)：业务能力图、确定性编译、确认绑定和执行后回读。
 - [基础主数据标准](reference/master-data-standard.md)：公司、组织、员工、项目、仓库、供应商等非物料主数据口径。
 
 ## 架构
@@ -33,6 +34,8 @@ operations    本地运行、验证、维护和排障
 - [Agent 使用 ToolCall 的统一方案](architecture/agent-toolcall-usage-strategy.md)
 - [ToolCall 参数编排层设计](architecture/toolcall-parameter-orchestration.md)
 - [DeepSeek 自主规划 Runtime](architecture/deepseek-agent-runtime.md)
+- [业务能力 Runtime](architecture/business-capability-runtime.md)
+- [OpenClaw 接入边界](architecture/openclaw-integration-boundary.md)
 
 架构文档回答“系统应该长什么样，以及为什么这样设计”。
 
