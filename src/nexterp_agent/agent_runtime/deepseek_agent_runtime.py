@@ -364,6 +364,17 @@ class DeepSeekAgentRuntime:
                 }
                 steps.append(_step("发现工具", kind, arguments, observation))
                 observations.append(observation)
+                if arguments.get("entities"):
+                    self._resolve_and_record_entities(
+                        arguments["entities"],
+                        user=user,
+                        today=today,
+                        session=session,
+                        policy=policy,
+                        steps=steps,
+                        observations=observations,
+                        label="发现工具时解析实体",
+                    )
                 continue
             if kind == "discover_capabilities":
                 cards = self.capabilities.discover(
@@ -390,6 +401,31 @@ class DeepSeekAgentRuntime:
                 }
                 steps.append(_step("发现业务能力", kind, arguments, observation))
                 observations.append(observation)
+                if arguments.get("entities"):
+                    missing_bundle_kinds = _missing_capability_entity_requirements(
+                        auto_guide,
+                        arguments["entities"],
+                        session,
+                    )
+                    if missing_bundle_kinds:
+                        bundle_observation = {
+                            "type": "entity_bundle_incomplete",
+                            "missing_entity_kinds": missing_bundle_kinds,
+                            "instruction": "合并解析未覆盖Capability所需实体，请下一步用resolve_entities一次补齐后再提交业务意图。",
+                        }
+                        steps.append(_step("检查合并实体", "entity_bundle_incomplete", arguments["entities"], bundle_observation))
+                        observations.append(bundle_observation)
+                    else:
+                        self._resolve_and_record_entities(
+                            arguments["entities"],
+                            user=user,
+                            today=today,
+                            session=session,
+                            policy=policy,
+                            steps=steps,
+                            observations=observations,
+                            label="发现能力时解析实体",
+                        )
                 continue
             if kind == "get_tool_contracts":
                 tool_names = [
@@ -414,38 +450,15 @@ class DeepSeekAgentRuntime:
                     session.business_state["active_capability_id"] = selected_capability_id
                 continue
             if kind == "resolve_entities":
-                observation = self._resolve_entities(arguments, user=user, today=today, session=session)
-                steps.append(_step("解析实体", kind, arguments, observation))
-                observations.append(observation)
-                resolved_values = _resolved_entity_values(observation)
-                if any(entity.get("kind") == "item" for entity in observation.get("entities") or []):
-                    for selected_id, selected in list(session.selected_entities.items()):
-                        if selected.get("kind") == "item":
-                            session.selected_entities.pop(selected_id, None)
-                for entity in observation.get("entities") or []:
-                    entity_id = str(entity.get("id") or "")
-                    if entity_id and entity_id not in resolved_values:
-                        session.selected_entities.pop(entity_id, None)
-                session.selected_entities.update(resolved_values)
-                document_snapshots = _document_snapshots_from_observation(observation)
-                if document_snapshots:
-                    capability_observation = {
-                        "type": "legal_business_capabilities",
-                        "capabilities": self.procurement_graph.legal_actions(document_snapshots),
-                    }
-                    steps.append(_step("判断合法业务动作", "capability_graph", {}, capability_observation))
-                    observations.append(capability_observation)
-                recommended_tools = _document_next_action_tools(observation)
-                if recommended_tools:
-                    contracts = self.discovery.full_contracts(recommended_tools, policy=policy)
-                    contract_observation = {"type": "get_tool_contracts", "contracts": contracts}
-                    steps.append(_step(
-                        "自动读取状态契约",
-                        "get_tool_contracts",
-                        {"tool_names": recommended_tools},
-                        contract_observation,
-                    ))
-                    observations.append(contract_observation)
+                self._resolve_and_record_entities(
+                    arguments.get("entities") or [],
+                    user=user,
+                    today=today,
+                    session=session,
+                    policy=policy,
+                    steps=steps,
+                    observations=observations,
+                )
                 continue
             if kind == "propose_business_action":
                 try:
@@ -856,9 +869,19 @@ class DeepSeekAgentRuntime:
             except ValueError:
                 active_capability_guide = None
         action_schemas = {
-                "discover_capabilities": {"query": "描述所需业务能力，必填", "modules": ["stock | buying | accounting | projects"], "limit": "1-5"},
+                "discover_capabilities": {
+                    "query": "描述所需业务能力，必填",
+                    "modules": ["stock | buying | accounting | projects"],
+                    "limit": "1-5",
+                    "entities": [{"id": "可选；本轮唯一标识", "kind": "item | project | warehouse | supplier | company | employee | date | uom | document", "query": "用户明确提到的实体原话", "specs": {}, "qty": "kind=item时可附数量", "uom": "kind=item时可附用户单位", "doctype": "kind=document时必填"}],
+                },
                 "get_capability_guide": {"capability_ids": ["从discover_capabilities结果逐字复制，最多3个"]},
-                "discover_tools": {"query": "描述所需业务能力，必填", "modules": ["generic | users | assets | stock | buying | accounting | projects"], "limit": "1-8"},
+                "discover_tools": {
+                    "query": "描述所需业务能力，必填",
+                    "modules": ["generic | users | assets | stock | buying | accounting | projects"],
+                    "limit": "1-8",
+                    "entities": "可选；格式同discover_capabilities.entities",
+                },
                 "get_tool_contracts": {"tool_names": ["从discover_tools结果逐字复制的工具名，最多5个"]},
                 "resolve_entities": {"entities": [{"id": "本轮唯一标识", "kind": "item | project | warehouse | supplier | company | employee | date | uom | document", "query": "用户原话或待核对主键", "specs": {}, "qty": "kind=item时可提供需求数量", "uom": "kind=item时可提供用户单位", "doctype": "kind=document时必填"}]},
                 "propose_business_action": {"capability_id": "已加载Guide的Capability ID", "business_intent": "严格符合该Guide的intent_schema"},
@@ -901,6 +924,53 @@ class DeepSeekAgentRuntime:
                 error = exc
                 attempt_messages.append({"role": "system", "content": f"上一次输出不符合动作协议：{exc}。请只返回合法JSON动作。"})
         raise ValueError(str(error))
+
+    def _resolve_and_record_entities(
+        self,
+        entities: list[dict[str, Any]],
+        *,
+        user: str,
+        today: date,
+        session: RuntimeSessionState,
+        policy: Any,
+        steps: list[dict[str, Any]],
+        observations: list[dict[str, Any]],
+        label: str = "解析实体",
+    ) -> dict[str, Any]:
+        arguments = {"entities": entities}
+        observation = self._resolve_entities(arguments, user=user, today=today, session=session)
+        steps.append(_step(label, "resolve_entities", arguments, observation))
+        observations.append(observation)
+        resolved_values = _resolved_entity_values(observation)
+        if any(entity.get("kind") == "item" for entity in observation.get("entities") or []):
+            for selected_id, selected in list(session.selected_entities.items()):
+                if selected.get("kind") == "item":
+                    session.selected_entities.pop(selected_id, None)
+        for entity in observation.get("entities") or []:
+            entity_id = str(entity.get("id") or "")
+            if entity_id and entity_id not in resolved_values:
+                session.selected_entities.pop(entity_id, None)
+        session.selected_entities.update(resolved_values)
+        document_snapshots = _document_snapshots_from_observation(observation)
+        if document_snapshots:
+            capability_observation = {
+                "type": "legal_business_capabilities",
+                "capabilities": self.procurement_graph.legal_actions(document_snapshots),
+            }
+            steps.append(_step("判断合法业务动作", "capability_graph", {}, capability_observation))
+            observations.append(capability_observation)
+        recommended_tools = _document_next_action_tools(observation)
+        if recommended_tools:
+            contracts = self.discovery.full_contracts(recommended_tools, policy=policy)
+            contract_observation = {"type": "get_tool_contracts", "contracts": contracts}
+            steps.append(_step(
+                "自动读取状态契约",
+                "get_tool_contracts",
+                {"tool_names": recommended_tools},
+                contract_observation,
+            ))
+            observations.append(contract_observation)
+        return observation
 
     def _resolve_entities(
         self,
@@ -1793,6 +1863,26 @@ def _successful_read_requires_finish(
         except ValueError:
             return False
     return False
+
+
+def _missing_capability_entity_requirements(
+    guide: dict[str, Any] | None,
+    entities: list[dict[str, Any]],
+    session: RuntimeSessionState,
+) -> list[str]:
+    if not guide:
+        return []
+    required = {str(value) for value in guide.get("resolver_requirements") or [] if str(value)}
+    available = {str(entity.get("kind") or "") for entity in entities}
+    if session.company:
+        available.add("company")
+    if session.selected_project_code or session.selected_entities.get("runtime_project"):
+        available.add("project")
+    if session.selected_warehouse_name or session.selected_entities.get("runtime_warehouse"):
+        available.add("warehouse")
+    if any(str(entity.get("uom") or "").strip() for entity in entities if entity.get("kind") == "item"):
+        available.add("uom")
+    return sorted(required - available)
 
 
 def _auto_load_capability_guide(

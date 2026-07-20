@@ -13,12 +13,14 @@ class DiscoverToolsArguments(_StrictModel):
     query: str = Field(min_length=1)
     modules: list[str] = Field(default_factory=list)
     limit: int = Field(default=8, ge=1, le=8)
+    entities: list[dict[str, Any]] = Field(default_factory=list, max_length=20)
 
 
 class DiscoverCapabilitiesArguments(_StrictModel):
     query: str = Field(min_length=1)
     modules: list[str] = Field(default_factory=list)
     limit: int = Field(default=5, ge=1, le=5)
+    entities: list[dict[str, Any]] = Field(default_factory=list, max_length=20)
 
 
 class GetToolContractsArguments(_StrictModel):
@@ -126,4 +128,3 @@ def validate_action(payload: dict[str, Any]) -> dict[str, Any]:
         normalized["summary"] = f"DeepSeek请求执行{action}"
     normalized.setdefault("arguments", {})
     return AGENT_ACTION_ADAPTER.validate_python(normalized).model_dump(exclude_none=True)
-

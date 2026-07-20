@@ -114,19 +114,66 @@ def test_unique_capability_discovery_auto_loads_guide(tmp_path: Path) -> None:
         {
             "action": "discover_capabilities",
             "summary": "查找材料申请能力",
-            "arguments": {"query": "创建采购类型材料申请草稿", "modules": ["buying"]},
+            "arguments": {
+                "query": "创建采购类型材料申请草稿",
+                "modules": ["buying"],
+                "entities": [
+                    {"id": "requested_item", "kind": "item", "query": "帆布手套", "uom": "双"},
+                    {"id": "needed_on", "kind": "date", "query": "2026-07-23"},
+                ],
+            },
         },
         {"action": "ask_user", "summary": "询问物料", "arguments": {"questions": ["需要什么物料？"]}},
     ])
     runtime = DeepSeekAgentRuntime(planner=planner, session_store=RuntimeSessionStore(tmp_path))
 
-    result = runtime.run_once("帮我创建材料申请", user="mao.xiaoquan@stec-up.local")
+    result = runtime.run_once(
+        "帮我创建材料申请",
+        user="mao.xiaoquan@stec-up.local",
+        context={
+            "project_code": "PRJ-HL-13",
+            "erpnext_project": "PROJ-0010",
+            "warehouse": "合流1.3标仓库 - SD",
+        },
+    )
 
     assert result.status == "needs_clarification"
     discovery = next(step["result"] for step in result.steps if step["label"] == "发现业务能力")
     assert discovery["auto_loaded_guide"]["capability_id"] == "material_request.create"
     assert "material_request.create" in planner.messages[1][1]["content"]
     assert not any(step["action"] == "get_capability_guide" for step in result.steps)
+    assert any(step["label"] == "发现能力时解析实体" for step in result.steps)
+    assert "resolve_entities" in planner.messages[1][1]["content"]
+
+
+def test_incomplete_discovery_entity_bundle_is_not_partially_resolved(tmp_path: Path) -> None:
+    planner = PlannerSequence([
+        {
+            "action": "discover_capabilities",
+            "summary": "查找材料申请能力",
+            "arguments": {
+                "query": "创建采购类型材料申请草稿",
+                "modules": ["buying"],
+                "entities": [{"id": "requested_item", "kind": "item", "query": "帆布手套", "uom": "双"}],
+            },
+        },
+        {"action": "ask_user", "summary": "询问日期", "arguments": {"questions": ["哪天需要？"]}},
+    ])
+    runtime = DeepSeekAgentRuntime(planner=planner, session_store=RuntimeSessionStore(tmp_path))
+
+    result = runtime.run_once(
+        "帮我创建材料申请",
+        user="mao.xiaoquan@stec-up.local",
+        context={
+            "project_code": "PRJ-HL-13",
+            "erpnext_project": "PROJ-0010",
+            "warehouse": "合流1.3标仓库 - SD",
+        },
+    )
+
+    check = next(step for step in result.steps if step["label"] == "检查合并实体")
+    assert check["result"]["missing_entity_kinds"] == ["date"]
+    assert not any(step["label"] == "发现能力时解析实体" for step in result.steps)
 
 
 def test_runtime_initial_prompt_uses_progressive_capability_disclosure(tmp_path: Path) -> None:
