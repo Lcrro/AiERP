@@ -73,6 +73,16 @@
       .message { max-width: min(78%, 680px); margin-bottom: 13px; padding: 11px 13px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); font-size: 13px; line-height: 1.58; white-space: pre-wrap; }
       .message.user { margin-left: auto; border-color: #b7ddce; background: var(--accent-soft); }
       .message.error { border-color: #efb4ae; background: var(--danger-soft); color: var(--danger); }
+      .business-issues { margin-top: 10px; border-top: 1px solid #edc3be; }
+      .business-issue { padding: 10px 0 2px; color: var(--ink); }
+      .business-issue + .business-issue { border-top: 1px solid #edc3be; }
+      .business-issue > strong, .business-issue > span { display: block; }
+      .business-issue > strong { font-size: 12px; }
+      .business-issue > span { margin-top: 4px; color: #5d3b37; font-size: 11px; }
+      .business-next { margin-top: 8px; padding-left: 9px; border-left: 2px solid var(--danger); }
+      .business-next b, .business-next span { display: block; font-size: 11px; }
+      .business-next b { margin-bottom: 3px; color: var(--danger); }
+      .business-next span { color: #4a3a38; }
       .message-doc { width: 100%; display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-top: 9px; padding: 9px 10px; border: 0; border-left: 3px solid var(--accent); background: var(--surface-soft); text-align: left; }
       .message-doc strong { display: block; color: var(--accent); font-size: 12px; }
       .message-doc small { display: block; margin-top: 3px; color: var(--muted); }

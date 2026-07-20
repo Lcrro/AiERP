@@ -319,6 +319,71 @@ def compact_chat_candidates(groups: list[Any] | tuple[Any, ...]) -> list[dict[st
     return compact
 
 
+def business_error_cards(result: dict[str, Any]) -> list[dict[str, Any]]:
+    """Convert unresolved Runtime failures into employee-facing recovery guidance."""
+    if result.get("status") not in {"failed", "needs_clarification"}:
+        return []
+    cards: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
+    for step in reversed(result.get("steps") or []):
+        if not isinstance(step, dict):
+            continue
+        observation = step.get("result") if isinstance(step.get("result"), dict) else {}
+        observation_type = str(observation.get("type") or "")
+        if observation_type not in {"business_action_error", "tool_validation_error"} and observation.get("ok") is not False:
+            continue
+        detail = str(
+            observation.get("user_message")
+            or observation.get("error")
+            or result.get("message")
+            or "当前操作未能完成。"
+        ).strip()
+        questions = [str(value).strip() for value in observation.get("questions") or [] if str(value).strip()]
+        error_type = str(observation.get("error_type") or observation_type)
+        category, title, fallback = _business_error_category(detail, error_type, bool(questions))
+        key = (category, detail)
+        if key in seen:
+            continue
+        seen.add(key)
+        cards.append({
+            "category": category,
+            "title": title,
+            "summary": detail,
+            "next_actions": questions or [fallback],
+            "retryable": category not in {"permission", "identity"},
+        })
+        if len(cards) == 3:
+            break
+    if cards:
+        return list(reversed(cards))
+    if result.get("status") == "failed":
+        return [{
+            "category": "runtime",
+            "title": "助理未能完成这次操作",
+            "summary": str(result.get("message") or "执行过程没有正常完成。"),
+            "next_actions": ["请稍后重试；若问题仍存在，可在开发者模式查看执行记录。"],
+            "retryable": True,
+        }]
+    return []
+
+
+def _business_error_category(detail: str, error_type: str, has_questions: bool) -> tuple[str, str, str]:
+    text = f"{detail} {error_type}".lower()
+    if any(token in text for token in ("identity", "身份不一致", "登录身份")):
+        return "identity", "当前登录身份不匹配", "请切换到正确员工账号后重新操作。"
+    if any(token in text for token in ("permission", "not permitted", "权限", "无权")):
+        return "permission", "当前岗位没有此操作权限", "请交由有权限的岗位处理，或联系管理员核对角色权限。"
+    if has_questions or any(token in text for token in ("缺少", "不能为空", "required", "请选择", "请说明", "请确认")):
+        return "missing_information", "还缺少必要业务信息", "请补充缺少的信息后继续。"
+    if any(token in text for token in ("状态不能", "尚未提交", "已失效", "过期", "不能超过", "不一致", "跨项目", "跨公司")):
+        return "business_precondition", "当前业务状态不允许这样操作", "请先处理来源单据状态或选择符合条件的单据。"
+    if any(token in text for token in ("not found", "不存在", "未找到")):
+        return "not_found", "没有找到对应业务数据", "请核对单号或重新选择系统中的真实记录。"
+    if any(token in text for token in ("network", "timeout", "连接", "服务不可用")):
+        return "service", "外部服务暂时不可用", "请稍后重试，本次不会重复写入单据。"
+    return "validation", "业务校验未通过", "请按提示修改业务信息后重新提交。"
+
+
 def compact_chat_result(result: dict[str, Any], erpnext_base_url: str, *, include_trace: bool = False) -> dict[str, Any]:
     document_links = result_document_links(result, erpnext_base_url)
     status = result.get("status")
@@ -340,6 +405,7 @@ def compact_chat_result(result: dict[str, Any], erpnext_base_url: str, *, includ
         "message": message,
         "questions": result.get("questions") or [],
         "candidates": compact_chat_candidates(result.get("candidates") or []),
+        "business_errors": business_error_cards(result),
         "document_links": document_links,
         "pending_tool_call": result.get("pending_tool_call"),
         "tool_call": result.get("tool_call"),
@@ -1642,6 +1708,7 @@ class AgentWorkbenchService:
         response = result.to_dict()
         response["execute"] = execute
         response["conversation_id"] = conversation_id
+        response["business_errors"] = business_error_cards(response)
         response["document_links"] = result_document_links(response, self.base_url)
         return response
 

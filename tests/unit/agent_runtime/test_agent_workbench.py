@@ -94,6 +94,46 @@ def test_successful_document_is_not_shown_failed_when_final_reply_failed() -> No
     assert "MAT-MR-2026-00015 已在 ERPNext 中执行成功" in result["message"]
 
 
+def test_business_error_card_explains_precondition_and_next_action() -> None:
+    result = MODULE.compact_chat_result(
+        {
+            "status": "failed",
+            "message": "无法创建询价单。",
+            "steps": [{
+                "result": {
+                    "type": "business_action_error",
+                    "error": "Material Request MAT-MR-0001 当前状态不能执行询价。",
+                },
+            }],
+        },
+        "http://localhost:8002",
+    )
+
+    assert result["business_errors"] == [{
+        "category": "business_precondition",
+        "title": "当前业务状态不允许这样操作",
+        "summary": "Material Request MAT-MR-0001 当前状态不能执行询价。",
+        "next_actions": ["请先处理来源单据状态或选择符合条件的单据。"],
+        "retryable": True,
+    }]
+
+
+def test_business_error_card_preserves_specific_clarification_question() -> None:
+    cards = MODULE.business_error_cards({
+        "status": "needs_clarification",
+        "steps": [{
+            "result": {
+                "type": "business_action_error",
+                "error": "询价单缺少候选供应商。",
+                "questions": ["请选择至少一家要询价的供应商。"],
+            },
+        }],
+    })
+
+    assert cards[0]["category"] == "missing_information"
+    assert cards[0]["next_actions"] == ["请选择至少一家要询价的供应商。"]
+
+
 def test_document_process_without_workflow_explains_direct_submission() -> None:
     process = MODULE.document_process_summary(
         "Material Request",

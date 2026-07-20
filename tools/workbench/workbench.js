@@ -210,7 +210,7 @@
           for (const turn of history.turns || []) {
             if (turn.user_text) addMessage("user", turn.user_text);
             const result = turn.result || {};
-            if (result.message) addMessage(result.status === "failed" ? "error" : "agent", result.message, result.document_links || [], result.candidates || []);
+            if (result.message) addMessage(result.status === "failed" ? "error" : "agent", result.message, result.document_links || [], result.candidates || [], result.business_errors || []);
           }
           state.preview = history.latest_result || null;
           state.lastText = history.latest_user_text || "";
@@ -267,15 +267,20 @@
         }
       }
 
-      function addMessage(kind, text, links = [], candidates = []) {
+      function addMessage(kind, text, links = [], candidates = [], businessErrors = []) {
         $("welcome")?.remove();
         const node = document.createElement("div");
         node.className = `message ${kind}`;
-        node.innerHTML = `<div>${esc(text)}</div>${candidateCards(candidates)}${links.map(link => `<button class="message-doc" data-doctype="${esc(link.doctype)}" data-name="${esc(link.name)}"><span><strong>${esc(link.name)}</strong><small>${esc(link.doctype)} · 在测试台查看</small></span><span>查看详情 ›</span></button>`).join("")}`;
+        node.innerHTML = `<div>${esc(text)}</div>${businessErrorCards(businessErrors)}${candidateCards(candidates)}${links.map(link => `<button class="message-doc" data-doctype="${esc(link.doctype)}" data-name="${esc(link.name)}"><span><strong>${esc(link.name)}</strong><small>${esc(link.doctype)} · 在测试台查看</small></span><span>查看详情 ›</span></button>`).join("")}`;
         $("messages").appendChild(node);
         bindDocumentButtons(node);
         node.querySelectorAll(".candidate-card").forEach(button => button.onclick = () => selectCandidate(button.dataset.code, button.dataset.name));
         $("messages").scrollTop = $("messages").scrollHeight;
+      }
+
+      function businessErrorCards(cards) {
+        if (!cards?.length) return "";
+        return `<div class="business-issues">${cards.map(card => `<section class="business-issue"><strong>${esc(card.title || "操作未完成")}</strong><span>${esc(card.summary || "")}</span>${card.next_actions?.length ? `<div class="business-next"><b>下一步</b>${card.next_actions.map(action => `<span>${esc(action)}</span>`).join("")}</div>` : ""}</section>`).join("")}</div>`;
       }
 
       function candidateByCode(code) {
@@ -322,7 +327,7 @@
 
       function handleAgentResult(result, executed) {
         state.preview = result;
-        addMessage(result.status === "failed" ? "error" : "agent", result.message, result.document_links || [], result.candidates || []);
+        addMessage(result.status === "failed" ? "error" : "agent", result.message, result.document_links || [], result.candidates || [], result.business_errors || []);
         const canExecute = !executed && result.status === "needs_confirmation" && (result.pending_tool_call || result.tool_call);
         $("confirmBar").classList.toggle("visible", Boolean(canExecute));
         if (executed) {
