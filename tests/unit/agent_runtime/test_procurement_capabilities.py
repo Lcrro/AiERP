@@ -112,6 +112,19 @@ def _context() -> dict[str, str]:
     }
 
 
+def test_procurement_source_rejects_document_from_another_company() -> None:
+    documents = _documents()
+    documents[("Material Request", "MAT-MR-0001")]["company"] = "Other Company"
+    intent = BusinessIntentDraft.from_dict({
+        "goal": "create_rfq_from_material_request",
+        "source_documents": [{"doctype": "Material Request", "name": "MAT-MR-0001"}],
+        "suppliers": ["测试供应商甲"],
+    })
+
+    with pytest.raises(CapabilityCompilationError, match="与当前公司 STEC \\(Demo\\) 不一致"):
+        _compiler(documents).compile(intent, runtime_context=_context(), today=TODAY)
+
+
 def test_material_request_compiles_resolved_context_into_rows() -> None:
     intent = BusinessIntentDraft.from_dict({
         "goal": "create_material_request",

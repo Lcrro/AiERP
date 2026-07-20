@@ -26,6 +26,7 @@ from nexterp_agent.agent_runtime.deepseek_agent_runtime import (
     validate_agent_action,
 )
 from nexterp_agent.agent_runtime.civil_runtime import CivilAgentRuntime, LegacyCivilAgentRuntime
+from nexterp_agent.agent_runtime.capability_registry import CapabilityRegistry
 from nexterp_agent.agent_runtime.session import RuntimeSessionState, RuntimeSessionStore
 from nexterp_agent.agent_runtime.tool_access import make_tool_access_policy
 from nexterp_agent.master_data import MasterDataRelease
@@ -34,7 +35,40 @@ from nexterp_agent.erpnext.schemas import ToolResult
 
 class PlannerSequence:
     def __init__(self, actions: list[dict]) -> None:
-        self.actions = list(actions)
+        registry = CapabilityRegistry()
+        expanded = []
+        loaded = set()
+        for original in actions:
+            action = original
+            if (
+                action.get("action") == "execute_tool"
+                and (action.get("arguments") or {}).get("tool_call", {}).get("tool")
+                == "erpnext.buying.create_material_request_draft"
+            ):
+                tool_arguments = action["arguments"]["tool_call"].get("arguments") or {}
+                action = {
+                    "action": "propose_business_action",
+                    "summary": action.get("summary") or "准备材料申请",
+                    "arguments": {"business_intent": {
+                        "goal": "create_material_request",
+                        "schedule_date": tool_arguments.get("schedule_date"),
+                        "company": tool_arguments.get("company"),
+                        "items": tool_arguments.get("items") or [],
+                    }},
+                }
+            if action.get("action") == "propose_business_action":
+                arguments = action.setdefault("arguments", {})
+                goal = str((arguments.get("business_intent") or {}).get("goal") or "")
+                capability_id = registry.for_goal(goal).capability_id
+                arguments["capability_id"] = capability_id
+                if capability_id not in loaded:
+                    expanded.extend([
+                        {"action": "discover_capabilities", "summary": "发现业务能力", "arguments": {"query": goal, "limit": 5}},
+                        {"action": "get_capability_guide", "summary": "读取业务能力说明", "arguments": {"capability_ids": [capability_id]}},
+                    ])
+                    loaded.add(capability_id)
+            expanded.append(action)
+        self.actions = expanded
         self.messages = []
 
     def __call__(self, messages):
@@ -76,8 +110,17 @@ class FakeERPNextClient:
         raise AssertionError(f"Unexpected doctype: {doctype}")
 
     def get_document(self, doctype, name):
-        assert doctype == "Item"
-        return ToolResult(ok=True, data={"name": name, "stock_uom": "个", "item_name": "测试物料", "description": "测试物料"})
+        if doctype == "Item":
+            return ToolResult(ok=True, data={"name": name, "stock_uom": "个", "item_name": "测试物料", "description": "测试物料"})
+        if doctype == "Material Request":
+            created = self.created[-1][1] if self.created else {}
+            return ToolResult(ok=True, data={
+                "doctype": doctype,
+                "name": name,
+                "docstatus": 0,
+                "items": created.get("items") or [],
+            })
+        raise AssertionError((doctype, name))
 
 
 class RepeatingPlanner:
@@ -127,9 +170,11 @@ def test_explicit_legacy_extractor_only_constructs_regression_runtime() -> None:
 
 @pytest.mark.parametrize("action,arguments", [
     ("discover_tools", {"query": "库存"}),
+    ("discover_capabilities", {"query": "库存"}),
     ("get_tool_contracts", {"tool_names": ["erpnext.stock.get_balance"]}),
+    ("get_capability_guide", {"capability_ids": ["stock.balance.query"]}),
     ("resolve_entities", {"entities": [{"id": "1", "kind": "item", "query": "手套"}]}),
-    ("propose_business_action", {"business_intent": {"goal": "create_material_request"}}),
+    ("propose_business_action", {"capability_id": "material_request.create", "business_intent": {"goal": "create_material_request"}}),
     ("execute_tool", {"tool_call": {}}),
     ("ask_user", {"questions": ["请选择。"]}),
     ("finish", {"message": "完成"}),
@@ -725,9 +770,9 @@ def test_execute_tool_progressively_discloses_missing_contract(tmp_path: Path) -
     result = runtime.run_once("查询库存", user="mao.xiaoquan@stec-up.local")
 
     assert result.status == "needs_clarification"
-    disclosure = next(step for step in result.steps if step["label"] == "自动读取契约")
-    assert disclosure["payload"]["tool_names"] == [tool]
-    assert tool in planner.messages[1][1]["content"]
+    disclosure = next(step for step in result.steps if step["action"] == "capability_required")
+    assert disclosure["result"]["capability"]["capability_id"] == "stock.balance.query"
+    assert "stock.balance.query" in planner.messages[1][1]["content"]
 
 
 def test_rfq_arguments_inherit_material_request_source_rows() -> None:
@@ -807,15 +852,14 @@ def test_write_tool_is_paused_with_resolved_entities(tmp_path: Path) -> None:
         {"action": "execute_tool", "summary": "创建材料申请草稿", "arguments": {"tool_call": tool_call}},
     ])
     store = RuntimeSessionStore(tmp_path)
-    runtime = DeepSeekAgentRuntime(release=release, planner=planner, session_store=store)
+    runtime = DeepSeekAgentRuntime(release=release, planner=planner, session_store=store, client_factory=lambda _user: FakeERPNextClient())
 
     result = runtime.run_once("明天需要20个物料", user="mao.xiaoquan@stec-up.local", today=__import__("datetime").date(2026, 7, 13))
 
     assert result.status == "needs_confirmation"
-    assert "尚未写入 ERPNext" in result.message
-    assert "确认" in result.message
+    assert "材料申请草稿" in result.message
     assert result.pending_tool_call["arguments"]["company"] == release.company_name("STEC")
-    assert result.pending_tool_call["arguments"]["items"][0]["project"] == project["project_code"]
+    assert result.pending_tool_call["arguments"]["items"][0]["project"] == "PROJ-0010"
     assert store.load("mao.xiaoquan@stec-up.local", profile="project").pending_action["tool_call"] == result.pending_tool_call
 
 
@@ -843,8 +887,8 @@ def test_runtime_context_replaces_stable_codes_with_erpnext_link_names(tmp_path:
                             "item_code": material["item_code"],
                             "qty": 100,
                             "uom": material["stock_uom"],
-                            "project": "PRJ-HL-13",
-                            "warehouse": "WH-HL-13",
+                                "project": "PROJ-0010",
+                                "warehouse": "合流1.3标仓库 - SD",
                         }],
                     },
                 },
@@ -855,6 +899,7 @@ def test_runtime_context_replaces_stable_codes_with_erpnext_link_names(tmp_path:
         release=release,
         planner=planner,
         session_store=RuntimeSessionStore(tmp_path),
+        client_factory=lambda _user: FakeERPNextClient(),
     )
 
     result = runtime.run_once(
@@ -871,8 +916,7 @@ def test_runtime_context_replaces_stable_codes_with_erpnext_link_names(tmp_path:
     item = result.pending_tool_call["arguments"]["items"][0]
     assert item["project"] == "PROJ-0010"
     assert item["warehouse"] == "合流1.3标仓库 - SD"
-    corrections = next(step["result"]["corrections"] for step in result.steps if step["action"] == "inject_context")
-    assert {row["field"] for row in corrections} >= {"items[0].project", "items[0].warehouse"}
+    assert not any(step["action"] == "inject_context" for step in result.steps)
 
 
 def test_forged_entity_is_rejected_and_returned_to_model(tmp_path: Path) -> None:
@@ -889,7 +933,7 @@ def test_forged_entity_is_rejected_and_returned_to_model(tmp_path: Path) -> None
     assert result.status == "needs_clarification"
     assert result.questions == ("请选择真实物料。",)
     assert result.message == "请选择真实物料。"
-    assert any("不是Resolver" in message[1]["content"] for message in planner.messages if len(message) > 1)
+    assert any("stock.balance.query" in message[1]["content"] for message in planner.messages if len(message) > 1)
 
 
 def test_item_resolution_batches_candidate_inventory_once(tmp_path: Path) -> None:
@@ -1003,7 +1047,7 @@ def test_confirmation_executes_pending_call_and_immediately_returns_tool_result(
     assert completed.status == "completed"
     assert completed.message == "Material Request MAT-MR-TEST-0001 已执行成功，当前状态：Draft。"
     assert client.created[0][0] == "Material Request"
-    assert len(planner.messages) == 3
+    assert len(planner.messages) == 5
     assert runtime.session_store.load("mao.xiaoquan@stec-up.local", profile="project").documents["Material Request"] == ["MAT-MR-TEST-0001"]
 
 
@@ -1066,7 +1110,7 @@ def test_successful_write_falls_back_to_tool_result_at_planner_step_limit(tmp_pa
         planner=planner,
         client_factory=lambda _user: FakeERPNextClient(),
         session_store=RuntimeSessionStore(tmp_path),
-        max_steps=4,
+        max_steps=6,
     )
 
     preview = runtime.run_once("创建草稿", user="mao.xiaoquan@stec-up.local")

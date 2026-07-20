@@ -25,6 +25,7 @@ operations    本地运行、验证、维护和排障
 - [员工 Agent 全功能验收 v0.5](planning/employee-agent-full-acceptance-v0.5.md)：按员工角色逐项验证工作台、Agent、ERPNext 权限和业务闭环。
 - [Agent Runtime 可靠性 v0.6](planning/agent-runtime-reliability-v0.6.md)：业务能力图、确定性编译、确认绑定和执行后回读。
 - [基础主数据标准](reference/master-data-standard.md)：公司、组织、员工、项目、仓库、供应商等非物料主数据口径。
+- [Capability Skill 清单](reference/capability-skill-catalog.md)：20 项按需业务能力、读写边界和稳定性基准入口。
 
 ## 架构
 
@@ -56,6 +57,8 @@ operations    本地运行、验证、维护和排障
 - [员工 Agent CLI](operations/agent-cli.md)
 - [员工工作台](operations/agent-workbench.md)
 - [Agent 写入能力验收](operations/agent-write-acceptance.md)
+- [Agent 失败回归库](operations/agent-failure-regressions.md)
+- [分层测试策略](operations/testing-strategy.md)
 - [物料目录 PostgreSQL 运行说明](operations/material-catalog-postgres.md)
 
 运行文档回答“本地系统怎么启动、怎么验证、怎么维护”。
@@ -77,6 +80,7 @@ operations    本地运行、验证、维护和排障
 - [物料 SKU 治理提示词 v0.3](reference/material-sku-governance-prompt-v0.3.md)
 - 物料主数据浏览器当前支持四级查看：`一级类目 -> 物料族 -> 物料名称 -> SKU 明细`。三级名称人工预览由 `scripts/material_master/build_third_layer_mapping_preview.py` 生成；批量治理工作包由 `scripts/material_master/build_third_layer_work_batches.py` 生成，队列在 `data/material_master/governance_v0_2/third_layer_work_queue.tsv`。
 - [物料目录 PostgreSQL 层](reference/material-catalog-postgres.md)
+- [Capability Skill 清单](reference/capability-skill-catalog.md)
 - [当前 ToolCall 清单](reference/toolcall-current-inventory.md)
 - [ToolCall Data Dictionary 设计稿](reference/toolcall-data-dictionary.md)
 - [ToolCall 用户与权限](reference/toolcall-users-permissions.md)

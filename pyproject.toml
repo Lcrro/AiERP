@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "ERPNext adapter foundation for employee assistant agents"
 requires-python = ">=3.10"
 dependencies = [
+    "pydantic>=2,<3",
     "psycopg[binary]>=3.2.0",
     "python-dotenv>=1.0.1",
     "PyYAML>=6.0.0",
@@ -26,5 +27,9 @@ where = ["src"]
 testpaths = ["tests"]
 pythonpath = ["src"]
 markers = [
+    "unit: fast isolated tests without external services",
     "integration: tests that require a running ERPNext sandbox and NEXTERP_LOCAL_* credentials",
+    "llm: tests or evaluations that call a real language-model API",
+    "erpnext_write: tests or acceptance flows that write to the ERPNext sandbox",
+    "slow: tests or acceptance flows intended for milestone or release validation",
 ]

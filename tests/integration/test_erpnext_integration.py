@@ -21,6 +21,8 @@ def local_adapter() -> ERPNextAdapter:
 
 
 @pytest.mark.integration
+@pytest.mark.erpnext_write
+@pytest.mark.slow
 def test_todo_crud_count_comment_assignment_and_attachment() -> None:
     adapter = local_adapter()
     created_name = None
@@ -141,6 +143,8 @@ def test_report_and_bridge_methods() -> None:
 
 
 @pytest.mark.integration
+@pytest.mark.erpnext_write
+@pytest.mark.slow
 def test_item_master_prepare_setup_and_create() -> None:
     adapter = local_adapter()
 

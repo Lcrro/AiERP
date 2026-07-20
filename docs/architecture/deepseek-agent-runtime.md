@@ -1,5 +1,9 @@
 # DeepSeek 自主规划 Runtime
 
+> 当前协议已升级为 Capability Skill 渐进披露。业务写操作优先走 `discover_capabilities -> get_capability_guide -> propose_business_action`；普通查询和尚未能力化工具继续使用工具发现协议。
+
+DeepSeek 不再直接承担复杂 ERPNext 写入 JSON 的编制。它负责选择业务能力并生成强类型业务意图，Runtime 负责真实实体解析、确定性 ToolCall 编译、预检、确认和回读。
+
 ## 目标
 
 员工自然语言由 DeepSeek 自主拆解为连续动作。Runtime 不使用关键词路由。对于采购写操作，DeepSeek 输出有限的结构化业务目标，由业务能力层根据 ERPNext 实时状态编译成 ToolCall；模型不再直接承担事务编排。

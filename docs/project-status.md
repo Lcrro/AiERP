@@ -10,7 +10,7 @@
 - Tool schema 与 Adapter handler：`160 / 160`
 - 主数据来源：`data/master_data/` 与 `data/material_master/`
 - Agent 主入口：`DeepSeekAgentRuntime`
-- 测试：`337 passed, 3 skipped`
+- 测试：`363 passed, 3 skipped`
 
 ## 已具备
 
@@ -19,6 +19,16 @@
 - 物料四级发布表、物料 Resolver 和 PostgreSQL 目录能力。
 - 公司、组织、员工、项目、仓库、供应商、价格等基础主数据发布包。
 - DeepSeek 自主规划循环、工具发现、契约查询、实体解析和多轮会话。
+- Capability Skill Runtime v0.3：20 项采购、库存、财务和项目能力统一进入按需 Registry；初始 Prompt 不再加载全部 goal 和 Schema，能力发现最多 5 项、Guide 每次最多 3 项。
+- Pydantic v2 强类型边界：Agent 动作和每项 Capability 使用独立契约，提供字段级错误修复；15 个能力化写工具禁止经通用 `execute_tool` 绕过。
+- Capability 编译入口已统一：DeepSeek 主链直接消费模块级 Pydantic 执行模型，不再经过旧 dataclass 二次解析；聚焦 Guide Schema 仍只披露当前能力所需字段。
+- Capability 异常边界已加固：项目任务更新、财务冲销和采购来源流转会在确认前拒绝跨项目或跨公司单据。
+- Agent 无进展检测：重复发现、Guide、Resolver 和只读动作会被识别并提前终止，保留 10 步总上限。
+- Capability Runtime 真实 DeepSeek 稳定性基准 `20 / 20` 通过：平均 10.1 个审计步骤，5 次字段修复，1 次重复动作被识别，底层写入绕过为 0。
+- Capability 多轮草稿：已确认字段按结构保存，后续只补缺失字段即可；切换项目/能力、只读成功或写入成功后自动清理，避免旧上下文污染。
+- 真实 DeepSeek 多轮材料申请验证通过：首轮只提供物料与日期时追问数量，次轮仅补“20包”即可生成完整确认 ToolCall，项目、仓库、日期、物料和单位均正确保留；未写入 ERPNext。
+- Agent 失败回归库已建立：首批 8 个历史错误覆盖动作格式、参数边界、跨轮字段保留、Capability 旁路和无进展循环；真实基准失败自动进入本地候选报告，审查后才能晋升为固定测试。
+- 测试已分层：日常使用 `unit` 或 Agent 模块测试，阶段边界运行全量；真实 DeepSeek 和 ERPNext 写入验收通过独立命令显式触发，避免每次修改都产生费用或测试单据。
 - 采购业务能力 Runtime：结构化业务意图、实时合法动作、确定性 ToolCall 编译、不可变确认和执行后回读。
 - 库存业务能力 Runtime：支持实时库存查询、仓库调拨、项目领料和盘点草稿；调拨与领料在确认前执行实时库存预检，写入后回读核验仓库或项目归属。
 - 财务业务能力 Runtime：支持应付查询、采购收货生成采购发票草稿、采购发票生成供应商付款草稿和财务单据取消冲销；付款账户由 ERPNext 生成，写操作确认后执行并回读核验来源关系或取消状态。

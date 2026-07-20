@@ -120,6 +120,19 @@ def test_cancel_financial_document_requires_reason_and_submitted_state() -> None
     assert prepared.tool_call["arguments"]["reason"] == "测试付款录入错误"
 
 
+def test_financial_write_rejects_document_from_another_company() -> None:
+    documents = {("Payment Entry", "PAY-OTHER"): {
+        "name": "PAY-OTHER", "docstatus": 1, "company": "Other Company",
+    }}
+
+    with pytest.raises(CapabilityCompilationError, match="与当前公司 STEC \\(Demo\\) 不一致"):
+        _compile({
+            "goal": "cancel_financial_document",
+            "source_documents": [{"doctype": "Payment Entry", "name": "PAY-OTHER"}],
+            "reason": "测试冲销",
+        }, documents)
+
+
 def test_verify_payment_preserves_invoice_reference() -> None:
     documents = {
         ("Purchase Invoice", "PINV-001"): {"name": "PINV-001", "docstatus": 1, "outstanding_amount": 800},

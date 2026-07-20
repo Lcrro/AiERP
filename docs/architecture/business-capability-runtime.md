@@ -1,5 +1,41 @@
 # 业务能力 Runtime
 
+## v0.3 Capability Skill
+
+现有 20 项能力已统一注册到 `CapabilityRegistry`。每项 Capability 都是一个按需加载的业务 Skill，包含紧凑发现卡、完整 Guide、独立 Pydantic 意图模型、Resolver 要求、来源单据、前置状态、确定性编译器和回读验证器。
+
+```text
+初始上下文：模块说明 + 元动作
+-> discover_capabilities：最多 5 张岗位可用能力卡
+-> get_capability_guide：最多加载 3 项完整说明
+-> propose_business_action：提交已加载能力对应的强类型意图
+-> Resolver / Compiler / Preflight / Confirm / Execute / Verify
+```
+
+模型初始看不到 20 个 goal、完整意图 Schema 或底层写工具。选中 Guide 后才获得该能力所需字段，避免一次注入大量相似工具。Registry 以 `ToolAccessPolicy` 过滤能力，因此发现结果不会超出当前岗位可用的底层权限。
+
+Agent 动作和 20 项业务意图均由 Pydantic v2 校验。未知字段、非法日期、负数金额、越界百分比和非法枚举会变成简短字段级 observation，模型最多修复两次。DeepSeek 主链直接把 Registry 生成的模块级 Pydantic 执行模型交给确定性编译器，不再转回旧 dataclass 重复解析；旧对象只保留兼容导入和既有调用。用于渐进披露的聚焦 Schema 与执行模型分离，因此 Guide 不会因为安全默认字段而膨胀。
+
+Registry 中 15 个写能力对应的底层 ToolCall 已禁止经通用 `execute_tool` 调用。模型绕过时只会收到 `capability_required`，不会执行写入。相同发现、Guide、Resolver 或只读动作连续重复时，Runtime 先返回 `no_progress`，再次重复立即终止。
+
+### 多轮 Capability 草稿
+
+当业务信息需要分几轮补齐时，Runtime 保存当前 Capability 的结构化草稿，而不是依赖模型从聊天文本中重新回忆整张表单。后续 `propose_business_action` 只需提交新增或修正字段，Runtime 按字段合并并重新执行 Pydantic 校验。
+
+- 物料明细等对象数组按行合并，补数量不会丢失已确认物料编码和单位。
+- 切换 Capability 或项目时立即清除旧草稿。
+- 写操作确认并成功回读后清除草稿。
+- 只读操作成功后清除草稿；执行失败则保留，允许下一轮修复。
+- Prompt 只披露当前 Capability 草稿，不混入其他项目或能力的历史字段。
+
+实现位置：
+
+```text
+src/nexterp_agent/agent_runtime/action_models.py
+src/nexterp_agent/agent_runtime/capability_registry.py
+src/nexterp_agent/agent_runtime/deepseek_agent_runtime.py
+```
+
 ## 为什么增加这一层
 
 单纯让大模型在 150 多个 ToolCall 中自由选择、填写参数和决定业务顺序，会把四类不同问题混在一起：

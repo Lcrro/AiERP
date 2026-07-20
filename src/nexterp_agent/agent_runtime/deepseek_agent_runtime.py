@@ -7,6 +7,8 @@ import json
 import re
 from typing import Any, Callable
 
+from pydantic import BaseModel, ValidationError
+
 from nexterp_agent.erpnext.adapter import ERPNextAdapter
 from nexterp_agent.erpnext.client import ERPNextClient
 from nexterp_agent.erpnext.tool_registry import ERPNext_TOOL_SCHEMAS
@@ -14,20 +16,18 @@ from nexterp_agent.item_master.release_resolver import ReleaseMaterialResolver
 from nexterp_agent.master_data import MasterDataRelease
 
 from .candidate_inventory import enrich_item_entity_results
+from .action_models import validate_action
+from .capability_registry import CapabilityRegistry
 from .business_capabilities import (
-    BusinessIntentDraft,
     CapabilityCompilationError,
     FINANCE_GOALS,
-    FinanceBusinessIntentDraft,
     FinanceCapabilityCompiler,
     PROJECT_GOALS,
-    ProjectBusinessIntentDraft,
     ProjectCapabilityCompiler,
     PreparedBusinessAction,
     ProcurementCapabilityCompiler,
     ProcurementCapabilityGraph,
     STOCK_GOALS,
-    StockBusinessIntentDraft,
     StockCapabilityCompiler,
     canonical_tool_call_hash,
     verify_finance_result,
@@ -46,7 +46,10 @@ from .tool_gateway import ToolGateway, ToolSession
 MAX_AGENT_STEPS = 10
 MAX_MODEL_RETRIES = 1
 MAX_TOOL_REPAIRS = 2
-AGENT_ACTIONS = frozenset({"discover_tools", "get_tool_contracts", "resolve_entities", "propose_business_action", "execute_tool", "ask_user", "finish"})
+AGENT_ACTIONS = frozenset({
+    "discover_tools", "discover_capabilities", "get_tool_contracts", "get_capability_guide",
+    "resolve_entities", "propose_business_action", "execute_tool", "ask_user", "finish",
+})
 MODULE_DESCRIPTIONS = {
     "generic": "通用文档、评论、待办和附件",
     "users": "用户、角色和权限",
@@ -95,28 +98,15 @@ class DeepSeekTurnResult:
 def validate_agent_action(payload: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError("DeepSeek action must be a JSON object")
-    action = payload.get("action")
-    if action not in AGENT_ACTIONS:
-        raise ValueError(f"Unsupported DeepSeek action: {action}")
-    if not isinstance(payload.get("summary"), str) or not payload["summary"].strip():
-        payload["summary"] = f"DeepSeek请求执行{action}"
-    if not isinstance(payload.get("arguments") or {}, dict):
-        raise ValueError("DeepSeek action arguments must be an object")
-    arguments = payload.get("arguments") or {}
-    if action == "discover_tools" and not str(arguments.get("query") or "").strip():
-        raise ValueError("discover_tools.arguments.query is required")
-    if action == "get_tool_contracts" and (not isinstance(arguments.get("tool_names"), list) or not arguments["tool_names"]):
-        raise ValueError("get_tool_contracts.arguments.tool_names must be a non-empty array")
-    if action == "resolve_entities" and (not isinstance(arguments.get("entities"), list) or not arguments["entities"]):
-        raise ValueError("resolve_entities.arguments.entities must be a non-empty array")
-    if action == "execute_tool" and not isinstance(arguments.get("tool_call"), dict):
-        raise ValueError("execute_tool.arguments.tool_call is required")
-    if action == "propose_business_action" and not isinstance(arguments.get("business_intent"), dict):
-        raise ValueError("propose_business_action.arguments.business_intent is required")
-    if action == "ask_user" and (not isinstance(arguments.get("questions"), list) or not arguments["questions"]):
-        raise ValueError("ask_user.arguments.questions must be a non-empty array")
-    if action == "finish" and not str(arguments.get("message") or "").strip():
-        raise ValueError("finish.arguments.message is required")
+    try:
+        validated = validate_action(payload)
+    except ValidationError as exc:
+        action = payload.get("action")
+        if action not in AGENT_ACTIONS:
+            raise ValueError(f"Unsupported DeepSeek action: {action}") from exc
+        raise ValueError(_compact_validation_error(exc)) from exc
+    payload.clear()
+    payload.update(validated)
     return payload
 
 
@@ -174,6 +164,7 @@ class DeepSeekAgentRuntime:
         self.material_resolver = ReleaseMaterialResolver(self.release.material_release_path)
         self.materials_by_code = {row["item_code"]: row for row in self.release.materials if row.get("item_code")}
         self.discovery = ToolDiscoveryIndex()
+        self.capabilities = CapabilityRegistry()
         self.procurement_graph = ProcurementCapabilityGraph()
         self.max_steps = max_steps
 
@@ -197,7 +188,10 @@ class DeepSeekAgentRuntime:
 
         selected_context = dict(context or {})
         if selected_context.get("project_code"):
-            session.selected_project_code = str(selected_context["project_code"])
+            selected_project_code = str(selected_context["project_code"])
+            if session.selected_project_code and session.selected_project_code != selected_project_code:
+                _clear_capability_draft(session)
+            session.selected_project_code = selected_project_code
         if selected_context.get("erpnext_project"):
             session.selected_entities["runtime_project"] = {
                 "kind": "project",
@@ -217,6 +211,7 @@ class DeepSeekAgentRuntime:
         observations: list[dict[str, Any]] = []
         tool_results: list[dict[str, Any]] = []
         confirmed_call: dict[str, Any] | None = None
+        action_occurrences: dict[str, int] = {}
         today = today or date.today()
 
         if execute:
@@ -263,6 +258,7 @@ class DeepSeekAgentRuntime:
                             tool_results=tuple(tool_results),
                         )
                         return self._save(session, user_text, result, request_id)
+                _clear_capability_draft(session, capability_id=str(pending.get("capability") or ""))
                 result = DeepSeekTurnResult(
                     "completed",
                     _successful_execution_message(payload),
@@ -299,18 +295,77 @@ class DeepSeekAgentRuntime:
             steps.append(_step("DeepSeek规划", action["action"], action.get("arguments") or {}, {"summary": action["summary"]}))
             kind = action["action"]
             arguments = action.get("arguments") or {}
+            fingerprint = _agent_action_fingerprint(action)
+            action_occurrences[fingerprint] = action_occurrences.get(fingerprint, 0) + 1
+            if action_occurrences[fingerprint] == 2:
+                observation = {
+                    "type": "no_progress",
+                    "action": kind,
+                    "error": "相同动作已经执行过且没有产生新的业务进展，请改用已有结果继续或向用户追问。",
+                }
+                steps.append(_step("检测无进展", "no_progress", arguments, observation))
+                observations.append(observation)
+                continue
+            if action_occurrences[fingerprint] > 2:
+                result = DeepSeekTurnResult(
+                    "failed",
+                    f"Agent重复执行{kind}且没有取得新进展，已停止。",
+                    tuple(steps),
+                    tool_results=tuple(tool_results),
+                )
+                return self._save(session, user_text, result, request_id)
 
             if kind == "discover_tools":
-                cards = self.discovery.discover(str(arguments.get("query") or user_text), policy=policy, modules=arguments.get("modules"), limit=int(arguments.get("limit") or 8))
-                observation = {"type": kind, "tools": cards}
+                discovery_query = str(arguments.get("query") or user_text)
+                cards = self.discovery.discover(discovery_query, policy=policy, modules=arguments.get("modules"), limit=int(arguments.get("limit") or 8))
+                cards = [card for card in cards if card.get("name") not in self.capabilities.capability_tools]
+                capability_cards = self.capabilities.discover(
+                    discovery_query,
+                    policy=policy,
+                    modules=arguments.get("modules"),
+                    limit=5,
+                )
+                observation = {
+                    "type": kind,
+                    "tools": cards,
+                    "capabilities": capability_cards,
+                    "instruction": "若存在匹配的 Capability，优先加载其 Guide；tools 仅用于尚未能力化的普通查询。",
+                }
                 steps.append(_step("发现工具", kind, arguments, observation))
                 observations.append(observation)
                 continue
+            if kind == "discover_capabilities":
+                cards = self.capabilities.discover(
+                    str(arguments.get("query") or user_text),
+                    policy=policy,
+                    modules=arguments.get("modules"),
+                    limit=int(arguments.get("limit") or 5),
+                )
+                observation = {"type": kind, "capabilities": cards}
+                steps.append(_step("发现业务能力", kind, arguments, observation))
+                observations.append(observation)
+                continue
             if kind == "get_tool_contracts":
-                contracts = self.discovery.full_contracts(arguments.get("tool_names") or [], policy=policy)
+                tool_names = [
+                    name
+                    for name in arguments.get("tool_names") or []
+                    if name not in self.capabilities.capability_tools
+                ]
+                contracts = self.discovery.full_contracts(tool_names, policy=policy)
                 observation = {"type": kind, "contracts": contracts}
                 steps.append(_step("读取契约", kind, arguments, observation))
                 observations.append(observation)
+                continue
+            if kind == "get_capability_guide":
+                guides = self.capabilities.guides(arguments.get("capability_ids") or [], policy=policy)
+                observation = {"type": kind, "guides": guides}
+                steps.append(_step("读取业务能力说明", kind, arguments, observation))
+                observations.append(observation)
+                if guides:
+                    selected_capability_id = guides[0]["capability_id"]
+                    if session.business_state.get("active_capability_id") != selected_capability_id:
+                        _clear_capability_draft(session)
+                    session.business_state["active_capability_id"] = selected_capability_id
                 continue
             if kind == "resolve_entities":
                 observation = self._resolve_entities(arguments, user=user, today=today, session=session)
@@ -348,7 +403,25 @@ class DeepSeekAgentRuntime:
                 continue
             if kind == "propose_business_action":
                 try:
-                    intent = self._parse_business_intent(arguments.get("business_intent") or {})
+                    capability_id = str(arguments.get("capability_id") or "").strip()
+                    raw_intent = arguments.get("business_intent") or {}
+                    if not capability_id and self.planner is not None:
+                        capability_id = self.capabilities.for_goal(str(raw_intent.get("goal") or "")).capability_id
+                    loaded_ids = _loaded_capability_ids(observations)
+                    active_id = str(session.business_state.get("active_capability_id") or "")
+                    if capability_id not in loaded_ids and capability_id != active_id:
+                        raise CapabilityCompilationError(
+                            f"Capability {capability_id or '(missing)'} 尚未加载使用说明。",
+                            questions=("请先发现并加载对应业务能力说明。",),
+                        )
+                    saved_draft = _capability_draft(session, capability_id)
+                    merged_intent = _merge_capability_intent(saved_draft, raw_intent)
+                    definition, intent = self.capabilities.parse_intent(capability_id, merged_intent)
+                    validated_intent = _canonical_intent_payload(intent)
+                    session.business_state["capability_draft"] = {
+                        "capability_id": capability_id,
+                        "intent": validated_intent,
+                    }
                     prepared = self._compile_business_action(
                         intent,
                         user=user,
@@ -356,15 +429,27 @@ class DeepSeekAgentRuntime:
                         observations=observations,
                         today=today,
                     )
+                    if prepared.capability != definition.capability_id:
+                        raise CapabilityCompilationError("业务意图与所选 Capability 不一致。")
+                    session.business_state["active_capability_id"] = capability_id
                 except (ValueError, CapabilityCompilationError) as exc:
                     questions = tuple(getattr(exc, "questions", ()) or ())
+                    error_message = _compact_validation_error(exc) if isinstance(exc, ValidationError) else str(exc)
                     observation = {
                         "type": "business_action_error",
-                        "error": str(exc),
+                        "error": error_message,
                         "questions": list(questions),
                     }
                     steps.append(_step("业务预检", kind, arguments, observation))
                     observations.append(observation)
+                    if sum(1 for item in observations if item.get("type") == "business_action_error") > MAX_TOOL_REPAIRS:
+                        result = DeepSeekTurnResult(
+                            "failed",
+                            error_message,
+                            tuple(steps),
+                            tool_results=tuple(tool_results),
+                        )
+                        return self._save(session, user_text, result, request_id)
                     continue
                 call = deepcopy(prepared.tool_call)
                 contract = next((item for item in self.discovery.contracts if item.name == call.get("tool")), None)
@@ -412,7 +497,8 @@ class DeepSeekAgentRuntime:
                         "result": _safe_tool_result(preflight_payload),
                     })
                 prepared_payload = prepared.to_dict()
-                steps.append(_step("业务能力编译", kind, {"intent": intent.to_dict()}, prepared_payload))
+                intent_payload = _canonical_intent_payload(intent)
+                steps.append(_step("业务能力编译", kind, {"intent": intent_payload}, prepared_payload))
                 if prepared.write:
                     session.pending_action = {
                         "tool_call": call,
@@ -431,7 +517,7 @@ class DeepSeekAgentRuntime:
                         tool_call=call,
                         tool_calls=(call,),
                         tool_results=tuple(tool_results),
-                        intent=intent.to_dict(),
+                        intent=intent_payload,
                     )
                     return self._save(session, user_text, result, request_id=None)
                 previous = next(
@@ -450,13 +536,14 @@ class DeepSeekAgentRuntime:
                 )
                 if previous is not None:
                     steps.append(_step("跳过重复业务查询", kind, prepared_payload, {"reason": "same_read_only_business_call_already_succeeded"}))
+                    _clear_capability_draft(session, capability_id=prepared.capability)
                     result = DeepSeekTurnResult(
                         "completed",
                         _successful_execution_message(previous),
                         tuple(steps),
                         tool_result=previous,
                         tool_results=tuple(tool_results),
-                        intent=intent.to_dict(),
+                        intent=intent_payload,
                     )
                     return self._save(session, user_text, result, request_id)
                 execution = self._execute(call, user=user, profile=profile)
@@ -464,6 +551,8 @@ class DeepSeekAgentRuntime:
                 tool_results.append(payload)
                 steps.append(_step("ERPNext执行", "execute_tool", call, payload))
                 self._remember_result(session, payload)
+                if execution.ok:
+                    _clear_capability_draft(session, capability_id=prepared.capability)
                 observations.append({
                     "type": "tool_result",
                     "business_goal": prepared.goal,
@@ -484,6 +573,16 @@ class DeepSeekAgentRuntime:
             if kind == "execute_tool":
                 call = deepcopy(arguments.get("tool_call") or arguments)
                 contract = next((item for item in self.discovery.contracts if item.name == call.get("tool")), None) if isinstance(call, dict) else None
+                protected = self.capabilities.for_tool(str(call.get("tool") or "")) if isinstance(call, dict) else None
+                if protected:
+                    observation = {
+                        "type": "capability_required",
+                        "error": "该操作已有业务能力，必须加载 Capability Guide 后执行，禁止直接调用底层 ToolCall。",
+                        "capability": protected.card(),
+                    }
+                    steps.append(_step("引导业务能力", "capability_required", call, observation))
+                    observations.append(observation)
+                    continue
                 if (
                     contract
                     and contract.expose is ToolExposure.AGENT_VISIBLE
@@ -576,29 +675,17 @@ class DeepSeekAgentRuntime:
         result = DeepSeekTurnResult("failed", f"Agent达到{self.max_steps}步规划上限，已停止执行。", tuple(steps), tool_results=tuple(tool_results))
         return self._save(session, user_text, result, request_id)
 
-    @staticmethod
-    def _parse_business_intent(
-        payload: dict[str, Any],
-    ) -> BusinessIntentDraft | StockBusinessIntentDraft | FinanceBusinessIntentDraft | ProjectBusinessIntentDraft:
-        goal = str(payload.get("goal") or "")
-        if goal in STOCK_GOALS:
-            return StockBusinessIntentDraft.from_dict(payload)
-        if goal in FINANCE_GOALS:
-            return FinanceBusinessIntentDraft.from_dict(payload)
-        if goal in PROJECT_GOALS:
-            return ProjectBusinessIntentDraft.from_dict(payload)
-        return BusinessIntentDraft.from_dict(payload)
-
     def _compile_business_action(
         self,
-        intent: BusinessIntentDraft | StockBusinessIntentDraft | FinanceBusinessIntentDraft | ProjectBusinessIntentDraft,
+        intent: BaseModel,
         *,
         user: str,
         session: RuntimeSessionState,
         observations: list[dict[str, Any]],
         today: date,
     ) -> PreparedBusinessAction:
-        if isinstance(intent, (BusinessIntentDraft, FinanceBusinessIntentDraft, ProjectBusinessIntentDraft)):
+        goal = str(intent.goal)
+        if goal not in STOCK_GOALS:
             allowed_documents = _allowed_entity_values(session, observations).get("document") or set()
             for source in intent.source_documents:
                 if source.name not in allowed_documents:
@@ -606,9 +693,9 @@ class DeepSeekAgentRuntime:
                         f"来源单据 {source.name} 尚未通过实体解析。",
                         questions=(f"请先核对来源单据 {source.name}。",),
                     )
-            if isinstance(intent, FinanceBusinessIntentDraft):
+            if goal in FINANCE_GOALS:
                 compiler = FinanceCapabilityCompiler(self._business_document_loader(user))
-            elif isinstance(intent, ProjectBusinessIntentDraft):
+            elif goal in PROJECT_GOALS:
                 compiler = ProjectCapabilityCompiler(self._business_document_loader(user))
             else:
                 compiler = ProcurementCapabilityCompiler(self._business_document_loader(user))
@@ -690,8 +777,9 @@ class DeepSeekAgentRuntime:
             "负责理解目标、提取用户明确表达的信息、比较候选和友好追问；不要承担ERP事务编排。"
             "任何ERPNext主键必须来自resolve_entities或已确认上下文，禁止猜测。"
             "已确认上下文中的runtime_project是当前ERPNext项目主键；用户没有明确说另一个项目时直接使用，不要重复解析或追问。"
-            "普通查询先discover_tools和get_tool_contracts，再execute_tool。采购、库存、财务与项目标准业务动作无需发现底层工具，"
-            "应先resolve_entities，再直接使用propose_business_action。"
+            "采购、库存、财务与项目业务先discover_capabilities，再get_capability_guide；按Guide要求resolve_entities后，"
+            "使用propose_business_action提交capability_id和业务意图。不得猜测Capability，也不得直接调用其底层写工具。"
+            "未能力化的普通查询才使用discover_tools、get_tool_contracts和execute_tool。"
             "Runtime负责读取来源单据、限制合法下一步、编译ToolCall和等待一次用户确认。"
             "收到business_action_error时，若信息可从原话解析，应调用Resolver或修正业务意图；只有用户确实没说时才ask_user。"
             "单据启用ERPNext Workflow时，禁止使用任何submit_document工具；必须先执行erpnext.get_workflow_actions，"
@@ -701,24 +789,29 @@ class DeepSeekAgentRuntime:
             "候选不唯一时ask_user并展示最相关候选；完成后只引用observation中的真实数字、状态和单号。"
             "summary仅用于审计；ask_user.message和finish.message要自然、简洁、可行动。不要展示隐藏思维过程。"
         )
+        active_capability_id = str(session.business_state.get("active_capability_id") or "")
+        active_capability_guide = None
+        if active_capability_id:
+            try:
+                active_capability_guide = self.capabilities.get(active_capability_id).guide()
+            except ValueError:
+                active_capability_guide = None
         protocol = {
-            "action_schema": {"action": "discover_tools | get_tool_contracts | resolve_entities | propose_business_action | execute_tool | ask_user | finish", "summary": "可审计的简短动作说明", "arguments": "必须符合对应action_schemas"},
+            "action_schema": {"action": "discover_capabilities | get_capability_guide | discover_tools | get_tool_contracts | resolve_entities | propose_business_action | execute_tool | ask_user | finish", "summary": "可审计的简短动作说明", "arguments": "必须符合对应action_schemas"},
             "action_schemas": {
+                "discover_capabilities": {"query": "描述所需业务能力，必填", "modules": ["stock | buying | accounting | projects"], "limit": "1-5"},
+                "get_capability_guide": {"capability_ids": ["从discover_capabilities结果逐字复制，最多3个"]},
                 "discover_tools": {"query": "描述所需业务能力，必填", "modules": ["generic | users | assets | stock | buying | accounting | projects"], "limit": "1-8"},
                 "get_tool_contracts": {"tool_names": ["从discover_tools结果逐字复制的工具名，最多5个"]},
                 "resolve_entities": {"entities": [{"id": "本轮唯一标识", "kind": "item | project | warehouse | supplier | company | employee | date | uom | document", "query": "用户原话或待核对主键", "specs": {}, "qty": "kind=item时可提供需求数量", "uom": "kind=item时可提供用户单位", "doctype": "kind=document时必填"}]},
-                "propose_business_action": {"business_intent": {
-                    "goal": "create_material_request | create_rfq_from_material_request | create_supplier_quotation_from_rfq | compare_supplier_quotations | create_purchase_order_from_supplier_quotation | create_purchase_order_from_material_request | create_purchase_receipt_from_purchase_order | create_purchase_return_from_receipt | query_stock_balance | create_stock_transfer | create_project_material_issue | create_stock_reconciliation | query_accounts_payable | create_purchase_invoice_from_receipt | create_supplier_payment_from_invoice | cancel_financial_document | query_project_cost | query_project_exceptions | create_project_task | update_project_task",
-                    "source_documents": [{"doctype": "已解析单据类型", "name": "已解析单号"}],
-                    "items": [{"item_code": "已解析物料编码", "source_row": "可选来源行name", "qty": "正数", "uom": "单位", "rate": "报价", "warehouse": "已解析仓库", "project": "已解析项目", "schedule_date": "YYYY-MM-DD", "reason": "退货原因"}],
-                    "suppliers": ["已解析Supplier.name"], "supplier": "已解析Supplier.name", "company": "已确认Company.name", "project": "已确认Project.name", "warehouse": "已确认Warehouse.name", "source_warehouse": "已解析源Warehouse.name", "target_warehouse": "已解析目标Warehouse.name", "schedule_date": "YYYY-MM-DD", "valid_till": "YYYY-MM-DD", "posting_date": "YYYY-MM-DD", "from_date": "YYYY-MM-DD", "to_date": "YYYY-MM-DD", "bill_no": "用户提供的供应商发票号", "bill_date": "YYYY-MM-DD", "paid_amount": "正数", "reference_no": "用户提供的付款参考号", "reference_date": "YYYY-MM-DD", "reason": "用户说明的冲销原因", "subject": "用户说明的任务名称", "description": "业务或任务说明", "priority": "Low | Medium | High | Urgent", "status": "任务状态", "progress": "0-100", "exp_start_date": "YYYY-MM-DD", "exp_end_date": "YYYY-MM-DD", "currency": "币种", "message": "业务说明", "remarks": "业务说明", "full_return": "boolean", "include_zero": "boolean", "require_available_stock": "boolean",
-                    "provenance": {"字段名": "user | resolver | runtime_context | source_document | system_default"}
-                }},
+                "propose_business_action": {"capability_id": "已加载Guide的Capability ID", "business_intent": "严格符合该Guide的intent_schema"},
                 "execute_tool": {"tool_call": {"tool": "已读取契约的工具名", "arguments": {}}},
                 "ask_user": {"message": "可直接展示给员工的自然回复", "questions": ["员工可直接回答的最少必要问题"], "candidates": ["从observation复制的相关候选，可省略并由Runtime补齐"]},
                 "finish": {"message": "基于真实observation的最终答复"},
             },
             "modules": MODULE_DESCRIPTIONS,
+            "active_capability_guide": active_capability_guide,
+            "active_capability_draft": _capability_draft(session, active_capability_id),
             "runtime_context": {
                 "current_date": today.isoformat(), "employee": employee, "profile": session.profile,
                 "company": session.company, "selected_project_code": session.selected_project_code,
@@ -1540,6 +1633,77 @@ def _observation_candidates(observations: list[dict[str, Any]]) -> list[dict[str
             if resolution.get("candidates"):
                 result.append({"id": entity.get("id"), "kind": entity.get("kind"), "query": entity.get("query"), "candidates": resolution["candidates"]})
     return result
+
+
+def _loaded_capability_ids(observations: list[dict[str, Any]]) -> set[str]:
+    return {
+        str(guide.get("capability_id"))
+        for observation in observations
+        if observation.get("type") == "get_capability_guide"
+        for guide in observation.get("guides") or []
+        if isinstance(guide, dict) and guide.get("capability_id")
+    }
+
+
+def _agent_action_fingerprint(action: dict[str, Any]) -> str:
+    payload = {
+        "action": action.get("action"),
+        "arguments": action.get("arguments") or {},
+    }
+    return json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _capability_draft(session: RuntimeSessionState, capability_id: str) -> dict[str, Any]:
+    draft = session.business_state.get("capability_draft")
+    if not isinstance(draft, dict) or str(draft.get("capability_id") or "") != capability_id:
+        return {}
+    intent = draft.get("intent")
+    return deepcopy(intent) if isinstance(intent, dict) else {}
+
+
+def _canonical_intent_payload(intent: BaseModel) -> dict[str, Any]:
+    payload = intent.model_dump(exclude_none=True, exclude_defaults=True)
+    payload["goal"] = str(intent.goal)
+    return payload
+
+
+def _clear_capability_draft(session: RuntimeSessionState, capability_id: str = "") -> None:
+    draft = session.business_state.get("capability_draft")
+    if capability_id and isinstance(draft, dict) and str(draft.get("capability_id") or "") != capability_id:
+        return
+    session.business_state.pop("capability_draft", None)
+    active_id = str(session.business_state.get("active_capability_id") or "")
+    if not capability_id or active_id == capability_id:
+        session.business_state.pop("active_capability_id", None)
+
+
+def _merge_capability_intent(previous: dict[str, Any], update: dict[str, Any]) -> dict[str, Any]:
+    merged = deepcopy(previous) if isinstance(previous, dict) else {}
+    for key, value in (update or {}).items():
+        if value is None or value == "" or value == [] or value == {}:
+            continue
+        current = merged.get(key)
+        if isinstance(current, dict) and isinstance(value, dict):
+            merged[key] = _merge_capability_intent(current, value)
+        elif isinstance(current, list) and isinstance(value, list) and all(isinstance(item, dict) for item in current + value):
+            rows = deepcopy(current)
+            for index, item in enumerate(value):
+                if index < len(rows):
+                    rows[index] = _merge_capability_intent(rows[index], item)
+                else:
+                    rows.append(deepcopy(item))
+            merged[key] = rows
+        else:
+            merged[key] = deepcopy(value)
+    return merged
+
+
+def _compact_validation_error(error: ValidationError) -> str:
+    details = []
+    for item in error.errors(include_url=False)[:5]:
+        location = ".".join(str(part) for part in item.get("loc") or ()) or "action"
+        details.append(f"{location}: {item.get('msg')}")
+    return "；".join(details) or "DeepSeek动作不符合协议"
 
 
 def _hydrate_presented_candidates(presented: list[Any], observations: list[dict[str, Any]]) -> list[dict[str, Any]]:

@@ -88,6 +88,21 @@ def test_update_task_requires_resolved_source_and_changes() -> None:
     }
 
 
+def test_update_task_rejects_task_from_another_project() -> None:
+    documents = {
+        ("Task", "TASK-OTHER"): {
+            "doctype": "Task", "name": "TASK-OTHER", "project": "PROJ-OTHER", "status": "Working",
+        },
+    }
+
+    with pytest.raises(CapabilityCompilationError, match="与当前项目 PROJ-001 不一致"):
+        _compile({
+            "goal": "update_project_task",
+            "source_documents": [{"doctype": "Task", "name": "TASK-OTHER"}],
+            "status": "Completed",
+        }, documents)
+
+
 def test_verify_created_task_checks_project_lineage() -> None:
     prepared = _compile({"goal": "create_project_task", "subject": "完成井壁验收"})
     documents = {

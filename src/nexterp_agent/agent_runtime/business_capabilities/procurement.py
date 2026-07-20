@@ -217,7 +217,7 @@ class ProcurementCapabilityCompiler:
     ) -> PreparedBusinessAction:
         spec = self.graph.for_goal(intent.goal)
         snapshots = [self.document_loader(ref.doctype, ref.name) for ref in intent.source_documents]
-        self._validate_source_documents(spec, intent, snapshots)
+        self._validate_source_documents(spec, intent, snapshots, runtime_context)
         context = _Context(intent, runtime_context, today)
         builders = {
             "create_material_request": self._material_request,
@@ -247,6 +247,7 @@ class ProcurementCapabilityCompiler:
         spec: CapabilitySpec,
         intent: BusinessIntentDraft,
         snapshots: list[dict[str, Any]],
+        runtime_context: dict[str, Any],
     ) -> None:
         if spec.source_doctypes and not intent.source_documents:
             raise CapabilityCompilationError(
@@ -262,6 +263,12 @@ class ProcurementCapabilityCompiler:
                 raise CapabilityCompilationError(f"{spec.name} 不能使用 {actual_type} {actual_name} 作为来源。")
             if spec.source_docstatus is not None and int(snapshot.get("docstatus") or 0) != spec.source_docstatus:
                 raise CapabilityCompilationError(f"{actual_type} {actual_name} 当前状态不能执行 {spec.name}。")
+            runtime_company = _text(runtime_context.get("company"))
+            source_company = _text(snapshot.get("company"))
+            if runtime_company and source_company and runtime_company != source_company:
+                raise CapabilityCompilationError(
+                    f"{actual_type} {actual_name} 属于公司 {source_company}，与当前公司 {runtime_company} 不一致。"
+                )
 
     def _material_request(self, ctx: "_Context", _: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, str], list[str], str]:
         if not ctx.intent.items:

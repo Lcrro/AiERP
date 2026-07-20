@@ -1,0 +1,150 @@
+{
+  "version": "1.0",
+  "cases": [
+    {
+      "id": "finish_requires_user_message",
+      "kind": "action_validation",
+      "payload": {
+        "action": "finish",
+        "summary": "完成",
+        "arguments": {}
+      },
+      "error_contains": "message"
+    },
+    {
+      "id": "capability_discovery_limit_is_bounded",
+      "kind": "action_validation",
+      "payload": {
+        "action": "discover_capabilities",
+        "summary": "发现能力",
+        "arguments": {
+          "query": "采购",
+          "limit": 20
+        }
+      },
+      "error_contains": "less than or equal to 5"
+    },
+    {
+      "id": "material_request_rejects_non_iso_date",
+      "kind": "capability_validation",
+      "capability_id": "material_request.create",
+      "intent": {
+        "schedule_date": "20/07/2026"
+      },
+      "error_contains": "YYYY-MM-DD"
+    },
+    {
+      "id": "supplier_payment_rejects_negative_amount",
+      "kind": "capability_validation",
+      "capability_id": "finance.supplier_payment.from_invoice",
+      "intent": {
+        "paid_amount": -100
+      },
+      "error_contains": "greater than 0"
+    },
+    {
+      "id": "capability_rejects_unknown_field",
+      "kind": "capability_validation",
+      "capability_id": "material_request.create",
+      "intent": {
+        "bill_no": "SHOULD-NOT-BE-HERE"
+      },
+      "error_contains": "Extra inputs are not permitted"
+    },
+    {
+      "id": "partial_item_update_preserves_resolved_identity",
+      "kind": "intent_merge",
+      "previous": {
+        "goal": "create_material_request",
+        "schedule_date": "2026-07-25",
+        "items": [
+          {
+            "item_code": "MAT-CEM-000008",
+            "uom": "包"
+          }
+        ]
+      },
+      "update": {
+        "items": [
+          {
+            "qty": 20
+          }
+        ]
+      },
+      "expected": {
+        "goal": "create_material_request",
+        "schedule_date": "2026-07-25",
+        "items": [
+          {
+            "item_code": "MAT-CEM-000008",
+            "uom": "包",
+            "qty": 20
+          }
+        ]
+      }
+    },
+    {
+      "id": "stock_read_cannot_bypass_capability",
+      "kind": "runtime_sequence",
+      "user": "mao.xiaoquan@stec-up.local",
+      "text": "查询库存",
+      "actions": [
+        {
+          "action": "execute_tool",
+          "summary": "直接查询库存",
+          "arguments": {
+            "tool_call": {
+              "tool": "erpnext.stock.get_balance",
+              "arguments": {
+                "item_code": "MAT-CEM-000008",
+                "warehouse": "合流1.3标仓库 - SD"
+              }
+            }
+          }
+        },
+        {
+          "action": "finish",
+          "summary": "停止旁路",
+          "arguments": {
+            "message": "需要通过库存 Capability 查询。"
+          }
+        }
+      ],
+      "expected_status": "completed",
+      "expected_step_action": "capability_required",
+      "expected_tool_result_count": 0
+    },
+    {
+      "id": "repeated_discovery_stops_without_progress",
+      "kind": "runtime_sequence",
+      "user": "mao.xiaoquan@stec-up.local",
+      "text": "查询库存",
+      "actions": [
+        {
+          "action": "discover_capabilities",
+          "summary": "发现库存能力",
+          "arguments": {
+            "query": "库存"
+          }
+        },
+        {
+          "action": "discover_capabilities",
+          "summary": "发现库存能力",
+          "arguments": {
+            "query": "库存"
+          }
+        },
+        {
+          "action": "discover_capabilities",
+          "summary": "发现库存能力",
+          "arguments": {
+            "query": "库存"
+          }
+        }
+      ],
+      "expected_status": "failed",
+      "expected_step_action": "no_progress",
+      "message_contains": "没有取得新进展"
+    }
+  ]
+}

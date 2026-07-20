@@ -117,6 +117,13 @@ class FinanceCapabilityCompiler:
     def compile(self, intent: FinanceBusinessIntentDraft, *, runtime_context: dict[str, Any], today: date) -> PreparedBusinessAction:
         spec = self.graph.for_goal(intent.goal)
         snapshots = [self.document_loader(ref.doctype, ref.name) for ref in intent.source_documents]
+        runtime_company = _text(runtime_context.get("company"))
+        for snapshot in snapshots:
+            source_company = _text(snapshot.get("company"))
+            if runtime_company and source_company and runtime_company != source_company:
+                raise CapabilityCompilationError(
+                    f"来源单据属于公司 {source_company}，与当前公司 {runtime_company} 不一致。"
+                )
         builders = {
             "query_accounts_payable": self._accounts_payable,
             "create_purchase_invoice_from_receipt": self._purchase_invoice,

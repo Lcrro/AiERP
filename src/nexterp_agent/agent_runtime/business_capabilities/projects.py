@@ -132,6 +132,11 @@ class ProjectCapabilityCompiler:
             checks = ["project_resolved", "subject_from_user", "task_dates_valid"]
         else:
             source = _single_task_source(intent, snapshots)
+            source_project = _text(source.get("project"))
+            if project and source_project and source_project != project:
+                raise CapabilityCompilationError(
+                    f"任务 {source['name']} 属于项目 {source_project}，与当前项目 {project} 不一致。"
+                )
             _validate_dates(intent.exp_start_date, intent.exp_end_date)
             changes = {
                 "status": intent.status, "progress": intent.progress, "priority": intent.priority,
