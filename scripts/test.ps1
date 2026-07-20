@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("quick", "agent", "full", "integration", "llm", "write")]
+    [ValidateSet("quick", "agent", "full", "integration", "llm", "write", "write-negative")]
     [string]$Mode = "quick"
 )
 
@@ -29,6 +29,9 @@ switch ($Mode) {
     }
     "write" {
         python scripts/acceptance/agent_write_capabilities.py all
+    }
+    "write-negative" {
+        python scripts/acceptance/capability_exception_paths.py all
     }
 }
 

@@ -42,6 +42,36 @@ python scripts\acceptance\agent_write_capabilities.py all
 data/runtime/agent_write_capabilities_last_report.json
 ```
 
+## 非法路径验收
+
+异常路径使用独立驱动器，不调用 DeepSeek，也不尝试让模型在真实系统中反复犯错：
+
+```powershell
+.\scripts\test.ps1 write-negative
+```
+
+当前使用真实 ERPNext 单据快照验证：
+
+```text
+草稿材料申请 -> 询价：拒绝
+过期且已提交的供应商报价 -> 采购订单：拒绝
+其他项目的任务 -> 当前项目任务更新：拒绝
+草稿财务单据 -> 取消冲销：拒绝
+```
+
+每个案例必须同时满足：
+
+- Capability 编译器没有生成底层 ToolCall。
+- 来源单据的状态、项目、有效期和修改时间没有变化。
+- 询价单、采购订单、任务和日记账数量没有变化。
+- 本轮四个最小来源夹具全部按 manifest 清理。
+
+最近一次结果写入：
+
+```text
+data/runtime/capability_exception_paths_last_report.json
+```
+
 运行中的 manifest 写入：
 
 ```text
