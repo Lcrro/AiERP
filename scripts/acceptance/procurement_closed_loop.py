@@ -31,6 +31,10 @@ USERS = {
     "manager": "pan.feng@stec-up.local",
     "project_manager": "hu.yinhu@stec-up.local",
 }
+SUPPLIERS = {
+    "a": "测试建材供应商甲",
+    "b": "测试建材供应商乙",
+}
 
 
 def _require(result, label: str) -> dict[str, Any]:
@@ -115,7 +119,7 @@ def run(service: AgentWorkbenchService) -> dict[str, Any]:
     mr_item = str(mr_doc["items"][0]["name"])
 
     rfq_payload = service.create_request_for_quotation(
-        USERS["manager"], PROJECT_CODE, [f"{mr}:{mr_item}"], ["SUP-TEST-A", "SUP-TEST-B"],
+        USERS["manager"], PROJECT_CODE, [f"{mr}:{mr_item}"], [SUPPLIERS["a"], SUPPLIERS["b"]],
         schedule_date=schedule_date,
         message_for_supplier="采购闭环自动验收，请按测试价格报价。",
     )
@@ -126,7 +130,7 @@ def run(service: AgentWorkbenchService) -> dict[str, Any]:
     rfq_item = str(rfq_doc["items"][0]["name"])
 
     sq_a_payload = service.create_supplier_quotation(
-        USERS["manager"], PROJECT_CODE, rfq, "SUP-TEST-A",
+        USERS["manager"], PROJECT_CODE, rfq, SUPPLIERS["a"],
         [{"request_for_quotation_item": rfq_item, "rate": 29.4, "schedule_date": schedule_date}],
         valid_till=valid_till,
         terms="月结30天；采购闭环自动验收。",
@@ -136,7 +140,7 @@ def run(service: AgentWorkbenchService) -> dict[str, Any]:
     service.submit_document(USERS["manager"], "Supplier Quotation", sq_a, project=PROJECT_CODE)
 
     sq_payload = service.create_supplier_quotation(
-        USERS["manager"], PROJECT_CODE, rfq, "SUP-TEST-B",
+        USERS["manager"], PROJECT_CODE, rfq, SUPPLIERS["b"],
         [{"request_for_quotation_item": rfq_item, "rate": 26.8, "schedule_date": schedule_date}],
         valid_till=valid_till,
         terms="货到付款；采购闭环自动验收。",
