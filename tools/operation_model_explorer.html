@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>字段槽位与操作模型</title>
+    <link rel="stylesheet" href="/workbench-assets/operation-model.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">N</span><span><strong>字段槽位与操作模型</strong><small>Agent Runtime v0.4 实验</small></span></div>
+      <nav><a href="/agent-runtime">运行剖面</a><a href="/">返回工作台</a></nav>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div><span class="eyebrow">纵向样板 01</span><h1>新建材料申请，不再是一整坨 JSON</h1><p>操作模板引用可复用字段槽位；Runtime 按来源填值、检查缺失，再确定性编译底层 ToolCall。</p></div>
+        <div class="flow" aria-label="操作模型关系">
+          <span>业务能力</span><b>→</b><span>操作模板</span><b>→</b><span>字段槽位</span><b>→</b><span>ToolCall</span>
+        </div>
+      </section>
+
+      <section class="model-grid">
+        <aside class="editor">
+          <div class="section-title"><span class="eyebrow">输入事实</span><h2>模拟员工与 Resolver 已知信息</h2></div>
+          <label>公司<input id="company" /></label>
+          <label>项目主键<input id="project" /></label>
+          <label>目标仓库<input id="warehouse" /></label>
+          <label>需求日期<input id="scheduleDate" type="date" /></label>
+          <div class="item-fields">
+            <h3>物料明细 #1</h3>
+            <label>物料编码<input id="itemCode" /></label>
+            <label>数量<input id="qty" type="number" min="0" step="0.01" /></label>
+            <label>单位<input id="uom" /></label>
+          </div>
+          <button id="compile" class="primary">重新编译</button>
+          <button id="clearResolver">清空 Resolver 字段</button>
+        </aside>
+
+        <section class="slots-panel">
+          <div class="section-title"><span class="eyebrow">operation_slot</span><h2 id="operationTitle">正在加载操作模板</h2></div>
+          <div class="summary" id="summary"></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>序号</th><th>字段槽位</th><th>来源</th><th>目标字段</th><th>当前值</th><th>状态</th></tr></thead>
+              <tbody id="slotRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <aside class="output-panel">
+          <div class="section-title"><span class="eyebrow">确定性输出</span><h2>ToolCall 预览</h2></div>
+          <div id="readiness" class="readiness"></div>
+          <pre id="toolCall"></pre>
+          <details><summary>查看关系表原始记录</summary><pre id="relations"></pre></details>
+        </aside>
+      </section>
+
+      <section class="rules-band">
+        <div class="section-title"><span class="eyebrow">operation_rule</span><h2>这个操作必须满足的业务不变量</h2></div>
+        <div id="rules" class="rules"></div>
+      </section>
+    </main>
+    <script src="/workbench-assets/operation-model.js" defer></script>
+  </body>
+</html>

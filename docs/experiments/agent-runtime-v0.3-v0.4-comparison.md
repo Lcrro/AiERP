@@ -106,3 +106,12 @@ Token 用量
 - 可以改变会话状态结构和模型交互协议。
 - 不允许削弱身份、权限、写入确认、幂等和 ERPNext 回读验证。
 - 新方案未胜出前，v0.3 存档始终保留为可运行回退版本。
+
+## v0.4 实验 01：字段槽位与操作模板
+
+第一项实验不替换现有 Runtime，只验证把复杂 ToolCall 拆成关系化字段槽位是否能降低参数编排复杂度。
+
+- 说明文档：[字段槽位与操作模板模型](../architecture/field-slot-operation-model.md)
+- 可视化页面：`http://127.0.0.1:8788/operation-model`
+- 首个样板：`op.material_request.create`
+- 验证重点：字段来源、缺失定位、派生字段、规则校验和确定性 ToolCall 编译。

@@ -38,6 +38,17 @@ def test_runtime_explorer_is_served_from_a_separate_auditable_page() -> None:
     assert "renderDiagnosis" in script
 
 
+def test_operation_model_explorer_shows_relational_slot_prototype() -> None:
+    html = MODULE.OPERATION_MODEL_PATH.read_text(encoding="utf-8")
+    script = (MODULE.ASSET_DIR / "operation-model.js").read_text(encoding="utf-8")
+
+    assert "字段槽位与操作模型" in html
+    assert 'id="slotRows"' in html
+    assert 'id="toolCall"' in html
+    assert "/api/operation-model/material-request" in script
+    assert "/api/operation-model/compile" in script
+
+
 def test_result_document_links_build_internal_workbench_route() -> None:
     result = {
         "tool_result": {"data": {"doctype": "Material Request", "name": "MAT-MR-2026-00001"}},

@@ -1,0 +1,66 @@
+:root {
+  color-scheme: light;
+  font-family: "Microsoft YaHei UI", "Segoe UI", sans-serif;
+  color: #18232f;
+  background: #f4f7f8;
+  letter-spacing: 0;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 1120px; }
+.topbar { height: 64px; padding: 0 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #d8e0e4; background: #fff; }
+.brand { display: flex; gap: 12px; align-items: center; }
+.brand span:last-child { display: grid; }
+.brand small { color: #6d7b86; margin-top: 2px; }
+.brand-mark { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 6px; color: #fff; background: #152433; font-weight: 700; }
+nav { display: flex; gap: 18px; }
+a { color: #08765b; text-decoration: none; }
+main { padding: 28px; }
+.intro { display: flex; justify-content: space-between; align-items: end; gap: 32px; padding-bottom: 24px; border-bottom: 1px solid #d5dfe3; }
+.intro h1 { margin: 6px 0 8px; font-size: 30px; }
+.intro p { margin: 0; color: #5e6e79; }
+.eyebrow { color: #08765b; font-size: 12px; font-weight: 700; }
+.flow { display: flex; gap: 10px; align-items: center; white-space: nowrap; }
+.flow span { padding: 10px 12px; border: 1px solid #bfcdd2; background: #fff; border-radius: 6px; font-weight: 600; }
+.flow b { color: #86959f; }
+.model-grid { display: grid; grid-template-columns: 280px minmax(620px, 1fr) 390px; min-height: 620px; border-bottom: 1px solid #d5dfe3; }
+.editor, .slots-panel, .output-panel { padding: 24px; }
+.editor { border-right: 1px solid #d5dfe3; background: #fff; }
+.output-panel { border-left: 1px solid #d5dfe3; background: #edf2f4; }
+.section-title h2 { margin: 5px 0 20px; font-size: 18px; }
+label { display: grid; gap: 6px; margin-bottom: 14px; font-size: 13px; color: #50606b; }
+input { width: 100%; min-height: 38px; padding: 8px 10px; border: 1px solid #bdc9ce; border-radius: 5px; font: inherit; background: #fff; }
+.item-fields { margin: 20px -24px; padding: 18px 24px; border-top: 1px solid #dde4e7; border-bottom: 1px solid #dde4e7; background: #f7f9fa; }
+.item-fields h3 { margin: 0 0 14px; font-size: 14px; }
+button { min-height: 38px; padding: 0 14px; border: 1px solid #b9c7cc; border-radius: 5px; background: #fff; cursor: pointer; margin-right: 6px; }
+button.primary { border-color: #08765b; color: #fff; background: #08765b; }
+button:disabled { opacity: .55; cursor: wait; }
+.summary { display: flex; gap: 12px; margin-bottom: 16px; }
+.summary span { padding: 8px 10px; background: #e9eff1; border-radius: 5px; color: #52636d; }
+.summary b { color: #162633; }
+.table-wrap { overflow: auto; max-height: 570px; border-top: 1px solid #ccd7db; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { position: sticky; top: 0; z-index: 1; text-align: left; padding: 11px 9px; background: #e6edef; color: #51616b; }
+td { padding: 11px 9px; border-bottom: 1px solid #dbe3e6; vertical-align: top; }
+td small { display: block; margin-top: 4px; color: #75858e; }
+td code { color: #38505e; }
+tr.missing { background: #fff9ed; }
+tr.invalid { background: #fff1f0; }
+tr.blocked { background: #f2f5f6; color: #697983; }
+.status { display: inline-block; padding: 3px 7px; border-radius: 10px; font-size: 12px; }
+.status.resolved { color: #17633f; background: #dff4e8; }
+.status.missing { color: #8a5a00; background: #ffedbd; }
+.status.invalid { color: #a32d28; background: #ffdeda; }
+.status.blocked { color: #536873; background: #dfe7ea; }
+.readiness { display: grid; gap: 4px; padding: 13px; margin-bottom: 14px; border-left: 4px solid; background: #fff; }
+.readiness.ready { border-color: #13805f; }
+.readiness.blocked { border-color: #d08816; }
+.readiness span { color: #657680; font-size: 13px; }
+pre { margin: 0; padding: 15px; overflow: auto; max-height: 480px; border: 1px solid #ccd8dc; border-radius: 5px; background: #fff; font: 12px/1.55 Consolas, monospace; white-space: pre-wrap; word-break: break-word; }
+details { margin-top: 16px; }
+summary { cursor: pointer; color: #52636d; margin-bottom: 10px; }
+.rules-band { padding: 24px 0; }
+.rules { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: #ced8dc; border: 1px solid #ced8dc; }
+.rules article { min-height: 112px; padding: 16px; background: #fff; display: grid; align-content: start; gap: 8px; }
+.rules code { color: #08765b; font-size: 12px; }
+.rules span { color: #657680; font-size: 13px; }

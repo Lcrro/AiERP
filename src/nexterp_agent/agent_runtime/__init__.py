@@ -21,6 +21,7 @@ from .civil_runtime import CivilAgentRuntime, LegacyCivilAgentRuntime, RuntimeTu
 from .deepseek_agent_runtime import DeepSeekAgentRuntime, DeepSeekTurnResult
 from .resolvers import EntityResolverRegistry, ResolutionResult
 from .session import RuntimeSessionState, RuntimeSessionStore
+from .operation_catalog import MaterialRequestOperationCatalog, OperationEvaluation
 
 __all__ = [
     "DeepSeekSettings",
@@ -30,6 +31,8 @@ __all__ = [
     "LegacyCivilAgentRuntime",
     "EntityResolverRegistry",
     "MaterialRequestRuntimeConfig",
+    "MaterialRequestOperationCatalog",
+    "OperationEvaluation",
     "ToolAccessPolicy",
     "ToolContract",
     "ToolExposure",

@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[3]
 
 from nexterp_agent.agent_runtime.civil_runtime import CivilAgentRuntime
 from nexterp_agent.agent_runtime.credentials import load_user_credentials
+from nexterp_agent.agent_runtime.operation_catalog import MaterialRequestOperationCatalog
 from nexterp_agent.agent_runtime.session import RuntimeSessionStore
 from nexterp_agent.erpnext.adapter import ERPNextAdapter
 from nexterp_agent.erpnext.client import ERPNextClient
@@ -26,6 +27,7 @@ from nexterp_agent.master_data import MasterDataRelease
 
 HTML_PATH = ROOT / "tools" / "agent_workbench.html"
 RUNTIME_EXPLORER_PATH = ROOT / "tools" / "agent_runtime_explorer.html"
+OPERATION_MODEL_PATH = ROOT / "tools" / "operation_model_explorer.html"
 ASSET_DIR = ROOT / "tools" / "workbench"
 ASSET_TYPES = {".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8"}
 DOCTYPE_ROUTES = {
@@ -1734,6 +1736,9 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
         if parsed.path in {"/agent-runtime", "/agent-runtime/"}:
             html_response(self, RUNTIME_EXPLORER_PATH.read_text(encoding="utf-8"))
             return
+        if parsed.path in {"/operation-model", "/operation-model/"}:
+            html_response(self, OPERATION_MODEL_PATH.read_text(encoding="utf-8"))
+            return
         if parsed.path == "/favicon.ico":
             self.send_response(HTTPStatus.NO_CONTENT)
             self.end_headers()
@@ -1746,6 +1751,9 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
             return
         if parsed.path == "/api/workbench/bootstrap":
             json_response(self, {"ok": True, **self.server.service.bootstrap()})  # type: ignore[attr-defined]
+            return
+        if parsed.path == "/api/operation-model/material-request":
+            json_response(self, {"ok": True, **MaterialRequestOperationCatalog().demo()})
             return
         if parsed.path == "/api/session":
             query = parse_qs(parsed.query)
@@ -1812,6 +1820,11 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         try:
+            if self.path == "/api/operation-model/compile":
+                request = read_json(self)
+                evaluation = MaterialRequestOperationCatalog().evaluate(request)
+                json_response(self, {"ok": True, "evaluation": evaluation.model_dump(mode="json")})
+                return
             if self.path == "/api/session/reset":
                 request = read_json(self)
                 payload = self.server.service.reset_session(  # type: ignore[attr-defined]
