@@ -8,6 +8,7 @@ architecture  系统架构、模块关系和长期路线
 reference     稳定事实，例如 API、schema、ToolCall、规则
 planning      分版本计划、开发清单和验收标准
 operations    本地运行、验证、维护和排障
+experiments   冻结基线、对照实验和方案比较
 ```
 
 目标是让每个文档只回答一类问题，避免所有内容混在一起。
@@ -26,6 +27,7 @@ operations    本地运行、验证、维护和排障
 - [Agent Runtime 可靠性 v0.6](planning/agent-runtime-reliability-v0.6.md)：业务能力图、确定性编译、确认绑定和执行后回读。
 - [基础主数据标准](reference/master-data-standard.md)：公司、组织、员工、项目、仓库、供应商等非物料主数据口径。
 - [Capability Skill 清单](reference/capability-skill-catalog.md)：20 项按需业务能力、读写边界和稳定性基准入口。
+- [Agent Runtime v0.3 / v0.4 对照实验](experiments/agent-runtime-v0.3-v0.4-comparison.md)：冻结旧 Agent，并用统一场景和指标比较新方案。
 
 ## 架构
 
@@ -62,6 +64,12 @@ operations    本地运行、验证、维护和排障
 - [物料目录 PostgreSQL 运行说明](operations/material-catalog-postgres.md)
 
 运行文档回答“本地系统怎么启动、怎么验证、怎么维护”。
+
+## 对照实验
+
+- [Agent Runtime v0.3 / v0.4 对照实验](experiments/agent-runtime-v0.3-v0.4-comparison.md)
+
+实验文档记录冻结版本、固定测试集、量化指标和人工盲评口径，避免不同方案只凭印象比较。
 
 ## 参考
 
