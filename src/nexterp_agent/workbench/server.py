@@ -25,6 +25,7 @@ from nexterp_agent.master_data import MasterDataRelease
 
 
 HTML_PATH = ROOT / "tools" / "agent_workbench.html"
+RUNTIME_EXPLORER_PATH = ROOT / "tools" / "agent_runtime_explorer.html"
 ASSET_DIR = ROOT / "tools" / "workbench"
 ASSET_TYPES = {".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8"}
 DOCTYPE_ROUTES = {
@@ -1730,6 +1731,9 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
         if parsed.path == "/":
             html_response(self, HTML_PATH.read_text(encoding="utf-8"))
             return
+        if parsed.path in {"/agent-runtime", "/agent-runtime/"}:
+            html_response(self, RUNTIME_EXPLORER_PATH.read_text(encoding="utf-8"))
+            return
         if parsed.path == "/favicon.ico":
             self.send_response(HTTPStatus.NO_CONTENT)
             self.end_headers()
@@ -1976,6 +1980,8 @@ def main() -> int:
     load_dotenv(args.env_file)
     if not HTML_PATH.exists():
         raise FileNotFoundError(HTML_PATH)
+    if not RUNTIME_EXPLORER_PATH.exists():
+        raise FileNotFoundError(RUNTIME_EXPLORER_PATH)
     server = build_server(args.host, args.port, args.profile)
     print(f"Employee Agent workbench: http://{args.host}:{args.port}/", flush=True)
     try:

@@ -25,6 +25,19 @@ def test_employee_catalog_does_not_expose_credentials() -> None:
     assert {employee["employee_name"] for employee in employees} >= {"张振光", "潘丰", "毛晓泉", "胡银虎", "方文倩"}
 
 
+def test_runtime_explorer_is_served_from_a_separate_auditable_page() -> None:
+    html = MODULE.RUNTIME_EXPLORER_PATH.read_text(encoding="utf-8")
+    script = (MODULE.ASSET_DIR / "runtime-explorer.js").read_text(encoding="utf-8")
+
+    assert "Agent 运行剖面" in html
+    assert 'id="flowMap"' in html
+    assert 'id="traceTimeline"' in html
+    assert 'id="diagnosis"' in html
+    assert "/api/session?" in script
+    assert "不包含模型隐藏思维过程" in script
+    assert "renderDiagnosis" in script
+
+
 def test_result_document_links_build_internal_workbench_route() -> None:
     result = {
         "tool_result": {"data": {"doctype": "Material Request", "name": "MAT-MR-2026-00001"}},

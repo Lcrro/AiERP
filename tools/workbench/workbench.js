@@ -15,6 +15,15 @@
         const key = conversationKey();
         state.conversationId = localStorage.getItem(key) || crypto.randomUUID();
         localStorage.setItem(key, state.conversationId);
+        const runtimeLink = $("runtimeExplorerLink");
+        if (runtimeLink && state.user && state.project) {
+          const query = new URLSearchParams({
+            user: state.user.user_email,
+            project: state.project.project_code,
+            conversation_id: state.conversationId,
+          });
+          runtimeLink.href = `/agent-runtime?${query}`;
+        }
         return state.conversationId;
       };
       const FIELD_LABELS = {

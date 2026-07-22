@@ -5,6 +5,8 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .playwright-mcp/
+.playwright-cli/
+output/playwright/
 .codex-remote-attachments/
 .codegraph/
 .mypy_cache/

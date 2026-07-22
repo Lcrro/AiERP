@@ -38,6 +38,8 @@
       .health { color: var(--muted); font-size: 12px; }
       .health::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 7px; border-radius: 50%; background: #98a2aa; }
       .health.ok::before { background: var(--accent); }
+      .runtime-link { min-height: 34px; display: inline-flex; align-items: center; padding: 0 10px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--muted); font-size: 11px; text-decoration: none; }
+      .runtime-link:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
       .dev-toggle { min-height: 34px; padding: 0 10px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--muted); font-size: 11px; }
       .dev-toggle.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
       .mobile-toggle { display: none; min-height: 34px; padding: 0 10px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); }

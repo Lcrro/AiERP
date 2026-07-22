@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>Agent 运行剖面</title>
+    <link rel="stylesheet" href="/workbench-assets/runtime-explorer.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">N</span><span><strong>Agent 运行剖面</strong><small>看清一次请求如何从人话走到 ERPNext</small></span></div>
+      <div class="top-actions"><a href="/">返回工作台</a><span id="health" class="health">正在连接</span></div>
+    </header>
+
+    <main class="page">
+      <section class="overview-band">
+        <div class="overview-copy">
+          <span class="eyebrow">当前架构</span>
+          <h1>模型负责理解，程序负责把事情做对</h1>
+          <p>点击链路节点查看职责；选择员工后可加载最近一次真实 Agent 轨迹。这里展示可审计动作，不展示模型隐藏思维。</p>
+        </div>
+        <div class="overview-metrics">
+          <div><span>业务能力</span><strong>20</strong></div>
+          <div><span>底层工具</span><strong>160</strong></div>
+          <div><span>最大规划步数</span><strong>10</strong></div>
+          <div><span>写入策略</span><strong>确认后执行</strong></div>
+        </div>
+      </section>
+
+      <section class="flow-section">
+        <div class="section-head"><div><span class="eyebrow">系统地图</span><h2>一次请求经过哪些层</h2></div><span class="legend"><i class="model"></i>模型决策 <i class="runtime"></i>确定性程序 <i class="erp"></i>ERPNext</span></div>
+        <div id="flowMap" class="flow-map"></div>
+        <div id="layerDetail" class="layer-detail"></div>
+      </section>
+
+      <section class="inspection-grid">
+        <aside class="context-panel">
+          <div class="panel-head"><div><span class="eyebrow">观察范围</span><h2>选择真实会话</h2></div></div>
+          <label>项目<select id="projectSelect"></select></label>
+          <label>员工<select id="employeeSelect"></select></label>
+          <label>会话 ID<input id="conversationId" placeholder="自动读取当前工作台会话" /></label>
+          <div class="button-row"><button id="loadTrace" class="primary">读取最近一轮</button><button id="useSample">查看示例</button></div>
+          <div id="sessionMeta" class="session-meta"></div>
+          <div class="explain-box"><strong>为什么需要会话 ID？</strong><span>同一员工在不同项目和不同对话中的实体、单号与待确认动作相互隔离，避免旧上下文污染。</span></div>
+        </aside>
+
+        <section class="trace-panel">
+          <div class="panel-head"><div><span class="eyebrow">真实轨迹</span><h2 id="traceTitle">尚未读取会话</h2></div><span id="traceStatus" class="status">等待</span></div>
+          <div id="traceSummary" class="trace-summary"></div>
+          <div id="traceTimeline" class="timeline"><div class="empty">选择项目和员工，然后读取最近一轮。</div></div>
+        </section>
+
+        <aside class="diagnosis-panel">
+          <div class="panel-head"><div><span class="eyebrow">体验诊断</span><h2>哪里可能显得笨拙</h2></div></div>
+          <div id="diagnosis" class="diagnosis"></div>
+          <div class="boundary">
+            <strong>三条关键边界</strong>
+            <p><b>DeepSeek：</b>理解目标、提取信息、比较候选、组织回复。</p>
+            <p><b>Runtime：</b>约束流程、解析真实主键、编译参数、预检和防重复。</p>
+            <p><b>ERPNext：</b>最终权限、库存、工作流、会计与单据事实。</p>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <dialog id="stepDialog">
+      <div class="dialog-head"><div><span id="dialogKind" class="eyebrow"></span><h2 id="dialogTitle"></h2></div><button id="dialogClose" aria-label="关闭">×</button></div>
+      <div id="dialogBody" class="dialog-body"></div>
+    </dialog>
+    <script src="/workbench-assets/runtime-explorer.js" defer></script>
+  </body>
+</html>

@@ -10,6 +10,7 @@
 | `material_master_browser.html` | 按 `类目 -> 物料族 -> 物料名称 -> SKU` 四级查看物料主数据，默认读取发布版 v0.3。 |
 | `project_module_map.html` | 用圆形节点和连线查看 Runtime、ToolCall、ERPNext、物料主数据和工程治理之间的关系。 |
 | `agent_workbench.html` | 用真实员工身份预览和执行自然语言 Agent；后端默认运行在 `http://127.0.0.1:8788/`。 |
+| `agent_runtime_explorer.html` | 查看 Agent 八层运行架构、真实会话步骤和体验诊断；通过 `http://127.0.0.1:8788/agent-runtime` 访问。 |
 
 规则：
 
