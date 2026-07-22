@@ -29,7 +29,11 @@ main { padding: 28px; }
 .output-panel { border-left: 1px solid #d5dfe3; background: #edf2f4; }
 .section-title h2 { margin: 5px 0 20px; font-size: 18px; }
 label { display: grid; gap: 6px; margin-bottom: 14px; font-size: 13px; color: #50606b; }
-input { width: 100%; min-height: 38px; padding: 8px 10px; border: 1px solid #bdc9ce; border-radius: 5px; font: inherit; background: #fff; }
+input, select { width: 100%; min-height: 38px; padding: 8px 10px; border: 1px solid #bdc9ce; border-radius: 5px; font: inherit; background: #fff; }
+input[readonly] { color: #53636d; background: #edf2f4; }
+label > small { color: #788891; line-height: 1.45; }
+.search-row { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
+.search-row button { margin: 0; }
 .item-fields { margin: 20px -24px; padding: 18px 24px; border-top: 1px solid #dde4e7; border-bottom: 1px solid #dde4e7; background: #f7f9fa; }
 .item-fields h3 { margin: 0 0 14px; font-size: 14px; }
 button { min-height: 38px; padding: 0 14px; border: 1px solid #b9c7cc; border-radius: 5px; background: #fff; cursor: pointer; margin-right: 6px; }

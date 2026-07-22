@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from nexterp_agent.agent_runtime.operation_catalog import (
     MaterialRequestOperationCatalog,
+    SlotControl,
     SlotSource,
     SlotStatus,
 )
@@ -58,7 +59,12 @@ def test_complete_material_request_facts_compile_exact_tool_call() -> None:
     }
     by_id = {slot.slot_id: slot for slot in evaluation.slots}
     assert by_id["slot.item_code"].source == SlotSource.RESOLVER
+    assert by_id["slot.item_code"].control == SlotControl.SEARCH_SELECT
+    assert by_id["slot.item_code"].lookup_doctype == "Item"
+    assert by_id["slot.company"].editable is False
+    assert by_id["slot.project"].editable is True
     assert by_id["slot.item_project"].source == SlotSource.DERIVED
+    assert by_id["slot.item_project"].control == SlotControl.DERIVED
     assert by_id["slot.material_request_type"].source == SlotSource.FIXED
 
 

@@ -45,7 +45,10 @@ def test_operation_model_explorer_shows_relational_slot_prototype() -> None:
     assert "字段槽位与操作模型" in html
     assert 'id="slotRows"' in html
     assert 'id="toolCall"' in html
+    assert 'id="project"></select>' in html
+    assert 'id="itemSearch"' in html
     assert "/api/operation-model/material-request" in script
+    assert "/api/operation-model/options" in script
     assert "/api/operation-model/compile" in script
 
 

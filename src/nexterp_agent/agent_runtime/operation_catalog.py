@@ -32,6 +32,16 @@ class SlotStatus(StrEnum):
     NOT_APPLICABLE = "not_applicable"
 
 
+class SlotControl(StrEnum):
+    READ_ONLY = "read_only"
+    SELECT = "select"
+    SEARCH_SELECT = "search_select"
+    DATE = "date"
+    NUMBER = "number"
+    DERIVED = "derived"
+    FIXED = "fixed"
+
+
 class InformationSlot(BaseModel):
     """A reusable business fact, independent from any one ERPNext operation."""
 
@@ -67,6 +77,11 @@ class OperationSlotBinding(BaseModel):
     scope: SlotScope
     target_path: str = Field(min_length=1)
     source: SlotSource
+    control: SlotControl
+    editable: bool = False
+    lookup_doctype: str | None = None
+    format_hint: str | None = None
+    default_strategy: str | None = None
     source_path: str | None = None
     required: bool = True
     resolver: str | None = None
@@ -94,6 +109,11 @@ class SlotEvaluation(BaseModel):
     scope: SlotScope
     target_path: str
     source: SlotSource
+    control: SlotControl
+    editable: bool
+    lookup_doctype: str | None = None
+    format_hint: str | None = None
+    default_strategy: str | None = None
     required: bool
     status: SlotStatus
     value: Any = None
@@ -139,17 +159,17 @@ INFORMATION_SLOTS = (
 
 
 MATERIAL_REQUEST_BINDINGS = (
-    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.company", position=1, scope=SlotScope.DOCUMENT, target_path="arguments.company", source=SlotSource.RUNTIME_CONTEXT, source_path="context.company", constraint="必须是当前员工可访问的 Company"),
-    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.project", position=2, scope=SlotScope.DOCUMENT, target_path="context.erpnext_project", source=SlotSource.RUNTIME_CONTEXT, source_path="context.erpnext_project", resolver="project", constraint="必须来自当前项目上下文或 Project Resolver"),
-    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.warehouse", position=3, scope=SlotScope.DOCUMENT, target_path="context.warehouse", source=SlotSource.RUNTIME_CONTEXT, source_path="context.warehouse", resolver="warehouse", constraint="必须是 ERPNext Warehouse Link"),
-    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.need_by_date", position=4, scope=SlotScope.DOCUMENT, target_path="arguments.schedule_date", source=SlotSource.USER_INPUT, source_path="user.schedule_date", resolver="date", constraint="ISO 日期 YYYY-MM-DD"),
-    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.item_code", position=5, scope=SlotScope.ITEM, target_path="arguments.items[].item_code", source=SlotSource.RESOLVER, source_path="items[].item_code", resolver="item", constraint="禁止模型编造，必须存在于 Item"),
-    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.quantity", position=6, scope=SlotScope.ITEM, target_path="arguments.items[].qty", source=SlotSource.USER_INPUT, source_path="items[].qty", constraint="number > 0"),
-    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.uom", position=7, scope=SlotScope.ITEM, target_path="arguments.items[].uom", source=SlotSource.USER_CHOICE, source_path="items[].uom", resolver="uom", constraint="必须是物料允许的 UOM"),
-    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.item_project", position=8, scope=SlotScope.ITEM, target_path="arguments.items[].project", source=SlotSource.DERIVED, derived_from="slot.project"),
-    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.item_warehouse", position=9, scope=SlotScope.ITEM, target_path="arguments.items[].warehouse", source=SlotSource.DERIVED, derived_from="slot.warehouse"),
-    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.item_need_by_date", position=10, scope=SlotScope.ITEM, target_path="arguments.items[].schedule_date", source=SlotSource.DERIVED, derived_from="slot.need_by_date"),
-    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.material_request_type", position=11, scope=SlotScope.DOCUMENT, target_path="arguments.material_request_type", source=SlotSource.FIXED, fixed_value="Purchase", constraint="enum: Purchase"),
+    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.company", position=1, scope=SlotScope.DOCUMENT, target_path="arguments.company", source=SlotSource.RUNTIME_CONTEXT, control=SlotControl.READ_ONLY, lookup_doctype="Company", source_path="context.company", default_strategy="当前登录身份所属公司", constraint="必须是当前员工可访问的 Company"),
+    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.project", position=2, scope=SlotScope.DOCUMENT, target_path="context.erpnext_project", source=SlotSource.RUNTIME_CONTEXT, control=SlotControl.SELECT, editable=True, lookup_doctype="Project", source_path="context.erpnext_project", resolver="project", default_strategy="当前工作台项目", constraint="只能从当前员工可访问的 Project 中选择"),
+    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.warehouse", position=3, scope=SlotScope.DOCUMENT, target_path="context.warehouse", source=SlotSource.RUNTIME_CONTEXT, control=SlotControl.SELECT, editable=True, lookup_doctype="Warehouse", source_path="context.warehouse", resolver="warehouse", default_strategy="所选项目的默认仓库", constraint="只能选择所选项目可用的 Warehouse"),
+    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.need_by_date", position=4, scope=SlotScope.DOCUMENT, target_path="arguments.schedule_date", source=SlotSource.USER_INPUT, control=SlotControl.DATE, editable=True, source_path="user.schedule_date", resolver="date", format_hint="YYYY-MM-DD", constraint="ISO 日期 YYYY-MM-DD"),
+    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.item_code", position=5, scope=SlotScope.ITEM, target_path="arguments.items[].item_code", source=SlotSource.RESOLVER, control=SlotControl.SEARCH_SELECT, editable=True, lookup_doctype="Item", source_path="items[].item_code", resolver="item", default_strategy="物料检索唯一命中时自动选择", constraint="禁止模型编造，必须存在于 Item"),
+    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.quantity", position=6, scope=SlotScope.ITEM, target_path="arguments.items[].qty", source=SlotSource.USER_INPUT, control=SlotControl.NUMBER, editable=True, source_path="items[].qty", format_hint="大于 0，最多 3 位小数", constraint="number > 0"),
+    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.uom", position=7, scope=SlotScope.ITEM, target_path="arguments.items[].uom", source=SlotSource.USER_CHOICE, control=SlotControl.SELECT, editable=True, lookup_doctype="UOM", source_path="items[].uom", resolver="uom", default_strategy="所选物料的库存单位", constraint="必须是物料允许的 UOM"),
+    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.item_project", position=8, scope=SlotScope.ITEM, target_path="arguments.items[].project", source=SlotSource.DERIVED, control=SlotControl.DERIVED, derived_from="slot.project", default_strategy="继承单据项目"),
+    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.item_warehouse", position=9, scope=SlotScope.ITEM, target_path="arguments.items[].warehouse", source=SlotSource.DERIVED, control=SlotControl.DERIVED, derived_from="slot.warehouse", default_strategy="继承单据仓库"),
+    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.item_need_by_date", position=10, scope=SlotScope.ITEM, target_path="arguments.items[].schedule_date", source=SlotSource.DERIVED, control=SlotControl.DERIVED, derived_from="slot.need_by_date", default_strategy="继承单据需求日期"),
+    OperationSlotBinding(operation_id=MATERIAL_REQUEST_OPERATION.operation_id, slot_id="slot.material_request_type", position=11, scope=SlotScope.DOCUMENT, target_path="arguments.material_request_type", source=SlotSource.FIXED, control=SlotControl.FIXED, fixed_value="Purchase", default_strategy="操作模板固定值", constraint="enum: Purchase"),
 )
 
 
@@ -253,6 +273,11 @@ class MaterialRequestOperationCatalog:
             scope=binding.scope,
             target_path=binding.target_path,
             source=binding.source,
+            control=binding.control,
+            editable=binding.editable,
+            lookup_doctype=binding.lookup_doctype,
+            format_hint=binding.format_hint,
+            default_strategy=binding.default_strategy,
             required=binding.required,
             status=status,
             value=None if binding.scope == SlotScope.ITEM else raw,

@@ -23,16 +23,17 @@
 
       <section class="model-grid">
         <aside class="editor">
-          <div class="section-title"><span class="eyebrow">输入事实</span><h2>模拟员工与 Resolver 已知信息</h2></div>
-          <label>公司<input id="company" /></label>
-          <label>项目主键<input id="project" /></label>
-          <label>目标仓库<input id="warehouse" /></label>
-          <label>需求日期<input id="scheduleDate" type="date" /></label>
+          <div class="section-title"><span class="eyebrow">输入事实</span><h2>按真实字段来源填写</h2></div>
+          <label>公司<input id="company" readonly /><small>登录身份自动带出，不允许自由填写</small></label>
+          <label>项目<select id="project"></select><small>从员工有权限的 Project 中选择</small></label>
+          <label>目标仓库<select id="warehouse"></select><small>随项目联动，只显示相关 Warehouse</small></label>
+          <label>需求日期<input id="scheduleDate" type="date" /><small>员工表达经日期解析后写入 YYYY-MM-DD</small></label>
           <div class="item-fields">
             <h3>物料明细 #1</h3>
-            <label>物料编码<input id="itemCode" /></label>
-            <label>数量<input id="qty" type="number" min="0" step="0.01" /></label>
-            <label>单位<input id="uom" /></label>
+            <label>查找物料<div class="search-row"><input id="itemSearch" placeholder="输入名称、规格或编码" /><button id="searchItem" type="button">查找</button></div></label>
+            <label>标准物料<select id="itemCode"></select><small id="itemMeta">必须选择 Item 表中的真实编码</small></label>
+            <label>数量<input id="qty" type="number" min="0.001" step="0.001" /><small>必须大于 0，最多 3 位小数</small></label>
+            <label>单位<select id="uom"></select><small>从该物料允许的 UOM 中选择</small></label>
           </div>
           <button id="compile" class="primary">重新编译</button>
           <button id="clearResolver">清空 Resolver 字段</button>
@@ -43,7 +44,7 @@
           <div class="summary" id="summary"></div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>序号</th><th>字段槽位</th><th>来源</th><th>目标字段</th><th>当前值</th><th>状态</th></tr></thead>
+              <thead><tr><th>序号</th><th>字段槽位</th><th>来源</th><th>交互</th><th>目标字段</th><th>当前值</th><th>状态</th></tr></thead>
               <tbody id="slotRows"></tbody>
             </table>
           </div>

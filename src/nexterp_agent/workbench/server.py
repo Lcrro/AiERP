@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[3]
 from nexterp_agent.agent_runtime.civil_runtime import CivilAgentRuntime
 from nexterp_agent.agent_runtime.credentials import load_user_credentials
 from nexterp_agent.agent_runtime.operation_catalog import MaterialRequestOperationCatalog
+from nexterp_agent.agent_runtime.operation_reference_data import OperationReferenceDataCatalog
 from nexterp_agent.agent_runtime.session import RuntimeSessionStore
 from nexterp_agent.erpnext.adapter import ERPNextAdapter
 from nexterp_agent.erpnext.client import ERPNextClient
@@ -1754,6 +1755,16 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
             return
         if parsed.path == "/api/operation-model/material-request":
             json_response(self, {"ok": True, **MaterialRequestOperationCatalog().demo()})
+            return
+        if parsed.path == "/api/operation-model/options":
+            query = parse_qs(parsed.query)
+            options = OperationReferenceDataCatalog(ROOT).options(
+                (query.get("entity") or [""])[0],
+                query=(query.get("q") or [""])[0],
+                project=(query.get("project") or [""])[0],
+                item_code=(query.get("item_code") or [""])[0],
+            )
+            json_response(self, {"ok": True, "options": options})
             return
         if parsed.path == "/api/session":
             query = parse_qs(parsed.query)
