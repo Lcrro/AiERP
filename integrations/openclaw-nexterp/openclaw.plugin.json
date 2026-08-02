@@ -1,0 +1,31 @@
+{
+  "id": "nexterp-capability",
+  "name": "Nexterp Capability Manual",
+  "description": "Progressively loads Nexterp capability guides and executes frozen ERPNext operations.",
+  "contracts": {
+    "tools": [
+      "nexterp_search_capabilities",
+      "nexterp_load_guide",
+      "nexterp_prepare_operation",
+      "nexterp_execute_prepared_operation"
+    ]
+  },
+  "activation": {
+    "onStartup": true
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "baseUrl": {
+        "type": "string",
+        "description": "Loopback URL of the Nexterp Capability API"
+      },
+      "requestTimeoutMs": {
+        "type": "integer",
+        "minimum": 1000,
+        "maximum": 120000
+      }
+    }
+  }
+}

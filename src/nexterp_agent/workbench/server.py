@@ -10,8 +10,10 @@ import os
 from pathlib import Path
 import re
 import sys
+import time
 from typing import Any
 from urllib.parse import parse_qs, quote, urlparse
+from uuid import uuid4
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -24,11 +26,13 @@ from nexterp_agent.agent_runtime.session import RuntimeSessionStore
 from nexterp_agent.erpnext.adapter import ERPNextAdapter
 from nexterp_agent.erpnext.client import ERPNextClient
 from nexterp_agent.master_data import MasterDataRelease
+from nexterp_agent.workbench.openclaw_compare import OpenClawPreviewRunner, summarize_existing_result
 
 
 HTML_PATH = ROOT / "tools" / "agent_workbench.html"
 RUNTIME_EXPLORER_PATH = ROOT / "tools" / "agent_runtime_explorer.html"
 OPERATION_MODEL_PATH = ROOT / "tools" / "operation_model_explorer.html"
+RUNTIME_COMPARE_PATH = ROOT / "tools" / "agent_runtime_compare.html"
 ASSET_DIR = ROOT / "tools" / "workbench"
 ASSET_TYPES = {".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8"}
 DOCTYPE_ROUTES = {
@@ -510,6 +514,7 @@ class AgentWorkbenchService:
         self.host_header = os.getenv(prefix + "HOST_HEADER")
         self.session_store = RuntimeSessionStore()
         self._project_name_cache: dict[tuple[str, str], str] = {}
+        self.openclaw_preview = OpenClawPreviewRunner(ROOT)
 
     def scoped_session_store(self, user: str, project: str = "", conversation_id: str = "default") -> RuntimeSessionStore:
         if not project and conversation_id == "default":
@@ -1722,6 +1727,74 @@ class AgentWorkbenchService:
         request.setdefault("text", "确认执行当前待处理操作。")
         return self.run(request)
 
+    def compare_runtimes(self, payload: dict[str, Any]) -> dict[str, Any]:
+        user = str(payload.get("user") or "").strip()
+        project_code = str(payload.get("project_code") or "").strip()
+        text = str(payload.get("text") or "").strip()
+        if not user or not project_code or not text:
+            raise ValueError("user、project_code 和 text 必填")
+        employee = next((row for row in employee_catalog() if row["user_email"] == user), None)
+        project = next((row for row in project_catalog() if row["project_code"] == project_code), None)
+        if not employee or not project:
+            raise ValueError("未知员工或项目")
+        if user not in {row["user_email"] for row in project.get("employees") or []}:
+            raise PermissionError("当前员工不属于所选项目")
+
+        comparison_id = uuid4().hex
+
+        def existing_preview() -> dict[str, Any]:
+            started = time.perf_counter()
+            result = self.run({
+                "user": user,
+                "project_code": project_code,
+                "text": text,
+                "execute": False,
+                "conversation_id": f"compare-existing-{comparison_id}",
+            })
+            return summarize_existing_result(result, duration_ms=round((time.perf_counter() - started) * 1000))
+
+        def openclaw_preview() -> dict[str, Any]:
+            return self.openclaw_preview.run(
+                text=text,
+                project_label=str(project.get("project_short_name") or project_code),
+                employee_name=str(employee.get("employee_name") or user),
+            )
+
+        def safe(call: Any, runtime_name: str) -> dict[str, Any]:
+            try:
+                return call()
+            except Exception as exc:
+                return {
+                    "runtime": runtime_name,
+                    "status": "failed",
+                    "message": str(exc),
+                    "duration_ms": 0,
+                    "steps": [],
+                    "questions": [],
+                    "question_count": 0,
+                    "tool_summary": {"calls": 0, "tools": [], "failures": 1},
+                }
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            old_future = executor.submit(safe, existing_preview, "existing")
+            new_future = executor.submit(safe, openclaw_preview, "openclaw_manual")
+            existing = old_future.result()
+            openclaw = new_future.result()
+        return {
+            "comparison_id": comparison_id,
+            "mode": "preview_only",
+            "notice": "两侧均只做预览；OpenClaw 对比会话在插件层禁止写入 ERPNext。",
+            "request": {
+                "text": text,
+                "project_code": project_code,
+                "project_label": project.get("project_short_name"),
+                "user": user,
+                "employee_name": employee.get("employee_name"),
+            },
+            "existing": existing,
+            "openclaw": openclaw,
+        }
+
 
 class AgentWorkbenchHandler(BaseHTTPRequestHandler):
     server_version = "NexterpAgentWorkbench/0.1"
@@ -1739,6 +1812,9 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
             return
         if parsed.path in {"/operation-model", "/operation-model/"}:
             html_response(self, OPERATION_MODEL_PATH.read_text(encoding="utf-8"))
+            return
+        if parsed.path in {"/agent-runtime-compare", "/agent-runtime-compare/"}:
+            html_response(self, RUNTIME_COMPARE_PATH.read_text(encoding="utf-8"))
             return
         if parsed.path == "/favicon.ico":
             self.send_response(HTTPStatus.NO_CONTENT)
@@ -1835,6 +1911,10 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
                 request = read_json(self)
                 evaluation = MaterialRequestOperationCatalog().evaluate(request)
                 json_response(self, {"ok": True, "evaluation": evaluation.model_dump(mode="json")})
+                return
+            if self.path == "/api/agent-runtime/compare":
+                payload = self.server.service.compare_runtimes(read_json(self))  # type: ignore[attr-defined]
+                json_response(self, {"ok": True, **payload})
                 return
             if self.path == "/api/session/reset":
                 request = read_json(self)
@@ -2006,6 +2086,8 @@ def main() -> int:
         raise FileNotFoundError(HTML_PATH)
     if not RUNTIME_EXPLORER_PATH.exists():
         raise FileNotFoundError(RUNTIME_EXPLORER_PATH)
+    if not RUNTIME_COMPARE_PATH.exists():
+        raise FileNotFoundError(RUNTIME_COMPARE_PATH)
     server = build_server(args.host, args.port, args.profile)
     print(f"Employee Agent workbench: http://{args.host}:{args.port}/", flush=True)
     try:

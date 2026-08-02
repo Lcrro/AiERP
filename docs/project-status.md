@@ -1,16 +1,16 @@
 # 项目状态
 
-更新日期：`2026-07-22`
+更新日期：`2026-08-02`
 
 ## 当前基线
 
-- 分支：`codex/civil-agent-v1.0`
+- 分支：`codex/openclaw-manual-runtime-v0.5`
 - ERPNext 开发账套：`http://localhost:8002`
 - 员工 Agent 工作台：`http://127.0.0.1:8788/`
 - Tool schema 与 Adapter handler：`160 / 160`
 - 主数据来源：`data/master_data/` 与 `data/material_master/`
 - Agent 主入口：`DeepSeekAgentRuntime`
-- 测试：`377 passed, 3 skipped`
+- 测试：Python `415 passed`；PostgreSQL 集成 `2 passed`；OpenClaw Plugin `4 passed`
 
 ## 已具备
 
@@ -66,6 +66,12 @@
 - 项目领料闭环：可从项目仓创建 Material Issue，提交后核对库存台账、项目和成本中心归集。
 - 库存闭环真实验收已完成：基地入库、调拨至项目仓、项目领料、影响核验和取消回零全部通过。
 - Civil 测试账套已建立黄金基线：保留项目、员工、仓库、物料、供应商和价格主数据，业务单据为零；支持约 34 秒一键还原并同步清空工作台会话。
+- OpenClaw 渐进式说明书 Runtime v0.5 样板已完成：隔离 Profile 和 Gateway、PostgreSQL 说明书关系图、Capability API、四个元工具、可信身份绑定、冻结确认动作与 ERPNext 回读均已接通。
+- 材料申请说明书已迁入 PostgreSQL，OpenClaw 只按需搜索能力和加载当前节点 Guide，不直接看到或拼接底层 ERPNext ToolCall。
+- 新增 A/B 对比页 `http://127.0.0.1:8788/agent-runtime-compare`；两侧默认只预览，OpenClaw 对比会话在 Plugin 和审批钩子两层禁止执行写操作。
+- OpenClaw 材料申请真实 DeepSeek 基准 `20 / 20` 通过，覆盖明确编码、相对日期、名称空格、多物料、多候选、缺数量、非法数量、未知物料和错误单位；执行调用 `0`，中位耗时 `19.58s`。
+- OpenClaw 材料申请真实写入验收通过：Control UI 显示冻结业务摘要并要求“允许一次”，批准后以材料员本人权限创建、回读 `MAT-MR-2026-00004`；项目、仓库、物料、数量、单位和需求日期全部一致，验收草稿随后已清理。
+- OpenClaw 审批边界验证通过：仅在聊天里说“确认”不会放行 Plugin 写工具，三次无审批界面的执行均超时并保持零写入。
 
 ## 数据状态
 
@@ -77,9 +83,9 @@
 
 ## 下一步
 
-1. 使用 Agent 运行剖面对高频员工任务建立体验样本，优先消除重复动作、碎片化追问和技术错误泄露，再扩展合并元动作。
-2. 增加正式登录和员工身份绑定，替换本地身份切换。
-3. 核心能力稳定后再评估 OpenClaw 外层渠道、长期偏好和主动通知。
+1. 审查材料申请样板后，按询价、供应商报价、采购订单、收货、退货的顺序迁移说明书节点，不并行铺开全部能力。
+2. 将 OpenClaw 审批卡接入未来员工工作台或正式消息渠道，避免依赖开发用 Control UI。
+3. 增加正式登录和员工身份绑定，替换本地身份切换。
 
 ## 维护规则
 

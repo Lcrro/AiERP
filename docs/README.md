@@ -39,6 +39,7 @@ experiments   冻结基线、对照实验和方案比较
 - [DeepSeek 自主规划 Runtime](architecture/deepseek-agent-runtime.md)
 - [业务能力 Runtime](architecture/business-capability-runtime.md)
 - [OpenClaw 接入边界](architecture/openclaw-integration-boundary.md)
+- [OpenClaw 渐进式说明书 Runtime v0.5](architecture/openclaw-progressive-manual-runtime.md)
 
 架构文档回答“系统应该长什么样，以及为什么这样设计”。
 

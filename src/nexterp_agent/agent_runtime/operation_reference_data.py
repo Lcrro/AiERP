@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from nexterp_agent.item_master.release_resolver import ReleaseMaterialResolver
+
 
 class OperationReferenceDataCatalog:
     """Read-only demo provider mirroring the ERPNext tables used by field slots."""
@@ -13,6 +15,7 @@ class OperationReferenceDataCatalog:
         self.root = root
         self.master_data = root / "data" / "master_data" / "release_v0_1"
         self.material_file = root / "data" / "material_master" / "release_v1_0" / "material_master_release_v1_0.tsv"
+        self.material_resolver = ReleaseMaterialResolver(self.material_file)
 
     def options(self, entity: str, *, query: str = "", project: str = "", item_code: str = "") -> list[dict[str, Any]]:
         if entity == "company":
@@ -72,18 +75,20 @@ class OperationReferenceDataCatalog:
         return rows[:20]
 
     def _items(self, query: str) -> list[dict[str, Any]]:
-        needle = query.casefold().strip()
+        ranked = self.material_resolver.resolve(query, limit=40).get("candidates", [])
         rows = []
-        for row in self._read(self.material_file):
-            haystack = " ".join((row.get("item_code", ""), row.get("item_name", ""), row.get("sku_name", ""), row.get("aliases", ""), row.get("search_keywords", ""))).casefold()
-            if row.get("status") != "active" or (needle and needle not in haystack):
+        for candidate in ranked:
+            row = candidate.get("data") or {}
+            if row.get("status") != "active":
                 continue
             rows.append({
-                "value": row["item_code"],
-                "label": row.get("sku_name") or row.get("item_name") or row["item_code"],
+                "value": candidate["item_code"],
+                "label": candidate.get("sku_name") or candidate.get("item_name") or candidate["item_code"],
                 "meta": row.get("required_specs", ""),
                 "stock_uom": row.get("stock_uom", ""),
                 "purchase_uom": row.get("purchase_uom", ""),
+                "score": candidate.get("score", 0),
+                "match_reason": candidate.get("match_reason", ""),
             })
             if len(rows) >= 20:
                 break

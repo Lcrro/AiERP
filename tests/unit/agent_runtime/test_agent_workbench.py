@@ -38,6 +38,18 @@ def test_runtime_explorer_is_served_from_a_separate_auditable_page() -> None:
     assert "renderDiagnosis" in script
 
 
+def test_runtime_compare_page_is_preview_only_and_shows_both_runtimes() -> None:
+    html = MODULE.RUNTIME_COMPARE_PATH.read_text(encoding="utf-8")
+    script = (MODULE.ASSET_DIR / "runtime-compare.js").read_text(encoding="utf-8")
+
+    assert "Agent Runtime 对比实验" in html
+    assert "现有 Nexterp Runtime" in html
+    assert "OpenClaw 说明书 Runtime" in html
+    assert "禁止写入 ERPNext" in html
+    assert "/api/agent-runtime/compare" in script
+    assert "loaded_nodes" in script
+
+
 def test_operation_model_explorer_shows_relational_slot_prototype() -> None:
     html = MODULE.OPERATION_MODEL_PATH.read_text(encoding="utf-8")
     script = (MODULE.ASSET_DIR / "operation-model.js").read_text(encoding="utf-8")

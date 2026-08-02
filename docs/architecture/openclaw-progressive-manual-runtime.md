@@ -1,0 +1,153 @@
+# OpenClaw 渐进式说明书 Runtime v0.5
+
+## 目标
+
+本实验验证 OpenClaw 是否适合作为员工助理的交流和规划外壳，同时把 ERPNext 业务约束继续留在 Nexterp 内部：
+
+```text
+OpenClaw + DeepSeek
+  -> 搜索业务能力
+  -> 按需加载节点说明书
+  -> 提交结构化业务事实
+  -> Nexterp 解析、校验和编译
+  -> 用户确认冻结动作
+  -> ERPNext 以员工身份执行
+  -> Nexterp 回读真实结果
+```
+
+首轮只覆盖“创建材料申请草稿”。现有 Runtime 和员工工作台继续保留，作为 A/B 对照基线。
+
+## 组件边界
+
+### OpenClaw
+
+负责：
+
+- 与员工自然交流；
+- 判断当前需要搜索或加载什么能力；
+- 从用户原话提取项目、物料描述、数量和日期；
+- 根据 Nexterp 返回的缺失信息或候选继续追问；
+- 用真实执行结果生成员工可读回复。
+
+不负责：
+
+- 编造 ERPNext Link 主键；
+- 直接拼底层 ToolCall；
+- 自行决定员工身份和权限；
+- 修改已进入确认阶段的 ToolCall；
+- 把库存、审批状态或单据状态写入长期记忆。
+
+### Nexterp Capability API
+
+负责：
+
+- 从 PostgreSQL 检索能力节点和说明书；
+- 根据可信请求头绑定 OpenClaw 会话与 ERPNext 员工；
+- 调用 Resolver 获取真实项目、仓库、物料和单位；
+- 填充系统默认值，执行规则校验并确定性编译 ToolCall；
+- 生成绑定会话、员工、项目、目录版本和哈希的待确认动作；
+- 执行冻结动作、保证幂等并回读 ERPNext 结果。
+
+### ERPNext
+
+ERPNext 仍是权限、库存、工作流、单据状态和业务数据的唯一事实来源。OpenClaw Plugin 不持有 ERPNext API Secret。
+
+## 说明书关系模型
+
+PostgreSQL 是 v0.5 说明书目录的唯一生产事实来源：
+
+| 表 | 作用 |
+| --- | --- |
+| `capability_node` | 模块、能力、操作和字段槽位节点 |
+| `capability_edge` | 节点间的包含、复用、前置和后续关系 |
+| `capability_alias` | 中文名称、现场俗称和检索词 |
+| `operation_tool` | 操作到内部 ToolCall、编译器和验证器的映射 |
+| `operation_rule` | 跨字段和业务状态规则 |
+| `external_identity` | OpenClaw 请求者与 ERPNext 员工身份绑定 |
+| `catalog_revision` | 当前目录版本和内容校验值 |
+
+数据库保存声明性说明和稳定实现键，不保存可执行代码。编译器、Resolver、预检器和回读验证器仍由 Python 实现。
+
+## OpenClaw 工具面
+
+新 Profile 只向模型暴露四个元工具：
+
+```text
+nexterp_search_capabilities
+nexterp_load_guide
+nexterp_prepare_operation
+nexterp_execute_prepared_operation
+```
+
+工作区 `AGENTS.md` 和 Skill 只保存短工作规约；完整说明书通过 Capability API 渐进加载。对比会话的 `sessionKey` 包含 `:compare-preview:`，Plugin 会在工具实现和 `before_tool_call` 钩子两层禁止执行写入。
+
+## HTTP 接口
+
+Capability API 默认监听 `127.0.0.1:8790`：
+
+```text
+POST /api/capabilities/search
+POST /api/guides/load
+POST /api/operations/prepare
+POST /api/operations/execute
+GET  /api/operations/{pending_id}
+```
+
+身份来自 Plugin 写入的可信请求头，不接受模型在 JSON body 中提交员工邮箱。执行接口只接受服务端生成的 `pending_id`。
+
+## 隔离运行环境
+
+| 服务 | 地址 | 说明 |
+| --- | --- | --- |
+| 员工工作台 | `http://127.0.0.1:8788/` | 现有 Runtime 基线 |
+| A/B 对比页 | `http://127.0.0.1:8788/agent-runtime-compare` | 两侧只做预览 |
+| Capability API | `http://127.0.0.1:8790` | WSL 内说明书服务 |
+| OpenClaw Gateway | `ws://127.0.0.1:18829` | 隔离 Profile `nexterp` |
+| 旧 OpenClaw | `ws://127.0.0.1:18789` | 不由本实验修改 |
+
+隔离 Runtime 使用项目独立 Node `22.22.3`、OpenClaw `2026.7.1-2`、状态目录 `~/.openclaw-nexterp` 和权限为 `600` 的 `~/.config/nexterp/openclaw-nexterp.env`。
+
+## 安装与启动
+
+在 WSL 中执行：
+
+```bash
+bash scripts/openclaw/install_nexterp_runtime.sh
+bash scripts/openclaw/restart_nexterp_runtime.sh
+```
+
+单独启动组件：
+
+```bash
+bash scripts/openclaw/start_capability_api.sh
+bash scripts/openclaw/start_nexterp_gateway.sh
+```
+
+从命令行调用隔离 Agent：
+
+```bash
+bash scripts/openclaw/run_nexterp_agent.sh \
+  --session-id agent:nexterp:manual-test \
+  --message '帮我给合流1.3标申请20包水泥，后天要用' \
+  --json
+```
+
+## 当前验收状态
+
+- PostgreSQL 迁移可重复执行，材料申请 11 个槽位和 4 条规则已入库。
+- 四个 Plugin 工具、可信身份派生和预览会话写入阻断已有自动化测试。
+- Capability API 已覆盖服务令牌、请求头身份和执行 body 防篡改测试。
+- 真实 OpenClaw 已完成能力搜索、Guide 加载和材料申请 prepare 预览。
+- Resolver 已改为复用发布版物料评分器，宽泛搜索不再按文件顺序把“水泥砖”排在“水泥”本体之前。
+- A/B 页面只展示可审计动作摘要，不展示模型隐藏思维。
+- 物料名称使用归一化精确匹配，名称中的空格差异不会再制造假多候选。
+- `prepare` 会验证用户提供的单位是否属于解析后 SKU 的真实可用单位，错误单位返回候选而不是进入确认。
+- 真实 DeepSeek 预览基准 `20 / 20` 通过，执行调用为 `0`，中位耗时 `19.58s`。
+- OpenClaw Control UI 已完成一次权威确认写入：审批卡展示冻结后的项目、仓库、物料、数量和日期，用户选择“允许一次”后才执行。
+- ERPNext 以材料员本人身份创建并回读材料申请草稿 `MAT-MR-2026-00004`，回读字段与确认摘要一致；验收后已删除草稿并验证单据不存在。
+- 非交互 CLI 不会把聊天中的“确认”当成审批决定；必须连接 Control UI 或配置支持审批的消息渠道，未确认和超时均保持零写入。
+- Python 全量测试 `415 passed`，PostgreSQL 目录集成测试 `2 passed`，Plugin 测试 `4 passed`，TypeScript 构建和打包检查通过。
+
+## 后续扩展门槛
+
+材料申请样板达到 20 次至少 19 次正确完成、零越权写入、零重复建单、全部写操作确认、全部成功写入回读后，才依次迁移询价、供应商报价、采购订单、采购收货和采购退货。

@@ -1,0 +1,37 @@
+{
+  gateway: {
+    mode: "local",
+    port: 18829,
+    bind: "loopback",
+    auth: { mode: "token" },
+  },
+  agents: {
+    defaults: {
+      workspace: "~/.openclaw-nexterp/workspace",
+      model: { primary: "deepseek/deepseek-v4-flash" },
+      skipBootstrap: true,
+    },
+  },
+  tools: {
+    profile: "minimal",
+    alsoAllow: [
+      "nexterp_search_capabilities",
+      "nexterp_load_guide",
+      "nexterp_prepare_operation",
+      "nexterp_execute_prepared_operation",
+    ],
+  },
+  plugins: {
+    allow: ["deepseek", "nexterp-capability"],
+    entries: {
+      deepseek: { enabled: true },
+      "nexterp-capability": {
+        enabled: true,
+        config: {
+          baseUrl: "http://127.0.0.1:8790",
+          requestTimeoutMs: 30000,
+        },
+      },
+    },
+  },
+}

@@ -37,3 +37,15 @@ def test_item_search_and_uom_options_come_from_material_master() -> None:
     assert items[0]["value"] == "MAT-CEM-000008"
     assert items[0]["label"] == "水泥 42.5 袋装 50kg"
     assert units == [{"value": "包", "label": "包", "meta": "物料允许单位"}]
+
+
+def test_generic_material_search_ranks_exact_material_name_before_related_products() -> None:
+    items = OperationReferenceDataCatalog(ROOT).options("item", query="水泥")
+
+    assert set(item["value"] for item in items[:3]) == {
+        "MAT-CEM-000008",
+        "MAT-CEM-000011",
+        "MAT-CEM-000018",
+    }
+    assert all(item["label"].startswith("水泥 ") for item in items[:3])
+    assert all(item["score"] > 0 for item in items[:3])
