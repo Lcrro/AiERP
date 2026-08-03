@@ -62,6 +62,7 @@ experiments   冻结基线、对照实验和方案比较
 - [Agent 写入能力验收](operations/agent-write-acceptance.md)
 - [Agent 失败回归库](operations/agent-failure-regressions.md)
 - [分层测试策略](operations/testing-strategy.md)
+- [Agent 岗位情境对照验收](operations/agent-context-role-matrix.md)
 - [物料目录 PostgreSQL 运行说明](operations/material-catalog-postgres.md)
 
 运行文档回答“本地系统怎么启动、怎么验证、怎么维护”。
