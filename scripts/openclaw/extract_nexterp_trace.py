@@ -46,13 +46,15 @@ def compact_result(tool_name: str, payload: dict[str, Any]) -> dict[str, Any]:
         }
     if tool_name == "nexterp_prepare_operation":
         choices = payload.get("choices") if isinstance(payload.get("choices"), list) else []
+        candidates = payload.get("candidates") if isinstance(payload.get("candidates"), list) else []
         questions = payload.get("questions") if isinstance(payload.get("questions"), list) else []
         return {
             "status": payload.get("status"),
             "pending_id": payload.get("pending_id"),
             "summary": payload.get("summary"),
             "questions": questions,
-            "choice_groups": len(choices),
+            "choices": choices,
+            "candidates": candidates,
         }
     if tool_name == "nexterp_execute_prepared_operation":
         result = payload.get("result") if isinstance(payload.get("result"), dict) else {}
@@ -64,7 +66,7 @@ def compact_result(tool_name: str, payload: dict[str, Any]) -> dict[str, Any]:
     return {}
 
 
-def extract(path: Path) -> dict[str, Any]:
+def extract(path: Path, *, last_turn_only: bool = False) -> dict[str, Any]:
     calls: dict[str, dict[str, Any]] = {}
     ordered_ids: list[str] = []
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -74,7 +76,10 @@ def extract(path: Path) -> dict[str, Any]:
         message = record.get("message") if isinstance(record.get("message"), dict) else {}
         role = message.get("role")
         content = message.get("content") if isinstance(message.get("content"), list) else []
-        if role == "assistant":
+        if role == "user" and last_turn_only:
+            calls.clear()
+            ordered_ids.clear()
+        elif role == "assistant":
             for item in content:
                 if not isinstance(item, dict) or item.get("type") != "toolCall":
                     continue
@@ -96,6 +101,10 @@ def extract(path: Path) -> dict[str, Any]:
     questions: list[str] = []
     confirmation: dict[str, Any] | None = None
     pending_id: str | None = None
+    business_status: str | None = None
+    choices: list[dict[str, Any]] = []
+    candidates: list[dict[str, Any]] = []
+    execution: dict[str, Any] | None = None
     for step in steps:
         result = step["result"]
         if step["tool"] in {"nexterp_search_capabilities", "nexterp_load_guide"}:
@@ -103,6 +112,13 @@ def extract(path: Path) -> dict[str, Any]:
                 if node not in loaded_nodes:
                     loaded_nodes.append(node)
         questions.extend(str(question) for question in result.get("questions") or [])
+        if step["tool"] == "nexterp_prepare_operation":
+            business_status = str(result.get("status") or "") or business_status
+            choices = [row for row in result.get("choices") or [] if isinstance(row, dict)]
+            candidates = [row for row in result.get("candidates") or [] if isinstance(row, dict)]
+        elif step["tool"] == "nexterp_execute_prepared_operation":
+            business_status = str(result.get("status") or "") or business_status
+            execution = result
         if result.get("summary"):
             confirmation = result["summary"]
         if result.get("pending_id"):
@@ -113,17 +129,24 @@ def extract(path: Path) -> dict[str, Any]:
         "questions": questions,
         "confirmation": confirmation,
         "pending_id": pending_id,
+        "business_status": business_status,
+        "choices": choices,
+        "candidates": candidates,
+        "execution": execution,
     }
 
 
 def main() -> int:
-    if len(sys.argv) != 2:
-        raise SystemExit("usage: extract_nexterp_trace.py SESSION_JSONL")
-    path = Path(sys.argv[1]).expanduser().resolve()
+    args = sys.argv[1:]
+    last_turn_only = "--last-turn" in args
+    args = [arg for arg in args if arg != "--last-turn"]
+    if len(args) != 1:
+        raise SystemExit("usage: extract_nexterp_trace.py [--last-turn] SESSION_JSONL")
+    path = Path(args[0]).expanduser().resolve()
     expected = (Path.home() / ".openclaw-nexterp" / "agents").resolve()
     if expected not in path.parents or path.suffix != ".jsonl":
         raise PermissionError("session path is outside the isolated Nexterp profile")
-    print(json.dumps(extract(path), ensure_ascii=False))
+    print(json.dumps(extract(path, last_turn_only=last_turn_only), ensure_ascii=False))
     return 0
 
 

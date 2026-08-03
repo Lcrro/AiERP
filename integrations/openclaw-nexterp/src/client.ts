@@ -13,6 +13,10 @@ export function isPreviewOnlySession(sessionKey: string): boolean {
   return sessionKey.includes(":compare-preview:");
 }
 
+export function isWorkbenchSession(sessionKey: string): boolean {
+  return sessionKey.includes(":workbench:");
+}
+
 export function capabilityBaseUrl(config?: PluginConfig): string {
   return (config?.baseUrl ?? process.env.NEXTERP_CAPABILITY_API_URL ?? "http://127.0.0.1:8790").replace(/\/$/, "");
 }

@@ -1,6 +1,6 @@
 # 项目状态
 
-更新日期：`2026-08-02`
+更新日期：`2026-08-03`
 
 ## 当前基线
 
@@ -9,8 +9,8 @@
 - 员工 Agent 工作台：`http://127.0.0.1:8788/`
 - Tool schema 与 Adapter handler：`160 / 160`
 - 主数据来源：`data/master_data/` 与 `data/material_master/`
-- Agent 主入口：`DeepSeekAgentRuntime`
-- 测试：Python `415 passed`；PostgreSQL 集成 `2 passed`；OpenClaw Plugin `4 passed`
+- Agent 主入口：员工工作台使用 `OpenClawWorkbenchRunner`；旧 `DeepSeekAgentRuntime` 仅作为 A/B 回归基线
+- 测试：Python `435 passed`；工作台与 Capability Service 聚焦回归 `73 passed`；OpenClaw Plugin `5 passed`
 
 ## 已具备
 
@@ -75,6 +75,9 @@
 - OpenClaw 采购主链说明书迁移完成：询价、供应商报价、采购订单、采购收货和采购退货均已进入 PostgreSQL 能力关系图，并由来源单据 Resolver、确定性编译器、冻结确认和执行后回读共同约束。
 - 新增能力不会把五份完整说明书一次塞给模型；真实 DeepSeek 已通过四个元工具按需搜索和逐层加载采购链，Capability API 询价真实预览保留材料申请父子来源且零写入。
 - 隔离 OpenClaw Runtime 重启已加固：清除专用端口残留进程并等待服务就绪，避免 PID 文件失效后继续运行旧代码。
+- 员工工作台已正式接入 OpenClaw 渐进式说明书 Runtime：员工、项目和 conversation 使用独立持久会话，员工身份以不可逆外部标识动态绑定，旧 Runtime 会话不会混入新版对话。
+- 工作台会话不向模型暴露执行工具；写操作由 Agent 准备冻结的 `pending_id`，用户确认后由工作台直接调用 Capability API 执行同一动作并回读 ERPNext，不重新规划、不允许改参。
+- 正式 `/api/agent/turn` 已完成真实 DeepSeek 冒烟：只按需调用能力搜索和 Guide 加载，返回 `openclaw_manual` 运行标识且未产生 ERPNext 写入。
 
 ## 数据状态
 
@@ -86,9 +89,9 @@
 
 ## 下一步
 
-1. 用一条连续的真实测试单据链验收询价、报价、订单、收货和退货，并记录每段耗时、追问、确认与回读结果。
-2. 将 OpenClaw 审批卡接入未来员工工作台或正式消息渠道，避免依赖开发用 Control UI。
-3. 增加正式登录和员工身份绑定，替换本地身份切换。
+1. 用一条连续的真实测试单据链在员工工作台验收询价、报价、订单、收货和退货，并记录每段耗时、追问、确认与回读结果。
+2. 增加正式登录和员工身份绑定，替换本地身份切换。
+3. 扩充中文能力别名，使“采购业务”“采购申请”等宽泛表达也能稳定发现正确说明书节点。
 
 ## 维护规则
 

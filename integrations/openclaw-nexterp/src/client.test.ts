@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { capabilityRequest, isPreviewOnlySession, trustedIdentity } from "./client.js";
+import { capabilityRequest, isPreviewOnlySession, isWorkbenchSession, trustedIdentity } from "./client.js";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -26,6 +26,13 @@ describe("preview sessions", () => {
   it("recognizes comparison sessions as write-blocked", () => {
     expect(isPreviewOnlySession("agent:main:compare-preview:abc")).toBe(true);
     expect(isPreviewOnlySession("agent:main:normal-session")).toBe(false);
+  });
+});
+
+describe("workbench sessions", () => {
+  it("recognizes sessions whose writes must be confirmed by the workbench", () => {
+    expect(isWorkbenchSession("agent:main:workbench:abc")).toBe(true);
+    expect(isWorkbenchSession("agent:main:normal-session")).toBe(false);
   });
 });
 

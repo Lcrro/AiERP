@@ -10,7 +10,7 @@
       const WELCOME_HTML = $("messages").innerHTML;
       const esc = value => String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
       const pretty = value => JSON.stringify(value ?? null, null, 2);
-      const conversationKey = () => `nexterp-conversation:${state.user?.user_email || "none"}:${state.project?.project_code || "none"}`;
+      const conversationKey = () => `nexterp-openclaw-v05-conversation:${state.user?.user_email || "none"}:${state.project?.project_code || "none"}`;
       const ensureConversation = () => {
         const key = conversationKey();
         state.conversationId = localStorage.getItem(key) || crypto.randomUUID();
@@ -80,7 +80,7 @@
         try {
           const [health, catalog] = await Promise.all([api("/api/health"), api("/api/workbench/bootstrap")]);
           $("healthText").classList.add("ok");
-          $("healthText").textContent = `DeepSeek 与 ERPNext 已连接 · ${health.profile}`;
+          $("healthText").textContent = `OpenClaw 助理与 ERPNext 已连接 · ${health.profile}`;
           state.projects = catalog.projects || [];
           $("projectSelect").innerHTML = state.projects.map(project => `<option value="${esc(project.project_code)}">${esc(project.project_short_name)} · ${esc(project.operating_status)}</option>`).join("");
           $("projectSelect").onchange = () => selectProject(state.projects.find(project => project.project_code === $("projectSelect").value));

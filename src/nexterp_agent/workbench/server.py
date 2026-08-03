@@ -23,10 +23,12 @@ from nexterp_agent.agent_runtime.credentials import load_user_credentials
 from nexterp_agent.agent_runtime.operation_catalog import MaterialRequestOperationCatalog
 from nexterp_agent.agent_runtime.operation_reference_data import OperationReferenceDataCatalog
 from nexterp_agent.agent_runtime.session import RuntimeSessionStore
+from nexterp_agent.capability_service.catalog import CapabilityCatalogRepository
 from nexterp_agent.erpnext.adapter import ERPNextAdapter
 from nexterp_agent.erpnext.client import ERPNextClient
 from nexterp_agent.master_data import MasterDataRelease
 from nexterp_agent.workbench.openclaw_compare import OpenClawPreviewRunner, summarize_existing_result
+from nexterp_agent.workbench.openclaw_runtime import OpenClawWorkbenchRunner, workbench_external_subject
 
 
 HTML_PATH = ROOT / "tools" / "agent_workbench.html"
@@ -281,8 +283,19 @@ def project_catalog() -> list[dict[str, Any]]:
 
 def result_document_links(result: dict[str, Any], erpnext_base_url: str) -> list[dict[str, str]]:
     links: list[dict[str, str]] = []
+    for supplied in result.get("document_links") or []:
+        if not isinstance(supplied, dict):
+            continue
+        doctype = str(supplied.get("doctype") or "")
+        name = str(supplied.get("name") or "")
+        if doctype in DOCTYPE_ROUTES and name:
+            links.append({
+                "doctype": doctype,
+                "name": name,
+                "url": f"#document/{quote(doctype, safe='')}/{quote(name, safe='')}",
+            })
     payloads = result.get("tool_results") or ([result.get("tool_result")] if result.get("tool_result") else [])
-    seen: set[tuple[str, str]] = set()
+    seen: set[tuple[str, str]] = {(row["doctype"], row["name"]) for row in links}
     for payload in payloads:
         data = payload.get("data") if isinstance(payload, dict) else None
         if not isinstance(data, dict):
@@ -515,6 +528,8 @@ class AgentWorkbenchService:
         self.session_store = RuntimeSessionStore()
         self._project_name_cache: dict[tuple[str, str], str] = {}
         self.openclaw_preview = OpenClawPreviewRunner(ROOT)
+        self.openclaw_runtime = OpenClawWorkbenchRunner(ROOT)
+        self.capability_repository = CapabilityCatalogRepository(os.environ["MATERIAL_CATALOG_DATABASE_URL"])
 
     def scoped_session_store(self, user: str, project: str = "", conversation_id: str = "default") -> RuntimeSessionStore:
         if not project and conversation_id == "default":
@@ -548,6 +563,7 @@ class AgentWorkbenchService:
                 "developer_mode": True,
                 "purchase_modules": list(MODULE_DOCTYPES["buying"]),
                 "conversation_scope": "employee_project_conversation",
+                "agent_runtime": "openclaw_progressive_manual",
             },
         }
 
@@ -1672,6 +1688,74 @@ class AgentWorkbenchService:
 
     def run(self, payload: dict[str, Any]) -> dict[str, Any]:
         user = str(payload.get("user") or "").strip()
+        project_code = str(payload.get("project_code") or "").strip()
+        conversation_id = str(payload.get("conversation_id") or "default").strip() or "default"
+        text = str(payload.get("text") or "").strip()
+        event = payload.get("event") if isinstance(payload.get("event"), dict) else None
+        if not user:
+            raise ValueError("user 必填")
+        if not project_code:
+            raise ValueError("project_code 必填")
+        employee = next((row for row in employee_catalog() if row["user_email"] == user), None)
+        project = next((row for row in project_catalog() if row["project_code"] == project_code), None)
+        if not employee or not project:
+            raise ValueError("未知员工或项目")
+        if user not in {row["user_email"] for row in project.get("employees") or []}:
+            raise PermissionError("当前员工不属于所选项目")
+
+        candidate = event.get("candidate") if event and event.get("type") == "select_candidate" else None
+        if candidate is not None and (not isinstance(candidate, dict) or not candidate.get("item_code")):
+            raise ValueError("候选物料事件缺少 item_code")
+        if not text and isinstance(candidate, dict):
+            label = candidate.get("sku_name") or candidate.get("item_name") or candidate["item_code"]
+            text = f"选择 {label}（{candidate['item_code']}）并继续。"
+        if not text:
+            raise ValueError("text 必填")
+
+        allowed_projects = [
+            row["project_code"]
+            for row in project_catalog()
+            if user in {person["user_email"] for person in row.get("employees") or []}
+        ]
+        self.capability_repository.upsert_identity(
+            external_subject=workbench_external_subject(user),
+            employee_user=user,
+            profile_name=str(employee["profile"]),
+            agent_id="main",
+            default_project=project_code,
+            allowed_projects=allowed_projects,
+        )
+        result = self.openclaw_runtime.run(
+            text=text,
+            user=user,
+            employee_name=str(employee.get("employee_name") or user),
+            position=str(employee.get("project_position") or employee.get("position") or ""),
+            project_code=project_code,
+            project_label=str(project.get("project_short_name") or project_code),
+            warehouse=str(payload.get("warehouse") or project.get("warehouse_code") or ""),
+            conversation_id=conversation_id,
+            event=event,
+        )
+        response = dict(result)
+        response["execute"] = False
+        response["conversation_id"] = conversation_id
+        response["document_links"] = result_document_links(response, self.base_url)
+        response["business_errors"] = response.get("business_errors") or business_error_cards(response)
+
+        store = self.scoped_session_store(user, project_code, conversation_id)
+        session = store.load(user, profile=str(employee["profile"]))
+        pending_id = str(response.get("pending_id") or "")
+        session.pending_action = (
+            {"runtime": "openclaw_manual", "pending_id": pending_id}
+            if response.get("status") == "needs_confirmation" and pending_id
+            else None
+        )
+        session.add_turn({"user_text": text, "result": response})
+        store.save(session)
+        return response
+
+    def run_existing(self, payload: dict[str, Any]) -> dict[str, Any]:
+        user = str(payload.get("user") or "").strip()
         text = str(payload.get("text") or "").strip()
         project_code = str(payload.get("project_code") or "").strip()
         conversation_id = str(payload.get("conversation_id") or "default").strip() or "default"
@@ -1722,10 +1806,33 @@ class AgentWorkbenchService:
         return response
 
     def confirm(self, payload: dict[str, Any]) -> dict[str, Any]:
-        request = dict(payload)
-        request["execute"] = True
-        request.setdefault("text", "确认执行当前待处理操作。")
-        return self.run(request)
+        user = str(payload.get("user") or "").strip()
+        project_code = str(payload.get("project_code") or "").strip()
+        conversation_id = str(payload.get("conversation_id") or "default").strip() or "default"
+        if not user or not project_code:
+            raise ValueError("user 和 project_code 必填")
+        employee = next((row for row in employee_catalog() if row["user_email"] == user), None)
+        if not employee:
+            raise ValueError("未知员工账号")
+        store = self.scoped_session_store(user, project_code, conversation_id)
+        session = store.load(user, profile=str(employee["profile"]))
+        pending = session.pending_action if isinstance(session.pending_action, dict) else {}
+        pending_id = str(pending.get("pending_id") or "")
+        if pending.get("runtime") != "openclaw_manual" or not pending_id:
+            raise ValueError("当前会话没有等待确认的新 Agent 操作")
+        response = self.openclaw_runtime.confirm(
+            pending_id=pending_id,
+            user=user,
+            project_code=project_code,
+            conversation_id=conversation_id,
+        )
+        response["execute"] = True
+        response["conversation_id"] = conversation_id
+        response["document_links"] = result_document_links(response, self.base_url)
+        session.pending_action = None
+        session.add_turn({"user_text": "", "result": response})
+        store.save(session)
+        return response
 
     def compare_runtimes(self, payload: dict[str, Any]) -> dict[str, Any]:
         user = str(payload.get("user") or "").strip()
@@ -1745,7 +1852,7 @@ class AgentWorkbenchService:
 
         def existing_preview() -> dict[str, Any]:
             started = time.perf_counter()
-            result = self.run({
+            result = self.run_existing({
                 "user": user,
                 "project_code": project_code,
                 "text": text,

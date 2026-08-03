@@ -99,13 +99,15 @@ GET  /api/operations/{pending_id}
 
 | 服务 | 地址 | 说明 |
 | --- | --- | --- |
-| 员工工作台 | `http://127.0.0.1:8788/` | 现有 Runtime 基线 |
+| 员工工作台 | `http://127.0.0.1:8788/` | OpenClaw 渐进式说明书 Runtime 正式入口 |
 | A/B 对比页 | `http://127.0.0.1:8788/agent-runtime-compare` | 默认只运行 OpenClaw；旧版按需开启 |
 | Capability API | `http://127.0.0.1:8790` | WSL 内说明书服务 |
 | OpenClaw Gateway | `ws://127.0.0.1:18829` | 隔离 Profile `nexterp` |
 | 旧 OpenClaw | `ws://127.0.0.1:18789` | 不由本实验修改 |
 
 隔离 Runtime 使用项目独立 Node `22.22.3`、OpenClaw `2026.7.1-2`、状态目录 `~/.openclaw-nexterp` 和权限为 `600` 的 `~/.config/nexterp/openclaw-nexterp.env`。
+
+员工工作台为每个“员工 + 项目 + conversation”生成独立 OpenClaw 会话，并通过可信启动参数注入不可逆的外部身份标识。工作台会话只暴露搜索、加载 Guide 和准备操作三个元工具，不向模型暴露执行工具。用户点击确认后，工作台服务使用 Capability API 直接执行原先冻结的 `pending_id`，因此模型不能在确认阶段替换员工、项目、业务字段或底层 ToolCall。
 
 ## 安装与启动
 
@@ -144,13 +146,15 @@ bash scripts/openclaw/run_nexterp_agent.sh \
 - Resolver 已改为复用发布版物料评分器，宽泛搜索不再按文件顺序把“水泥砖”排在“水泥”本体之前。
 - A/B 页面只展示可审计动作摘要，不展示模型隐藏思维。
 - A/B 页面默认暂停旧版 Runtime，后端不会调用旧模型；需要回归对照时可手动开启。新版等待期间显示“小助理正在……”和当前处理阶段。
+- 员工工作台正式入口已切换到 OpenClaw 渐进式说明书 Runtime；旧 Runtime 仅保留为 A/B 回归基线。
+- 正式入口使用持久 OpenClaw 会话和动态员工身份绑定；工作台确认按钮直接执行冻结动作，不重新调用模型。
 - 物料名称使用归一化精确匹配，名称中的空格差异不会再制造假多候选。
 - `prepare` 会验证用户提供的单位是否属于解析后 SKU 的真实可用单位，错误单位返回候选而不是进入确认。
 - 真实 DeepSeek 预览基准 `20 / 20` 通过，执行调用为 `0`，中位耗时 `19.58s`。
 - OpenClaw Control UI 已完成一次权威确认写入：审批卡展示冻结后的项目、仓库、物料、数量和日期，用户选择“允许一次”后才执行。
 - ERPNext 以材料员本人身份创建并回读材料申请草稿 `MAT-MR-2026-00004`，回读字段与确认摘要一致；验收后已删除草稿并验证单据不存在。
 - 非交互 CLI 不会把聊天中的“确认”当成审批决定；必须连接 Control UI 或配置支持审批的消息渠道，未确认和超时均保持零写入。
-- Python 全量回归 `430 passed`；其中采购链 Capability Service 单元测试 `29 passed`，PostgreSQL 目录集成测试 `3 passed`，Plugin 测试 `4 passed`，TypeScript 构建和打包检查通过。
+- Python 全量回归 `435 passed`；其中本次工作台与 Capability Service 聚焦回归 `73 passed`，PostgreSQL 目录集成测试包含在全量回归中，Plugin 测试 `5 passed`，TypeScript 构建检查通过。
 - 真实 Capability API 已使用 `MAT-MR-2026-00003` 完成询价预览：解析真实供应商并冻结完整来源明细，全程零 ERPNext 写入，临时待确认记录已清理。
 - 真实 OpenClaw + DeepSeek 已按需搜索并逐层加载五项新增能力，能正确说明“材料申请 -> 询价 -> 供应商报价 -> 采购订单 -> 采购收货 -> 可选退货”，且只暴露四个元工具。
 - 隔离 Runtime 重启脚本会同时清理 PID 文件和专用端口上的残留进程，并等待服务最多 30 秒，避免代码升级后仍连接旧 Capability API。

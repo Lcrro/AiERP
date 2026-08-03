@@ -1,6 +1,6 @@
 # 员工工作台
 
-员工工作台是 ERPNext 上方的简化业务入口。DeepSeek 负责理解目标和规划，ERPNext 仍负责数据、权限、工作流和审计。
+员工工作台是 ERPNext 上方的简化业务入口。当前正式助理使用隔离的 OpenClaw + DeepSeek 渐进式说明书 Runtime；OpenClaw 负责交流和规划，Nexterp 负责能力说明书、实体解析、确定性编译、确认和执行，ERPNext 仍负责数据、权限、工作流和审计。
 
 ## 启动
 
@@ -28,13 +28,15 @@ python scripts\dev\agent_workbench.py --port 8788 --profile civil
 
 ## 操作规则
 
-自然语言请求通过 DeepSeek 自主规划循环。物料多候选时，工作台展示名称、关键规格、单位和相关仓库实时库存，点击卡片会发送结构化选择事件。
+自然语言请求通过 OpenClaw 渐进式说明书 Runtime。Agent 先搜索业务能力，再按需加载当前节点 Guide，不会一次取得全部底层 ToolCall。物料多候选时，工作台展示名称、关键规格、单位和相关仓库实时库存，点击卡片会发送结构化选择事件。
 
-所有 Agent 写操作先展示业务摘要并等待确认。`request_id` 防止重复写入。
+所有 Agent 写操作先由 Nexterp `prepare` 生成冻结的 `pending_id`，工作台展示业务摘要并等待确认。确认按钮直接执行这一份冻结动作，不再次调用模型规划；员工、项目、会话、目录版本和 ToolCall 哈希不匹配时拒绝执行。`request_id` 防止重复写入。
 
 明确的提交、批准和驳回按钮不调用 DeepSeek，直接使用当前员工的 ERPNext 身份执行原生工作流动作。右侧“待我处理”直接读取 ERPNext `Workflow Action`，工作台不维护第二套审批状态。
 
-“新会话”只清理当前项目和员工的对话、已解析实体和待确认操作，不删除 ERPNext 单据。刷新页面会恢复当前会话。
+会话按“员工 + 项目 + conversation_id”隔离，并映射为持久 OpenClaw 会话。刷新页面会恢复当前会话；“新会话”只清理当前项目和员工的对话、已解析实体和待确认操作，不删除 ERPNext 单据。旧 Runtime 的本地会话使用不同命名空间，不会污染新版 Agent。
+
+旧 Nexterp Runtime 不再承接工作台正式请求，只在 `/agent-runtime-compare` 中按需启用，作为 A/B 回归基线。
 
 ## 接口
 

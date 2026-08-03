@@ -2,7 +2,13 @@ import { Type } from "typebox";
 import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 import type { OpenClawPluginDefinition } from "openclaw/plugin-sdk/core";
 
-import { capabilityRequest, isPreviewOnlySession, trustedIdentity, type PluginConfig } from "./client.js";
+import {
+  capabilityRequest,
+  isPreviewOnlySession,
+  isWorkbenchSession,
+  trustedIdentity,
+  type PluginConfig,
+} from "./client.js";
 
 function toolResult(payload: Record<string, unknown>) {
   return {
@@ -19,7 +25,7 @@ const plugin: OpenClawPluginDefinition = definePluginEntry({
     api.registerTool((ctx) => {
       const identity = trustedIdentity(ctx);
       const config = (ctx.config?.plugins?.entries?.["nexterp-capability"]?.config ?? {}) as PluginConfig;
-      return [
+      const tools = [
         {
           name: "nexterp_search_capabilities",
           label: "Search Nexterp capabilities",
@@ -85,7 +91,7 @@ const plugin: OpenClawPluginDefinition = definePluginEntry({
             return toolResult(await capabilityRequest("/api/operations/prepare", identity, { body: params, config }));
           },
         },
-        {
+        ...(!isWorkbenchSession(identity.sessionKey) ? [{
           name: "nexterp_execute_prepared_operation",
           label: "Execute prepared Nexterp operation",
           description: "Execute one immutable pending operation after OpenClaw obtains explicit user approval.",
@@ -99,8 +105,9 @@ const plugin: OpenClawPluginDefinition = definePluginEntry({
             const params = rawParams as { pending_id: string };
             return toolResult(await capabilityRequest("/api/operations/execute", identity, { body: params, config }));
           },
-        },
+        }] : []),
       ];
+      return tools;
     }, {
       names: [
         "nexterp_search_capabilities",
