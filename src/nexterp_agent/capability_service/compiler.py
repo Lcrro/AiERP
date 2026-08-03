@@ -2,7 +2,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date
+from functools import partial
 from typing import Any, Callable
+
+from nexterp_agent.agent_runtime.business_capabilities.procurement import (
+    BusinessIntentDraft,
+    ProcurementCapabilityCompiler,
+)
+
+from .procurement_catalog import PROCUREMENT_CHAIN
 
 
 @dataclass(frozen=True)
@@ -26,6 +34,10 @@ class OperationCompilerRegistry:
         self._compilers: dict[str, Compiler] = {
             "material_request.create.v1": compile_material_request,
         }
+        self._compilers.update({
+            seed.compiler_key: partial(compile_procurement_operation, goal=seed.goal)
+            for seed in PROCUREMENT_CHAIN
+        })
 
     def compile(self, bundle: dict[str, Any], facts: dict[str, Any]) -> CatalogEvaluation:
         key = str(bundle.get("operation", {}).get("compiler_key") or "")
@@ -102,6 +114,60 @@ def compile_material_request(bundle: dict[str, Any], facts: dict[str, Any]) -> C
         blocked=blocked,
         rules=[dict(row) for row in bundle.get("rules") or []],
         tool_call=tool_call,
+    )
+
+
+def compile_procurement_operation(
+    bundle: dict[str, Any],
+    facts: dict[str, Any],
+    *,
+    goal: str,
+) -> CatalogEvaluation:
+    """Reuse the hardened procurement compiler behind the database operation catalog."""
+
+    snapshots = [dict(row) for row in facts.get("source_documents") or [] if isinstance(row, dict)]
+    snapshot_index = {
+        (str(row.get("doctype") or ""), str(row.get("name") or "")): row
+        for row in snapshots
+    }
+
+    def load_document(doctype: str, name: str) -> dict[str, Any]:
+        try:
+            return snapshot_index[(doctype, name)]
+        except KeyError as exc:
+            raise ValueError(f"来源单据尚未由 Nexterp 回读：{doctype} {name}") from exc
+
+    intent_payload = dict(facts.get("intent") or {})
+    intent_payload["goal"] = goal
+    intent = BusinessIntentDraft.from_dict(intent_payload)
+    raw_today = facts.get("today")
+    today = raw_today if isinstance(raw_today, date) else date.fromisoformat(str(raw_today or date.today().isoformat())[:10])
+    prepared = ProcurementCapabilityCompiler(load_document).compile(
+        intent,
+        runtime_context=dict(facts.get("runtime_context") or {}),
+        today=today,
+    )
+    expected_tool = str(bundle.get("operation", {}).get("tool_name") or "")
+    if prepared.tool_call.get("tool") != expected_tool:
+        raise ValueError("数据库操作目录与确定性采购编译器映射不一致")
+
+    slots = []
+    for row in sorted((dict(value) for value in bundle.get("slots") or []), key=lambda value: int(value.get("position") or 0)):
+        slots.append({
+            **row,
+            "status": "resolved",
+            "value": None,
+            "values": [],
+            "reason": "字段已由来源单据、Resolver、用户输入或系统默认值确定。",
+        })
+    return CatalogEvaluation(
+        status="ready",
+        slots=slots,
+        missing=[],
+        invalid=[],
+        blocked=[],
+        rules=[dict(row) for row in bundle.get("rules") or []],
+        tool_call=prepared.tool_call,
     )
 
 

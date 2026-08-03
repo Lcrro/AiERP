@@ -16,6 +16,8 @@ from nexterp_agent.agent_runtime.operation_catalog import (
     MATERIAL_REQUEST_RULES,
 )
 
+from .procurement_catalog import PROCUREMENT_CHAIN
+
 
 ROOT = Path(__file__).resolve().parents[3]
 MIGRATIONS = ROOT / "config" / "capability_catalog_migrations"
@@ -55,6 +57,7 @@ class CapabilityCatalogRepository:
             for script in scripts:
                 conn.execute(script.read_text(encoding="utf-8"))
             self._seed_material_request(conn)
+            self._seed_procurement_chain(conn)
             revision = self._write_revision(conn)
             conn.commit()
         return revision
@@ -338,19 +341,29 @@ class CapabilityCatalogRepository:
         return self.get_pending(pending_id)
 
     def export_markdown(self, path: Path) -> None:
-        guides = self.load_guides(["module.buying", "cap.material_request", "op.material_request.create"])
-        bundle = self.operation_bundle("op.material_request.create")
+        guide_ids = ["module.buying", "cap.material_request", "op.material_request.create"]
+        guide_ids.extend(seed.capability_id for seed in PROCUREMENT_CHAIN)
         lines = ["# Capability 说明书目录", "", f"目录版本：`{self.current_revision()}`", ""]
-        for guide in guides:
+        for guide_id in guide_ids:
+            guide = self.load_guides([guide_id])[0]
             lines.extend([f"## {guide['label']}", "", guide["summary"], "", guide["guide"], ""])
-        lines.extend(["## 字段槽位", "", "| 序号 | 字段 | 来源 | 控件 | 目标 |", "|---:|---|---|---|---|"])
-        for slot in bundle["slots"]:
-            lines.append(f"| {slot['position']} | {slot['label']} | {slot['source']} | {slot['control']} | `{slot['target_path']}` |")
-        lines.extend(["", "## 业务规则", ""])
-        for rule in bundle["rules"]:
-            lines.append(f"- **{rule['label']}**：{rule['message']}")
+        operation_ids = ["op.material_request.create", *(seed.operation_id for seed in PROCUREMENT_CHAIN)]
+        for operation_id in operation_ids:
+            bundle = self.operation_bundle(operation_id)
+            lines.extend([
+                f"## {bundle['operation']['label']}字段槽位",
+                "",
+                "| 序号 | 字段 | 来源 | 控件 | 目标 |",
+                "|---:|---|---|---|---|",
+            ])
+            for slot in bundle["slots"]:
+                lines.append(f"| {slot['position']} | {slot['label']} | {slot['source']} | {slot['control']} | `{slot['target_path']}` |")
+            lines.extend(["", "### 业务规则", ""])
+            for rule in bundle["rules"]:
+                lines.append(f"- **{rule['label']}**：{rule['message']}")
+            lines.append("")
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
 
     def _seed_material_request(self, conn: Any) -> None:
         nodes = [
@@ -438,6 +451,165 @@ class CapabilityCatalogRepository:
                        user_message = EXCLUDED.user_message, position = EXCLUDED.position""",
                 (rule.rule_id, rule.operation_id, rule.label, rule.rule_id + ".v1", rule.expression, rule.message, position),
             )
+
+    def _seed_procurement_chain(self, conn: Any) -> None:
+        for capability_position, seed in enumerate(PROCUREMENT_CHAIN, start=1):
+            nodes = (
+                (
+                    seed.capability_id,
+                    "capability",
+                    "buying",
+                    seed.capability_label,
+                    seed.capability_summary,
+                    f"先加载 {seed.operation_label} 操作节点，再按说明提交业务事实。",
+                    seed.usage_conditions,
+                    seed.prohibitions,
+                    seed.examples,
+                    None,
+                    True,
+                    30 + capability_position * 10,
+                ),
+                (
+                    seed.operation_id,
+                    "operation",
+                    "buying",
+                    seed.operation_label,
+                    seed.operation_summary,
+                    seed.guide,
+                    seed.usage_conditions,
+                    seed.prohibitions,
+                    seed.examples,
+                    seed.compiler_key,
+                    True,
+                    31 + capability_position * 10,
+                ),
+            )
+            for node in nodes:
+                self._upsert_node(conn, node)
+            for slot in seed.slots:
+                self._upsert_node(conn, (
+                    slot["slot_id"],
+                    "slot",
+                    "buying",
+                    slot["label"],
+                    slot["description"],
+                    slot["description"],
+                    "",
+                    "",
+                    (),
+                    None,
+                    False,
+                    200 + int(slot["position"]),
+                ))
+
+            edges = [
+                ("module.buying", seed.capability_id, "contains", capability_position + 1),
+                (seed.capability_id, seed.operation_id, "contains", 1),
+            ]
+            edges.extend((seed.operation_id, slot["slot_id"], "uses_slot", slot["position"]) for slot in seed.slots)
+            for edge in edges:
+                conn.execute(
+                    """INSERT INTO nexterp_manual.capability_edge(source_node_id, target_node_id, relation_type, position)
+                         VALUES (%s, %s, %s, %s)
+                         ON CONFLICT (source_node_id, target_node_id, relation_type)
+                         DO UPDATE SET position = EXCLUDED.position""",
+                    edge,
+                )
+
+            for alias in (*seed.aliases, seed.capability_label, seed.operation_label):
+                for node_id in (seed.capability_id, seed.operation_id):
+                    conn.execute(
+                        """INSERT INTO nexterp_manual.capability_alias(node_id, alias_text, normalized_text)
+                             VALUES (%s, %s, %s)
+                             ON CONFLICT (node_id, normalized_text)
+                             DO UPDATE SET alias_text = EXCLUDED.alias_text""",
+                        (node_id, alias, normalize_text(alias)),
+                    )
+
+            conn.execute(
+                """INSERT INTO nexterp_manual.operation_tool
+                       (operation_id, tool_name, compiler_key, resolver_key, preflight_key, verifier_key,
+                        risk_level, requires_confirmation)
+                     VALUES (%s, %s, %s, 'procurement.resolve_source.v1',
+                             'procurement.preflight.v1', 'procurement.verify.v1', 'L3', TRUE)
+                     ON CONFLICT (operation_id) DO UPDATE SET
+                       tool_name = EXCLUDED.tool_name, compiler_key = EXCLUDED.compiler_key,
+                       resolver_key = EXCLUDED.resolver_key, preflight_key = EXCLUDED.preflight_key,
+                       verifier_key = EXCLUDED.verifier_key, risk_level = EXCLUDED.risk_level,
+                       requires_confirmation = EXCLUDED.requires_confirmation""",
+                (seed.operation_id, seed.tool_name, seed.compiler_key),
+            )
+            for slot in seed.slots:
+                conn.execute(
+                    """INSERT INTO nexterp_manual.operation_slot
+                           (operation_id, slot_id, position, scope, target_path, source_type, control_type,
+                            is_user_editable, lookup_doctype, format_hint, default_strategy, source_path,
+                            is_required, resolver_key, fixed_value_json, derived_from_slot_id, constraint_text)
+                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL, %s)
+                         ON CONFLICT (operation_id, slot_id) DO UPDATE SET
+                           position = EXCLUDED.position, scope = EXCLUDED.scope,
+                           target_path = EXCLUDED.target_path, source_type = EXCLUDED.source_type,
+                           control_type = EXCLUDED.control_type, is_user_editable = EXCLUDED.is_user_editable,
+                           lookup_doctype = EXCLUDED.lookup_doctype, format_hint = EXCLUDED.format_hint,
+                           default_strategy = EXCLUDED.default_strategy, source_path = EXCLUDED.source_path,
+                           is_required = EXCLUDED.is_required, resolver_key = EXCLUDED.resolver_key,
+                           constraint_text = EXCLUDED.constraint_text""",
+                    (
+                        seed.operation_id,
+                        slot["slot_id"],
+                        slot["position"],
+                        slot["scope"],
+                        slot["target_path"],
+                        slot["source"],
+                        slot["control"],
+                        slot["editable"],
+                        slot["lookup_doctype"],
+                        slot["format_hint"],
+                        slot["default_strategy"],
+                        slot["source_path"],
+                        slot["required"],
+                        slot["resolver"],
+                        slot["constraint"],
+                    ),
+                )
+            for position, (rule_id, label, message) in enumerate(seed.rules, start=1):
+                conn.execute(
+                    """INSERT INTO nexterp_manual.operation_rule
+                           (rule_id, operation_id, label, implementation_key, expression_text, user_message, position)
+                         VALUES (%s, %s, %s, %s, %s, %s, %s)
+                         ON CONFLICT (rule_id) DO UPDATE SET
+                           operation_id = EXCLUDED.operation_id, label = EXCLUDED.label,
+                           implementation_key = EXCLUDED.implementation_key,
+                           expression_text = EXCLUDED.expression_text,
+                           user_message = EXCLUDED.user_message, position = EXCLUDED.position""",
+                    (rule_id, seed.operation_id, label, rule_id + ".v1", rule_id, message, position),
+                )
+
+        chain = ["cap.material_request", *(seed.capability_id for seed in PROCUREMENT_CHAIN)]
+        for position, (source, target) in enumerate(zip(chain, chain[1:]), start=1):
+            conn.execute(
+                """INSERT INTO nexterp_manual.capability_edge(source_node_id, target_node_id, relation_type, position)
+                     VALUES (%s, %s, 'next', %s)
+                     ON CONFLICT (source_node_id, target_node_id, relation_type)
+                     DO UPDATE SET position = EXCLUDED.position""",
+                (source, target, position),
+            )
+
+    def _upsert_node(self, conn: Any, node: tuple[Any, ...]) -> None:
+        conn.execute(
+            """INSERT INTO nexterp_manual.capability_node
+                   (node_id, node_type, module, label, summary, guide, usage_conditions, prohibitions,
+                    examples_json, implementation_key, is_write, sort_order)
+                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 ON CONFLICT (node_id) DO UPDATE SET
+                   node_type = EXCLUDED.node_type, module = EXCLUDED.module, label = EXCLUDED.label,
+                   summary = EXCLUDED.summary, guide = EXCLUDED.guide,
+                   usage_conditions = EXCLUDED.usage_conditions, prohibitions = EXCLUDED.prohibitions,
+                   examples_json = EXCLUDED.examples_json, implementation_key = EXCLUDED.implementation_key,
+                   is_write = EXCLUDED.is_write, is_active = TRUE, sort_order = EXCLUDED.sort_order,
+                   updated_at = NOW()""",
+            (*node[:8], self._psycopg.types.json.Jsonb(node[8]), *node[9:]),
+        )
 
     def _write_revision(self, conn: Any) -> str:
         nodes = conn.execute(

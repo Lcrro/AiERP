@@ -5,6 +5,12 @@ import os
 from pathlib import Path
 from typing import Any, Callable, Protocol
 
+from nexterp_agent.agent_runtime.business_capabilities.procurement import (
+    CapabilityCompilationError,
+    PreparedBusinessAction,
+    canonical_tool_call_hash,
+    verify_procurement_result,
+)
 from nexterp_agent.agent_runtime.credentials import load_user_credentials
 from nexterp_agent.agent_runtime.operation_reference_data import OperationReferenceDataCatalog
 from nexterp_agent.agent_runtime.tool_access import make_tool_access_policy
@@ -22,10 +28,18 @@ from .models import (
     PrepareOperationRequest,
     RequestIdentity,
 )
+from .procurement_catalog import (
+    CAPABILITY_OPERATION_IDS,
+    OPERATION_BY_ID,
+    PROCUREMENT_OPERATION_IDS,
+    operation_capability,
+    operation_goal,
+)
 
 
 ROOT = Path(__file__).resolve().parents[3]
 MATERIAL_REQUEST_OPERATION_ID = "op.material_request.create"
+ALL_OPERATION_IDS = (MATERIAL_REQUEST_OPERATION_ID, *PROCUREMENT_OPERATION_IDS)
 
 
 class CatalogRepositoryLike(Protocol):
@@ -72,6 +86,10 @@ class CapabilityManualService:
         for guide in guides:
             if not self._node_allowed(guide, identity):
                 raise PermissionError(f"当前岗位不能加载该业务能力：{guide['node_id']}")
+            guide["relations"] = [
+                relation for relation in guide.get("relations") or []
+                if self._node_allowed(relation, identity)
+            ]
         return {
             "status": "loaded",
             "catalog_revision": self.repository.current_revision(),
@@ -83,10 +101,12 @@ class CapabilityManualService:
         bundle = self.repository.operation_bundle(request.operation_id)
         if not self._operation_allowed(bundle, identity):
             raise PermissionError("当前岗位不能准备这个业务操作")
-        if request.operation_id != MATERIAL_REQUEST_OPERATION_ID:
-            raise ValueError("当前试验只支持创建材料申请草稿")
-
-        resolution = self._resolve_material_request(request, identity)
+        if request.operation_id == MATERIAL_REQUEST_OPERATION_ID:
+            resolution = self._resolve_material_request(request, identity)
+        elif request.operation_id in OPERATION_BY_ID:
+            resolution = self._resolve_procurement_operation(request, identity)
+        else:
+            raise ValueError(f"当前说明书服务尚不支持操作 {request.operation_id}")
         if resolution["status"] != "resolved":
             return {
                 **resolution,
@@ -95,7 +115,16 @@ class CapabilityManualService:
             }
 
         facts = resolution["facts"]
-        evaluation = self.compiler_registry.compile(bundle, facts)
+        try:
+            evaluation = self.compiler_registry.compile(bundle, facts)
+        except CapabilityCompilationError as exc:
+            return {
+                "status": "needs_input",
+                "operation_id": request.operation_id,
+                "catalog_revision": self.repository.current_revision(),
+                "questions": list(exc.questions) or [str(exc)],
+                "error": str(exc),
+            }
         if not evaluation.tool_call:
             return {
                 "status": "needs_input",
@@ -109,7 +138,7 @@ class CapabilityManualService:
             }
 
         project_code = str(resolution["project_code"])
-        summary = self._confirmation_summary(facts, bundle)
+        summary = self._confirmation_summary(facts, bundle, evaluation.tool_call)
         pending = self.repository.create_pending(
             operation_id=request.operation_id,
             identity=identity,
@@ -150,7 +179,7 @@ class CapabilityManualService:
                 completed = self.repository.finish_pending(request.pending_id, status="failed", result=result_payload)
                 return self._public_pending(completed)
 
-            readback = self._readback(gateway, tool_result.data)
+            readback = self._verify_readback(gateway, pending, result_payload)
             if not readback.get("ok"):
                 failure = {
                     "ok": False,
@@ -166,7 +195,7 @@ class CapabilityManualService:
                 "ok": True,
                 "write_result": result_payload,
                 "readback": readback,
-                "document": readback.get("data"),
+                "document": readback.get("document"),
             }
             completed = self.repository.finish_pending(request.pending_id, status="completed", result=verified)
             return self._public_pending(completed)
@@ -194,6 +223,12 @@ class CapabilityManualService:
         return self._public_pending(pending)
 
     def _resolve_material_request(self, request: PrepareOperationRequest, identity: ExternalIdentity) -> dict[str, Any]:
+        if not request.items:
+            return {
+                "status": "needs_input",
+                "questions": ["请说明需要的物料、数量和单位。"],
+                "missing": ["items"],
+            }
         project_text = str(request.project or identity.default_project or "").strip()
         if not project_text:
             return {"status": "needs_input", "questions": ["这批材料属于哪个项目？"], "missing": ["project"]}
@@ -309,14 +344,336 @@ class CapabilityManualService:
             },
         }
 
+    def _resolve_procurement_operation(
+        self,
+        request: PrepareOperationRequest,
+        identity: ExternalIdentity,
+    ) -> dict[str, Any]:
+        seed = OPERATION_BY_ID[request.operation_id]
+        if len(request.source_documents) != 1:
+            expected = "、".join(seed.source_doctypes)
+            return {
+                "status": "needs_input",
+                "questions": [f"请指定一张要处理的{expected}单号。"],
+                "missing": ["source_documents"],
+            }
+        reference = request.source_documents[0]
+        if reference.doctype not in seed.source_doctypes:
+            return {
+                "status": "blocked",
+                "questions": [
+                    f"{seed.operation_label} 需要 {seed.source_doctypes[0]}，不能使用 {reference.doctype}。"
+                ],
+            }
+
+        client = self._verified_client(identity)
+        source_result = client.get_document(reference.doctype, reference.name)
+        if not source_result.ok or not isinstance(source_result.data, dict):
+            if source_result.error_type in {"permission_error", "auth_error"}:
+                raise PermissionError(source_result.user_message or "当前员工无权读取来源单据")
+            return {
+                "status": "blocked",
+                "questions": [source_result.user_message or f"无法读取 {reference.doctype} {reference.name}。"],
+                "source_document": reference.model_dump(),
+            }
+        snapshot = dict(source_result.data)
+        snapshot.setdefault("doctype", reference.doctype)
+        snapshot.setdefault("name", reference.name)
+
+        supplier_queries = list(request.suppliers)
+        if request.supplier:
+            supplier_queries.insert(0, request.supplier)
+        needs_suppliers = seed.goal in {
+            "create_rfq_from_material_request",
+            "create_supplier_quotation_from_rfq",
+        }
+        if needs_suppliers and not supplier_queries:
+            wording = "至少一家供应商" if seed.goal == "create_rfq_from_material_request" else "报价供应商"
+            return {
+                "status": "needs_input",
+                "questions": [f"请选择{wording}。"],
+                "missing": ["suppliers"],
+            }
+        resolved_suppliers: list[str] = []
+        supplier_choices: list[dict[str, Any]] = []
+        for query in dict.fromkeys(supplier_queries):
+            options = self.reference_data.options("supplier", query=query)
+            selected = exact_or_unique_option(options, query)
+            if selected:
+                resolved_suppliers.append(str(selected["value"]))
+            else:
+                supplier_choices.append({"query": query, "candidates": options[:5]})
+        if supplier_choices:
+            return {
+                "status": "needs_choice" if any(row["candidates"] for row in supplier_choices) else "blocked",
+                "entity": "supplier",
+                "questions": ["有供应商无法唯一确定，请从真实供应商中选择。"],
+                "choices": supplier_choices,
+            }
+        if seed.goal == "create_supplier_quotation_from_rfq" and len(resolved_suppliers) != 1:
+            return {
+                "status": "needs_choice",
+                "entity": "supplier",
+                "questions": ["一张供应商报价只能对应一家供应商，请选择其中一家。"],
+                "candidates": [{"value": value, "label": value} for value in resolved_suppliers],
+            }
+
+        schedule_date = parse_schedule_date(request.schedule_date or request.schedule_text)
+        if (request.schedule_date or request.schedule_text) and not schedule_date:
+            return {
+                "status": "needs_input",
+                "questions": ["日期无法确定，请使用明确日期，例如 2026-08-06。"],
+                "missing": ["schedule_date"],
+            }
+        for field_name, value in (("posting_date", request.posting_date), ("valid_till", request.valid_till)):
+            if value and not _is_iso_date(value):
+                return {
+                    "status": "needs_input",
+                    "questions": [f"{field_name} 请使用 YYYY-MM-DD。"],
+                    "invalid": [field_name],
+                }
+
+        project_scope = self._resolve_project_scope(request.project, snapshot, identity)
+        if project_scope["status"] != "resolved":
+            return project_scope
+        project_code = str(project_scope["project_code"])
+
+        warehouse_value = str(request.warehouse or "").strip()
+        if warehouse_value:
+            options = self.reference_data.options("warehouse", query=warehouse_value, project=project_code)
+            selected = exact_or_unique_option(options, warehouse_value)
+            if not selected:
+                return {
+                    "status": "needs_choice" if options else "blocked",
+                    "entity": "warehouse",
+                    "questions": ["请选择真实收货仓库。"],
+                    "candidates": options[:5],
+                }
+            warehouse_value = str(selected["value"])
+
+        normalized_items, item_choices = self._source_operation_items(
+            request.items,
+            snapshot,
+            project_code=project_code,
+        )
+        if item_choices:
+            return {
+                "status": "needs_choice",
+                "entity": "source_item",
+                "questions": ["部分物料无法唯一对应到来源单据明细，请选择具体行。"],
+                "choices": item_choices,
+            }
+
+        company = str(snapshot.get("company") or "")
+        if not company:
+            companies = self.reference_data.options("company")
+            company = str(companies[0]["value"]) if len(companies) == 1 else ""
+        source_project = str(project_scope.get("erpnext_project") or "")
+        intent = {
+            "source_documents": [{"doctype": reference.doctype, "name": reference.name}],
+            "items": normalized_items,
+            "suppliers": resolved_suppliers,
+            "company": company or None,
+            "project": source_project or None,
+            "warehouse": warehouse_value or None,
+            "schedule_date": schedule_date,
+            "valid_till": request.valid_till,
+            "posting_date": request.posting_date,
+            "currency": request.currency,
+            "message": request.message,
+            "full_return": request.full_return,
+        }
+        facts = {
+            "today": date.today(),
+            "runtime_context": {
+                "company": company or None,
+                "project": source_project or None,
+                "warehouse": warehouse_value or None,
+            },
+            "source_documents": [snapshot],
+            "intent": intent,
+        }
+        return {
+            "status": "resolved",
+            "facts": facts,
+            "project_code": project_code,
+            "resolved": {
+                "source_documents": [{
+                    "doctype": snapshot.get("doctype"),
+                    "name": snapshot.get("name"),
+                    "docstatus": snapshot.get("docstatus"),
+                    "status": snapshot.get("status"),
+                }],
+                "suppliers": resolved_suppliers,
+                "project": project_scope,
+                "warehouse": warehouse_value or None,
+                "items": normalized_items,
+            },
+        }
+
+    def _resolve_project_scope(
+        self,
+        requested_project: str | None,
+        snapshot: dict[str, Any],
+        identity: ExternalIdentity,
+    ) -> dict[str, Any]:
+        source_projects = list(dict.fromkeys(
+            str(value).strip()
+            for value in [
+                snapshot.get("project"),
+                *[row.get("project") for row in snapshot.get("items") or [] if isinstance(row, dict)],
+            ]
+            if str(value or "").strip()
+        ))
+        resolved_sources: list[dict[str, Any]] = []
+        for source_project in source_projects:
+            options = self.reference_data.options("project", query=source_project)
+            selected_source = exact_or_unique_option(options, source_project)
+            if not selected_source:
+                return {
+                    "status": "blocked",
+                    "entity": "project",
+                    "questions": [f"来源单据中的项目 {source_project} 无法映射到受管项目主数据。"],
+                }
+            source_code = str(selected_source.get("source_code") or source_project)
+            if identity.allowed_projects and source_code not in identity.allowed_projects:
+                raise PermissionError("当前员工无权操作来源单据所属项目")
+            resolved_sources.append(selected_source)
+
+        selected: dict[str, Any] | None = None
+        project_text = str(requested_project or "").strip()
+        if project_text:
+            options = self.reference_data.options("project", query=project_text)
+            selected = exact_or_unique_option(options, project_text)
+        elif len(resolved_sources) == 1:
+            selected = resolved_sources[0]
+            project_text = str(selected.get("value") or selected.get("label") or "")
+        elif len(resolved_sources) > 1:
+            return {
+                "status": "blocked",
+                "entity": "project",
+                "questions": ["来源单据包含多个项目，请先按项目拆分后再继续。"],
+                "candidates": resolved_sources[:5],
+            }
+
+        if project_text and not selected:
+            return {
+                "status": "needs_choice" if options else "blocked",
+                "entity": "project",
+                "questions": ["请选择当前业务所属的真实项目。"],
+                "candidates": options[:5],
+            }
+        if selected and resolved_sources:
+            selected_code = str(selected.get("source_code") or "")
+            source_codes = {str(row.get("source_code") or "") for row in resolved_sources}
+            if selected_code not in source_codes:
+                return {
+                    "status": "blocked",
+                    "entity": "project",
+                    "questions": ["指定项目与来源单据项目不一致，不能转换。"],
+                }
+
+        project_code = str((selected or {}).get("source_code") or identity.default_project)
+        if not project_code:
+            return {
+                "status": "needs_input",
+                "entity": "project",
+                "questions": ["请指定当前业务所属项目。"],
+            }
+        if identity.allowed_projects and project_code not in identity.allowed_projects:
+            raise PermissionError("当前员工无权操作来源单据所属项目")
+        return {
+            "status": "resolved",
+            "project_code": project_code,
+            "erpnext_project": (selected or {}).get("value"),
+            "label": (selected or {}).get("label") or project_text,
+        }
+
+    def _source_operation_items(
+        self,
+        items: list[Any],
+        snapshot: dict[str, Any],
+        *,
+        project_code: str,
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        source_rows = [dict(row) for row in snapshot.get("items") or [] if isinstance(row, dict)]
+        by_name = {str(row.get("name") or ""): row for row in source_rows if row.get("name")}
+        normalized: list[dict[str, Any]] = []
+        choices: list[dict[str, Any]] = []
+        for index, item in enumerate(items):
+            payload = item.model_dump(exclude_none=True)
+            source_row = str(payload.get("source_row") or "")
+            matches: list[dict[str, Any]] = []
+            if source_row and source_row in by_name:
+                matches = [by_name[source_row]]
+            elif payload.get("item_code"):
+                matches = [row for row in source_rows if str(row.get("item_code") or "") == payload["item_code"]]
+            elif payload.get("raw_item_text"):
+                needle = normalize_text(payload["raw_item_text"])
+                matches = [
+                    row for row in source_rows
+                    if needle in {
+                        normalize_text(row.get("item_code")),
+                        normalize_text(row.get("item_name")),
+                        normalize_text(row.get("description")),
+                    }
+                ]
+            if len(matches) == 1:
+                payload["source_row"] = matches[0].get("name")
+                payload["item_code"] = matches[0].get("item_code")
+            elif items:
+                choices.append({
+                    "item_index": index,
+                    "query": payload.get("item_code") or payload.get("raw_item_text") or source_row,
+                    "candidates": [
+                        {
+                            "value": row.get("name"),
+                            "label": row.get("item_name") or row.get("item_code"),
+                            "item_code": row.get("item_code"),
+                            "qty": row.get("qty"),
+                            "uom": row.get("uom") or row.get("stock_uom"),
+                        }
+                        for row in source_rows[:20]
+                    ],
+                })
+                continue
+
+            warehouse = str(payload.get("warehouse") or "").strip()
+            if warehouse:
+                warehouse_options = self.reference_data.options("warehouse", query=warehouse, project=project_code)
+                selected = exact_or_unique_option(warehouse_options, warehouse)
+                if not selected:
+                    choices.append({
+                        "item_index": index,
+                        "entity": "warehouse",
+                        "query": warehouse,
+                        "candidates": warehouse_options[:5],
+                    })
+                    continue
+                payload["warehouse"] = selected["value"]
+            payload.pop("raw_item_text", None)
+            normalized.append(payload)
+        return normalized, choices
+
     def _node_allowed(self, node: dict[str, Any], identity: ExternalIdentity) -> bool:
         node_id = str(node.get("node_id") or "")
-        if node_id in {"module.buying", "cap.material_request"}:
-            bundle = self.repository.operation_bundle(MATERIAL_REQUEST_OPERATION_ID)
-            return self._operation_allowed(bundle, identity)
+        if node_id == "module.buying":
+            return any(
+                self._operation_allowed(self.repository.operation_bundle(operation_id), identity)
+                for operation_id in ALL_OPERATION_IDS
+            )
+        capability_operation = {
+            "cap.material_request": MATERIAL_REQUEST_OPERATION_ID,
+            **CAPABILITY_OPERATION_IDS,
+        }.get(node_id)
+        if capability_operation:
+            return self._operation_allowed(self.repository.operation_bundle(capability_operation), identity)
         if node.get("node_type") == "slot":
-            return self._operation_allowed(self.repository.operation_bundle(MATERIAL_REQUEST_OPERATION_ID), identity)
-        if node_id == MATERIAL_REQUEST_OPERATION_ID:
+            return any(
+                self._operation_allowed(self.repository.operation_bundle(operation_id), identity)
+                for operation_id in ALL_OPERATION_IDS
+            )
+        if node_id in ALL_OPERATION_IDS:
             return self._operation_allowed(self.repository.operation_bundle(node_id), identity)
         return False
 
@@ -329,12 +686,24 @@ class CapabilityManualService:
         return self.repository.resolve_identity(request.external_subject, request.agent_id)
 
     def _gateway(self, identity: ExternalIdentity) -> ToolGateway:
-        client = self.client_factory(identity.employee_user)
+        client = self._verified_client(identity)
         policy = make_tool_access_policy(identity.profile_name)
         return ToolGateway(
             ERPNextAdapter(client),
             ToolSession(user=identity.employee_user, policy=policy, verify_erpnext_identity=True),
         )
+
+    def _verified_client(self, identity: ExternalIdentity) -> ERPNextClient:
+        client = self.client_factory(identity.employee_user)
+        logged_user = client.get_logged_user()
+        if not logged_user.ok:
+            raise PermissionError(logged_user.user_message or "无法核对 ERPNext 登录身份")
+        actual = logged_user.data
+        if isinstance(actual, dict):
+            actual = actual.get("message") or actual.get("user") or actual.get("name")
+        if str(actual or "").strip() != identity.employee_user:
+            raise PermissionError("ERPNext 登录身份与当前员工不一致")
+        return client
 
     def _default_client_factory(self, user: str) -> ERPNextClient:
         profile = os.getenv("NEXTERP_CAPABILITY_ERP_PROFILE", "CIVIL").upper()
@@ -346,15 +715,37 @@ class CapabilityManualService:
         )
 
     @staticmethod
-    def _confirmation_summary(facts: dict[str, Any], bundle: dict[str, Any]) -> dict[str, Any]:
+    def _confirmation_summary(
+        facts: dict[str, Any],
+        bundle: dict[str, Any],
+        tool_call: dict[str, Any],
+    ) -> dict[str, Any]:
+        operation_id = str(bundle["operation"]["operation_id"])
+        arguments = dict(tool_call.get("arguments") or {})
+        if operation_id == MATERIAL_REQUEST_OPERATION_ID:
+            return {
+                "title": bundle["operation"]["label"],
+                "project": facts["context"]["erpnext_project"],
+                "warehouse": facts["context"]["warehouse"],
+                "company": facts["context"]["company"],
+                "schedule_date": facts["user"]["schedule_date"],
+                "items": facts["items"],
+                "effect": "将在 ERPNext 中创建一张采购类型材料申请草稿。",
+            }
+        seed = OPERATION_BY_ID[operation_id]
+        intent = dict(facts.get("intent") or {})
         return {
-            "title": bundle["operation"]["label"],
-            "project": facts["context"]["erpnext_project"],
-            "warehouse": facts["context"]["warehouse"],
-            "company": facts["context"]["company"],
-            "schedule_date": facts["user"]["schedule_date"],
-            "items": facts["items"],
-            "effect": "将在 ERPNext 中创建一张采购类型材料申请草稿。",
+            "title": seed.operation_label,
+            "source_documents": intent.get("source_documents") or [],
+            "company": arguments.get("company") or facts.get("runtime_context", {}).get("company"),
+            "project": facts.get("runtime_context", {}).get("project"),
+            "warehouse": facts.get("runtime_context", {}).get("warehouse"),
+            "suppliers": arguments.get("suppliers") or ([arguments["supplier"]] if arguments.get("supplier") else []),
+            "schedule_date": arguments.get("schedule_date"),
+            "posting_date": arguments.get("posting_date"),
+            "valid_till": arguments.get("valid_till"),
+            "items": arguments.get("items") or arguments.get("selected_items") or [],
+            "effect": f"将在 ERPNext 中{seed.operation_summary}",
         }
 
     @staticmethod
@@ -366,13 +757,32 @@ class CapabilityManualService:
             if slot_id in by_id
         ]
 
-    def _readback(self, gateway: ToolGateway, data: Any) -> dict[str, Any]:
-        name = data.get("name") if isinstance(data, dict) else None
-        doctype = data.get("doctype") if isinstance(data, dict) else None
-        if not name or not doctype:
-            return {"ok": False, "error": "write result did not contain document identity"}
-        result = gateway.adapter.client.get_document(str(doctype), str(name))
-        return result.to_dict()
+    def _verify_readback(
+        self,
+        gateway: ToolGateway,
+        pending: dict[str, Any],
+        tool_result: dict[str, Any],
+    ) -> dict[str, Any]:
+        operation_id = str(pending["operation_id"])
+        goal = operation_goal(operation_id)
+        prepared = PreparedBusinessAction(
+            capability=operation_capability(operation_id),
+            goal=goal,
+            tool_call=dict(pending["tool_call"]),
+            summary=str(pending.get("summary", {}).get("title") or goal),
+            field_sources={},
+            preflight_checks=(),
+            confirmation_hash=canonical_tool_call_hash(dict(pending["tool_call"])),
+            write=True,
+        )
+
+        def load_document(doctype: str, name: str) -> dict[str, Any]:
+            result = gateway.adapter.client.get_document(doctype, name)
+            if not result.ok or not isinstance(result.data, dict):
+                raise RuntimeError(result.user_message or f"无法回读 {doctype} {name}")
+            return dict(result.data)
+
+        return verify_procurement_result(prepared, tool_result, load_document)
 
     @staticmethod
     def _public_pending(pending: dict[str, Any]) -> dict[str, Any]:
@@ -416,3 +826,11 @@ def exact_or_unique_option(
     if len(exact) == 1:
         return exact[0]
     return options[0] if len(options) == 1 else None
+
+
+def _is_iso_date(value: str) -> bool:
+    try:
+        date.fromisoformat(str(value)[:10])
+        return True
+    except ValueError:
+        return False

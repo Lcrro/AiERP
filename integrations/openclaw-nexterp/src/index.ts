@@ -56,12 +56,29 @@ const plugin: OpenClawPluginDefinition = definePluginEntry({
             warehouse: Type.Optional(Type.String()),
             schedule_date: Type.Optional(Type.String({ description: "ISO date YYYY-MM-DD when known." })),
             schedule_text: Type.Optional(Type.String({ description: "Relative Chinese date such as 明天 or 后天." })),
-            items: Type.Array(Type.Object({
+            posting_date: Type.Optional(Type.String({ description: "Posting date in ISO YYYY-MM-DD." })),
+            valid_till: Type.Optional(Type.String({ description: "Quotation validity date in ISO YYYY-MM-DD." })),
+            currency: Type.Optional(Type.String()),
+            message: Type.Optional(Type.String({ maxLength: 4000 })),
+            supplier: Type.Optional(Type.String({ description: "One supplier name as spoken by the user; Nexterp resolves it." })),
+            suppliers: Type.Optional(Type.Array(Type.String(), { maxItems: 50 })),
+            source_documents: Type.Optional(Type.Array(Type.Object({
+              doctype: Type.String({ minLength: 1 }),
+              name: Type.String({ minLength: 1 }),
+            }, { additionalProperties: false }), { maxItems: 20 })),
+            items: Type.Optional(Type.Array(Type.Object({
               raw_item_text: Type.Optional(Type.String()),
               item_code: Type.Optional(Type.String()),
-              qty: Type.Number({ exclusiveMinimum: 0 }),
+              source_row: Type.Optional(Type.String({ description: "ERPNext child-row name returned by the source document." })),
+              qty: Type.Optional(Type.Number({ exclusiveMinimum: 0 })),
               uom: Type.Optional(Type.String()),
-            }, { additionalProperties: false }), { minItems: 1, maxItems: 100 }),
+              rate: Type.Optional(Type.Number({ minimum: 0 })),
+              warehouse: Type.Optional(Type.String()),
+              project: Type.Optional(Type.String()),
+              schedule_date: Type.Optional(Type.String()),
+              reason: Type.Optional(Type.String({ maxLength: 500 })),
+            }, { additionalProperties: false }), { maxItems: 100 })),
+            full_return: Type.Optional(Type.Boolean()),
           }, { additionalProperties: false }),
           async execute(_id: string, rawParams: unknown) {
             const params = rawParams as Record<string, unknown>;

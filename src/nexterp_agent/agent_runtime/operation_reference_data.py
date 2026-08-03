@@ -28,6 +28,8 @@ class OperationReferenceDataCatalog:
             return self._items(query)
         if entity == "uom":
             return self._uoms(item_code)
+        if entity == "supplier":
+            return self._suppliers(query)
         return []
 
     def _companies(self) -> list[dict[str, Any]]:
@@ -42,7 +44,12 @@ class OperationReferenceDataCatalog:
         erpnext_names = self._project_erpnext_names()
         rows = []
         for row in self._read(self.master_data / "projects.tsv"):
-            haystack = " ".join((row.get("project_code", ""), row.get("project_name", ""), row.get("project_short_name", ""))).casefold()
+            haystack = " ".join((
+                row.get("project_code", ""),
+                row.get("project_name", ""),
+                row.get("project_short_name", ""),
+                erpnext_names.get(row.get("project_code", ""), ""),
+            )).casefold()
             if row.get("status") != "active" or (needle and needle not in haystack):
                 continue
             rows.append({
@@ -104,6 +111,25 @@ class OperationReferenceDataCatalog:
                     units.append(value)
             return [{"value": value, "label": value, "meta": "物料允许单位"} for value in units]
         return []
+
+    def _suppliers(self, query: str) -> list[dict[str, Any]]:
+        needle = query.casefold().strip()
+        rows = []
+        for row in self._read(self.master_data / "suppliers.tsv"):
+            haystack = " ".join((
+                row.get("supplier_code", ""),
+                row.get("supplier_name", ""),
+                row.get("primary_category", ""),
+            )).casefold()
+            if row.get("status") != "active" or (needle and needle not in haystack):
+                continue
+            rows.append({
+                "value": row["supplier_name"],
+                "label": row["supplier_name"],
+                "source_code": row.get("supplier_code", ""),
+                "meta": row.get("primary_category", ""),
+            })
+        return rows[:20]
 
     def _project_erpnext_names(self) -> dict[str, str]:
         report = self.root / "data" / "runtime" / "master_data_apply_report.json"

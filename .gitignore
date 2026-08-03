@@ -23,6 +23,7 @@ data/runtime/logs/*
 data/runtime/sessions/*
 data/runtime/*_report.json
 data/runtime/openclaw_*.json
+data/runtime/openclaw_*.log
 data/runtime/workbench-*.log
 !data/runtime/logs/.gitkeep
 !data/runtime/sessions/.gitkeep

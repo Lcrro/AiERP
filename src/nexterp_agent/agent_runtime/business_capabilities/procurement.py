@@ -448,6 +448,25 @@ def verify_procurement_result(
     if str(snapshot.get("name") or "") != name:
         return {"ok": False, "reason": "read_back_name_mismatch", "checks": checks, "document": snapshot}
     checks.append("document_identity_matches")
+    if prepared.goal == "create_rfq_from_material_request":
+        source = next(iter({
+            str(row.get("material_request") or "")
+            for row in prepared.tool_call["arguments"].get("items") or []
+            if row.get("material_request")
+        }), "")
+        if source and not any(str(row.get("material_request") or "") == source for row in snapshot.get("items") or []):
+            return {"ok": False, "reason": "material_request_lineage_missing", "checks": checks, "document": snapshot}
+        checks.append("material_request_lineage_preserved")
+    if prepared.goal == "create_supplier_quotation_from_rfq":
+        source = prepared.tool_call["arguments"].get("request_for_quotation")
+        linked = str(snapshot.get("request_for_quotation") or "") == str(source or "")
+        linked = linked or any(
+            str(row.get("request_for_quotation") or "") == str(source or "")
+            for row in snapshot.get("items") or []
+        )
+        if source and not linked:
+            return {"ok": False, "reason": "request_for_quotation_lineage_missing", "checks": checks, "document": snapshot}
+        checks.append("request_for_quotation_lineage_preserved")
     if prepared.goal == "create_purchase_order_from_supplier_quotation":
         source = prepared.tool_call["arguments"]["supplier_quotation"]
         if not any(str(row.get("supplier_quotation") or "") == source for row in snapshot.get("items") or []):
@@ -458,6 +477,11 @@ def verify_procurement_result(
         if not any(str(row.get("purchase_order") or "") == source for row in snapshot.get("items") or []):
             return {"ok": False, "reason": "purchase_order_lineage_missing", "checks": checks, "document": snapshot}
         checks.append("purchase_order_lineage_preserved")
+    if prepared.goal == "create_purchase_return_from_receipt":
+        source = prepared.tool_call["arguments"]["purchase_receipt"]
+        if not snapshot.get("is_return") or str(snapshot.get("return_against") or "") != source:
+            return {"ok": False, "reason": "purchase_return_lineage_missing", "checks": checks, "document": snapshot}
+        checks.append("purchase_return_lineage_preserved")
     return {"ok": True, "reason": "verified", "checks": checks, "document": snapshot}
 
 

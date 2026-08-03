@@ -29,14 +29,25 @@ class GuideLoadRequest(StrictModel):
 class PrepareItem(StrictModel):
     raw_item_text: str | None = Field(default=None, max_length=300)
     item_code: str | None = Field(default=None, max_length=180)
-    qty: float = Field(gt=0)
+    source_row: str | None = Field(default=None, max_length=180)
+    qty: float | None = Field(default=None, gt=0)
     uom: str | None = Field(default=None, max_length=80)
+    rate: float | None = Field(default=None, ge=0)
+    warehouse: str | None = Field(default=None, max_length=240)
+    project: str | None = Field(default=None, max_length=240)
+    schedule_date: str | None = Field(default=None, max_length=40)
+    reason: str | None = Field(default=None, max_length=500)
 
-    @field_validator("raw_item_text", "item_code")
+    @field_validator("raw_item_text", "item_code", "source_row", "uom", "warehouse", "project", "schedule_date", "reason")
     @classmethod
     def strip_optional(cls, value: str | None) -> str | None:
         value = str(value or "").strip()
         return value or None
+
+
+class PrepareDocumentReference(StrictModel):
+    doctype: str = Field(min_length=1, max_length=140)
+    name: str = Field(min_length=1, max_length=180)
 
 
 class PrepareOperationRequest(StrictModel):
@@ -46,9 +57,15 @@ class PrepareOperationRequest(StrictModel):
     warehouse: str | None = Field(default=None, max_length=240)
     schedule_date: str | None = Field(default=None, max_length=40)
     schedule_text: str | None = Field(default=None, max_length=120)
-    items: list[PrepareItem] = Field(min_length=1, max_length=100)
-
-
+    posting_date: str | None = Field(default=None, max_length=40)
+    valid_till: str | None = Field(default=None, max_length=40)
+    currency: str | None = Field(default=None, max_length=20)
+    message: str | None = Field(default=None, max_length=4000)
+    supplier: str | None = Field(default=None, max_length=240)
+    suppliers: list[str] = Field(default_factory=list, max_length=50)
+    source_documents: list[PrepareDocumentReference] = Field(default_factory=list, max_length=20)
+    items: list[PrepareItem] = Field(default_factory=list, max_length=100)
+    full_return: bool = False
 class ExecuteOperationRequest(StrictModel):
     pending_id: str = Field(min_length=1, max_length=80)
 
