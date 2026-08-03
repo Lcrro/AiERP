@@ -1,5 +1,7 @@
 const $ = (selector) => document.querySelector(selector);
-const state = { bootstrap: null };
+const state = { bootstrap: null, progressTimer: null, progressStartedAt: 0, progressPhase: 0 };
+const progressPhases = ["正在理解你的需求…", "正在查找相关业务能力…", "正在读取当前能力说明书…", "正在核对项目、物料和业务资料…", "正在准备操作摘要和回复…"];
+const statusLabels = { ok: "已完成", completed: "已完成", failed: "失败", disabled: "已暂停", running: "运行中" };
 
 function esc(value) {
   return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
@@ -66,14 +68,15 @@ function renderDetails(side, data) {
 
 function renderSide(side, data) {
   const status = $(`#${side}Status`);
-  status.textContent = data.status || "未知";
-  status.className = `status ${data.status === "failed" ? "failed" : "ok"}`;
+  status.textContent = statusLabels[data.status] || data.status || "未知";
+  status.className = `status ${data.status === "failed" ? "failed" : data.status === "disabled" ? "disabled" : "ok"}`;
+  $(`.runtime-column[data-side="${side}"]`).classList.toggle("is-disabled", data.status === "disabled");
   const tools = data.tool_summary?.tools || [];
   $(`#${side}Metrics`).innerHTML = [
     metric("耗时", `${data.duration_ms || 0} ms`),
     metric("动作数", data.tool_summary?.calls ?? (data.steps || []).length),
     metric("追问数", data.question_count || 0),
-    metric("模型", data.model || "DeepSeek"),
+    metric("模型", data.status === "disabled" ? "未调用" : data.model || "DeepSeek"),
   ].join("");
   const message = $(`#${side}Message`);
   message.textContent = data.message || "没有生成回复";
@@ -82,27 +85,76 @@ function renderSide(side, data) {
   renderDetails(side, data);
 }
 
-function setRunning(running) {
+function updateAssistantProgress() {
+  const elapsedSeconds = Math.max(0, Math.floor((Date.now() - state.progressStartedAt) / 1000));
+  const nextPhase = Math.min(progressPhases.length - 1, Math.floor(elapsedSeconds / 4));
+  state.progressPhase = nextPhase;
+  $("#assistantPhase").textContent = progressPhases[nextPhase];
+  $("#assistantElapsed").textContent = `${elapsedSeconds} 秒`;
+}
+
+function startAssistantProgress() {
+  clearInterval(state.progressTimer);
+  state.progressStartedAt = Date.now();
+  state.progressPhase = 0;
+  $("#assistantActivity").hidden = false;
+  updateAssistantProgress();
+  state.progressTimer = setInterval(updateAssistantProgress, 1000);
+}
+
+function stopAssistantProgress() {
+  clearInterval(state.progressTimer);
+  state.progressTimer = null;
+  $("#assistantActivity").hidden = true;
+}
+
+function setRunning(running, includeExisting = false) {
   $("#runCompare").disabled = running;
-  $("#runCompare").textContent = running ? "两侧运行中..." : "开始对比";
+  $("#runCompare").textContent = running ? "小助理处理中..." : includeExisting ? "开始对比" : "运行新版";
+  $("#includeExisting").disabled = running;
   if (running) {
-    for (const side of ["existing", "openclaw"]) {
-      const status = $(`#${side}Status`);
-      status.textContent = "运行中";
-      status.className = "status running";
-    }
+    const openclawStatus = $("#openclawStatus");
+    openclawStatus.textContent = "运行中";
+    openclawStatus.className = "status running";
+    const existingStatus = $("#existingStatus");
+    existingStatus.textContent = includeExisting ? "运行中" : "已暂停";
+    existingStatus.className = includeExisting ? "status running" : "status disabled";
   }
 }
 
+function syncLegacyMode() {
+  const enabled = $("#includeExisting").checked;
+  const column = $('.runtime-column[data-side="existing"]');
+  column.classList.toggle("is-disabled", !enabled);
+  if (!enabled) {
+    $("#existingStatus").textContent = "已暂停";
+    $("#existingStatus").className = "status disabled";
+    $("#existingMessage").textContent = "默认不调用旧版，避免额外消耗 Token";
+  } else {
+    $("#existingStatus").textContent = "等待对照";
+    $("#existingStatus").className = "status";
+    $("#existingMessage").textContent = "运行后显示旧版结果";
+  }
+  $("#runCompare").textContent = enabled ? "开始对比" : "运行新版";
+}
+
 $("#project").addEventListener("change", fillEmployees);
+$("#includeExisting").addEventListener("change", syncLegacyMode);
 $("#compareForm").addEventListener("submit", async (event) => {
   event.preventDefault();
-  setRunning(true);
+  const includeExisting = $("#includeExisting").checked;
+  setRunning(true, includeExisting);
+  startAssistantProgress();
   $("#summary").hidden = true;
   try {
     const payload = await fetchJson("/api/agent-runtime/compare", {
       method: "POST",
-      body: JSON.stringify({ user: $("#employee").value, project_code: $("#project").value, text: $("#requestText").value.trim() }),
+      body: JSON.stringify({
+        user: $("#employee").value,
+        project_code: $("#project").value,
+        text: $("#requestText").value.trim(),
+        include_existing: includeExisting,
+      }),
     });
     renderSide("existing", payload.existing);
     renderSide("openclaw", payload.openclaw);
@@ -112,7 +164,8 @@ $("#compareForm").addEventListener("submit", async (event) => {
     $("#summary").textContent = error.message;
     $("#summary").hidden = false;
   } finally {
-    setRunning(false);
+    stopAssistantProgress();
+    setRunning(false, includeExisting);
   }
 });
 
@@ -120,3 +173,5 @@ bootstrap().catch((error) => {
   $("#summary").textContent = `初始化失败：${error.message}`;
   $("#summary").hidden = false;
 });
+
+syncLegacyMode();

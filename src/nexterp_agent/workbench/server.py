@@ -1731,6 +1731,7 @@ class AgentWorkbenchService:
         user = str(payload.get("user") or "").strip()
         project_code = str(payload.get("project_code") or "").strip()
         text = str(payload.get("text") or "").strip()
+        include_existing = payload.get("include_existing") is True
         if not user or not project_code or not text:
             raise ValueError("user、project_code 和 text 必填")
         employee = next((row for row in employee_catalog() if row["user_email"] == user), None)
@@ -1775,15 +1776,32 @@ class AgentWorkbenchService:
                     "tool_summary": {"calls": 0, "tools": [], "failures": 1},
                 }
 
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            old_future = executor.submit(safe, existing_preview, "existing")
-            new_future = executor.submit(safe, openclaw_preview, "openclaw_manual")
-            existing = old_future.result()
-            openclaw = new_future.result()
+        if include_existing:
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                old_future = executor.submit(safe, existing_preview, "existing")
+                new_future = executor.submit(safe, openclaw_preview, "openclaw_manual")
+                existing = old_future.result()
+                openclaw = new_future.result()
+        else:
+            existing = {
+                "runtime": "existing",
+                "status": "disabled",
+                "message": "旧版 Runtime 已暂停，本次没有调用模型，也没有消耗 Token。",
+                "duration_ms": 0,
+                "steps": [],
+                "questions": [],
+                "question_count": 0,
+                "tool_summary": {"calls": 0, "tools": [], "failures": 0},
+            }
+            openclaw = safe(openclaw_preview, "openclaw_manual")
         return {
             "comparison_id": comparison_id,
-            "mode": "preview_only",
-            "notice": "两侧均只做预览；OpenClaw 对比会话在插件层禁止写入 ERPNext。",
+            "mode": "ab_preview" if include_existing else "openclaw_only",
+            "notice": (
+                "两侧均只做预览；OpenClaw 对比会话在插件层禁止写入 ERPNext。"
+                if include_existing
+                else "本次只运行 OpenClaw 新版；旧版 Runtime 未调用，不消耗额外 Token。"
+            ),
             "request": {
                 "text": text,
                 "project_code": project_code,

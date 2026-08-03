@@ -100,7 +100,7 @@ GET  /api/operations/{pending_id}
 | 服务 | 地址 | 说明 |
 | --- | --- | --- |
 | 员工工作台 | `http://127.0.0.1:8788/` | 现有 Runtime 基线 |
-| A/B 对比页 | `http://127.0.0.1:8788/agent-runtime-compare` | 两侧只做预览 |
+| A/B 对比页 | `http://127.0.0.1:8788/agent-runtime-compare` | 默认只运行 OpenClaw；旧版按需开启 |
 | Capability API | `http://127.0.0.1:8790` | WSL 内说明书服务 |
 | OpenClaw Gateway | `ws://127.0.0.1:18829` | 隔离 Profile `nexterp` |
 | 旧 OpenClaw | `ws://127.0.0.1:18789` | 不由本实验修改 |
@@ -140,6 +140,7 @@ bash scripts/openclaw/run_nexterp_agent.sh \
 - 真实 OpenClaw 已完成能力搜索、Guide 加载和材料申请 prepare 预览。
 - Resolver 已改为复用发布版物料评分器，宽泛搜索不再按文件顺序把“水泥砖”排在“水泥”本体之前。
 - A/B 页面只展示可审计动作摘要，不展示模型隐藏思维。
+- A/B 页面默认暂停旧版 Runtime，后端不会调用旧模型；需要回归对照时可手动开启。新版等待期间显示“小助理正在……”和当前处理阶段。
 - 物料名称使用归一化精确匹配，名称中的空格差异不会再制造假多候选。
 - `prepare` 会验证用户提供的单位是否属于解析后 SKU 的真实可用单位，错误单位返回候选而不是进入确认。
 - 真实 DeepSeek 预览基准 `20 / 20` 通过，执行调用为 `0`，中位耗时 `19.58s`。

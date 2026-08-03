@@ -46,8 +46,41 @@ def test_runtime_compare_page_is_preview_only_and_shows_both_runtimes() -> None:
     assert "现有 Nexterp Runtime" in html
     assert "OpenClaw 说明书 Runtime" in html
     assert "禁止写入 ERPNext" in html
+    assert 'id="includeExisting"' in html
+    assert "小助理正在处理" in html
     assert "/api/agent-runtime/compare" in script
     assert "loaded_nodes" in script
+    assert "include_existing" in script
+    assert "progressPhases" in script
+
+
+def test_runtime_compare_defaults_to_openclaw_without_calling_existing_runtime() -> None:
+    existing_calls: list[dict] = []
+    openclaw_calls: list[dict] = []
+    service = object.__new__(MODULE.AgentWorkbenchService)
+    service.run = lambda request: existing_calls.append(request)  # type: ignore[method-assign]
+    service.openclaw_preview = SimpleNamespace(run=lambda **kwargs: openclaw_calls.append(kwargs) or {
+        "runtime": "openclaw_manual",
+        "status": "ok",
+        "message": "已准备材料申请",
+        "duration_ms": 10,
+        "steps": [],
+        "questions": [],
+        "question_count": 0,
+        "tool_summary": {"calls": 1, "tools": ["nexterp_prepare_operation"], "failures": 0},
+    })
+
+    result = service.compare_runtimes({
+        "user": "mao.xiaoquan@stec-up.local",
+        "project_code": "PRJ-HL-13",
+        "text": "申请20包水泥",
+    })
+
+    assert result["mode"] == "openclaw_only"
+    assert result["existing"]["status"] == "disabled"
+    assert result["openclaw"]["status"] == "ok"
+    assert existing_calls == []
+    assert len(openclaw_calls) == 1
 
 
 def test_operation_model_explorer_shows_relational_slot_prototype() -> None:

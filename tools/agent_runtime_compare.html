@@ -18,13 +18,14 @@
         <div>
           <p class="eyebrow">A/B 预览</p>
           <h1>同一句员工请求，两套 Agent 怎么处理</h1>
-          <p>左侧是现有 Capability Runtime，右侧是 OpenClaw 渐进式说明书 Runtime。两侧默认只预览，禁止写入 ERPNext。</p>
+          <p>默认只运行 OpenClaw 渐进式说明书 Runtime。旧版已暂停，需要回归对照时再手动开启；所有测试只预览，禁止写入 ERPNext。</p>
         </div>
         <form id="compareForm">
           <label>项目<select id="project"></select></label>
           <label>员工<select id="employee"></select></label>
           <label class="request-field">员工请求<textarea id="requestText" rows="3">帮我给合流1.3标申请20包水泥，后天要用</textarea></label>
-          <button id="runCompare" type="submit">开始对比</button>
+          <label class="legacy-toggle"><input id="includeExisting" type="checkbox" />同时运行旧版对照<span>会额外调用一次模型</span></label>
+          <button id="runCompare" type="submit">运行新版</button>
         </form>
       </section>
 
@@ -32,15 +33,20 @@
 
       <section class="comparison-grid">
         <article class="runtime-column" data-side="existing">
-          <header><div><p class="eyebrow">基线</p><h2>现有 Nexterp Runtime</h2></div><span class="status" id="existingStatus">等待</span></header>
+          <header><div><p class="eyebrow">按需对照</p><h2>现有 Nexterp Runtime</h2></div><span class="status disabled" id="existingStatus">已暂停</span></header>
           <div id="existingMetrics" class="metrics"></div>
-          <section><h3>最终回复</h3><div id="existingMessage" class="message empty">运行后显示结果</div></section>
+          <section><h3>最终回复</h3><div id="existingMessage" class="message empty">默认不调用旧版，避免额外消耗 Token</div></section>
           <section><h3>可审计步骤</h3><div id="existingSteps" class="steps empty">尚无步骤</div></section>
           <section><h3>确认与追问</h3><div id="existingDetails" class="details empty">尚无内容</div></section>
         </article>
 
         <article class="runtime-column" data-side="openclaw">
-          <header><div><p class="eyebrow">试验</p><h2>OpenClaw 说明书 Runtime</h2></div><span class="status" id="openclawStatus">等待</span></header>
+          <header><div><p class="eyebrow">当前版本</p><h2>OpenClaw 说明书 Runtime</h2></div><span class="status" id="openclawStatus">等待</span></header>
+          <div id="assistantActivity" class="assistant-activity" hidden aria-live="polite">
+            <span class="typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <div><strong>小助理正在处理</strong><small id="assistantPhase">正在理解你的需求…</small></div>
+            <time id="assistantElapsed">0 秒</time>
+          </div>
           <div id="openclawMetrics" class="metrics"></div>
           <section><h3>最终回复</h3><div id="openclawMessage" class="message empty">运行后显示结果</div></section>
           <section><h3>加载节点与元工具</h3><div id="openclawSteps" class="steps empty">尚无步骤</div></section>
