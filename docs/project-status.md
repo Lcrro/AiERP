@@ -4,13 +4,13 @@
 
 ## 当前基线
 
-- 分支：`codex/openclaw-manual-runtime-v0.5`
+- 分支：`codex/agent-context-runtime-v0.6`
 - ERPNext 开发账套：`http://localhost:8002`
 - 员工 Agent 工作台：`http://127.0.0.1:8788/`
 - Tool schema 与 Adapter handler：`160 / 160`
 - 主数据来源：`data/master_data/` 与 `data/material_master/`
 - Agent 主入口：员工工作台使用 `OpenClawWorkbenchRunner`；旧 `DeepSeekAgentRuntime` 仅作为 A/B 回归基线
-- 测试：Python `436 passed`；工作台与 Capability Service 聚焦回归 `74 passed`；OpenClaw Plugin `5 passed`
+- 测试：Python 全量 `444 passed`；v0.6 聚焦回归通过；OpenClaw Plugin `5 passed`
 
 ## 已具备
 
@@ -67,6 +67,10 @@
 - 库存闭环真实验收已完成：基地入库、调拨至项目仓、项目领料、影响核验和取消回零全部通过。
 - Civil 测试账套已建立黄金基线：保留项目、员工、仓库、物料、供应商和价格主数据，业务单据为零；支持约 34 秒一键还原并同步清空工作台会话。
 - OpenClaw 渐进式说明书 Runtime v0.5 样板已完成：隔离 Profile 和 Gateway、PostgreSQL 说明书关系图、Capability API、四个元工具、可信身份绑定、冻结确认动作与 ERPNext 回读均已接通。
+- Agent 身份与工作情境层 v0.6：9 名员工、8 类岗位可生成可信上下文；同一员工可随项目切换项目岗位和仓库；岗位职责通过 PostgreSQL 按需加载，不参与权限放大。
+- 新增物料与库存、候选详情、可见单据状态只读入口；查询模式不会发现写能力，第二次仍无匹配时明确停止。
+- 工作台会话身份由服务端根据受信任 session key 反查，解决常驻 OpenClaw Gateway 使用旧开发身份的问题。
+- Runtime 查看页新增身份与工作情境层，可查看本轮查询/分析/写入类型、活动能力、已加载情境和未解决信息。
 - 材料申请说明书已迁入 PostgreSQL，OpenClaw 只按需搜索能力和加载当前节点 Guide，不直接看到或拼接底层 ERPNext ToolCall。
 - 新增 A/B 对比页 `http://127.0.0.1:8788/agent-runtime-compare`；默认只运行 OpenClaw 新版，旧版按需开启，关闭时后端不调用旧模型；等待期间显示“小助理正在……”处理阶段。两侧预览均禁止执行写操作。
 - OpenClaw 材料申请真实 DeepSeek 基准 `20 / 20` 通过，覆盖明确编码、相对日期、名称空格、多物料、多候选、缺数量、非法数量、未知物料和错误单位；执行调用 `0`，中位耗时 `19.58s`。
@@ -90,7 +94,7 @@
 
 ## 下一步
 
-1. 用一条连续的真实测试单据链在员工工作台验收询价、报价、订单、收货和退货，并记录每段耗时、追问、确认与回读结果。
+1. 为总经理、财务、项目经理和材料员各跑一组同问题对照，验证岗位情境只影响解释与协作建议，不扩大权限。
 2. 增加正式登录和员工身份绑定，替换本地身份切换。
 3. 扩充中文能力别名，使“采购业务”“采购申请”等宽泛表达也能稳定发现正确说明书节点。
 

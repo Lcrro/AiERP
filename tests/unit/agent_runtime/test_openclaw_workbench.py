@@ -16,7 +16,20 @@ from nexterp_agent.workbench.openclaw_runtime import (
     workbench_external_subject,
     workbench_session_key,
 )
-from nexterp_agent.workbench.server import AgentWorkbenchService
+from nexterp_agent.workbench.server import AgentWorkbenchService, infer_intent_mode
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("查询采购订单的状态", "read"),
+        ("采购订单有哪些延期", "analyze"),
+        ("帮我采购一批帆布手套", "write"),
+        ("把刚才的申请提交", "write"),
+    ],
+)
+def test_intent_mode_classifies_effect_instead_of_business_nouns(text: str, expected: str) -> None:
+    assert infer_intent_mode(text) == expected
 
 
 def test_workbench_identity_and_session_are_stable_and_scope_isolated() -> None:

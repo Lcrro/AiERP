@@ -77,7 +77,7 @@ set +a
 "$OPENCLAW" --profile nexterp config set agents.defaults.skipBootstrap true
 "$OPENCLAW" --profile nexterp config set tools.profile minimal
 "$OPENCLAW" --profile nexterp config unset tools.allow >/dev/null 2>&1 || true
-"$OPENCLAW" --profile nexterp config set tools.alsoAllow '["nexterp_search_capabilities","nexterp_load_guide","nexterp_prepare_operation","nexterp_execute_prepared_operation"]' --strict-json
+"$OPENCLAW" --profile nexterp config set tools.alsoAllow '["nexterp_load_work_context","nexterp_search_capabilities","nexterp_load_guide","nexterp_prepare_operation","nexterp_execute_prepared_operation"]' --strict-json
 "$OPENCLAW" --profile nexterp config set plugins.allow '["deepseek","nexterp-capability"]' --strict-json
 "$OPENCLAW" --profile nexterp config set plugins.entries.deepseek.enabled true
 "$OPENCLAW" --profile nexterp config set plugins.entries.nexterp-capability.enabled true

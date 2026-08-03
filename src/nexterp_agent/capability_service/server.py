@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from pydantic import ValidationError
 
 from .catalog import CapabilityCatalogRepository
+from .context_models import WorkContextLoadRequest
 from .models import (
     CapabilitySearchRequest,
     ExecuteOperationRequest,
@@ -41,14 +42,14 @@ def respond(handler: BaseHTTPRequestHandler, payload: dict[str, Any], status: in
 
 
 class CapabilityAPIHandler(BaseHTTPRequestHandler):
-    server_version = "NexterpCapabilityAPI/0.5"
+    server_version = "NexterpCapabilityAPI/0.6"
 
     def do_GET(self) -> None:  # noqa: N802
         try:
             self._authorize()
             parsed = urlparse(self.path)
             if parsed.path == "/api/health":
-                respond(self, {"ok": True, "service": "nexterp-capability-api", "version": "0.5"})
+                respond(self, {"ok": True, "service": "nexterp-capability-api", "version": "0.6"})
                 return
             prefix = "/api/operations/"
             if parsed.path.startswith(prefix):
@@ -68,6 +69,8 @@ class CapabilityAPIHandler(BaseHTTPRequestHandler):
             service = self.server.service  # type: ignore[attr-defined]
             if self.path == "/api/capabilities/search":
                 result = service.search(CapabilitySearchRequest.model_validate(payload), identity)
+            elif self.path == "/api/context/load":
+                result = service.load_context(WorkContextLoadRequest.model_validate(payload), identity)
             elif self.path == "/api/guides/load":
                 result = service.load_guides(GuideLoadRequest.model_validate(payload), identity)
             elif self.path == "/api/operations/prepare":

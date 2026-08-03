@@ -27,12 +27,29 @@ const plugin: OpenClawPluginDefinition = definePluginEntry({
       const config = (ctx.config?.plugins?.entries?.["nexterp-capability"]?.config ?? {}) as PluginConfig;
       const tools = [
         {
+          name: "nexterp_load_work_context",
+          label: "Load trusted Nexterp work context",
+          description: "Load up to three trusted role, project, inbox, document, collaboration, or process context topics.",
+          parameters: Type.Object({
+            topics: Type.Array(Type.Union([
+              Type.Literal("responsibilities"), Type.Literal("collaboration"), Type.Literal("project"),
+              Type.Literal("recent_documents"), Type.Literal("inbox"), Type.Literal("process_position"),
+            ]), { minItems: 1, maxItems: 3 }),
+            query: Type.Optional(Type.String({ maxLength: 300 })),
+          }, { additionalProperties: false }),
+          async execute(_id: string, rawParams: unknown) {
+            const params = rawParams as { topics: string[]; query?: string };
+            return toolResult(await capabilityRequest("/api/context/load", identity, { body: params, config }));
+          },
+        },
+        {
           name: "nexterp_search_capabilities",
           label: "Search Nexterp capabilities",
           description: "Search the authorized Nexterp business capability catalog in Chinese. Call this before loading a guide.",
           parameters: Type.Object({
             query: Type.String({ minLength: 1, maxLength: 500, description: "Business goal in concise Chinese." }),
             module: Type.Optional(Type.String({ maxLength: 60 })),
+            intent_mode: Type.Optional(Type.Union([Type.Literal("read"), Type.Literal("analyze"), Type.Literal("write")])),
           }, { additionalProperties: false }),
           async execute(_id: string, rawParams: unknown) {
             const params = rawParams as { query: string; module?: string };
@@ -58,6 +75,11 @@ const plugin: OpenClawPluginDefinition = definePluginEntry({
           parameters: Type.Object({
             operation_id: Type.String({ pattern: "^op\\.[a-z0-9_.]+$" }),
             request_id: Type.String({ minLength: 1, maxLength: 180 }),
+            query: Type.Optional(Type.String({ maxLength: 500 })),
+            item_codes: Type.Optional(Type.Array(Type.String(), { maxItems: 50 })),
+            document_type: Type.Optional(Type.String({ maxLength: 140 })),
+            document_name: Type.Optional(Type.String({ maxLength: 180 })),
+            limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 50 })),
             project: Type.Optional(Type.String()),
             warehouse: Type.Optional(Type.String()),
             schedule_date: Type.Optional(Type.String({ description: "ISO date YYYY-MM-DD when known." })),
@@ -110,6 +132,7 @@ const plugin: OpenClawPluginDefinition = definePluginEntry({
       return tools;
     }, {
       names: [
+        "nexterp_load_work_context",
         "nexterp_search_capabilities",
         "nexterp_load_guide",
         "nexterp_prepare_operation",

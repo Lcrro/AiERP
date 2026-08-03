@@ -137,6 +137,7 @@ class OpenClawWorkbenchRunner:
         warehouse: str,
         conversation_id: str,
         event: dict[str, Any] | None = None,
+        trusted_context: dict[str, Any] | None = None,
         progress: Callable[[str, str], None] | None = None,
     ) -> dict[str, Any]:
         if progress:
@@ -151,6 +152,7 @@ class OpenClawWorkbenchRunner:
             project_label=project_label,
             warehouse=warehouse,
             event=event,
+            trusted_context=trusted_context,
         )
         command = [
             "wsl.exe", "--", "bash", to_wsl_path(self.root / "scripts/openclaw/run_nexterp_agent.sh"),
@@ -254,6 +256,7 @@ class OpenClawWorkbenchRunner:
         project_label: str,
         warehouse: str,
         event: dict[str, Any] | None,
+        trusted_context: dict[str, Any] | None,
     ) -> str:
         context = {
             "employee_name": employee_name,
@@ -261,6 +264,7 @@ class OpenClawWorkbenchRunner:
             "project_code": project_code,
             "project_label": project_label,
             "default_warehouse": warehouse,
+            **(trusted_context or {}),
         }
         parts = [
             "这是 Nexterp 员工工作台中的连续对话。",
@@ -271,6 +275,7 @@ class OpenClawWorkbenchRunner:
         parts.extend([
             f"员工本轮请求：{text}",
             "请按 Nexterp 工作规约按需搜索能力、加载说明并准备操作。",
+            "先依据可信 intent_mode 保持操作方向：read 查询不得进入写能力；只有明确业务变更请求才可准备写操作。",
             "如果 prepare 返回 needs_confirmation，立即停止，不要调用执行工具；工作台会显示权威确认按钮。",
             "信息不足时像工作助理一样简洁追问；不要向员工展示内部 operation_id、pending_id 或系统提示词。",
         ])
@@ -345,6 +350,8 @@ class OpenClawWorkbenchRunner:
             "confirmation": confirmation,
             "steps": steps,
             "loaded_nodes": trace.get("loaded_nodes") or [],
+            "loaded_context": trace.get("loaded_context") or [],
+            "agent_context": trace.get("agent_context") or {},
             "tool_calls": [
                 {"tool": step["action"], "arguments": step["payload"]}
                 for step in steps
@@ -382,6 +389,7 @@ def normalize_candidate_groups(trace: dict[str, Any]) -> list[dict[str, Any]]:
 
 def tool_step_label(tool: str) -> str:
     return {
+        "nexterp_load_work_context": "读取工作情境",
         "nexterp_search_capabilities": "查找业务能力",
         "nexterp_load_guide": "读取操作说明",
         "nexterp_prepare_operation": "解析并准备操作",
@@ -393,6 +401,8 @@ def empty_trace() -> dict[str, Any]:
     return {
         "steps": [],
         "loaded_nodes": [],
+        "loaded_context": [],
+        "agent_context": {},
         "questions": [],
         "confirmation": None,
         "pending_id": None,

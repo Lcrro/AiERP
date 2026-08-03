@@ -29,6 +29,15 @@ class RuntimeSessionState:
     agent_steps: list[dict[str, Any]] = field(default_factory=list)
     pending_action: dict[str, Any] | None = None
     business_state: dict[str, Any] = field(default_factory=dict)
+    current_goal: str = ""
+    intent_mode: str = "read"
+    confirmed_entities: dict[str, Any] = field(default_factory=dict)
+    unresolved_fields: list[str] = field(default_factory=list)
+    active_capability: str | None = None
+    loaded_context: list[str] = field(default_factory=list)
+    recent_documents: list[dict[str, Any]] = field(default_factory=list)
+    pending_operation: str | None = None
+    last_successful_progress: str | None = None
     updated_at: str | None = None
 
     def remember_document(self, doctype: str, name: str) -> None:

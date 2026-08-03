@@ -17,6 +17,14 @@
   --danger-soft: #fff0ee;
   font-family: Inter, ui-sans-serif, system-ui, "Segoe UI", "Microsoft YaHei", sans-serif;
 }
+
+.identity-context { margin-top: 12px; padding: 12px; border: 1px solid #cbd5df; background: #f6f8fa; }
+.identity-context > strong { display: block; margin-bottom: 8px; color: #17212b; }
+.identity-context dl { margin: 0; display: grid; gap: 5px; }
+.identity-context dl div { display: grid; grid-template-columns: 70px 1fr; gap: 8px; font-size: 12px; }
+.identity-context dt { color: #65717e; }
+.identity-context dd { margin: 0; color: #17212b; overflow-wrap: anywhere; }
+.identity-context > span { display: block; margin-top: 8px; color: #536170; font-size: 12px; line-height: 1.45; }
 * { box-sizing: border-box; }
 html, body { margin: 0; min-width: 0; min-height: 100%; color: var(--ink); background: var(--page); }
 body { font-size: 13px; }

@@ -19,6 +19,7 @@ class RequestIdentity(StrictModel):
 class CapabilitySearchRequest(StrictModel):
     query: str = Field(min_length=1, max_length=500)
     module: str | None = Field(default=None, max_length=60)
+    intent_mode: Literal["read", "analyze", "write"] | None = None
     limit: int = Field(default=5, ge=1, le=5)
 
 
@@ -66,6 +67,11 @@ class PrepareOperationRequest(StrictModel):
     source_documents: list[PrepareDocumentReference] = Field(default_factory=list, max_length=20)
     items: list[PrepareItem] = Field(default_factory=list, max_length=100)
     full_return: bool = False
+    query: str | None = Field(default=None, max_length=500)
+    item_codes: list[str] = Field(default_factory=list, max_length=50)
+    document_type: str | None = Field(default=None, max_length=140)
+    document_name: str | None = Field(default=None, max_length=180)
+    limit: int = Field(default=10, ge=1, le=50)
 class ExecuteOperationRequest(StrictModel):
     pending_id: str = Field(min_length=1, max_length=80)
 

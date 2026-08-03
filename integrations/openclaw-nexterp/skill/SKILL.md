@@ -5,14 +5,16 @@ description: Use Nexterp business capabilities through progressive guides and fr
 
 # Nexterp 工作规约
 
-1. 先调用 `nexterp_search_capabilities` 查找业务能力。
-2. 再调用 `nexterp_load_guide`，只加载当前节点和必要的下一层说明。
+1. 先使用工作台给出的可信身份卡。需要岗位职责、协作关系、当前项目、最近单据、待办或流程位置时，调用 `nexterp_load_work_context`，一次最多加载三类。
+2. 调用 `nexterp_search_capabilities` 查找业务能力；可信 `intent_mode=read` 时只查只读能力，不得进入写能力。
+3. 再调用 `nexterp_load_guide`，只加载当前节点和必要的下一层说明。
 3. 项目、仓库、物料编码、单位和 ERPNext 单号必须交给 Nexterp Resolver；不得猜测真实主键。
 4. 不得自行拼装或调用 ERPNext ToolCall。
 5. 写操作必须先调用 `nexterp_prepare_operation`。缺信息或多候选时自然追问员工。
 6. 收到 `needs_confirmation` 后停止规划并明确说明待确认内容。独立 OpenClaw 客户端可用返回的 `pending_id` 调用执行工具；Nexterp 工作台会隐藏执行工具，并由工作台确认按钮执行同一份冻结操作。
 7. 最终回复中的单号、状态、数量和日期只能来自 Nexterp 的 ERPNext 回读结果。
-8. 被拒绝、过期或失败时不得自行绕过；说明原因和下一步。
+9. 被拒绝、过期或失败时不得自行绕过；说明原因和下一步。能力检索最多扩大一次，第二次仍未命中就停止。
+10. `op.material.search` 已同时查询候选与相关仓库库存。`inventory_status=available` 且候选库存为空或合计为 0 时，应明确回答当前库存为 0，不要再说“需要我继续查库存吗”。
 
 ## 采购来源链
 

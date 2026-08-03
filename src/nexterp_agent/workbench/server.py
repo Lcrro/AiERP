@@ -30,7 +30,11 @@ from nexterp_agent.erpnext.adapter import ERPNextAdapter
 from nexterp_agent.erpnext.client import ERPNextClient
 from nexterp_agent.master_data import MasterDataRelease
 from nexterp_agent.workbench.openclaw_compare import OpenClawPreviewRunner, summarize_existing_result
-from nexterp_agent.workbench.openclaw_runtime import OpenClawWorkbenchRunner, workbench_external_subject
+from nexterp_agent.workbench.openclaw_runtime import (
+    OpenClawWorkbenchRunner,
+    workbench_external_subject,
+    workbench_session_key,
+)
 
 
 HTML_PATH = ROOT / "tools" / "agent_workbench.html"
@@ -236,6 +240,8 @@ def employee_catalog() -> list[dict[str, Any]]:
             "employee_code": row["employee_code"],
             "employee_name": row["employee_name"],
             "position": row["position"],
+            "role_code": row["role_code"],
+            "department_code": row.get("department_code", ""),
             "user_email": row["user_email"],
             "profile": roles[row["role_code"]]["default_agent_profile"],
             "default_project_code": row.get("default_project_code", ""),
@@ -521,6 +527,21 @@ def _procurement_urgency(days_remaining: int | None) -> dict[str, str]:
     return {"code": "normal", "label": "正常"}
 
 
+def infer_intent_mode(text: str) -> str:
+    """Conservatively classify effect level; capability selection remains model-driven."""
+    normalized = str(text or "").strip()
+    write_markers = (
+        "创建", "新建", "申请", "帮我买", "帮我采购", "采购一批", "下单", "提交", "批准", "驳回",
+        "收货", "退货", "调拨", "领料", "付款", "修改", "删除", "录入", "生成", "转成",
+    )
+    analyze_markers = ("分析", "比较", "汇总", "异常", "建议", "风险", "趋势", "延期")
+    if any(marker in normalized for marker in write_markers):
+        return "write"
+    if any(marker in normalized for marker in analyze_markers):
+        return "analyze"
+    return "read"
+
+
 class AgentWorkbenchService:
     def __init__(self, profile: str = "civil") -> None:
         self.profile = profile
@@ -602,6 +623,17 @@ class AgentWorkbenchService:
             "updated_at": session.updated_at,
             "conversation_id": conversation_id,
             "project": project,
+            "task_context": {
+                "current_goal": session.current_goal,
+                "intent_mode": session.intent_mode,
+                "confirmed_entities": session.confirmed_entities,
+                "unresolved_fields": session.unresolved_fields,
+                "active_capability": session.active_capability,
+                "loaded_context": session.loaded_context,
+                "recent_documents": session.recent_documents,
+                "pending_operation": session.pending_operation,
+                "last_successful_progress": session.last_successful_progress,
+            },
         }
 
     def reset_session(self, user: str, project: str = "", conversation_id: str = "default") -> dict[str, Any]:
@@ -1867,6 +1899,28 @@ class AgentWorkbenchService:
             default_project=project_code,
             allowed_projects=allowed_projects,
         )
+        session_key = workbench_session_key(user, project_code, conversation_id)
+        intent_mode = infer_intent_mode(text)
+        existing_store = self.scoped_session_store(user, project_code, conversation_id)
+        existing_session = existing_store.load(user, profile=str(employee["profile"]))
+        upsert_context = getattr(self.capability_repository, "upsert_session_context", None)
+        if upsert_context:
+            upsert_context(
+                external_subject=workbench_external_subject(user),
+                agent_id="main",
+                session_key=session_key,
+                employee_user=user,
+                project_code=project_code,
+                current_goal=text,
+                intent_mode=intent_mode,
+                confirmed_entities=existing_session.confirmed_entities,
+                unresolved_fields=existing_session.unresolved_fields,
+                active_capability=existing_session.active_capability,
+                loaded_context=existing_session.loaded_context,
+                recent_documents=existing_session.recent_documents,
+                pending_operation=existing_session.pending_operation,
+                last_successful_progress=existing_session.last_successful_progress,
+            )
         if progress:
             progress("openclaw", "小助理正在处理业务请求...")
         runtime_kwargs = {
@@ -1879,6 +1933,11 @@ class AgentWorkbenchService:
             "warehouse": str(payload.get("warehouse") or project.get("warehouse_code") or ""),
             "conversation_id": conversation_id,
             "event": event,
+            "trusted_context": {
+                "role_code": employee.get("role_code", ""),
+                "department_code": employee.get("department_code", ""),
+                "intent_mode": intent_mode,
+            },
         }
         if progress is not None:
             runtime_kwargs["progress"] = progress
@@ -1897,6 +1956,16 @@ class AgentWorkbenchService:
             if response.get("status") == "needs_confirmation" and pending_id
             else None
         )
+        session.current_goal = text
+        session.intent_mode = intent_mode
+        session.loaded_context = list(response.get("loaded_context") or session.loaded_context)
+        session.active_capability = next(
+            (str(row.get("node_id")) for row in reversed(response.get("loaded_nodes") or [])
+             if isinstance(row, dict) and str(row.get("node_id") or "").startswith("cap.")),
+            session.active_capability,
+        )
+        session.pending_operation = pending_id or None
+        session.last_successful_progress = str(response.get("status") or "")
         session.add_turn({"user_text": text, "result": response})
         store.save(session)
         return response

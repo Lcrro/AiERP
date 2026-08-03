@@ -10,8 +10,18 @@ const LAYERS = [
     friction: "简称、土名、缺数量和省略上下文会造成歧义。",
   },
   {
-    id: "planner",
+    id: "identity",
     index: "02",
+    title: "身份与工作情境",
+    subtitle: "可信工作证与任务状态",
+    kind: "runtime",
+    responsibility: "从基础主数据、当前会话和 ERPNext 加载员工、岗位、项目、仓库、职责及任务状态。",
+    boundary: "岗位知识帮助理解工作，但不能扩大 ToolAccessPolicy 或 ERPNext 权限。",
+    friction: "身份、项目或当前目标缺失时，助理容易给出脱离现场的机械回答。",
+  },
+  {
+    id: "planner",
+    index: "03",
     title: "DeepSeek 规划",
     subtitle: "理解下一步目标",
     kind: "model",
@@ -21,7 +31,7 @@ const LAYERS = [
   },
   {
     id: "capability",
-    index: "03",
+    index: "04",
     title: "Capability Skill",
     subtitle: "按需披露业务能力",
     kind: "runtime",
@@ -31,7 +41,7 @@ const LAYERS = [
   },
   {
     id: "resolver",
-    index: "04",
+    index: "05",
     title: "Resolver",
     subtitle: "把人话变成真实实体",
     kind: "runtime",
@@ -41,7 +51,7 @@ const LAYERS = [
   },
   {
     id: "compiler",
-    index: "05",
+    index: "06",
     title: "确定性编译器",
     subtitle: "生成精确 ToolCall",
     kind: "runtime",
@@ -51,7 +61,7 @@ const LAYERS = [
   },
   {
     id: "gateway",
-    index: "06",
+    index: "07",
     title: "ToolGateway",
     subtitle: "身份、权限与确认",
     kind: "runtime",
@@ -61,7 +71,7 @@ const LAYERS = [
   },
   {
     id: "erpnext",
-    index: "07",
+    index: "08",
     title: "ERPNext",
     subtitle: "业务事实与最终执行",
     kind: "erp",
@@ -71,7 +81,7 @@ const LAYERS = [
   },
   {
     id: "answer",
-    index: "08",
+    index: "09",
     title: "回复与会话",
     subtitle: "解释结果并记住事实",
     kind: "model",
@@ -212,6 +222,7 @@ function classifyStep(step) {
   const label = String(step.label || "");
   const action = String(step.action || "");
   if (label === "DeepSeek规划") return { kind: "model", layer: "planner", name: "模型决定下一动作" };
+  if (/工作情境|work_context|context\/load/i.test(`${label} ${action}`)) return { kind: "runtime", layer: "identity", name: "加载可信工作情境" };
   if (/发现业务能力|加载.*Guide|capabilit/i.test(`${label} ${action}`)) return { kind: "runtime", layer: "capability", name: "筛选并加载业务能力" };
   if (/解析|resolve/i.test(`${label} ${action}`)) return { kind: "runtime", layer: "resolver", name: "解析真实业务实体" };
   if (/编译|契约|预检|compile|validate/i.test(`${label} ${action}`)) return { kind: "runtime", layer: "compiler", name: "编译并校验精确参数" };
@@ -246,6 +257,7 @@ function renderTrace(trace) {
     $("#traceSummary").innerHTML = "";
     $("#traceTimeline").innerHTML = '<div class="empty">先在工作台发送一条消息，再回来读取轨迹；也可以查看示例。</div>';
     renderDiagnosis(null);
+    renderIdentityContext(trace, null);
     return;
   }
   const result = turn.result || {};
@@ -272,6 +284,37 @@ function renderTrace(trace) {
   const employee = selectedEmployee();
   $("#sessionMeta").innerHTML = `<strong>${esc(employee?.employee_name || employee?.name || $("#employeeSelect").value)}</strong><span>${esc($("#projectSelect").value)} · ${esc($("#conversationId").value || "示例")}</span><span>${esc(trace.updated_at || "")}</span>`;
   renderDiagnosis(turn);
+  renderIdentityContext(trace, turn);
+}
+
+function renderIdentityContext(trace, turn) {
+  const employee = selectedEmployee() || {};
+  const project = selectedProject() || {};
+  const result = turn?.result || {};
+  const trusted = result.agent_context || {};
+  const identity = trusted.identity || {};
+  const workplace = trusted.workplace || {};
+  const roleProfile = trusted.role_profile || {};
+  const responsibilities = trusted.responsibilities || [];
+  const task = trace?.task_context || {};
+  const mode = task.intent_mode || "未记录";
+  const modeLabel = ({ read: "查询", analyze: "分析", write: "写操作" })[mode] || mode;
+  const loaded = result.loaded_context || task.loaded_context || [];
+  $("#identityContext").innerHTML = `
+    <strong>当前助理身份</strong>
+    <dl>
+      <div><dt>员工</dt><dd>${esc(identity.employee_name || employee.employee_name || employee.name || "未选择")}</dd></div>
+      <div><dt>岗位</dt><dd>${esc(identity.position || employee.project_position || employee.position || "未确认")}</dd></div>
+      <div><dt>项目</dt><dd>${esc(workplace.project_short_name || project.project_short_name || project.project_code || "未确认")}</dd></div>
+      <div><dt>仓库</dt><dd>${esc(workplace.warehouse_name || project.warehouse_code || "未确认")}</dd></div>
+      <div><dt>本轮类型</dt><dd>${esc(modeLabel)}</dd></div>
+      <div><dt>活动能力</dt><dd>${esc(task.active_capability || "尚未选择")}</dd></div>
+    </dl>
+    <span>职责摘要：${esc(roleProfile.mission || employee.workbench_view?.focus || "处理本人 ERPNext 权限范围内的工作")}</span>
+    ${responsibilities.length ? `<span>岗位重点：${responsibilities.slice(0, 3).map((item) => esc(item.label || item.summary || "")).join("、")}</span>` : ""}
+    ${roleProfile.boundaries ? `<span>职责边界：${esc(roleProfile.boundaries)}</span>` : ""}
+    <span>已加载情境：${loaded.length ? loaded.map(esc).join("、") : "仅短身份卡"}</span>
+    ${task.unresolved_fields?.length ? `<span>未解决信息：${task.unresolved_fields.map(esc).join("、")}</span>` : ""}`;
 }
 
 function statusLabel(status) {

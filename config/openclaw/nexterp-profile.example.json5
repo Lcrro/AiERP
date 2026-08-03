@@ -15,6 +15,7 @@
   tools: {
     profile: "minimal",
     alsoAllow: [
+      "nexterp_load_work_context",
       "nexterp_search_capabilities",
       "nexterp_load_guide",
       "nexterp_prepare_operation",

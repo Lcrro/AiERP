@@ -21,6 +21,8 @@ from nexterp_agent.item_master.release_resolver import normalize_text
 
 from .catalog import CapabilityCatalogRepository, ExternalIdentity
 from .compiler import CatalogEvaluation, OperationCompilerRegistry
+from .context import AgentContextBuilder
+from .context_models import WorkContextLoadRequest
 from .models import (
     CapabilitySearchRequest,
     ExecuteOperationRequest,
@@ -48,10 +50,15 @@ class CatalogRepositoryLike(Protocol):
     def operation_bundle(self, operation_id: str) -> dict[str, Any]: ...
     def current_revision(self) -> str: ...
     def resolve_identity(self, external_subject: str, agent_id: str = "") -> ExternalIdentity: ...
+    def resolve_identity_for_session(self, session_key: str, agent_id: str = "") -> ExternalIdentity: ...
     def create_pending(self, **kwargs: Any) -> dict[str, Any]: ...
     def get_pending(self, pending_id: str, *, for_update: bool = False) -> dict[str, Any]: ...
     def claim_pending(self, pending_id: str, *, identity: ExternalIdentity, session_key: str) -> dict[str, Any]: ...
     def finish_pending(self, pending_id: str, *, status: str, result: dict[str, Any]) -> dict[str, Any]: ...
+    def role_context(self, role_code: str, topics: list[str]) -> dict[str, Any]: ...
+    def session_context(self, identity: ExternalIdentity, session_key: str) -> dict[str, Any]: ...
+    def mark_context_loaded(self, identity: ExternalIdentity, session_key: str, topics: list[str]) -> None: ...
+    def record_search_result(self, identity: ExternalIdentity, session_key: str, *, found: bool) -> int: ...
 
 
 class CapabilityManualService:
@@ -69,15 +76,55 @@ class CapabilityManualService:
         self.reference_data = reference_data or OperationReferenceDataCatalog(ROOT)
         self.client_factory = client_factory or self._default_client_factory
         self.compiler_registry = compiler_registry or OperationCompilerRegistry()
+        self.context_builder = AgentContextBuilder(ROOT)
 
     def search(self, request: CapabilitySearchRequest, identity_request: RequestIdentity) -> dict[str, Any]:
         identity = self._identity(identity_request)
+        session = self._session_context(identity, identity_request.session_key)
+        # Legacy callers without a registered trusted session keep the old discovery behavior.
+        intent_mode = str(session.get("intent_mode") or request.intent_mode or "write")
         cards = self.repository.search_nodes(request.query, module=request.module, limit=request.limit)
-        allowed = [card for card in cards if self._node_allowed(card, identity)]
+        allowed = [
+            card for card in cards
+            if self._mode_allowed(card, intent_mode) and self._node_allowed(card, identity)
+        ]
+        record_search = getattr(self.repository, "record_search_result", None)
+        misses = record_search(identity, identity_request.session_key, found=bool(allowed)) if record_search else 0
+        if not allowed and misses >= 2:
+            return {
+                "status": "unsupported",
+                "catalog_revision": self.repository.current_revision(),
+                "intent_mode": intent_mode,
+                "message": "当前说明书中没有与该请求匹配的合法能力，我不会改用语义相近的其他操作。",
+                "cards": [],
+            }
         return {
             "status": "found" if allowed else "not_found",
             "catalog_revision": self.repository.current_revision(),
+            "intent_mode": intent_mode,
             "cards": allowed[: request.limit],
+        }
+
+    def load_context(self, request: WorkContextLoadRequest, identity_request: RequestIdentity) -> dict[str, Any]:
+        identity = self._identity(identity_request)
+        session = self._session_context(identity, identity_request.session_key)
+        envelope = self.context_builder.build(identity, session)
+        role_context = self.repository.role_context(envelope.identity.role_code, request.topics)
+        dynamic: dict[str, Any] = {}
+        if "project" in request.topics:
+            dynamic["project"] = envelope.workplace.model_dump(mode="json")
+        if "recent_documents" in request.topics:
+            dynamic["recent_documents"] = self._recent_documents(identity, request.query)
+        if "inbox" in request.topics:
+            dynamic["inbox"] = self._workflow_inbox(identity)
+        self.repository.mark_context_loaded(identity, identity_request.session_key, request.topics)
+        return {
+            "status": "loaded",
+            "catalog_revision": self.repository.current_revision(),
+            "agent_context": envelope.model_dump(mode="json"),
+            "role_context": role_context,
+            "dynamic_context": dynamic,
+            "loaded_topics": request.topics,
         }
 
     def load_guides(self, request: GuideLoadRequest, identity_request: RequestIdentity) -> dict[str, Any]:
@@ -98,6 +145,10 @@ class CapabilityManualService:
 
     def prepare(self, request: PrepareOperationRequest, identity_request: RequestIdentity) -> dict[str, Any]:
         identity = self._identity(identity_request)
+        if request.operation_id == "op.material.search":
+            return self._search_materials(request, identity, identity_request)
+        if request.operation_id == "op.document.search":
+            return self._search_visible_documents(request, identity, identity_request)
         bundle = self.repository.operation_bundle(request.operation_id)
         if not self._operation_allowed(bundle, identity):
             raise PermissionError("当前岗位不能准备这个业务操作")
@@ -657,6 +708,8 @@ class CapabilityManualService:
 
     def _node_allowed(self, node: dict[str, Any], identity: ExternalIdentity) -> bool:
         node_id = str(node.get("node_id") or "")
+        if str(node.get("operation_mode") or "") in {"read", "analyze"}:
+            return True
         if node_id == "module.buying":
             return any(
                 self._operation_allowed(self.repository.operation_bundle(operation_id), identity)
@@ -678,12 +731,156 @@ class CapabilityManualService:
         return False
 
     @staticmethod
+    def _mode_allowed(node: dict[str, Any], intent_mode: str) -> bool:
+        node_mode = str(node.get("operation_mode") or ("write" if node.get("is_write") else "read"))
+        if intent_mode == "read":
+            return node_mode == "read"
+        if intent_mode == "analyze":
+            return node_mode in {"read", "analyze"}
+        return True
+
+    def _search_materials(
+        self,
+        request: PrepareOperationRequest,
+        identity: ExternalIdentity,
+        identity_request: RequestIdentity,
+    ) -> dict[str, Any]:
+        session = self._session_context(identity, identity_request.session_key)
+        query = str(request.query or "").strip()
+        if not query:
+            return {"status": "needs_input", "operation_id": request.operation_id,
+                    "questions": ["请告诉我要查询的物料名称或规格。"]}
+        candidates = self.reference_data.options("item", query=query)[: request.limit]
+        item_codes = [str(row.get("value") or "") for row in candidates if row.get("value")]
+        project_code = str(session.get("project_code") or identity.default_project or "")
+        warehouses: list[dict[str, Any]] = []
+        for accessible_project in dict.fromkeys([project_code, *identity.allowed_projects]):
+            for warehouse in self.reference_data.options("warehouse", project=accessible_project):
+                if warehouse.get("value") and not any(row.get("value") == warehouse.get("value") for row in warehouses):
+                    warehouses.append(warehouse)
+        warehouse_names = [str(row.get("value") or "") for row in warehouses if row.get("value")]
+        inventory_by_item: dict[str, list[dict[str, Any]]] = {code: [] for code in item_codes}
+        inventory_status = "available"
+        if item_codes and warehouse_names:
+            client = self._verified_client(identity)
+            result = client.search_documents(
+                "Bin",
+                filters=[["item_code", "in", item_codes], ["warehouse", "in", warehouse_names]],
+                fields=["item_code", "warehouse", "actual_qty", "reserved_qty", "projected_qty"],
+                limit=min(500, len(item_codes) * max(1, len(warehouse_names))),
+                order_by="item_code asc, warehouse asc",
+            )
+            if result.ok:
+                rows = result.data if isinstance(result.data, list) else []
+                for row in rows:
+                    if isinstance(row, dict) and str(row.get("item_code") or "") in inventory_by_item:
+                        inventory_by_item[str(row["item_code"])].append(row)
+            else:
+                inventory_status = "unavailable"
+        enriched = []
+        for row in candidates:
+            code = str(row.get("value") or "")
+            stocks = inventory_by_item.get(code, [])
+            enriched.append({
+                "item_code": code,
+                "sku_name": row.get("label"),
+                "required_specs": row.get("meta"),
+                "stock_uom": row.get("stock_uom"),
+                "purchase_uom": row.get("purchase_uom"),
+                "score": row.get("score"),
+                "match_reason": row.get("match_reason"),
+                "inventory": stocks,
+                "total_actual_qty": sum(float(stock.get("actual_qty") or 0) for stock in stocks),
+            })
+        return {
+            "status": "completed",
+            "operation_id": request.operation_id,
+            "operation_mode": "read",
+            "query": query,
+            "project_code": project_code,
+            "inventory_status": inventory_status,
+            "candidates": enriched,
+            "catalog_revision": self.repository.current_revision(),
+        }
+
+    def _search_visible_documents(
+        self,
+        request: PrepareOperationRequest,
+        identity: ExternalIdentity,
+        identity_request: RequestIdentity,
+    ) -> dict[str, Any]:
+        allowed = {
+            "Material Request": ["name", "status", "workflow_state", "transaction_date", "schedule_date", "modified", "owner"],
+            "Request for Quotation": ["name", "status", "transaction_date", "modified", "owner"],
+            "Supplier Quotation": ["name", "status", "transaction_date", "valid_till", "modified", "owner"],
+            "Purchase Order": ["name", "status", "transaction_date", "schedule_date", "modified", "owner"],
+            "Purchase Receipt": ["name", "status", "posting_date", "modified", "owner"],
+        }
+        doctype = str(request.document_type or "Material Request")
+        if doctype not in allowed:
+            return {"status": "blocked", "operation_id": request.operation_id,
+                    "message": "当前只读说明书尚未开放该单据类型。"}
+        client = self._verified_client(identity)
+        if request.document_name:
+            result = client.get_document(doctype, request.document_name)
+            rows = [result.data] if result.ok and isinstance(result.data, dict) else []
+        else:
+            filters: dict[str, Any] = {}
+            if request.query:
+                filters["name"] = ["like", f"%{request.query}%"]
+            result = client.search_documents(
+                doctype, filters=filters or None, fields=allowed[doctype],
+                limit=request.limit, order_by="modified desc",
+            )
+            rows = result.data if result.ok and isinstance(result.data, list) else []
+        if not result.ok:
+            return {"status": "blocked", "operation_id": request.operation_id,
+                    "message": result.user_message or "读取单据失败。"}
+        return {"status": "completed", "operation_id": request.operation_id,
+                "operation_mode": "read", "doctype": doctype, "documents": rows,
+                "catalog_revision": self.repository.current_revision()}
+
+    def _recent_documents(self, identity: ExternalIdentity, query: str | None) -> dict[str, Any]:
+        client = self._verified_client(identity)
+        rows: list[dict[str, Any]] = []
+        for doctype in ("Material Request", "Purchase Order", "Purchase Receipt"):
+            result = client.search_documents(doctype, fields=["name", "status", "modified", "owner"],
+                                             limit=5, order_by="modified desc")
+            if result.ok and isinstance(result.data, list):
+                rows.extend({"doctype": doctype, **row} for row in result.data if isinstance(row, dict))
+        rows.sort(key=lambda row: str(row.get("modified") or ""), reverse=True)
+        return {"source": "ERPNext live", "documents": rows[:10]}
+
+    def _workflow_inbox(self, identity: ExternalIdentity) -> dict[str, Any]:
+        client = self._verified_client(identity)
+        result = client.search_documents(
+            "Workflow Action",
+            filters={"user": identity.employee_user, "status": "Open"},
+            fields=["name", "reference_doctype", "reference_name", "status", "creation"],
+            limit=20, order_by="creation desc",
+        )
+        return {
+            "source": "ERPNext live",
+            "available": result.ok,
+            "actions": result.data if result.ok and isinstance(result.data, list) else [],
+            "message": None if result.ok else (result.user_message or "待办读取失败"),
+        }
+
+    @staticmethod
     def _operation_allowed(bundle: dict[str, Any], identity: ExternalIdentity) -> bool:
         policy = make_tool_access_policy(identity.profile_name)
         return policy.decide(str(bundle["operation"]["tool_name"]), origin="agent").allowed
 
     def _identity(self, request: RequestIdentity) -> ExternalIdentity:
+        if ":workbench:" in request.session_key:
+            resolver = getattr(self.repository, "resolve_identity_for_session", None)
+            if resolver:
+                return resolver(request.session_key, request.agent_id)
         return self.repository.resolve_identity(request.external_subject, request.agent_id)
+
+    def _session_context(self, identity: ExternalIdentity, session_key: str) -> dict[str, Any]:
+        loader = getattr(self.repository, "session_context", None)
+        return loader(identity, session_key) if loader else {}
 
     def _gateway(self, identity: ExternalIdentity) -> ToolGateway:
         client = self._verified_client(identity)

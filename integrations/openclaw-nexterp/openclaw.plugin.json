@@ -4,6 +4,7 @@
   "description": "Progressively loads Nexterp capability guides and executes frozen ERPNext operations.",
   "contracts": {
     "tools": [
+      "nexterp_load_work_context",
       "nexterp_search_capabilities",
       "nexterp_load_guide",
       "nexterp_prepare_operation",

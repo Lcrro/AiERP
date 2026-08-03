@@ -17,6 +17,7 @@ from nexterp_agent.agent_runtime.operation_catalog import (
 )
 
 from .procurement_catalog import PROCUREMENT_CHAIN
+from .role_catalog import CONTEXT_GUIDES, ROLE_CAPABILITY_LINKS, ROLE_PROFILES
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -58,6 +59,8 @@ class CapabilityCatalogRepository:
                 conn.execute(script.read_text(encoding="utf-8"))
             self._seed_material_request(conn)
             self._seed_procurement_chain(conn)
+            self._seed_read_capabilities(conn)
+            self._seed_role_context(conn)
             revision = self._write_revision(conn)
             conn.commit()
         return revision
@@ -69,6 +72,7 @@ class CapabilityCatalogRepository:
             rows = conn.execute(
                 """
                 SELECT n.node_id, n.node_type, n.module, n.label, n.summary, n.is_write,
+                       n.operation_mode, n.business_object, n.intent_kind,
                        COALESCE(array_agg(a.normalized_text) FILTER (WHERE a.alias_id IS NOT NULL), '{}') AS aliases
                   FROM nexterp_manual.capability_node n
                   LEFT JOIN nexterp_manual.capability_alias a ON a.node_id = n.node_id
@@ -84,7 +88,8 @@ class CapabilityCatalogRepository:
         for row in rows:
             payload = {
                 "node_id": row[0], "node_type": row[1], "module": row[2], "label": row[3],
-                "summary": row[4], "is_write": row[5], "aliases": list(row[6] or []),
+                "summary": row[4], "is_write": row[5], "operation_mode": row[6],
+                "business_object": row[7], "intent_kind": row[8], "aliases": list(row[9] or []),
             }
             phrases = [
                 normalize_text(value)
@@ -114,13 +119,14 @@ class CapabilityCatalogRepository:
         with self.connect() as conn:
             nodes = conn.execute(
                 """SELECT node_id, node_type, module, label, summary, guide, usage_conditions,
-                          prohibitions, examples_json, implementation_key, is_write
+                          prohibitions, examples_json, implementation_key, is_write,
+                          operation_mode, business_object, intent_kind
                      FROM nexterp_manual.capability_node WHERE node_id = ANY(%s) AND is_active = TRUE""",
                 (node_ids,),
             ).fetchall()
             edges = conn.execute(
                 """SELECT e.source_node_id, e.target_node_id, e.relation_type, e.position,
-                          n.node_type, n.label, n.summary
+                          n.node_type, n.label, n.summary, n.operation_mode, n.business_object, n.intent_kind
                      FROM nexterp_manual.capability_edge e
                      JOIN nexterp_manual.capability_node n ON n.node_id = e.target_node_id
                     WHERE e.source_node_id = ANY(%s)
@@ -133,13 +139,15 @@ class CapabilityCatalogRepository:
                 "node_id": row[0], "node_type": row[1], "module": row[2], "label": row[3],
                 "summary": row[4], "guide": row[5], "usage_conditions": row[6],
                 "prohibitions": row[7], "examples": row[8], "implementation_key": row[9],
-                "is_write": row[10], "relations": [],
+                "is_write": row[10], "operation_mode": row[11], "business_object": row[12],
+                "intent_kind": row[13], "relations": [],
             }
         for row in edges:
             if row[0] in by_id:
                 by_id[row[0]]["relations"].append({
                     "node_id": row[1], "relation_type": row[2], "position": row[3],
                     "node_type": row[4], "label": row[5], "summary": row[6],
+                    "operation_mode": row[7], "business_object": row[8], "intent_kind": row[9],
                 })
         missing = [node_id for node_id in node_ids if node_id not in by_id]
         if missing:
@@ -248,6 +256,22 @@ class CapabilityCatalogRepository:
             raise PermissionError("OpenClaw 请求者尚未绑定 ERPNext 员工身份")
         return ExternalIdentity(row[0], row[1], row[2], row[3], row[4], tuple(row[5] or []))
 
+    def resolve_identity_for_session(self, session_key: str, agent_id: str = "") -> ExternalIdentity:
+        """Resolve a workbench identity from its server-registered trusted session."""
+        with self.connect() as conn:
+            row = conn.execute(
+                """SELECT i.external_subject, i.agent_id, i.employee_user, i.profile_name,
+                          COALESCE(i.default_project, ''), i.allowed_projects_json
+                     FROM nexterp_manual.agent_session_context s
+                     JOIN nexterp_manual.external_identity i
+                       ON i.external_subject = s.external_subject AND i.agent_id = s.agent_id
+                    WHERE s.session_key = %s AND s.agent_id = %s AND i.is_active = TRUE""",
+                (session_key, agent_id),
+            ).fetchone()
+        if not row:
+            raise PermissionError("工作台会话尚未绑定可信员工身份")
+        return ExternalIdentity(row[0], row[1], row[2], row[3], row[4], tuple(row[5] or []))
+
     def create_pending(
         self,
         *,
@@ -339,6 +363,112 @@ class CapabilityCatalogRepository:
             )
             conn.commit()
         return self.get_pending(pending_id)
+
+    def role_context(self, role_code: str, topics: list[str]) -> dict[str, Any]:
+        with self.connect() as conn:
+            profile = conn.execute(
+                """SELECT role_code, role_name, mission, boundaries, escalation_guidance
+                     FROM nexterp_manual.agent_role_profile
+                    WHERE role_code = %s AND is_active = TRUE""",
+                (role_code,),
+            ).fetchone()
+            if not profile:
+                raise KeyError(f"Unknown role profile: {role_code}")
+            responsibilities = conn.execute(
+                """SELECT responsibility_id, label, summary, responsibility_type, priority
+                     FROM nexterp_manual.agent_role_responsibility
+                    WHERE role_code = %s AND is_active = TRUE ORDER BY priority, label""",
+                (role_code,),
+            ).fetchall()
+            guides = conn.execute(
+                """SELECT g.guide_id, g.topic, g.label, g.summary, g.guide
+                     FROM nexterp_manual.agent_context_guide g
+                     JOIN nexterp_manual.agent_role_context rc ON rc.guide_id = g.guide_id
+                    WHERE rc.role_code = %s AND g.topic = ANY(%s) AND g.is_active = TRUE
+                    ORDER BY rc.relevance, g.topic""",
+                (role_code, topics),
+            ).fetchall()
+        return {
+            "profile": {"role_code": profile[0], "role_name": profile[1], "mission": profile[2],
+                        "boundaries": profile[3], "escalation": profile[4]},
+            "responsibilities": [
+                {"responsibility_id": row[0], "label": row[1], "summary": row[2],
+                 "type": row[3], "priority": row[4]} for row in responsibilities
+            ],
+            "guides": [
+                {"guide_id": row[0], "topic": row[1], "label": row[2],
+                 "summary": row[3], "guide": row[4]} for row in guides
+            ],
+        }
+
+    def upsert_session_context(self, **values: Any) -> None:
+        with self.connect() as conn:
+            conn.execute(
+                """INSERT INTO nexterp_manual.agent_session_context
+                       (external_subject, agent_id, session_key, employee_user, project_code,
+                        current_goal, intent_mode, confirmed_entities_json, unresolved_fields_json,
+                        active_capability, loaded_context_json, recent_documents_json,
+                        pending_operation, last_successful_progress, search_miss_count)
+                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                     ON CONFLICT (external_subject, agent_id, session_key) DO UPDATE SET
+                       employee_user = EXCLUDED.employee_user, project_code = EXCLUDED.project_code,
+                       current_goal = EXCLUDED.current_goal, intent_mode = EXCLUDED.intent_mode,
+                       confirmed_entities_json = EXCLUDED.confirmed_entities_json,
+                       unresolved_fields_json = EXCLUDED.unresolved_fields_json,
+                       active_capability = EXCLUDED.active_capability,
+                       loaded_context_json = EXCLUDED.loaded_context_json,
+                       recent_documents_json = EXCLUDED.recent_documents_json,
+                       pending_operation = EXCLUDED.pending_operation,
+                       last_successful_progress = EXCLUDED.last_successful_progress,
+                       search_miss_count = EXCLUDED.search_miss_count, updated_at = NOW()""",
+                (values["external_subject"], values.get("agent_id", ""), values["session_key"],
+                 values["employee_user"], values["project_code"], values.get("current_goal", ""),
+                 values.get("intent_mode", "read"), self._psycopg.types.json.Jsonb(values.get("confirmed_entities", {})),
+                 self._psycopg.types.json.Jsonb(values.get("unresolved_fields", [])), values.get("active_capability"),
+                 self._psycopg.types.json.Jsonb(values.get("loaded_context", [])),
+                 self._psycopg.types.json.Jsonb(values.get("recent_documents", [])), values.get("pending_operation"),
+                 values.get("last_successful_progress"), values.get("search_miss_count", 0)),
+            )
+            conn.commit()
+
+    def session_context(self, identity: ExternalIdentity, session_key: str) -> dict[str, Any]:
+        with self.connect() as conn:
+            row = conn.execute(
+                """SELECT employee_user, project_code, current_goal, intent_mode,
+                          confirmed_entities_json, unresolved_fields_json, active_capability,
+                          loaded_context_json, recent_documents_json, pending_operation,
+                          last_successful_progress, search_miss_count
+                     FROM nexterp_manual.agent_session_context
+                    WHERE external_subject = %s AND agent_id = %s AND session_key = %s""",
+                (identity.external_subject, identity.agent_id, session_key),
+            ).fetchone()
+        if not row:
+            return {}
+        if row[0] != identity.employee_user:
+            raise PermissionError("会话工作情境不属于当前员工")
+        keys = ("employee_user", "project_code", "current_goal", "intent_mode", "confirmed_entities",
+                "unresolved_fields", "active_capability", "loaded_context", "recent_documents",
+                "pending_operation", "last_successful_progress", "search_miss_count")
+        return dict(zip(keys, row))
+
+    def mark_context_loaded(self, identity: ExternalIdentity, session_key: str, topics: list[str]) -> None:
+        current = self.session_context(identity, session_key)
+        if not current:
+            return
+        current.update({"external_subject": identity.external_subject, "agent_id": identity.agent_id,
+                        "session_key": session_key,
+                        "loaded_context": list(dict.fromkeys([*(current.get("loaded_context") or []), *topics]))})
+        self.upsert_session_context(**current)
+
+    def record_search_result(self, identity: ExternalIdentity, session_key: str, *, found: bool) -> int:
+        current = self.session_context(identity, session_key)
+        if not current:
+            return 0
+        misses = 0 if found else int(current.get("search_miss_count") or 0) + 1
+        current.update({"external_subject": identity.external_subject, "agent_id": identity.agent_id,
+                        "session_key": session_key, "search_miss_count": misses})
+        self.upsert_session_context(**current)
+        return misses
 
     def export_markdown(self, path: Path) -> None:
         guide_ids = ["module.buying", "cap.material_request", "op.material_request.create"]
@@ -611,10 +741,107 @@ class CapabilityCatalogRepository:
             (*node[:8], self._psycopg.types.json.Jsonb(node[8]), *node[9:]),
         )
 
+    def _seed_role_context(self, conn: Any) -> None:
+        for role in ROLE_PROFILES:
+            conn.execute(
+                """INSERT INTO nexterp_manual.agent_role_profile
+                       (role_code, role_name, mission, boundaries, escalation_guidance)
+                     VALUES (%s, %s, %s, %s, %s)
+                     ON CONFLICT (role_code) DO UPDATE SET role_name = EXCLUDED.role_name,
+                       mission = EXCLUDED.mission, boundaries = EXCLUDED.boundaries,
+                       escalation_guidance = EXCLUDED.escalation_guidance,
+                       is_active = TRUE, updated_at = NOW()""",
+                (role.role_code, role.role_name, role.mission, role.boundaries, role.escalation),
+            )
+            for item in role.responsibilities:
+                conn.execute(
+                    """INSERT INTO nexterp_manual.agent_role_responsibility
+                           (responsibility_id, role_code, label, summary, responsibility_type, priority)
+                         VALUES (%s, %s, %s, %s, %s, %s)
+                         ON CONFLICT (responsibility_id) DO UPDATE SET label = EXCLUDED.label,
+                           summary = EXCLUDED.summary, responsibility_type = EXCLUDED.responsibility_type,
+                           priority = EXCLUDED.priority, is_active = TRUE""",
+                    (f"resp.{role.role_code.lower()}.{item.key}", role.role_code,
+                     item.label, item.summary, item.kind, item.priority),
+                )
+        for topic, (label, guide) in CONTEXT_GUIDES.items():
+            guide_id = f"context.{topic}"
+            conn.execute(
+                """INSERT INTO nexterp_manual.agent_context_guide(guide_id, topic, label, summary, guide)
+                     VALUES (%s, %s, %s, %s, %s)
+                     ON CONFLICT (guide_id) DO UPDATE SET label = EXCLUDED.label,
+                       summary = EXCLUDED.summary, guide = EXCLUDED.guide,
+                       is_active = TRUE, updated_at = NOW()""",
+                (guide_id, topic, label, guide, guide),
+            )
+            for role in ROLE_PROFILES:
+                conn.execute(
+                    """INSERT INTO nexterp_manual.agent_role_context(role_code, guide_id, relevance)
+                         VALUES (%s, %s, 100) ON CONFLICT (role_code, guide_id) DO NOTHING""",
+                    (role.role_code, guide_id),
+                )
+        for role_code, node_ids in ROLE_CAPABILITY_LINKS.items():
+            for relevance, node_id in enumerate(node_ids, start=1):
+                conn.execute(
+                    """INSERT INTO nexterp_manual.agent_role_capability(role_code, node_id, relevance)
+                         VALUES (%s, %s, %s)
+                         ON CONFLICT (role_code, node_id) DO UPDATE SET relevance = EXCLUDED.relevance""",
+                    (role_code, node_id, relevance),
+                )
+
+    def _seed_read_capabilities(self, conn: Any) -> None:
+        nodes = (
+            ("cap.material_lookup", "capability", "stock", "物料查询", "查询标准物料、SKU 详情和相关仓库库存。", "read", "Item", "lookup_material"),
+            ("op.material.search", "operation", "stock", "查询标准物料与库存", "按名称、别名、规格或编码查询候选，并返回相关仓库库存。", "read", "Item", "lookup_material"),
+            ("cap.document_lookup", "capability", "generic", "业务单据查询", "查询当前员工可见的业务单据及状态。", "read", "Document", "lookup_document"),
+            ("op.document.search", "operation", "generic", "查询业务单据状态", "按单号、类型和项目查询当前员工可见单据。", "read", "Document", "lookup_document"),
+        )
+        for node_id, node_type, module, label, summary, mode, business_object, intent in nodes:
+            conn.execute(
+                """INSERT INTO nexterp_manual.capability_node
+                       (node_id, node_type, module, label, summary, guide, usage_conditions,
+                        prohibitions, examples_json, implementation_key, is_write, sort_order,
+                        operation_mode, business_object, intent_kind)
+                     VALUES (%s, %s, %s, %s, %s, %s, '', %s, '[]'::jsonb, %s, FALSE, 5, %s, %s, %s)
+                     ON CONFLICT (node_id) DO UPDATE SET label = EXCLUDED.label,
+                       summary = EXCLUDED.summary, guide = EXCLUDED.guide,
+                       prohibitions = EXCLUDED.prohibitions,
+                       operation_mode = EXCLUDED.operation_mode,
+                       business_object = EXCLUDED.business_object,
+                       intent_kind = EXCLUDED.intent_kind, is_active = TRUE""",
+                (node_id, node_type, module, label, summary,
+                "这是只读能力。返回真实候选以及当前员工相关项目仓库的实时库存，不创建、不修改任何 ERPNext 数据。"
+                "候选中的 inventory 是已查询结果；inventory_status=available 且明细为空时表示相关仓库当前库存为 0，"
+                "应直接告知员工，不要再次承诺以后查询库存。",
+                 "不得把查询升级成申请或其他写操作。", f"read.{intent}.v1",
+                 mode, business_object, intent),
+            )
+        for source, target in (("cap.material_lookup", "op.material.search"),
+                               ("cap.document_lookup", "op.document.search")):
+            conn.execute(
+                """INSERT INTO nexterp_manual.capability_edge(source_node_id, target_node_id, relation_type, position)
+                     VALUES (%s, %s, 'contains', 1) ON CONFLICT DO NOTHING""", (source, target),
+            )
+        aliases = {
+            "cap.material_lookup": ("查物料", "有没有物料", "物料表", "SKU查询", "查库存"),
+            "op.material.search": ("物料查询", "规格查询", "候选物料", "库存查询", "有没有14的钻头"),
+            "cap.document_lookup": ("查单据", "单据状态", "最近单据"),
+            "op.document.search": ("查询材料申请", "查询采购订单", "单据进度"),
+        }
+        for node_id, values in aliases.items():
+            for value in values:
+                conn.execute(
+                    """INSERT INTO nexterp_manual.capability_alias(node_id, alias_text, normalized_text)
+                         VALUES (%s, %s, %s) ON CONFLICT (node_id, normalized_text)
+                         DO UPDATE SET alias_text = EXCLUDED.alias_text""",
+                    (node_id, value, normalize_text(value)),
+                )
+
     def _write_revision(self, conn: Any) -> str:
         nodes = conn.execute(
             """SELECT node_id, node_type, module, label, summary, guide, usage_conditions, prohibitions,
-                      examples_json, implementation_key, is_write, is_active, sort_order
+                      examples_json, implementation_key, is_write, is_active, sort_order,
+                      operation_mode, business_object, intent_kind
                  FROM nexterp_manual.capability_node ORDER BY node_id"""
         ).fetchall()
         edges = conn.execute(
@@ -637,8 +864,20 @@ class CapabilityCatalogRepository:
             """SELECT rule_id, operation_id, label, implementation_key, expression_text, user_message, position
                  FROM nexterp_manual.operation_rule ORDER BY 2,7,1"""
         ).fetchall()
+        role_profiles = conn.execute(
+            "SELECT role_code, role_name, mission, boundaries, escalation_guidance FROM nexterp_manual.agent_role_profile ORDER BY 1"
+        ).fetchall()
+        responsibilities = conn.execute(
+            """SELECT responsibility_id, role_code, label, summary, responsibility_type, priority
+                 FROM nexterp_manual.agent_role_responsibility ORDER BY 2,6,1"""
+        ).fetchall()
+        role_capabilities = conn.execute(
+            "SELECT role_code, node_id, relevance FROM nexterp_manual.agent_role_capability ORDER BY 1,3,2"
+        ).fetchall()
         payload = json.dumps(
-            {"nodes": nodes, "edges": edges, "aliases": aliases, "tools": tools, "slots": slots, "rules": rules},
+            {"nodes": nodes, "edges": edges, "aliases": aliases, "tools": tools, "slots": slots,
+             "rules": rules, "role_profiles": role_profiles, "responsibilities": responsibilities,
+             "role_capabilities": role_capabilities},
             ensure_ascii=False,
             sort_keys=True,
             default=str,
@@ -649,7 +888,7 @@ class CapabilityCatalogRepository:
         conn.execute("UPDATE nexterp_manual.catalog_revision SET is_current = FALSE WHERE is_current = TRUE")
         conn.execute(
             """INSERT INTO nexterp_manual.catalog_revision(revision_id, content_checksum, schema_version, is_current)
-                 VALUES (%s, %s, 1, TRUE) ON CONFLICT (revision_id) DO UPDATE SET is_current = TRUE""",
+                 VALUES (%s, %s, 2, TRUE) ON CONFLICT (revision_id) DO UPDATE SET is_current = TRUE""",
             (revision, checksum),
         )
         return revision

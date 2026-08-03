@@ -49,6 +49,14 @@ class MasterDataRelease:
     def employees(self) -> dict[str, dict[str, str]]:
         return {row["employee_code"]: row for row in self.table("employees.tsv")}
 
+    @property
+    def assignments(self) -> list[dict[str, str]]:
+        return self.table("employee_assignments.tsv")
+
+    @property
+    def departments(self) -> dict[str, dict[str, str]]:
+        return {row["department_code"]: row for row in self.table("departments.tsv")}
+
     def company_name(self, code: str) -> str:
         return self.companies[code]["erpnext_company_name"]
 

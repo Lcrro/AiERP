@@ -70,9 +70,10 @@ PostgreSQL 是 v0.5 说明书目录的唯一生产事实来源：
 
 ## OpenClaw 工具面
 
-新 Profile 只向模型暴露四个元工具：
+v0.6 Profile 只向模型暴露五个元工具：
 
 ```text
+nexterp_load_work_context
 nexterp_search_capabilities
 nexterp_load_guide
 nexterp_prepare_operation
@@ -87,13 +88,24 @@ Capability API 默认监听 `127.0.0.1:8790`：
 
 ```text
 POST /api/capabilities/search
+POST /api/context/load
 POST /api/guides/load
 POST /api/operations/prepare
 POST /api/operations/execute
 GET  /api/operations/{pending_id}
 ```
 
-身份来自 Plugin 写入的可信请求头，不接受模型在 JSON body 中提交员工邮箱。执行接口只接受服务端生成的 `pending_id`。
+身份不接受模型在 JSON body 中提交员工邮箱。工作台先注册不可猜测的会话键，Capability API 再由该会话键反查员工身份；常驻 Gateway 的进程环境不能覆盖工作台会话身份。执行接口只接受服务端生成的 `pending_id`。
+
+## v0.6 身份与工作情境
+
+每轮请求建立 `AgentContextEnvelope`，包含员工、岗位、部门、项目岗位、当前项目、默认仓库、任务模式、已确认实体和待解决信息。字段带来源与可信级别，岗位知识不会扩大 ToolAccessPolicy 或 ERPNext 权限。
+
+PostgreSQL 新增岗位画像、职责、情境 Guide、岗位情境关联和会话情境表。初始 Prompt 只带短身份卡；Agent 仅在需要时通过 `nexterp_load_work_context` 加载最多三类职责、协作、项目、最近单据、待办或流程位置。
+
+能力节点标记 `read | analyze | write`。工作台将本轮影响级别写入可信会话；只读请求只会发现只读能力。第一次未命中可以扩大检索一次，第二次仍未命中必须停止，不能改用相近写能力。
+
+首批只读操作为物料与库存查询、员工可见单据查询。物料查询会一次返回候选 SKU 以及当前员工相关项目仓库的实时库存，不产生确认卡、不写 ERPNext。
 
 ## 隔离运行环境
 
@@ -140,7 +152,9 @@ bash scripts/openclaw/run_nexterp_agent.sh \
 - 五项新增操作均实时读取唯一来源单据，以员工本人 ERPNext 身份校验状态和权限；公司、项目、物料、数量、单位及子表来源引用不由模型重填。
 - 供应商、项目和仓库通过 Resolver 解析；部分报价、下单、收货或退货必须绑定真实来源子表行。
 - 每项写操作由确定性编译器生成底层 ToolCall，确认摘要与 ToolCall 哈希冻结；执行成功后按目标 DocType、来源关系和关键字段回读验证。
-- 四个 Plugin 工具、可信身份派生和预览会话写入阻断已有自动化测试。
+- 五个 Plugin 工具、服务端会话身份派生和预览会话写入阻断已有自动化测试。
+- v0.6 已迁移 8 个岗位画像、16 条职责、6 类情境 Guide、48 个岗位情境关联和 4 个只读节点。
+- 真实工作台请求“物料表里有没有14的钻头”已命中 `TOOL-000223`，未发现写能力、未产生确认卡；首次修复还发现并消除了常驻 Gateway 误用开发身份的问题。
 - Capability API 已覆盖服务令牌、请求头身份和执行 body 防篡改测试。
 - 真实 OpenClaw 已完成能力搜索、Guide 加载和材料申请 prepare 预览。
 - Resolver 已改为复用发布版物料评分器，宽泛搜索不再按文件顺序把“水泥砖”排在“水泥”本体之前。

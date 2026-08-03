@@ -8,6 +8,7 @@ from typing import Any
 
 
 ALLOWED_TOOLS = {
+    "nexterp_load_work_context",
     "nexterp_search_capabilities",
     "nexterp_load_guide",
     "nexterp_prepare_operation",
@@ -26,6 +27,31 @@ def parse_json_text(value: Any) -> dict[str, Any]:
 
 
 def compact_result(tool_name: str, payload: dict[str, Any]) -> dict[str, Any]:
+    if tool_name == "nexterp_load_work_context":
+        context = payload.get("agent_context") if isinstance(payload.get("agent_context"), dict) else {}
+        identity = context.get("identity") if isinstance(context.get("identity"), dict) else {}
+        workplace = context.get("workplace") if isinstance(context.get("workplace"), dict) else {}
+        role_context = payload.get("role_context") if isinstance(payload.get("role_context"), dict) else {}
+        role_profile = role_context.get("profile") if isinstance(role_context.get("profile"), dict) else {}
+        responsibilities = role_context.get("responsibilities") if isinstance(role_context.get("responsibilities"), list) else []
+        return {
+            "status": payload.get("status"),
+            "loaded_topics": payload.get("loaded_topics") or [],
+            "identity": {"employee_name": identity.get("employee_name"), "role_code": identity.get("role_code"),
+                         "position": identity.get("project_position") or identity.get("position")},
+            "workplace": {"project_code": workplace.get("project_code"),
+                          "project_short_name": workplace.get("project_short_name"),
+                          "warehouse_name": workplace.get("warehouse_name")},
+            "role_profile": {
+                "role_name": role_profile.get("role_name"),
+                "mission": role_profile.get("mission"),
+                "boundaries": role_profile.get("boundaries"),
+            },
+            "responsibilities": [
+                {"label": row.get("label"), "summary": row.get("summary"), "type": row.get("type")}
+                for row in responsibilities[:5] if isinstance(row, dict)
+            ],
+        }
     if tool_name == "nexterp_search_capabilities":
         cards = payload.get("cards") if isinstance(payload.get("cards"), list) else []
         return {
@@ -98,6 +124,8 @@ def extract(path: Path, *, last_turn_only: bool = False) -> dict[str, Any]:
 
     steps = [calls[call_id] for call_id in ordered_ids]
     loaded_nodes: list[dict[str, Any]] = []
+    loaded_context: list[str] = []
+    agent_context: dict[str, Any] = {}
     questions: list[str] = []
     confirmation: dict[str, Any] | None = None
     pending_id: str | None = None
@@ -107,6 +135,14 @@ def extract(path: Path, *, last_turn_only: bool = False) -> dict[str, Any]:
     execution: dict[str, Any] | None = None
     for step in steps:
         result = step["result"]
+        if step["tool"] == "nexterp_load_work_context":
+            loaded_context.extend(str(topic) for topic in result.get("loaded_topics") or [])
+            agent_context = {
+                "identity": result.get("identity") or {},
+                "workplace": result.get("workplace") or {},
+                "role_profile": result.get("role_profile") or {},
+                "responsibilities": result.get("responsibilities") or [],
+            }
         if step["tool"] in {"nexterp_search_capabilities", "nexterp_load_guide"}:
             for node in result.get("nodes") or []:
                 if node not in loaded_nodes:
@@ -126,6 +162,8 @@ def extract(path: Path, *, last_turn_only: bool = False) -> dict[str, Any]:
     return {
         "steps": steps,
         "loaded_nodes": loaded_nodes,
+        "loaded_context": list(dict.fromkeys(loaded_context)),
+        "agent_context": agent_context,
         "questions": questions,
         "confirmation": confirmation,
         "pending_id": pending_id,
