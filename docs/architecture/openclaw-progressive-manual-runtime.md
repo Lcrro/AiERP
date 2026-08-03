@@ -154,7 +154,8 @@ bash scripts/openclaw/run_nexterp_agent.sh \
 - OpenClaw Control UI 已完成一次权威确认写入：审批卡展示冻结后的项目、仓库、物料、数量和日期，用户选择“允许一次”后才执行。
 - ERPNext 以材料员本人身份创建并回读材料申请草稿 `MAT-MR-2026-00004`，回读字段与确认摘要一致；验收后已删除草稿并验证单据不存在。
 - 非交互 CLI 不会把聊天中的“确认”当成审批决定；必须连接 Control UI 或配置支持审批的消息渠道，未确认和超时均保持零写入。
-- Python 全量回归 `435 passed`；其中本次工作台与 Capability Service 聚焦回归 `73 passed`，PostgreSQL 目录集成测试包含在全量回归中，Plugin 测试 `5 passed`，TypeScript 构建检查通过。
+- Python 全量回归 `436 passed`；其中本次工作台与 Capability Service 聚焦回归 `74 passed`，PostgreSQL 目录集成测试包含在全量回归中，Plugin 测试 `5 passed`，TypeScript 构建检查通过。
+- 工作台自然语言请求采用异步运行状态：先返回运行编号，再按员工、项目和会话轮询连接、规划、能力发现、说明书读取、实体查询和操作准备等阶段；最终审计步骤仍以 OpenClaw 返回的真实 Trace 为准。
 - 真实 Capability API 已使用 `MAT-MR-2026-00003` 完成询价预览：解析真实供应商并冻结完整来源明细，全程零 ERPNext 写入，临时待确认记录已清理。
 - 真实 OpenClaw + DeepSeek 已按需搜索并逐层加载五项新增能力，能正确说明“材料申请 -> 询价 -> 供应商报价 -> 采购订单 -> 采购收货 -> 可选退货”，且只暴露四个元工具。
 - 隔离 Runtime 重启脚本会同时清理 PID 文件和专用端口上的残留进程，并等待服务最多 30 秒，避免代码升级后仍连接旧 Capability API。

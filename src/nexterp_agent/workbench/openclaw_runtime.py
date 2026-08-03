@@ -137,7 +137,10 @@ class OpenClawWorkbenchRunner:
         warehouse: str,
         conversation_id: str,
         event: dict[str, Any] | None = None,
+        progress: Callable[[str, str], None] | None = None,
     ) -> dict[str, Any]:
+        if progress:
+            progress("connecting", "小助理正在连接 OpenClaw 助理...")
         external_subject = workbench_external_subject(user)
         session_key = workbench_session_key(user, project_code, conversation_id)
         instruction = self._instruction(
@@ -155,18 +158,26 @@ class OpenClawWorkbenchRunner:
             "--agent", "main", "--session-key", session_key, "--message", instruction,
             "--thinking", "low", "--timeout", "180", "--json",
         ]
+        if progress:
+            progress("planning", "小助理正在规划这次业务请求...")
         started = time.perf_counter()
         completed = self.runner(command, capture_output=True, timeout=210)
         duration_ms = round((time.perf_counter() - started) * 1000)
         if completed.returncode != 0:
             detail = completed.stderr.decode("utf-8", errors="replace").strip()
             raise RuntimeError(detail or "OpenClaw 工作助理调用失败")
+        if progress:
+            progress("trace", "小助理正在整理执行过程...")
         payload = json.loads(completed.stdout.decode("utf-8"))
         result = payload.get("result") if isinstance(payload.get("result"), dict) else {}
         meta = result.get("meta") if isinstance(result.get("meta"), dict) else {}
         agent_meta = meta.get("agentMeta") if isinstance(meta.get("agentMeta"), dict) else {}
         session_file = str(agent_meta.get("sessionFile") or "")
         trace = self._extract_trace(session_file) if session_file else empty_trace()
+        if progress and trace.get("loaded_nodes"):
+            progress("guides", "小助理已读取相关业务说明书...")
+        if progress and trace.get("tool_calls"):
+            progress("preparing", "小助理正在核对并准备业务操作...")
         payloads = result.get("payloads") if isinstance(result.get("payloads"), list) else []
         message = next(
             (str(row.get("text") or "") for row in reversed(payloads) if isinstance(row, dict) and row.get("text")),

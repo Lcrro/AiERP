@@ -10,7 +10,7 @@
 - Tool schema 与 Adapter handler：`160 / 160`
 - 主数据来源：`data/master_data/` 与 `data/material_master/`
 - Agent 主入口：员工工作台使用 `OpenClawWorkbenchRunner`；旧 `DeepSeekAgentRuntime` 仅作为 A/B 回归基线
-- 测试：Python `435 passed`；工作台与 Capability Service 聚焦回归 `73 passed`；OpenClaw Plugin `5 passed`
+- 测试：Python `436 passed`；工作台与 Capability Service 聚焦回归 `74 passed`；OpenClaw Plugin `5 passed`
 
 ## 已具备
 
@@ -77,6 +77,7 @@
 - 隔离 OpenClaw Runtime 重启已加固：清除专用端口残留进程并等待服务就绪，避免 PID 文件失效后继续运行旧代码。
 - 员工工作台已正式接入 OpenClaw 渐进式说明书 Runtime：员工、项目和 conversation 使用独立持久会话，员工身份以不可逆外部标识动态绑定，旧 Runtime 会话不会混入新版对话。
 - 工作台会话不向模型暴露执行工具；写操作由 Agent 准备冻结的 `pending_id`，用户确认后由工作台直接调用 Capability API 执行同一动作并回读 ERPNext，不重新规划、不允许改参。
+- 工作台自然语言请求改为异步运行：`/api/agent/turn/start` 立即返回运行编号，`/api/agent/run` 按员工、项目和会话隔离提供阶段状态；页面显示“小助理正在……”和当前处理阶段，完成后再渲染真实结果。
 - 正式 `/api/agent/turn` 已完成真实 DeepSeek 冒烟：只按需调用能力搜索和 Guide 加载，返回 `openclaw_manual` 运行标识且未产生 ERPNext 写入。
 
 ## 数据状态

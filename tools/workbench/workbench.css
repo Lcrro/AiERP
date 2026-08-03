@@ -66,6 +66,10 @@
       .conversation-identity span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
       .permission-scope { color: var(--accent); font-size: 11px; font-weight: 700; }
       .messages { overflow: auto; padding: 22px; }
+      .processing-status { display: flex; align-items: center; gap: 9px; width: fit-content; max-width: min(78%, 680px); margin: 0 0 13px; padding: 9px 12px; border: 1px solid #b7ddce; border-radius: 7px; background: var(--surface); color: var(--muted); font-size: 12px; line-height: 1.5; }
+      .processing-status[hidden] { display: none; }
+      .processing-dot { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: var(--accent); animation: assistant-pulse 1.2s ease-in-out infinite; }
+      @keyframes assistant-pulse { 0%, 100% { opacity: .35; transform: scale(.85); } 50% { opacity: 1; transform: scale(1); } }
       .welcome { max-width: 620px; margin: 44px auto; text-align: center; }
       .welcome h1 { margin: 0 0 8px; font-size: 24px; letter-spacing: 0; }
       .welcome p { margin: 0; color: var(--muted); font-size: 13px; }

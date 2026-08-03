@@ -36,6 +36,10 @@
           <div class="permission-scope">ERPNext 本人权限</div>
         </div>
         <div id="messages" class="messages">
+          <div id="processingStatus" class="processing-status" hidden aria-live="polite">
+            <span class="processing-dot" aria-hidden="true"></span>
+            <span id="processingText">小助理正在准备...</span>
+          </div>
           <div id="welcome" class="welcome">
             <h1>今天需要处理什么？</h1>
             <p>我会先查询真实业务数据，涉及写入时再请你确认。</p>

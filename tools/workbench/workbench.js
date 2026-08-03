@@ -2,7 +2,7 @@
         projects: [], project: null, employees: [], user: null,
         preview: null, documents: null, stockDocuments: null, inbox: null, procurement: null, procurementPreparation: null, lastText: "", executeId: null,
         panel: "inbox", technicalView: "toolcall", documentDetail: null, quotationContext: null, historyToken: 0,
-        conversationId: "default", developerMode: false,
+        conversationId: "default", developerMode: false, activeRunId: null, pollToken: 0,
         procurementFilters: {scope:"project", urgency:"", family:"", supplier:"", before:"", view:"rows"},
         procurementSelected: new Set(),
       };
@@ -114,6 +114,8 @@
       }
 
       function selectEmployee(employee) {
+        state.pollToken += 1;
+        hideProcessing();
         state.user = employee;
         state.preview = null;
         state.historyToken += 1;
@@ -235,6 +237,8 @@
       async function startNewConversation() {
         if (!state.user || !window.confirm("将清除该员工 Agent 的聊天记录、已解析实体和待确认操作，但不会删除 ERPNext 单据。是否继续？")) return;
         setBusy(true);
+        state.pollToken += 1;
+        hideProcessing();
         try {
           await api("/api/session/reset", {method:"POST", body:JSON.stringify({user:state.user.user_email, project_code:state.project.project_code, conversation_id:state.conversationId})});
           state.conversationId = crypto.randomUUID();
@@ -298,23 +302,65 @@
         return rows.find(row => row.item_code === code) || {item_code:code};
       }
 
+      function updateProcessing(label) {
+        const status = $("processingStatus");
+        const text = $("processingText");
+        if (!status || !text) return;
+        status.hidden = false;
+        text.textContent = label || "小助理正在处理...";
+        $("messages").scrollTop = $("messages").scrollHeight;
+      }
+
+      function hideProcessing() {
+        const status = $("processingStatus");
+        if (status) status.hidden = true;
+        state.activeRunId = null;
+      }
+
+      const wait = milliseconds => new Promise(resolve => window.setTimeout(resolve, milliseconds));
+
+      async function startAgentTurn(payload) {
+        const token = ++state.pollToken;
+        const data = await api("/api/agent/turn/start", {method:"POST", body:JSON.stringify(payload)});
+        const initial = data.run || data;
+        if (!initial.run_id) throw new Error("工作台没有收到助理运行编号");
+        state.activeRunId = initial.run_id;
+        updateProcessing(initial.stage_label);
+        while (state.pollToken === token) {
+          const query = new URLSearchParams({
+            run_id: initial.run_id,
+            user: payload.user,
+            project_code: payload.project_code,
+            conversation_id: payload.conversation_id || "default",
+          });
+          const statusData = await api(`/api/agent/run?${query.toString()}`);
+          const run = statusData.run || statusData;
+          updateProcessing(run.stage_label);
+          if (run.status !== "running") {
+            hideProcessing();
+            if (run.status === "failed" && !run.result) throw new Error(run.error || "小助理处理失败");
+            return run.result || {status:"failed", message:run.error || "小助理没有返回结果。"};
+          }
+          await wait(650);
+        }
+        throw new Error("当前助理请求已被新会话替换");
+      }
+
       async function selectCandidate(code, name) {
         if (!state.user || !code) return;
         setBusy(true);
         addMessage("user", `选择 ${name}（${code}）`);
         try {
-          const data = await api("/api/agent/turn", {
-            method:"POST",
-            body:JSON.stringify({
-              user:state.user.user_email,
-              project_code:state.project.project_code,
-              warehouse:state.project.warehouse_code,
-              conversation_id:state.conversationId,
-              event:{type:"select_candidate", entity_id:"selected_item", candidate:candidateByCode(code)},
-            }),
+          const result = await startAgentTurn({
+            user:state.user.user_email,
+            project_code:state.project.project_code,
+            warehouse:state.project.warehouse_code,
+            conversation_id:state.conversationId,
+            event:{type:"select_candidate", entity_id:"selected_item", candidate:candidateByCode(code)},
           });
-          handleAgentResult(data.result, false);
+          handleAgentResult(result, false);
         } catch (error) {
+          hideProcessing();
           addMessage("error", error.message);
         } finally {
           setBusy(false);
@@ -359,12 +405,27 @@
           addMessage("user", text);
         }
         try {
-          const data = await api(execute ? "/api/agent/confirm" : "/api/agent/turn", {
-            method:"POST",
-            body:JSON.stringify({user:state.user.user_email, project_code:state.project?.project_code, warehouse:state.project?.warehouse_code, conversation_id:state.conversationId, text, execute, request_id:execute ? state.executeId : null}),
-          });
-          handleAgentResult(data.result, execute);
+          if (execute) {
+            updateProcessing("小助理正在执行已确认的业务操作...");
+            const data = await api("/api/agent/confirm", {
+              method:"POST",
+              body:JSON.stringify({user:state.user.user_email, project_code:state.project?.project_code, warehouse:state.project?.warehouse_code, conversation_id:state.conversationId, text, execute, request_id:state.executeId}),
+            });
+            handleAgentResult(data.result, true);
+            hideProcessing();
+          } else {
+            const result = await startAgentTurn({
+              user:state.user.user_email,
+              project_code:state.project?.project_code,
+              warehouse:state.project?.warehouse_code,
+              conversation_id:state.conversationId,
+              text,
+              execute:false,
+            });
+            handleAgentResult(result, false);
+          }
         } catch (error) {
+          hideProcessing();
           addMessage("error", error.message);
         } finally {
           setBusy(false);

@@ -10,8 +10,10 @@ import os
 from pathlib import Path
 import re
 import sys
+import threading
 import time
-from typing import Any
+from copy import deepcopy
+from typing import Any, Callable
 from urllib.parse import parse_qs, quote, urlparse
 from uuid import uuid4
 
@@ -530,6 +532,8 @@ class AgentWorkbenchService:
         self.openclaw_preview = OpenClawPreviewRunner(ROOT)
         self.openclaw_runtime = OpenClawWorkbenchRunner(ROOT)
         self.capability_repository = CapabilityCatalogRepository(os.environ["MATERIAL_CATALOG_DATABASE_URL"])
+        self._run_lock = threading.Lock()
+        self._runs: dict[str, dict[str, Any]] = {}
 
     def scoped_session_store(self, user: str, project: str = "", conversation_id: str = "default") -> RuntimeSessionStore:
         if not project and conversation_id == "default":
@@ -1686,7 +1690,145 @@ class AgentWorkbenchService:
             "failed_count": len(failed),
         }
 
-    def run(self, payload: dict[str, Any]) -> dict[str, Any]:
+    def _validate_agent_request(self, payload: dict[str, Any]) -> dict[str, Any]:
+        """Validate the cheap request scope before a background run is created."""
+        user = str(payload.get("user") or "").strip()
+        project_code = str(payload.get("project_code") or "").strip()
+        conversation_id = str(payload.get("conversation_id") or "default").strip() or "default"
+        text = str(payload.get("text") or "").strip()
+        event = payload.get("event") if isinstance(payload.get("event"), dict) else None
+        if not user:
+            raise ValueError("user 必填")
+        if not project_code:
+            raise ValueError("project_code 必填")
+        employee = next((row for row in employee_catalog() if row["user_email"] == user), None)
+        project = next((row for row in project_catalog() if row["project_code"] == project_code), None)
+        if not employee or not project:
+            raise ValueError("未知员工或项目")
+        if user not in {row["user_email"] for row in project.get("employees") or []}:
+            raise PermissionError("当前员工不属于所选项目")
+        candidate = event.get("candidate") if event and event.get("type") == "select_candidate" else None
+        if candidate is not None and (not isinstance(candidate, dict) or not candidate.get("item_code")):
+            raise ValueError("候选物料事件缺少 item_code")
+        if not text and not isinstance(candidate, dict):
+            raise ValueError("text 必填")
+        return {
+            "user": user,
+            "project_code": project_code,
+            "conversation_id": conversation_id,
+            "text": text,
+            "event": event,
+            "employee": employee,
+            "project": project,
+        }
+
+    def _ensure_run_registry(self) -> None:
+        # Some focused unit tests construct the service with __new__ to avoid external setup.
+        if not hasattr(self, "_run_lock"):
+            self._run_lock = threading.Lock()
+        if not hasattr(self, "_runs"):
+            self._runs = {}
+
+    def _set_run_progress(self, run_id: str, stage: str, label: str) -> None:
+        self._ensure_run_registry()
+        now = time.time()
+        with self._run_lock:
+            run = self._runs.get(run_id)
+            if not run or run.get("status") != "running":
+                return
+            run.update({"stage": stage, "stage_label": label, "updated_at": now})
+
+    def _run_status(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        self._ensure_run_registry()
+        user = str(payload.get("user") or "").strip()
+        project_code = str(payload.get("project_code") or "").strip()
+        conversation_id = str(payload.get("conversation_id") or "default").strip() or "default"
+        with self._run_lock:
+            run = self._runs.get(run_id)
+            if not run:
+                raise ValueError("找不到该助理运行记录，可能已过期")
+            if run["user"] != user or run["project_code"] != project_code or run["conversation_id"] != conversation_id:
+                raise PermissionError("不能读取其他员工或项目的助理运行记录")
+            return deepcopy(run)
+
+    def run_status(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._run_status(str(run_id or "").strip(), payload)
+
+    def start_run(self, payload: dict[str, Any]) -> dict[str, Any]:
+        """Start an OpenClaw turn without blocking the HTTP request."""
+        context = self._validate_agent_request(payload)
+        self._ensure_run_registry()
+        run_id = uuid4().hex
+        now = time.time()
+        record = {
+            "run_id": run_id,
+            "user": context["user"],
+            "project_code": context["project_code"],
+            "conversation_id": context["conversation_id"],
+            "status": "running",
+            "stage": "starting",
+            "stage_label": "小助理正在准备请求...",
+            "started_at": now,
+            "updated_at": now,
+        }
+        with self._run_lock:
+            self._runs[run_id] = record
+            # Keep a bounded in-memory status cache. The session file remains the durable chat record.
+            if len(self._runs) > 100:
+                finished = [key for key, value in self._runs.items() if value.get("status") != "running"]
+                for key in finished[: max(1, len(self._runs) - 100)]:
+                    self._runs.pop(key, None)
+        thread = threading.Thread(target=self._run_in_background, args=(run_id, dict(payload)), daemon=True)
+        thread.start()
+        return {key: record[key] for key in ("run_id", "status", "stage", "stage_label", "started_at", "updated_at")}
+
+    def _run_in_background(self, run_id: str, payload: dict[str, Any]) -> None:
+        stop = threading.Event()
+        phases = (
+            ("connecting", "小助理正在连接业务服务...", 0.8),
+            ("planning", "小助理正在理解你的需求...", 1.7),
+            ("discovering", "小助理正在查找相关业务能力...", 2.8),
+            ("guides", "小助理正在读取业务说明书...", 4.0),
+            ("resolving", "小助理正在查询物料、项目和仓库...", 6.0),
+            ("preparing", "小助理正在准备可执行的业务操作...", 8.0),
+        )
+
+        def advance() -> None:
+            for stage, label, delay in phases:
+                if stop.wait(delay):
+                    return
+                self._set_run_progress(run_id, stage, label)
+
+        progress_thread = threading.Thread(target=advance, daemon=True)
+        progress_thread.start()
+        try:
+            result = self.run(
+                payload,
+                progress=lambda stage, label: self._set_run_progress(run_id, stage, label),
+            )
+            status = str(result.get("status") or "failed")
+            terminal = {
+                "completed": ("completed", "小助理已完成处理。"),
+                "needs_confirmation": ("needs_confirmation", "小助理已准备好，请确认后执行。"),
+                "needs_clarification": ("needs_clarification", "小助理需要你补充一点信息。"),
+                "failed": ("failed", "小助理处理失败。"),
+            }.get(status, (status, "小助理已返回结果。"))
+            now = time.time()
+            with self._run_lock:
+                run = self._runs.get(run_id)
+                if run:
+                    run.update({"status": terminal[0], "stage": terminal[0], "stage_label": terminal[1], "updated_at": now, "result": result})
+        except Exception as exc:  # pragma: no cover - exercised through the HTTP boundary
+            now = time.time()
+            with self._run_lock:
+                run = self._runs.get(run_id)
+                if run:
+                    run.update({"status": "failed", "stage": "failed", "stage_label": "小助理处理失败。", "updated_at": now, "error": str(exc)})
+        finally:
+            stop.set()
+            progress_thread.join(timeout=0.2)
+
+    def run(self, payload: dict[str, Any], *, progress: Callable[[str, str], None] | None = None) -> dict[str, Any]:
         user = str(payload.get("user") or "").strip()
         project_code = str(payload.get("project_code") or "").strip()
         conversation_id = str(payload.get("conversation_id") or "default").strip() or "default"
@@ -1725,17 +1867,22 @@ class AgentWorkbenchService:
             default_project=project_code,
             allowed_projects=allowed_projects,
         )
-        result = self.openclaw_runtime.run(
-            text=text,
-            user=user,
-            employee_name=str(employee.get("employee_name") or user),
-            position=str(employee.get("project_position") or employee.get("position") or ""),
-            project_code=project_code,
-            project_label=str(project.get("project_short_name") or project_code),
-            warehouse=str(payload.get("warehouse") or project.get("warehouse_code") or ""),
-            conversation_id=conversation_id,
-            event=event,
-        )
+        if progress:
+            progress("openclaw", "小助理正在处理业务请求...")
+        runtime_kwargs = {
+            "text": text,
+            "user": user,
+            "employee_name": str(employee.get("employee_name") or user),
+            "position": str(employee.get("project_position") or employee.get("position") or ""),
+            "project_code": project_code,
+            "project_label": str(project.get("project_short_name") or project_code),
+            "warehouse": str(payload.get("warehouse") or project.get("warehouse_code") or ""),
+            "conversation_id": conversation_id,
+            "event": event,
+        }
+        if progress is not None:
+            runtime_kwargs["progress"] = progress
+        result = self.openclaw_runtime.run(**runtime_kwargs)
         response = dict(result)
         response["execute"] = False
         response["conversation_id"] = conversation_id
@@ -1976,6 +2123,25 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
             )
             json_response(self, {"ok": True, **payload})
             return
+        if parsed.path == "/api/agent/run":
+            query = parse_qs(parsed.query)
+            try:
+                payload = self.server.service.run_status(  # type: ignore[attr-defined]
+                    (query.get("run_id") or [""])[0],
+                    {
+                        "user": (query.get("user") or [""])[0],
+                        "project_code": (query.get("project_code") or [""])[0],
+                        "conversation_id": (query.get("conversation_id") or ["default"])[0],
+                    },
+                )
+            except PermissionError as exc:
+                json_response(self, {"ok": False, "error": str(exc)}, 403)
+                return
+            except ValueError as exc:
+                json_response(self, {"ok": False, "error": str(exc)}, 404)
+                return
+            json_response(self, {"ok": True, "run": payload})
+            return
         if parsed.path == "/api/inbox":
             query = parse_qs(parsed.query)
             payload = self.server.service.inbox(  # type: ignore[attr-defined]
@@ -2179,11 +2345,17 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
                 response = self.server.service.confirm(read_json(self))  # type: ignore[attr-defined]
                 json_response(self, {"ok": response.get("status") != "failed", "result": response})
                 return
+            if self.path == "/api/agent/turn/start":
+                run = self.server.service.start_run(read_json(self))  # type: ignore[attr-defined]
+                json_response(self, {"ok": True, "run": run})
+                return
             if self.path not in {"/api/agent", "/api/agent/turn"}:
                 json_response(self, {"ok": False, "error": "not_found"}, 404)
                 return
             response = self.server.service.run(read_json(self))  # type: ignore[attr-defined]
             json_response(self, {"ok": response.get("status") != "failed", "result": response})
+        except PermissionError as exc:
+            json_response(self, {"ok": False, "error": str(exc)}, 403)
         except (ValueError, json.JSONDecodeError) as exc:
             json_response(self, {"ok": False, "error": str(exc)}, 400)
         except Exception as exc:  # pragma: no cover - local service boundary

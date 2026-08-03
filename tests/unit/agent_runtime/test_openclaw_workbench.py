@@ -3,6 +3,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import subprocess
+import time
+
+import pytest
 
 from nexterp_agent.agent_runtime.session import RuntimeSessionStore
 from nexterp_agent.workbench import openclaw_runtime
@@ -196,3 +199,49 @@ def test_workbench_service_uses_openclaw_and_confirms_same_pending(tmp_path: Pat
     assert completed["document_links"][0]["url"] == "#document/Material%20Request/MAT-MR-1"
     history = service.session_history("mao.xiaoquan@stec-up.local", "PRJ-HL-13", "conversation-a")
     assert [turn["result"]["status"] for turn in history["turns"]] == ["needs_confirmation", "completed"]
+
+
+def test_workbench_async_run_exposes_terminal_result_and_scopes_status(tmp_path: Path) -> None:
+    class Repository:
+        def upsert_identity(self, **_kwargs):
+            return None
+
+    class Runtime:
+        def run(self, **_kwargs):
+            return {
+                "status": "needs_clarification",
+                "message": "请选择具体物料。",
+                "questions": ["请选择规格。"],
+                "candidates": [],
+                "document_links": [],
+            }
+
+    service = AgentWorkbenchService.__new__(AgentWorkbenchService)
+    service.base_url = "http://localhost:8002"
+    service.session_store = RuntimeSessionStore(tmp_path)
+    service.capability_repository = Repository()
+    service.openclaw_runtime = Runtime()
+
+    request = {
+        "user": "mao.xiaoquan@stec-up.local",
+        "project_code": "PRJ-HL-13",
+        "conversation_id": "async-test",
+        "text": "帮我找钻头",
+    }
+    started = service.start_run(request)
+    assert started["status"] == "running"
+    assert started["stage_label"]
+
+    finished = None
+    for _ in range(100):
+        finished = service.run_status(started["run_id"], request)
+        if finished["status"] != "running":
+            break
+        time.sleep(0.005)
+    assert finished is not None
+    assert finished["status"] == "needs_clarification"
+    assert finished["result"]["message"] == "请选择具体物料。"
+    assert finished["stage_label"] == "小助理需要你补充一点信息。"
+
+    with pytest.raises(PermissionError):
+        service.run_status(started["run_id"], {**request, "project_code": "PRJ-NJ-01"})

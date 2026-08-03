@@ -25,6 +25,7 @@ python scripts\dev\agent_workbench.py --port 8788 --profile civil
 - 右侧“我的工作”显示 ERPNext 的审批待办、本人申请、采购进度、最近单据和异常退回。
 - 单据在工作台抽屉中打开，不跳转 ERPNext；普通员工不显示 ToolCall 和 JSON。
 - “开发者模式”用于查看 Agent 步骤、ToolCall、ToolResult 和完整 JSON。
+- 发送自然语言后，工作台立即显示“小助理正在……”状态；后台运行期间通过运行编号轮询连接、理解、能力发现、说明书读取、实体查询和操作准备等阶段，完成后再显示真实回复。阶段提示用于告知当前处理进度，完整审计步骤以最终结果中的 Agent 步骤为准。
 
 ## 操作规则
 
@@ -47,6 +48,8 @@ GET  /api/documents
 GET  /api/document
 POST /api/workflow/action
 POST /api/document/submit
+POST /api/agent/turn/start
+GET  /api/agent/run
 POST /api/agent/turn
 POST /api/agent/confirm
 POST /api/session/reset
