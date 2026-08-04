@@ -1,22 +1,30 @@
 item_code	type_id	standard_name	mapping_method	mapping_evidence	mapping_status	source_hash
+ADMIN-000001	MT-DD8C081E0D76	水壶	exact_current_name	热水壶缺乏电热结构证据，按修正后的水壶类型定义归入水壶	frozen	87ed5c8422361cc43ec9e45b3d90821e630b669437a74a9a2256520c6dbcf4a2
 ADMIN-000002	MT-852FF9EFC7D2	洁厕剂	exact_current_name	清洁剂功能独立，容量归SKU属性。	frozen	847bbfc6c0d9cfad6ca7bdd162b9d2cd2d88e8b998f4a4fc0158b7a3059d7d1e
+ADMIN-000003	MT-DD8C081E0D76	水壶	exact_current_name	名称合格，类型定义已按审核意见修正为中性描述	frozen	3383ee5803ab127e203436b66bde7c67dcc7d473d0cbce9339f13096b886c3fd
 ADMIN-000004	MT-A4B31D70F1B0	水桶	exact_current_name	水桶为独立盛水容器类型。	frozen	9735952eb4998d3845a61721b5bcb98ebb192fe383a6f2e74852763ca131377c
 ADMIN-000005	MT-05F875FF3F83	垃圾袋	exact_current_name	类型稳定，尺寸/厚度/颜色归SKU属性。	frozen	1482938eb27a232107e36ed3bd0c9b4c09eca2b9b931416bd93eee6bd8aa5402
 ADMIN-000006	MT-CA02AD4C115E	记号笔	exact_current_name	记号笔类型稳定，颜色归SKU属性。	frozen	b7d42db4386092e934cb111ccadb600411392ec7a8a733be2469a9f997fe57fc
 ADMIN-000007	MT-9E65A5E71B56	油污清洗剂	exact_current_name	油污清洗剂为独立去油污清洗剂类型。	frozen	6179cd811010ded96f9451652f8b61bdc2ab7b2f2d6465e515dc4c7dd0f29905
 ADMIN-000008	MT-05F875FF3F83	垃圾袋	exact_current_name	类型稳定，尺寸/厚度/颜色归SKU属性。	frozen	c5a2082bfebdf6e3f419afba3abaeb947713563eb6c25b58c905fd442963ce19
+ADMIN-000009	MT-461381BDDA89	凳子	exact_current_name	方凳属于无靠背坐具，与凳子商品结构一致，以属性区分凳面形状	frozen	23b2bc9886b5b126dd7a090ee9ff437b9e236916fd2c4a80e8f46c6aea532300
 ADMIN-000011	MT-CA02AD4C115E	记号笔	exact_current_name	记号笔类型稳定，颜色归SKU属性。	frozen	408bf6ee08ecdaf1d1c2d0eb892e8dfa9ab4c7b7cf23b6e72df5f9ce54e15162
+ADMIN-000012	MT-88DE797BCE34	床垫	exact_current_name	床上用品，独立类型	frozen	86fe1b064ad3762cebf6389dee834d8908bd49e48f04a6bcb688f187702b751f
+ADMIN-000014	MT-35CD0A39FE33	电视支架	exact_current_name	功能明确，独立类型	frozen	25d172d3cf96a84c02f2b65029940635859c60cacbc7517206cf0b225a09587a
 ADMIN-000015	MT-73BAC5D3B018	电源线	exact_current_name	现有名称即标准类型名称。	frozen	902a756ec410ef88a40dcdea2e4b0959517e516e8c295086fff695f2942d3555
 ADMIN-000016	MT-B738E1F78153	数据线	exact_current_name	现有名称即标准类型名称。	frozen	0ac2482b4bb0d73d9fac6be7f45756cd743266071d4be235adc1deac32f22f71
+ADMIN-000017	MT-331BE0A5CDA3	办公椅	exact_current_name	用途明确的椅子，独立类型	frozen	6b2afe78e9e654731170015a711340f0d16b4c0319017e4d3a3fa94886d65f3c
 ADMIN-000018	MT-83BB20A2CD56	鼠标	exact_current_name	设备类型稳定，连接方式和品牌归SKU属性。	frozen	7e2545f2af2e239c1b8191ff3d8c2b7bb1c532b98a5d8fa1c6250a47ebc6d65f
 ADMIN-000021	MT-4ECDC4BBE3A7	除甲醛机	exact_current_name	功能设备独立，用途和适用面积归SKU属性。	frozen	b44887892ab7c3dc4d8f66098d73a4f43a2c7593e4607132e8a5ed4f5221d6e8
 ADMIN-000022	MT-C5316F0242F6	多功能打印机	exact_current_name	设备类型稳定，品牌和类型归SKU属性。	frozen	dd5c704d82441df9e50ab67ac11a7b8f5cf4b4f5959276b70135a811e0f8e746
+ADMIN-000023	MT-D773E186D48C	办公桌	exact_current_name	用途明确，独立类型	frozen	7d99bf4e14cdea2ca294b9042998ade8b2a07e7858493af533826eaa4fdf3663
 ADMIN-000026	MT-23A67A242AA9	擦拭布	exact_current_name	棉布在清洁场景中作为擦拭布原料/物料，合并进入擦拭布。	frozen	a88a765d7d6379751dbea5c36cc7e20fcf8a87f76dfbe173f0c5eb4803d29dc1
 ADMIN-000027	MT-D26523FE2B24	吸油棉	exact_current_name	名称稳定；材质和尺寸作为SKU属性。	frozen	665092cf9ef19e085940444176d403e2a9421623013d75ce68139657f7766fa8
 ADMIN-000029	MT-310EA2FFDD11	拖把	exact_current_name	名称稳定；拖头材质和规格作为SKU属性。	frozen	ceaa4bd53b93aa47ac3d9d2e62beb58beea7140f9fb9d39d746c64100b94b357
 ADMIN-000030	MT-23A67A242AA9	擦拭布	exact_current_name	抹布属于擦拭布类成品，合并进入擦拭布。	frozen	3476c057cd3d42d0b7908d883eba9a86dd14ec82942a3d245152785168467c9c
 ADMIN-000031	MT-40FB771794DF	垃圾桶	exact_current_name	名称稳定；容量、材质和配置作为SKU属性。	frozen	3ff0b9d6668f3ebd5ad0b4b5721168f24809792a976044308c745645f19deb02
 ADMIN-000032	MT-05F875FF3F83	垃圾袋	exact_current_name	类型稳定，尺寸/厚度/颜色归SKU属性。	frozen	bdcdf6427e09b9fdbb9509c5c972039bfe627e5c445c8031650f616326f3edfa
+ADMIN-000033	MT-35CD0A39FE33	电视支架	exact_current_name	功能明确，独立类型	frozen	4f91a343731ea3ddff7b8e1d0b8f2921f75854bab0898e9e45c02e25ad370916
 ADMIN-000034	MT-05F875FF3F83	垃圾袋	exact_current_name	类型稳定，尺寸/厚度/颜色归SKU属性。	frozen	cb03f9e8712df927bbcf36779844fccea6617b65c6653f415d25457dc9b48973
 ADMIN-000035	MT-C50DDC6D6023	扫把	exact_current_name	名称稳定；材质和规格作为SKU属性。	frozen	aa7b1dfb256690374c37f413c8c4565a92acc3f72d61581722fbfcb62cd9026a
 ADMIN-000037	MT-C50DDC6D6023	扫把	exact_current_name	名称稳定；材质和规格作为SKU属性。	frozen	253ac50625b822a9827eee68136f839880985e578e43d8a25b4fc43ffb197d1a
@@ -27,18 +35,25 @@ ADMIN-000045	MT-D0EF7E647AA6	喷壶	exact_current_name	名称稳定；容量和�
 ADMIN-000048	MT-E6781F281E7C	烟灰桶	exact_current_name	名称稳定；材质和尺寸作为SKU属性。	frozen	bc45c72d78f2ddae04c11c9d63948801e9424a2efdd19f8f922bc3190aa5b329
 ADMIN-000050	MT-9E65A5E71B56	油污清洗剂	exact_current_name	油污清洗剂为独立去油污清洗剂类型。	frozen	4e72cf29dadfe907f45b05d829d64cfe55569d22aac15effa3278025da40ec0f
 ADMIN-000051	MT-533BD564EE08	洗洁精	exact_current_name	洗涤剂类型独立，容量归SKU属性。	frozen	c10ff0bb53413581ef5718e4d39cc16f2ad13efbcdc5dbee2b83ecb593bac0fc
+ADMIN-000053	MT-335A01CAF8EC	牙膏	exact_current_name	清洁用品，独立类型	frozen	7d8ceecfe75917d60f7f34dd1e707430f074ec979717c8243250b1785ee8312f
+ADMIN-000054	MT-25F09C4C1D23	拖鞋	exact_current_name	鞋类独立类型	frozen	ec75baa63d8aa244abadb07d7a11358c4a4b645a4a35bef74f30c2965c723538
 ADMIN-000056	MT-40FB771794DF	垃圾桶	exact_current_name	名称稳定；容量、材质和配置作为SKU属性。	frozen	cf243d018d6a6c8926e1f10db86f415690355e1b5fd5cbca93de8a69339e07c5
 ADMIN-000057	MT-CA02AD4C115E	记号笔	exact_current_name	记号笔类型稳定，颜色归SKU属性。	frozen	f0db2f7d364d6aa0088411bcb471fa5744cfc1f6407376ea53ce323844656670
 ADMIN-000058	MT-05F875FF3F83	垃圾袋	exact_current_name	类型稳定，尺寸/厚度/颜色归SKU属性。	frozen	21cf4f838406516358ce61d019c20f9453026b35bd3b301b7eb419cb654ca472
 ADMIN-000060	MT-533BD564EE08	洗洁精	exact_current_name	洗涤剂类型独立，容量归SKU属性。	frozen	c3a3191c7baf45cb379e7c34e2e4f2b2d09e0cc795cc3a653ec7f4d0916ee86a
 ADMIN-000061	MT-E4F385D3AC19	铅笔	exact_current_name	铅笔类型稳定，硬度规格归SKU属性。	frozen	47df57ce8d5caba609db6200aca2dc47202ea75917bd5e500fe1e9e9bb1795f1
 ADMIN-000062	MT-D26523FE2B24	吸油棉	exact_current_name	名称稳定；材质和尺寸作为SKU属性。	frozen	512f3366b3d2d022718d5252ea7b5cf3ec6c30f4cb8e35ce58b1bbbdab0683dd
+ADMIN-000064	MT-852BD11EF6B0	圆桌	exact_current_name	形状明确，独立类型	frozen	51ff10b28dc447791533645c9a96f9e26810119de5da5227f3327341b108d27b
+ADMIN-000065	MT-D773E186D48C	办公桌	exact_current_name	用途明确，独立类型	frozen	b4cfaa53ba28f7659bf685325dadc38cd2b29c1a04da7db1b9382d0d248097b6
 ADMIN-000066	MT-8476FBB13E91	吸尘器	exact_current_name	名称稳定；样式和功率作为SKU属性。	frozen	740ebc82f433c26e3f2a5ecefb29c44891401ce9266c69db58f35da79035ebb4
 ADMIN-000067	MT-40FB771794DF	垃圾桶	exact_current_name	名称稳定；容量、材质和配置作为SKU属性。	frozen	fcbbde0f1a83707feecac5454726e3ed11b35bb044e8e254483af6bb6b8d47ff
 ADMIN-000070	MT-04DCB71A5950	记录本	exact_current_name	记录本类型稳定，规格和页数归SKU属性。	frozen	e14db02e7f201875a2d04d4c50459be61d4b787951600d9e3b8812ea812e51ec
 ADMIN-000072	MT-C50DDC6D6023	扫把	exact_current_name	名称稳定；材质和规格作为SKU属性。	frozen	e5ef21e52d975a0782dde23abdbede56ab66d8d8c175dcf1a768f7d6cd2ca3bf
+CHEM-000001	MT-FABE0F5323A6	聚氨酯堵漏剂	exact_current_name	将类型属性改为optional，覆盖主剂/副剂SKU。	frozen	ea9648dc82e1edf8b1994f3c941dcf2475ad2a75c7f5783001e57f8581793db7
 CHEM-000002	MT-F0BD53D94D9C	涂料	exact_current_name	源证据只有系列和环保特征，不足以支持并入乳胶漆；保留为未定成膜类型涂料。	frozen	bacc54a0b90b7f073a4e66e7decf92019668753111e30e7a03b3e52786d1df96
+CHEM-000003	MT-7CC4128E26E2	瞬干胶	exact_current_name	名称与标准类型一致，边界清晰。	frozen	5d0a10ee81e9ff1cdeebdecde01e73c526e0e89d3c0a9d35b61d466b31ca10a6
 CHEM-000004	MT-AE1D847DF5D5	除胶剂	exact_current_name	除胶剂为独立去胶剂类型。	frozen	488aa34b376f8fc9c2ece7d9709bab4442317aeac058a86d32ed35a2892d54ec
+CHEM-000005	MT-7B6E8B21E377	泡沫填缝剂	exact_current_name	名称与标准类型一致，边界清晰。	frozen	eccdec49cbaba144bd9bb86108fadb843ae30e9b387e3cb5fa22fbb16cf45eb6
 CHEM-000006	MT-31866361124C	防锈润滑剂	exact_current_name	名称合格，品牌和容量留在SKU属性。	frozen	69c4c20c119237348342f743985a730f3fd471c12454cc195a0197470fc1f05a
 CHEM-000007	MT-77D73CEF4ECF	调和漆	exact_current_name	直接刷涂的调和漆为独立类型。	frozen	52cc2cc1da0673ab755f32f9b46c092460db9ab5041dc823bae1a7ed9bdb7d21
 CHEM-000008	MT-77D73CEF4ECF	调和漆	exact_current_name	直接刷涂的调和漆为独立类型。	frozen	1a93358f79b5de3a402dcf4bc34f801d2436bf158dda5ac1b81c3c6d6bdcfb6e
@@ -53,7 +68,11 @@ CHEM-000018	MT-3BF81E32BAFC	自喷漆	exact_current_name	气雾罐自喷漆商�
 CHEM-000019	MT-2F88AF306F4D	脱漆剂	exact_current_name	脱漆剂为独立去漆膜化学剂类型。	frozen	fe034baf7e74a4eccdd12150bd555d3e51323ce128a97e2029440d2e96a85ec6
 CHEM-000020	MT-6E6D6F625138	电气清洗剂	exact_current_name	电气清洗剂为独立电力设备清洗剂类型。	frozen	aaf590a49a1540987a31b341d5f125b91184cb01c4b73eb77a1e79214da7f2e1
 CHEM-000021	MT-B6BEC02712CE	黄油泵	exact_current_name	电动油脂泵类型稳定，容量/出口数作为属性。	frozen	a597d5f0e49bf88478ebebcdd8eef31b361afac96eeedc9b52114c66fbade1f4
+CHEM-000022	MT-99C49417346C	AB胶	exact_current_name	名称与标准类型一致，边界清晰。	frozen	e74ec834a1c1e674e1f3a0b58fce5c5d289896c0f5a20d8e079f99b0413e6849
 CHEM-000023	MT-77D73CEF4ECF	调和漆	exact_current_name	直接刷涂的调和漆为独立类型。	frozen	65abdb7c811968228c7699d8159b921af2d34cf2f10b806af7be8ff94c942b80
+CHEM-000025	MT-E972C7D9F037	玻璃胶	exact_current_name	名称与标准类型一致，边界清晰。	frozen	f1c6323f054bac0f9929b356fa47b59dcc42134f6f3b706c23dcda7d6ad56e24
+CHEM-000026	MT-08564248ADC3	密封胶	exact_current_name	调整定义排除硅酮玻璃胶，并补充类型属性。	frozen	9847ba7fe26e5c36394a8adb9db12fab8edb444b41e2c73b27d544de98d0e9ec
+CHEM-000027	MT-B77F8002D76A	双面胶带	exact_current_name	名称与标准类型一致，边界清晰。	frozen	7517bc82066e0856d3ce3aad5ec1129f0511b6f477fc3232a8cb54a50b543153
 CHEM-000028	MT-8155D2AB2365	固化剂	exact_current_name	按配套体系和层次采购的固化剂，类型边界清楚。	frozen	81393b1d418c942f923972c709c7dc816d38a08958f115e96268e74b47431677
 CHEM-000029	MT-582B7CE5942A	底漆	exact_current_name	地坪底漆为独立层次商品。	frozen	706dad7f478834a8aa9629ceb52a586a1738acd8d876c86c7630e469ee0aad2a
 CHEM-000030	MT-8155D2AB2365	固化剂	exact_current_name	按配套体系和层次采购的固化剂，类型边界清楚。	frozen	618284b5e1bcf1bc2b31b6a832a2060b1f551fed05f0d7f7b3d368fca697a3e9
@@ -61,14 +80,21 @@ CHEM-000031	MT-5904A7482737	美纹纸胶带	exact_current_name	类型特殊且�
 CHEM-000032	MT-63EC0EF307BC	乳胶漆	exact_current_name	源SKU为外墙乳胶漆，“墙面漆”是乳胶漆俗名，不改变商品类型。	frozen	406a839ef270e4cdb5f62ce81c5ce6942f45eab9d8993b32d497bea07c584025
 CHEM-000034	MT-3BF81E32BAFC	自喷漆	exact_current_name	气雾罐自喷漆商品特征明确。	frozen	b03145f912be4a3c5d5e5a78ae457b63ffcb4858da6688abd12a0fbe14682155
 CHEM-000035	MT-3BF81E32BAFC	自喷漆	exact_current_name	气雾罐自喷漆商品特征明确。	frozen	f19fe263bdabcf14559a0e372c139ab3488fb4677597c7eadc427176338c1467
+CHEM-000036	MT-9890C1C35446	万能胶	exact_current_name	名称与标准类型一致，边界清晰。	frozen	db47493d135cfee331573291306fa6f8b4cc99275870783ce92478df2dcff184
 CHEM-000037	MT-7B5749411F6B	齿轮油	exact_current_name	齿轮油为独立齿轮传动用油类型。	frozen	841227c8edeaa9f0512acf76b632247bce8944f2661c43b3861dea66a7b30bbb
+CHEM-000038	MT-ACDB3D621DB0	植筋胶	exact_current_name	名称与标准类型一致，边界清晰。	frozen	13c15a4106f204b9e3d80754a17224e3c6697c5a4eaac2f3f476a9e5fb5ff2ce
 CHEM-000039	MT-2C6F9D2B1067	泡棉双面胶带	exact_current_name	该族现有双面胶带均为海绵/泡沫/泡沫棉泡棉基材；更名为泡棉双面胶带，与胶粘密封族通用双面胶带形成清晰边界。	frozen	bba7e7617e9c68a6d6ba92311a605d7a665508b00821137d4523928e335da4b2
 CHEM-000040	MT-77D73CEF4ECF	调和漆	exact_current_name	直接刷涂的调和漆为独立类型。	frozen	41a7cfdb22e90e9d17e7dd11b4b4f69eb001a278d2edd2b6d01c05db09210c89
+CHEM-000041	MT-FABE0F5323A6	聚氨酯堵漏剂	exact_current_name	将类型属性改为optional，覆盖主剂/副剂SKU。	frozen	99202bcf30cdc3c7fa066001405998aeb92ccc3a1fc09e7e9f2a2e7f2fd3419b
+CHEM-000042	MT-FABE0F5323A6	聚氨酯堵漏剂	exact_current_name	将类型属性改为optional，覆盖主剂/副剂SKU。	frozen	2fbbf84c0a2ff371c808594215c931e2cbe07f0d246aae7fb28be9ae8edb66d2
 CHEM-000043	MT-74E5601A05D1	橡胶支座	exact_current_name	名称稳定，尺寸和材质留在SKU属性。	frozen	76549e1ba4fcb830ebc14ac05f3965b54a6e778f49645985f3ceb34bd7400b92
 CHEM-000044	MT-2C6F9D2B1067	泡棉双面胶带	exact_current_name	该族现有双面胶带均为海绵/泡沫/泡沫棉泡棉基材；更名为泡棉双面胶带，与胶粘密封族通用双面胶带形成清晰边界。	frozen	3df26b8533a187ccfb1ee6d013fce476ab015f6389077ebe2c647bb9c13bfd10
+CHEM-000045	MT-A63C92D8B9D7	胶水	exact_current_name	名称与标准类型一致，边界清晰。	frozen	e8fc223d987cdb23063338435909a503bd05ef0d4ed62004cbf17e9db7cef3e0
+CHEM-000046	MT-B77F8002D76A	双面胶带	exact_current_name	名称与标准类型一致，边界清晰。	frozen	f1fa9a1269de42af05ca1b37c5ec5d646adf41d57bf349dd83219020b0fdeee2
 CHEM-000047	MT-77D73CEF4ECF	调和漆	exact_current_name	直接刷涂的调和漆为独立类型。	frozen	1b282ab7620a59fe060c012144b38d6cc881d41d42de19aaeb7d1316459817b9
 CHEM-000048	MT-77D73CEF4ECF	调和漆	exact_current_name	直接刷涂的调和漆为独立类型。	frozen	0befeffbd4f52b74c0755d5e409ac064384e14bbe8759f3cbdd735ccfaaf82d8
 CHEM-000050	MT-A6DDF67DC33F	橡胶板	exact_current_name	橡胶板为独立橡胶材料类型。	frozen	6eee6f96764992094a6faffdb567a68fb4986d5474af3d377abaa72862beba20
+CHEM-000051	MT-D81E1CB5E7D9	强力胶	exact_current_name	名称与标准类型一致，边界清晰。	frozen	537152689b222b6db0c204a675a5b5241d5a257a5b97b8bd2e6272246df5be53
 CHEM-000052	MT-4F7924C8DD76	封箱胶带	exact_current_name	标准名称稳定，按宽度/长度/颜色区分SKU。	frozen	79a21354960ff799b17ab1295b9bb0d6afb07ad76586352d1ecc5aae580d7638
 CHEM-000053	MT-3BF81E32BAFC	自喷漆	exact_current_name	气雾罐自喷漆商品特征明确。	frozen	ccf6655852f6a0dfe9b6d2ca817e72a6d50c30874e71a76e9b78e3b69a6191e9
 CHEM-000054	MT-31866361124C	防锈润滑剂	exact_current_name	名称合格，品牌和容量留在SKU属性。	frozen	411b709f63b1b3b907b7c5b16aaac27cb691046637836b7b22f007b0d73e1ea1
@@ -82,6 +108,7 @@ CHEM-000063	MT-20692D1C01E6	橡胶垫块	exact_current_name	名称稳定，尺�
 CHEM-000065	MT-9D9CD04D7D99	气动油	exact_current_name	气动油为独立气动设备用油类型。	frozen	15a8d1891717f5331f6d15b819ea8a9fd89ed81713c15c2555e620782d24a0d5
 CHEM-000067	MT-7B5749411F6B	齿轮油	exact_current_name	齿轮油为独立齿轮传动用油类型。	frozen	6a852dc4b8e568a2287cdada51537ee674e4a177133f48b38f37b6a1c7247aac
 CHEM-000068	MT-3BF81E32BAFC	自喷漆	exact_current_name	气雾罐自喷漆商品特征明确。	frozen	7b94e5eba59b6fa5c7b00da8e196f3de1e617b57100877ad7ff295891d2f67ac
+CHEM-000069	MT-2E436B10F973	胶粘剂	exact_current_name	名称与标准类型一致，边界清晰。	frozen	8bf5f53338809fb92bc6511f3bc5d565cb4831c2fcf1f77f37306cb95ee19f7f
 CHEM-000071	MT-41A5C8A013A6	电子清洗剂	exact_current_name	电子清洗剂为独立电子元件清洗剂类型。	frozen	725ce4e2919863def5688922170be177a61f8ff2f3f857eefb785e0781f73544
 CHEM-000072	MT-F2BDF488FE05	黄油嘴	exact_current_name	补充角度属性后已覆盖全部黄油嘴SKU，含角度规格的旧名称归入本类型。	frozen	a6ba526b4d9d36364506cc4ff61bb3c0947d18cea2b0dabbbd280a323e8d819c
 CHEM-000073	MT-F2BDF488FE05	黄油嘴	exact_current_name	补充角度属性后已覆盖全部黄油嘴SKU，含角度规格的旧名称归入本类型。	frozen	060c072679238cd28a029485beb5cf5827835d1c6136f629a0fba6fcf6d7cf6b
@@ -93,7 +120,9 @@ CHEM-000078	MT-533BD564EE08	洗洁精	exact_current_name	洗涤剂类型独立�
 CHEM-000079	MT-7A84B38CEDD9	人工草皮	exact_current_name	人工草皮为仿草皮铺装材料，草高等为SKU属性。	frozen	32bbad01b6ff124e01f67888eec8fb6c41933bff42653a6e696f8955076e77ba
 CHEM-000080	MT-8E0745C32BBC	胶枪	exact_current_name	胶枪名称合格，适用材料设为必填	frozen	d4b8362bdc70bf3c25f5c5545ab5589edd17d98d40039d446dc5c8cdba864ab7
 CHEM-000081	MT-EB54F5C192D0	机油	exact_current_name	机油为独立内燃机润滑油类型。	frozen	c0529d28cda4c60b5737aba78c60c28bfa34d152fef2a71b2e08a546a01fcf31
+CHEM-000082	MT-08564248ADC3	密封胶	exact_current_name	调整定义排除硅酮玻璃胶，并补充类型属性。	frozen	032d3e2282c2b803f83847fc79c74e2c41bd890c0aa1c1ef3cc91ef5bff66875
 CHEM-000083	MT-2C6F9D2B1067	泡棉双面胶带	exact_current_name	该族现有双面胶带均为海绵/泡沫/泡沫棉泡棉基材；更名为泡棉双面胶带，与胶粘密封族通用双面胶带形成清晰边界。	frozen	5c6cc0fc19999debd2bd894ea0469af51fd6914629a71d1ca131459cdaeb4af6
+CHEM-000084	MT-4A12024267E1	流量计	exact_current_name	名称与标准类型一致，边界清晰。	frozen	104de3be6ad0a635073c167a8b85ab23da982d2418de674b7d455b5def2b4c13
 CHEM-000085	MT-31866361124C	防锈润滑剂	exact_current_name	名称合格，品牌和容量留在SKU属性。	frozen	0983c30b12999a7a77b64b0d8c9bdc3ca040b12246681acf1540d9f2f9cbf6b9
 CHEM-000087	MT-96A19CDD2689	快速接头胶垫	exact_current_name	旧名称过宽，证据均为快速接头胶垫，标准名收窄为快速接头胶垫。	frozen	3a08e67845e21ea34ee99fe6a939b412ac20d198202049421a3d361cac7923ec
 CHEM-000088	MT-96A19CDD2689	快速接头胶垫	exact_current_name	旧名称过宽，证据均为快速接头胶垫，标准名收窄为快速接头胶垫。	frozen	1a95641b51fcf201a8b34ac6a6255a98add62d0067c9d62de94320fde429b42c
@@ -102,11 +131,16 @@ CHEM-000090	MT-336F13215B77	清洗机专用油	exact_current_name	清洗机专�
 CHEM-000091	MT-B1F91331D072	高压清洗机滤网	exact_current_name	现有名称已是稳定类型，外径放入SKU属性。	frozen	02208e190012f8b686c60eb130128b1f3d206b39080442014f940349eb413565
 CHEM-000092	MT-2849DC3D05E4	润滑脂	exact_current_name	克虏伯NB52只证明品牌/型号，不足以推断设备专用，保留为未标注用途的润滑脂。	frozen	8559053ffaaa8529aab91bbdad8d0840303307cda9b41e7a7b20fa6a1dcab222
 CHEM-000093	MT-8EFBFA8E3D41	泵头	exact_current_name	现有名称已是稳定类型，品牌和型号放入SKU属性。	frozen	41feb1128203641bc2eac75c1d63b3d2c497b473fb6e55b5e1a2bb8b7b6ebc26
+CHEM-000094	MT-08564248ADC3	密封胶	exact_current_name	调整定义排除硅酮玻璃胶，并补充类型属性。	frozen	4c18399c021f0fb290a93efa689ecff39bca818d240a340210d5dff15e5e3755
 CHEM-000095	MT-7B5749411F6B	齿轮油	exact_current_name	齿轮油为独立齿轮传动用油类型。	frozen	9b6253c54e7d2b3160a30535c53e6caf0afe1d7531541b3e060cc6aa1cb98452
+CHEM-000096	MT-08564248ADC3	密封胶	exact_current_name	调整定义排除硅酮玻璃胶，并补充类型属性。	frozen	a2fffab37d62ad7e69c914b4a80d907e180870dc07b5ab3ea40c325d465555e7
+CHEM-000097	MT-08564248ADC3	密封胶	exact_current_name	调整定义排除硅酮玻璃胶，并补充类型属性。	frozen	a86a279703eee44a0a5d7061a1b7d7716adbb866db83b3a585d57efce401beff
+CHEM-000098	MT-A63C92D8B9D7	胶水	exact_current_name	名称与标准类型一致，边界清晰。	frozen	3b736152759cfd156f58a11fe791216ae8958825ea05a008eda700016032802a
 CHEM-000099	MT-3BF81E32BAFC	自喷漆	exact_current_name	气雾罐自喷漆商品特征明确。	frozen	30146c709bd9adec448a902881bc3e9ba863a5e8e2f1f020582ada31cc115ffe
 CHEM-000101	MT-4F7924C8DD76	封箱胶带	exact_current_name	标准名称稳定，按宽度/长度/颜色区分SKU。	frozen	bcfc0dfd1e6088af978386ebdf2f6a46a8968b0827e00a219a566560aabb857c
 CHEM-000102	MT-730ABDA2E578	防锈漆	exact_current_name	以防锈功能为采购入口，类型稳定。	frozen	3aea637a84f0ff9e47b70e7076e5df42d4879c19a1ac356376cde0bf162a3c1e
 CHEM-000103	MT-0981473E7197	稀释剂	exact_current_name	稀释剂为独立油漆稀释剂类型。	frozen	da8e146398c204648a24dc299b18587faa787ea63caa1948fedb788d284fe523
+CHEM-000106	MT-8A32D7C28EC3	螺纹锁固胶	exact_current_name	名称与标准类型一致，边界清晰。	frozen	8ba794f0a4d9264feffef0ad329dcf79494dc4962e85cca2786cc4e4151015ba
 CHEM-000107	MT-E5CE27BC4AAB	滚筒刷	exact_current_name	滚筒刷为稳定刷涂耗材类型，规格和宽度入属性。	frozen	98124fe73364cbc0b2ecfdc9206c2a73146d59611fe2683421816a43df4b0e38
 CHEM-000108	MT-730ABDA2E578	防锈漆	exact_current_name	以防锈功能为采购入口，类型稳定。	frozen	1a8f5ffa7f5691baf1b608ce3e3599999d5b7f4ecd7ebf01b0138ce06f6378b4
 CHEM-000110	MT-730ABDA2E578	防锈漆	exact_current_name	以防锈功能为采购入口，类型稳定。	frozen	2ce62687bb6548be5b62192d6ab8c6c94c0e26dc2875675283e4fa252f0eec79
@@ -123,6 +157,7 @@ CHEM-000123	MT-0508F13A1EA0	油漆	exact_current_name	现有SKU以颜色/金属�
 CHEM-000125	MT-3BF81E32BAFC	自喷漆	exact_current_name	气雾罐自喷漆商品特征明确。	frozen	2d02dd6f9d728afd3d676e38b585b796adb9cabbe046c96830900e50eead3bba
 CHEM-000128	MT-EA5002FF3C63	不干胶标签	exact_current_name	名称稳定、含义明确，直接保留。	frozen	eef54f2358f5d0d249617b8958149ba111e5371400f20e311e6e1c38efff34e0
 CHEM-000129	MT-EA5002FF3C63	不干胶标签	exact_current_name	名称稳定、含义明确，直接保留。	frozen	6fa025685308ca538c0eede353061d67e6f7e3d275a143c0e3fa2a674fd9f4d2
+CHEM-000130	MT-B77F8002D76A	双面胶带	exact_current_name	名称与标准类型一致，边界清晰。	frozen	29c1a8a5b052e6f4cc4036d98eca00f1005141bb613cfafd393a8e3c578588d8
 CHEM-000132	MT-730ABDA2E578	防锈漆	exact_current_name	以防锈功能为采购入口，类型稳定。	frozen	24d38f961dfd9fc765d2504274e0d5de34803a4ab7bb15a503c724489ba5e444
 CHEM-000133	MT-0508F13A1EA0	油漆	exact_current_name	现有SKU以颜色/金属效果区分，均属通用油漆，无需拆分。	frozen	8ce35da60ad36abcb53a611854709f34b2565ba8b18d252332b4ca2797cb8583
 CHEM-000134	MT-D6CF0A391F04	除锈剂	exact_current_name	名称合格，品牌和容量留在SKU属性。	frozen	110b18be7c86610a42d543fba17a8bb1a0ff11af94b3e53385c7fe344cb9f792
@@ -130,6 +165,7 @@ CHEM-000135	MT-0508F13A1EA0	油漆	exact_current_name	现有SKU以颜色/金属�
 CHEM-000136	MT-7A225E74D037	高温润滑脂	exact_current_name	以高温工况为采购区分项。	frozen	6af0a8869638cfef6cb564a55fc62e23a64cea83456e8d84b91e9e6945760ab2
 CHEM-000137	MT-D6CF0A391F04	除锈剂	exact_current_name	名称合格，品牌和容量留在SKU属性。	frozen	1465b6d1a6e8235123388ea6b5bda2985b7cee82df0502667353e457da1e9577
 CHEM-000138	MT-F2BDF488FE05	黄油嘴	exact_current_name	补充角度属性后已覆盖全部黄油嘴SKU，含角度规格的旧名称归入本类型。	frozen	ddf3d3a54f4931d6938adb661a9151e6574cf2d10d716c0d5b5271d00cd3c548
+CHEM-000139	MT-08564248ADC3	密封胶	exact_current_name	调整定义排除硅酮玻璃胶，并补充类型属性。	frozen	39b3cbf9e1be7c005769972be909fa57868037af91d7a38139f6fd6e4e8fecba
 CHEM-000140	MT-E5CE27BC4AAB	滚筒刷	exact_current_name	滚筒刷为稳定刷涂耗材类型，规格和宽度入属性。	frozen	0424e159310faa636404e92d01e584210e6dbc62cac31cbf19844601fca2b7bf
 CHEM-000141	MT-63EC0EF307BC	乳胶漆	exact_current_name	乳胶漆作为独立商品类型成立。	frozen	1e9f0bd2015bdc84ea784c1939f13e438e885a07ac34fb26a3e093ac2edaa3a6
 CHEM-000142	MT-63EC0EF307BC	乳胶漆	exact_current_name	乳胶漆作为独立商品类型成立。	frozen	f8e516168b11dbc25037af75f76fdb4d829a3fab30314d5c1c9a42dec9eff1a7
@@ -138,7 +174,9 @@ CHEM-000144	MT-63EC0EF307BC	乳胶漆	exact_current_name	乳胶漆作为独立�
 CHEM-000145	MT-2C6F9D2B1067	泡棉双面胶带	exact_current_name	该族现有双面胶带均为海绵/泡沫/泡沫棉泡棉基材；更名为泡棉双面胶带，与胶粘密封族通用双面胶带形成清晰边界。	frozen	3084c84d09bf2437e3d7c8223de9d8e35f300c5a3b388c26923b141ef6851ca3
 CHEM-000146	MT-D6CF0A391F04	除锈剂	exact_current_name	名称合格，品牌和容量留在SKU属性。	frozen	fd646f5a2a0f41947f51e1825bc2557eb6fabf5b36cce09a69f8476767dca0c5
 CHEM-000148	MT-9D9CD04D7D99	气动油	exact_current_name	气动油为独立气动设备用油类型。	frozen	e34f5722ccb0710286b6e3ac5a3f62678c67d4a18885b50d2cc566e26b64e49d
+CHEM-000149	MT-2733C13A06DB	堵漏剂	exact_current_name	名称与标准类型一致，边界清晰。	frozen	88a44307d1e711d169334a1e511d3bd600e56bbf9a6c320496576bff02fb6013
 CHEM-000155	MT-587A31130FB0	泡沫清洗剂	exact_current_name	泡沫清洗剂为独立泡沫形态清洗剂类型。	frozen	e021ae155dd1f8adf1839e2e5aff2ca101afaff40d7a19834a1cd12a8d9dc350
+CHEM-000156	MT-E972C7D9F037	玻璃胶	exact_current_name	名称与标准类型一致，边界清晰。	frozen	ca875e1a423175bf25b51b1aacbc3c99294dbf87f615f9bf3ae133cc94581d37
 CHEM-000157	MT-0508F13A1EA0	油漆	exact_current_name	现有SKU以颜色/金属效果区分，均属通用油漆，无需拆分。	frozen	43d040509d162220b488f46631b8da89b2cb969222a6f6d437111d416b454ade
 CHEM-000159	MT-F2BDF488FE05	黄油嘴	exact_current_name	补充角度属性后已覆盖全部黄油嘴SKU，含角度规格的旧名称归入本类型。	frozen	7235b6debc32adbb3515a850e46ef4aafee70d988f89f2a5f1e01c42d3df999b
 CHEM-000160	MT-F2BDF488FE05	黄油嘴	exact_current_name	补充角度属性后已覆盖全部黄油嘴SKU，含角度规格的旧名称归入本类型。	frozen	788d4522ce41c65f5e429677a58030f9de284c3ae2507401815c76f08231d7d3
@@ -316,6 +354,7 @@ ELEC-000148	MT-A119B993C77F	急停按钮	exact_current_name	紧急分断功能�
 ELEC-000149	MT-448156536DBB	声光报警器	exact_current_name	名称稳定，电压和光源属性可覆盖现有SKU。	frozen	6e4de04f7fe638ed901f5105119b9c92a416ec588ef7a35d17cc79c573b401cc
 ELEC-000150	MT-6CE0EFC00956	断路器	exact_current_name	不带漏电保护的分断保护电器，极数/额定电流作为SKU属性。	frozen	32573bb85f1b33c88c93134e317150de3a47bc52f170923b39ef0718f7bac241
 ELEC-000151	MT-BACA08B14D4F	按钮开关	exact_current_name	按钮操作通断结构明确，颜色/电压/带灯作为SKU属性。	frozen	456c874363477e20577a3995c55513a9ec60492857432e6976e40e61cea00e19
+ELEC-000152	MT-5D0C4AAC2695	电流表	exact_current_name	名称与标准类型一致，边界清晰。	frozen	3e43801c3a0fd3eaae1580bc5073a34ae9370b22056f555bac3aa788f035399a
 ELEC-000153	MT-02478E6BF285	配电箱壳体	exact_current_name	空壳体与成套配电箱区分，独立成类。	frozen	625de3d31a68f3360048370fc9198ecdd858db9affb078215785f673adef48f1
 ELEC-000156	MT-3E7CF719F789	刀开关手柄	exact_current_name	商品结构独立，型号和额定电流作为SKU属性。	frozen	5edeeb8af53d90e8922d81864ed434b0b162ecb0e5fe7dacaa4cfaeaa1840185
 ELEC-000157	MT-80E4695971B8	插线板	exact_current_name	移动多位取电结构独立，孔位/线长/额定参数/结构作为SKU属性。	frozen	3327a9fd2af08234852351716cace9c7986dd563a3da52caf64dc8c82ff6d3b2
@@ -360,6 +399,7 @@ ELEC-000205	MT-B90BAECA3E7D	管型端子	exact_current_name	无掌部圆柱形�
 ELEC-000207	MT-B90BAECA3E7D	管型端子	exact_current_name	无掌部圆柱形压接管结构清晰，保留。	frozen	729bb43cfa6abb6dc814e52a5bf68cc4123b3bf7c15432125f21328f59695530
 ELEC-000208	MT-D3057B7399BA	时间继电器	exact_current_name	延时输出触点动作的继电器结构独立，与普通继电器/时控开关区分。	frozen	df64ea176296ae94a0403fe9c20a3cd1f2b1d5a18779b29f7edd7a2f7106bd11
 ELEC-000209	MT-F1696DD2EA78	刀闸推拉杆	exact_current_name	商品结构独立，适配型号和材质作为SKU属性。	frozen	9052131c7abe819dc0242048e2c509c351b300af4a42eea1b8b5abc46a26c4be
+ELEC-000210	MT-5D0C4AAC2695	电流表	exact_current_name	名称与标准类型一致，边界清晰。	frozen	cc71d5b8ec7d4b9264ef96c3cd1c3b67d6a0d3be283d802bb892e929bb73b146
 ELEC-000212	MT-77F38575DBC0	电缆	exact_current_name	多芯电力电缆独立成类。	frozen	4de44768cd217330dd8f81674239a2383abbf4fa45ccf6c3d24f07ebc379880b
 ELEC-000213	MT-4E060FB18F29	扎丝	exact_current_name	现有名称稳定，无跨类型重叠。	frozen	d58485256c3389dde80dba3cebc877505c21bc375bcdb62a29d5e25b4c7c9b12
 ELEC-000214	MT-C04D1CEA6631	插头	exact_current_name	商品结构稳定，类型/额定电流/额定电压/极数作为SKU属性，工业/快速插头通过插头类型属性区分。	frozen	f608bffcb3a3fa22806925e8dce5bf22addd698e9bec9ab741b1add4a99af412
@@ -368,11 +408,13 @@ ELEC-000216	MT-AC69232F3EE7	铜接线端子	detailed_evidence	"{""attributes"": 
 ELEC-000217	MT-4F811188E2CE	自粘带	exact_current_name	与绝缘胶带按成膜/密封方式区分，边界清晰。	frozen	6be3b6c810f2d8efd61521478cd98c02f7cff114b0c304b97d37b357fd830c01
 ELEC-000218	MT-888097D447F8	接地桩	exact_current_name	现有名称稳定，无跨类型重叠。	frozen	73a36f6b416afe2140b07fc0127b8e076cccc779a6331696704c7e66a8602c8a
 ELEC-000219	MT-52E9A8C12AC5	接地线	exact_current_name	现有名称即标准类型名称。	frozen	e2f9291766dff24cd48118165b90c486b639db916cacb2f5c5a9946925017c4d
+ELEC-000220	MT-963325DAF9C0	绝缘电阻表	exact_current_name	名称与标准类型一致，边界清晰。	frozen	dad0d5d17efc09b549c566d5aa634b24ecf9abf611e3d02f0cfb39c670536c9e
 ELEC-000222	MT-5B286FCE2E91	插座	exact_current_name	补充输入电压、输出电压、USB输出等字段，使变压USB插座与普通USB插座可正确区分。	frozen	27545cf130c66e14f829617957e62d321a713f2fcb1d9ff686c6cf6d67fb639c
 ELEC-000223	MT-04B3F7D6DC04	接触器	exact_current_name	主电路电磁开关结构独立，线圈电压/额定电流/电流类型作为SKU属性。	frozen	e9d7c965a3867f5984d1dde15a2d72aba68bd3a3e60d9a599766754d8f147e3a
 ELEC-000224	MT-F66F2C8BA587	O形冷压端子	exact_current_name	证据中冷压端子均为OT（O形）冷压端子，按结构收窄为O形冷压端子，与管式铜接线端子形成可操作边界。	frozen	3a2e767ab1fa6a7ad8c1acdf7ac719aff360362637734405b9cb1c78afd3ab19
 ELEC-000225	MT-F66F2C8BA587	O形冷压端子	exact_current_name	证据中冷压端子均为OT（O形）冷压端子，按结构收窄为O形冷压端子，与管式铜接线端子形成可操作边界。	frozen	fa143394c81e6c4403cbc13c72f1a381ff5059f88e9c11878d7abd4847a9b479
 ELEC-000226	MT-F66F2C8BA587	O形冷压端子	exact_current_name	证据中冷压端子均为OT（O形）冷压端子，按结构收窄为O形冷压端子，与管式铜接线端子形成可操作边界。	frozen	ccb378cd37d8385fbb6639ada315789672497d230f8a96ffed182069af4c74a6
+ELEC-000227	MT-3ABD6EEC75F8	钳形电流表	exact_current_name	名称与标准类型一致，边界清晰。	frozen	7f6057501487e56fd528152751c931d5b024e984436478642f3151b381e23258
 ELEC-000228	MT-5B286FCE2E91	插座	exact_current_name	补充输入电压、输出电压、USB输出等字段，使变压USB插座与普通USB插座可正确区分。	frozen	2fdf8413e6588363293a2677cc9584a22eb1626b353b96969f84bf58cb8c313a
 ELEC-000229	MT-F45AED8CD777	开口线鼻子	exact_current_name	开口槽形/叉形接线端与闭口类端子边界明确，保留独立类型。	frozen	a90fe352b607603cedadd8dd8acd23e969ebda7a3aa2b5e2bc9d0b969b8cd99b
 ELEC-000230	MT-CFBC2E137B15	浮球液位开关	exact_current_name	由液位浮球动作的结构定义清晰，线长/安装方式作为SKU属性。	frozen	12865551cfe8e24c8f55d0f75b512adf7a36f360aa0c7663aa4f3067a3639bef
@@ -383,6 +425,7 @@ ELEC-000236	MT-6C33E0A79B78	灯泡	exact_current_name	现有名称即标准类�
 ELEC-000237	MT-77F38575DBC0	电缆	exact_current_name	多芯电力电缆独立成类。	frozen	ed2747fe40350892ee0616bf39463a33f2809f07b9029f1c7443c461702b7ee3
 ELEC-000238	MT-8F3552CE85F0	电缆支架	exact_current_name	与电线架按用途和结构区分，边界清晰。	frozen	c6dbf1f3ea1c716403b7a12ab123d5b3b369d594ee545a24d675b22178cf5715
 ELEC-000239	MT-77F38575DBC0	电缆	exact_current_name	多芯电力电缆独立成类。	frozen	326ab7459df3b7a186bb446e35cafcc9dc93f6ebaf22b52ea46e9046ed0968ff
+ELEC-000240	MT-BCE33FF0CA86	钳形万用表	exact_current_name	名称与标准类型一致，边界清晰。	frozen	b0e7461f0df273df16b6c2869cb1741b83194b2d5dae88ea2fff179863e51087
 ELEC-000241	MT-77F38575DBC0	电缆	exact_current_name	多芯电力电缆独立成类。	frozen	532b3e15449c8d607612ab0619d2ac462c3c8f69d70813a5380b1cd389148369
 ELEC-000243	MT-444DBD3425B5	转换插头	exact_current_name	标准转换结构独立，标准/孔位/功能/额定参数作为SKU属性。	frozen	4fec7ab2b138ae7df3d7a63beb90597218592fccb3f633c4f2b373cfe0f71802
 ELEC-000245	MT-F45AED8CD777	开口线鼻子	exact_current_name	开口槽形/叉形接线端与闭口类端子边界明确，保留独立类型。	frozen	17b87929709fd164af2bf037bb147a27476bb583479a7a18b81928f304a218cb
@@ -401,51 +444,126 @@ ELEC-TIE-000007	MT-38EA50E40EC6	扎带	exact_current_name	现有名称稳定，�
 ELEC-TIE-000008	MT-38EA50E40EC6	扎带	exact_current_name	现有名称稳定，无跨类型重叠。	frozen	055180f0d7e700131d878051280a233702dea05d9978c2be10446c6c204f30e6
 FAST-000001	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M14"", ""length"": ""120"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M14*120，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	b299b0e4d24bfd766508df1f4864fc96741c2c34a81b2f4b0d234e548fced216
 FAST-000002	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M10"", ""length"": ""70"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M10*70，别名爆炸螺丝，符合expansion_bolt定义。""}"	frozen	8cae57063221145c1d007f1b5cf8c698527f7c7bbb2471650b684e0fe63a62ce
+FAST-000003	MT-ACBA3BC18A00	平垫圈	exact_current_name	标准平垫圈类型明确，保留独立类型。	frozen	2ac5031826231af2d51ee07be02a30e542f47a232962f6b0e54e8a275326c248
 FAST-000004	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M12"", ""length"": ""80"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M12*80，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	1376b678830ec65a2b7521a88896ae2c426f73f116d0f5844a033bd26b7bd131
 FAST-000005	MT-FE0C1CE4AE5E	花篮螺丝	exact_current_name	名称稳定，螺纹规格、长度、表面处理留在SKU属性。	frozen	1d2c387a94a662168c54418d3963295fa46e916a8307dfbd654e9fbb3868f8c2
+FAST-000006	MT-ACBA3BC18A00	平垫圈	exact_current_name	标准平垫圈类型明确，保留独立类型。	frozen	3d67ab1948ad54a18ffd3a9dd999eaf6483eb0c98d05ff31c4a5afbc5297837a
+FAST-000007	MT-ACBA3BC18A00	平垫圈	exact_current_name	标准平垫圈类型明确，保留独立类型。	frozen	ae0beba80ed51d29f175693d0f8d77d893598a12f0c4254266c21deabd90de06
 FAST-000008	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M20"", ""length"": ""140"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M20*140，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	c2236dd37f63e1b98acdc4bf80fe4c16fe93b50decb3c75c7270f08bf42587bc
 FAST-000009	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M22"", ""length"": ""140"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M22*140，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	b6833af96f740b466706e4164a6715e1505bfcb3f13dc75b17bcfba0d2595a89
 FAST-000010	MT-FE0C1CE4AE5E	花篮螺丝	exact_current_name	名称稳定，螺纹规格、长度、表面处理留在SKU属性。	frozen	e2d517ddad045c0f4a36166c946f907cad8731b98e4d058271222f8c8e66554b
 FAST-000011	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M8"", ""length"": ""60"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M8*60，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	fb085b2cfca1f05a26347cf7c99bbc1c0847365ddccf22a181bc68a7e94297e3
 FAST-000012	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M6"", ""length"": ""60"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M6*60，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	dae3704bb3ea5221847eb1b1b24d1d4bfa9f5636bd6748f27b5686d88fd11b87
+FAST-000013	MT-926A17646F58	外六角螺栓套件	exact_current_name	外六角螺栓组合套装，结构与单品不同，名称稳定。	frozen	b4f8d49751b1bae5df537a582f55153d1cba42d194ed772dcb7800105571fb18
+FAST-000015	MT-1C86AD74DABB	螺丝套件	exact_current_name	名称本身合格；按审核意见将螺丝类型、套件组成设为可选，兼容缺省数据。	frozen	06cc7b85e53e3f0bc4b5049cd4face5adfa3e6b3684a4abaa21bcea6cd9e5893
+FAST-000016	MT-6C0FF6E30774	高强度螺栓	exact_current_name	证据支持10.8、10.9、12.9级高强度螺栓为独立类型；无头型证据，故不并入外六角螺栓。	frozen	66946829dc6e64660adb991674bc66125cfd254d1745fd379864b51ac53c79c3
 FAST-000017	MT-8250372BC1E7	螺杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	4d3e12193f46dc1f276c86c2ae2f661707d05d6fc7f13f315d74cc35b46ddda8
 FAST-000018	MT-8250372BC1E7	螺杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	4c3bba509c934e9c37c05a0c7b122ad4e1a72878df6ed912362bf92af283d684
 FAST-000019	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M20"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	012df9ee3819acfab60541f41e19c8284ce02a29b27352fe121d53919624da03
 FAST-000020	MT-8250372BC1E7	螺杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	5d2e8d781b93166ade16b89cc70daa9d1907b2b70e00ae04c41e282fb03bb9f1
 FAST-000021	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M16"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	ef6ffb711bb4de53d7378c5080091651711739f49c9d977bbecd6a5d64d73375
+FAST-000022	MT-1C86AD74DABB	螺丝套件	exact_current_name	名称本身合格；按审核意见将螺丝类型、套件组成设为可选，兼容缺省数据。	frozen	dd1559bf0ce0fd96deec5923dde3606199a93d74f244bcf25623ffdb12a76367
 FAST-000023	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M14"", ""length"": ""100"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M14*100，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	85b567c494973317814cf91775e0777ca68665652efbd4c9fd1fdf0f6998aa72
 FAST-000024	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M10"", ""length"": ""80"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M10*80，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	2e2db34d8ca9f52c519d2afecacb55c924ae2b450848a39995656180c7898be0
+FAST-000025	MT-275FAE855873	内六角螺丝	exact_current_name	内六角驱动结构明确，名称不含规格、材质、品牌，标准名合格。	frozen	3eaf1894d241777fc2244673b06d2c4bf08d1cad1b8452cc947b75e946303f7f
+FAST-000027	MT-275FAE855873	内六角螺丝	exact_current_name	内六角驱动结构明确，名称不含规格、材质、品牌，标准名合格。	frozen	ec917d039b66319571fedc6317a7f69a8989d81a404cede67bf731bece265482
 FAST-000028	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M14"", ""length"": ""150"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M14*150，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	6044d6e6b227651f95075f42d3d8610b01852eedaea811f8a6b45f25bafa68aa
 FAST-000029	MT-8250372BC1E7	螺杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	6320ddbf2a4fc06972270c8fcd7e48fe7b037b43c6988317f5476e9ac414e6b6
+FAST-000030	MT-ACBA3BC18A00	平垫圈	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.85, ""reason"": ""M10碳钢标准垫片，无加厚/非标/密封特征，符合flat_washer定义。""}"	frozen	98a2602ea745f4a58f20bd18273dca5d42e3b8d16d0fb8f79e0f0f760f312be3
 FAST-000031	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M10"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	b30936299d2fd330698844d5cdd990c81b6776fd3cd3fede1f6b560516c7924c
+FAST-000032	MT-1C86AD74DABB	螺丝套件	exact_current_name	名称本身合格；按审核意见将螺丝类型、套件组成设为可选，兼容缺省数据。	frozen	05b18000e302e4ed94999281411b730d2db52777cef47dcbaf09edc857291e25
+FAST-000033	MT-1C86AD74DABB	螺丝套件	exact_current_name	名称本身合格；按审核意见将螺丝类型、套件组成设为可选，兼容缺省数据。	frozen	60818c5464a53977ce40e6dc1341602025778a8ce1527120d1e384849eab89a3
+FAST-000034	MT-275FAE855873	内六角螺丝	exact_current_name	内六角驱动结构明确，名称不含规格、材质、品牌，标准名合格。	frozen	be007627353b8da100bc98e611d6e0b9a7f3507d09370e202e719c9598e1acbb
+FAST-000035	MT-1C86AD74DABB	螺丝套件	exact_current_name	名称本身合格；按审核意见将螺丝类型、套件组成设为可选，兼容缺省数据。	frozen	8cc04ce267a6daf958b087f74cdb329c9a698399ea557b8237191578b90a4c97
+FAST-000036	MT-1C86AD74DABB	螺丝套件	exact_current_name	名称本身合格；按审核意见将螺丝类型、套件组成设为可选，兼容缺省数据。	frozen	24d49dff5ed4e9a984f37da5e0f6e3bebf016c48e59705d5830f714658ceaef6
+FAST-000037	MT-1C86AD74DABB	螺丝套件	exact_current_name	名称本身合格；按审核意见将螺丝类型、套件组成设为可选，兼容缺省数据。	frozen	125b28c1f324dcbee760446b6ea303b27e65bba86f5a0d427f5ea4c17107d33b
+FAST-000038	MT-1C86AD74DABB	螺丝套件	exact_current_name	名称本身合格；按审核意见将螺丝类型、套件组成设为可选，兼容缺省数据。	frozen	b61a49c8d0237197e0bcef1392061cc4c6a3e20d260fa6b6db7eb26057bae504
+FAST-000039	MT-1C86AD74DABB	螺丝套件	exact_current_name	名称本身合格；按审核意见将螺丝类型、套件组成设为可选，兼容缺省数据。	frozen	9f4839ced1d4a09cedc2377dccc5b7481df3a5466019215bf8b433732c884941
 FAST-000040	MT-8250372BC1E7	螺杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	6794b3cb7b60e3226fefbc9c54f6256b93752f252c6e36461e176eab03b62da8
 FAST-000041	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M48"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	fa52ed97458b56a5bd0a2b0430da396b26f3424973352eed6dae647fd1ad5683
 FAST-000042	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M24"", ""length"": ""150"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M24*150，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	27786f81a21fc0b9cb8b2a94bdea465d03b8ab8cf8bcae3d64380649fd1b635f
+FAST-000043	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	779a3f306c4e5386b292d2db38effba95599b5acb010776306b7619396f6b27f
+FAST-000043-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	d1f1e5dbb87fa8427a2d368995fa7595a34ef2a62e000a65178aced9c80a7852
+FAST-000044	MT-275FAE855873	内六角螺丝	exact_current_name	内六角驱动结构明确，名称不含规格、材质、品牌，标准名合格。	frozen	5a8fa28a80feb429cbde3a577c5fe908329c4f50eaccb9721ae634d1ab1606c0
+FAST-000045	MT-1C86AD74DABB	螺丝套件	exact_current_name	名称本身合格；按审核意见将螺丝类型、套件组成设为可选，兼容缺省数据。	frozen	db65a750a9c1b3e589f5677cbdd066fad9b8ebad733ff22850010ae58f766979
+FAST-000046	MT-1C86AD74DABB	螺丝套件	exact_current_name	名称本身合格；按审核意见将螺丝类型、套件组成设为可选，兼容缺省数据。	frozen	bb1291786e24ca1579403d2965fed77da138522b4ea5035969c79715a573bc72
+FAST-000047	MT-1C86AD74DABB	螺丝套件	exact_current_name	名称本身合格；按审核意见将螺丝类型、套件组成设为可选，兼容缺省数据。	frozen	7db35cf87d4cc5a1885dd473aa1e1c571584d59a50f8ff4476b98818ebac7dd4
+FAST-000048	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	4b8482d10893bd0e45f3f819b22fb37282a565c4e614e7f1d9b820e6489c27ea
+FAST-000048-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	def25b7b19f8c9539e74ee0889790263290b9e143e96917b7a0f860286eac760
+FAST-000049	MT-C5438E1E84B1	垫片	detailed_evidence	"{""attributes"": {}, ""confidence"": 1.0, ""reason"": ""M24加厚碳钢垫片，带加厚特征，符合gasket_general定义。""}"	frozen	2f21a0586ab6413eb80f02b5e63d7ffa8210500f8b8a8f3a55be19f99335d7ef
 FAST-000050	MT-99FF090373BB	防松螺母	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	22d4f20dc324dc1a583e75bdad2869c0c6ef408b6aadcec0509d8d19cce8c088
+FAST-000051	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	0ec18a0b52f8e5d75f087f7981ad4a7dfc80da6779e56c6193b509c1a8e20f1b
+FAST-000051-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	9092bb54dacf682fa1f11f74c30a1552f0f495e42c7731498d34c8b21c715bc3
+FAST-000052	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	31eb33b49bd3259d2269a95ac239287fd2fedf27e8e3561e6e2fe9fc71d43c95
+FAST-000052-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	3cd990218059521016d2ed8790a81935d6e6831d0202d9a48df4960f97e17d51
+FAST-000053	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	0395f3b15677ff0b372c9d97f108c5de4bccb2c45a8767b9756d1be40529f0d8
+FAST-000053-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	2a2380b1b3777b6ec630e8d1ade2c18d83097023a9ab4b89518f52ce7eb646c1
+FAST-000054	MT-1C86AD74DABB	螺丝套件	exact_current_name	名称本身合格；按审核意见将螺丝类型、套件组成设为可选，兼容缺省数据。	frozen	ba8c1a34952cf4538b3a6670207aa2189afe997de7a8705db15e61e5df9bb62f
+FAST-000055	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	57bb76b4eaf8183d4f532799268cb35978993a9359e15b4d5a1b17c3026d40d7
+FAST-000055-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	2f56cb6ff1be71ce3b6b3e08f09aa1a129f78d5ebd183bdb07ee2f04ba3148db
 FAST-000056	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M27"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	4fce83d83e5b7951bace471123413276eef82a3fbca1c1d9fe43d69ee410f3bc
+FAST-000057	MT-ACBA3BC18A00	平垫圈	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.85, ""reason"": ""M27标准碳钢垫片，无加厚/非标/密封特征，符合flat_washer定义。""}"	frozen	78ca034ff4e02f8ec3fbb0e75ef1f4f29f6eee6a6a5a3c9a2b8fba403a6c06de
+FAST-000058	MT-54F0098B9EB5	外六角螺栓	exact_current_name	外六角头型由名称明确，标准名合格；不再将无头型证据的螺栓并入。	frozen	3ffb3120f1274ab056357a9671ef951f22c80ad9cb6f8519ca8b06c6946236bf
 FAST-000059	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M20"", ""length"": ""150"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M20*150，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	5a01717134d71c33f8945f7388c07c74297ba2b773151c0a232922d3fcbea8e0
 FAST-000060	MT-FE0C1CE4AE5E	花篮螺丝	exact_current_name	名称稳定，螺纹规格、长度、表面处理留在SKU属性。	frozen	76ec57fa93229109c3ad390cf227951c5dacad358db94ba95bd5b0a9460ef18b
 FAST-000062	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M10"", ""length"": ""60"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M10*60，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	108c72b164562866687b3748594e711ccc4c04b064c362cd584c4c96f0851578
 FAST-000063	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M14"", ""length"": ""70"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M14*70，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	09883b8f061f0123170f1c6534dbf5f4d13d9fae580029160f70952834f02eb1
+FAST-000064	MT-6C0FF6E30774	高强度螺栓	exact_current_name	证据支持10.8、10.9、12.9级高强度螺栓为独立类型；无头型证据，故不并入外六角螺栓。	frozen	09023887a9d6e7727036bfd55c3c5cdd9e7d12378186c7b58b509422e495ee39
 FAST-000065	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M30"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	41651c82dbb92edd131984c9caa45c127a5a3324d134bb11f5eb6df5bf815c28
+FAST-000066	MT-ACBA3BC18A00	平垫圈	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.85, ""reason"": ""M30标准碳钢垫片，无加厚/非标/密封特征，符合flat_washer定义。""}"	frozen	85bd5890c59905d62eb4f3f123eb0a4a88a691e895831b2efe570862ec154dbd
+FAST-000067	MT-6C0FF6E30774	高强度螺栓	exact_current_name	证据支持10.8、10.9、12.9级高强度螺栓为独立类型；无头型证据，故不并入外六角螺栓。	frozen	7b41328287f1100f10b56015b28f26fd3f93568e91802e31fda845a713509d78
+FAST-000068	MT-8AE4D626B8FD	T型螺丝套件	exact_current_name	名称已明确T型结构且为套件，不含尺寸、材质、品牌，标准名合格。	frozen	484f5a567e90105133efe4c16d1758d50451a4f59a2089ccd95d77a316386d56
+FAST-000069	MT-8AE4D626B8FD	T型螺丝套件	exact_current_name	名称已明确T型结构且为套件，不含尺寸、材质、品牌，标准名合格。	frozen	6f30f2ab80e570d5e9d37c018ebc1a7b3e31d530c0fa47f131e047b709ffb7de
+FAST-000070	MT-C5438E1E84B1	垫片	detailed_evidence	"{""attributes"": {}, ""confidence"": 1.0, ""reason"": ""非标尺寸18*50*60mm且加厚，符合gasket_general定义。""}"	frozen	5700dea04e8ba7bfba088fb2a827e45a94d24411ddca7a27cda76d58b063dc89
 FAST-000071	MT-BE833CCCABED	全螺纹丝杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	c711bbc313bdd136683aa7f1d6f263f81eb5f90d4e8525bce5f5680d1ffd59b2
 FAST-000072	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M12"", ""length"": ""100"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M12*100，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	76f04f0bbe73afa473a118f62b2144bc3b8daf13719a04180fb5fa3caa84a7cb
+FAST-000073	MT-33314DBCFB5A	自攻螺丝	exact_current_name	自攻功能即商品结构，驱动类型作为可选属性，名称不含规格、材质、品牌。	frozen	4a3ba95995984d1cdfea0025ea4973a29c6b1858d6e13b46b4b43822e8ca5163
+FAST-000074	MT-1C86AD74DABB	螺丝套件	exact_current_name	名称本身合格；按审核意见将螺丝类型、套件组成设为可选，兼容缺省数据。	frozen	e31b35a310898b8e544d075140a47df9062d01ca3bb08035cdbd793a1df2bc48
+FAST-000075	MT-275FAE855873	内六角螺丝	exact_current_name	内六角驱动结构明确，名称不含规格、材质、品牌，标准名合格。	frozen	69ed1aaf97fc658502fd1eb151a77ad59815901a9bd2270d51ed192e5342ff2d
 FAST-000076	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""304不锈钢"", ""spec"": ""M6""}, ""confidence"": 0.95, ""reason"": ""不锈钢螺母，无防松结构，符合nut定义。""}"	frozen	592780857249c78814a8126ea639762cc7dfc404cb7a44b106eed1aede1c1d54
+FAST-000077	MT-C5438E1E84B1	垫片	detailed_evidence	"{""attributes"": {}, ""confidence"": 1.0, ""reason"": ""M6加厚304不锈钢垫片，带加厚特征，符合gasket_general定义。""}"	frozen	b51840ad7d85439f5d996b853367d14c1a631d2fb4ee2cc17c32cea6ee3d482a
+FAST-000078	MT-C5438E1E84B1	垫片	detailed_evidence	"{""attributes"": {}, ""confidence"": 1.0, ""reason"": ""橡胶材质圆形垫片，用于密封，符合gasket_general定义。""}"	frozen	40341ef57f8f55b4a6c2297b1bc749b4be8d2e326917bac32cf4eb8f77819cd9
 FAST-000079	MT-99FF090373BB	防松螺母	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	59716667726bccafa71af2ddbf1b5c58f8162c640e4692fd81b7a50de151ae7f
 FAST-000080	MT-BE833CCCABED	全螺纹丝杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	fbf9611df2ea30286197c62319a6dd2c08923ea80aa808a844dc410c17729a06
 FAST-000081	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""合金钢"", ""spec"": ""M30"", ""strength_grade"": ""12.9""}, ""confidence"": 0.93, ""reason"": ""高强度合金钢螺母，无防松结构，符合nut定义。""}"	frozen	84cea82ce4bb02b565c5dbd04141859f5756f49badfbec5817c82cb418de51d2
+FAST-000082	MT-CACDBAC7EA13	高强度全牙螺栓	exact_current_name	完整证据显示其螺纹形式为全牙、强度等级12.9、材质合金钢；全牙高强度是独立螺栓结构，名称稳定。	frozen	53a740c6886fcc64819b70916033d61e4f937d205daa97e0ad73aa940865f812
 FAST-000083	MT-220D69842A50	四氟垫片	exact_current_name	材质类型独立，边界清晰。	frozen	6f26ab757da74f70ad10e11e5ef5e4ba61255065479702c5062662f6d5b93e58
+FAST-000084	MT-1C86AD74DABB	螺丝套件	exact_current_name	未标注头型或驱动类型，“高强度”属于强度或材质属性；套件结构与通用螺丝套件一致，并入螺丝套件。	frozen	992769eed05282f6f810c2d5f00b8f08645e7831bb32bf19ae80fedc3d83d686
+FAST-000085	MT-ACBA3BC18A00	平垫圈	exact_current_name	标准平垫圈类型明确，保留独立类型。	frozen	db92cc8a416f1cc80b2400670d8bb2f6bc9049b7081098526baf316c2fdb1bb7
 FAST-000086	MT-A910340E89B8	膨胀止水条	exact_current_name	遇水膨胀密封条类型稳定，规格作为属性。	frozen	74c200c30d95c7b8a0fe5f9a9c4d3c81ea32e3e1b36c7f5e074a6fa86f875615
+FAST-000087	MT-1C86AD74DABB	螺丝套件	exact_current_name	名称本身合格；按审核意见将螺丝类型、套件组成设为可选，兼容缺省数据。	frozen	ed680e0d5a30049b48bc492aeebbbc5be00a7337c4f67c2e5065a2c16801f774
 FAST-000089	MT-948FDC7C0C55	膨胀钩	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	6ca73987e433faef0c5358e152ecda9858de028c09447eaf297818518592ff95
+FAST-000090	MT-1C86AD74DABB	螺丝套件	exact_current_name	未标注头型或驱动类型，“高强度”属于强度或材质属性；套件结构与通用螺丝套件一致，并入螺丝套件。	frozen	2a824674bca4ccd691d1b33fed9cbfe575d2c774ab911130c08e7f137e731d90
+FAST-000091	MT-1C86AD74DABB	螺丝套件	exact_current_name	未标注头型或驱动类型，“高强度”属于强度或材质属性；套件结构与通用螺丝套件一致，并入螺丝套件。	frozen	b1b453d5ba27a9cc39cc357b05d771c6c4b56fd1736d7410d2d94350761c194f
 FAST-000092	MT-25B26D59F8C2	异形垫片	exact_current_name	名称稳定，尺寸和材质留在SKU属性。	frozen	cdb88d0fd9c0ecab95c0ff5c012d49359e944c006dc77068efa5eb7be0594134
+FAST-000093	MT-1C86AD74DABB	螺丝套件	exact_current_name	未标注头型或驱动类型，“高强度”属于强度或材质属性；套件结构与通用螺丝套件一致，并入螺丝套件。	frozen	f1b9555cb8475a5cd100ae57ae45e8f09c7834d3ebeea6c713292cadcaa47c0c
+FAST-000094	MT-1C86AD74DABB	螺丝套件	exact_current_name	未标注头型或驱动类型，“高强度”属于强度或材质属性；套件结构与通用螺丝套件一致，并入螺丝套件。	frozen	e28ca8865b3c676a67fd64f25e5cef445531d93d0eb9726e3f592cd7aa4131ad
+FAST-000095	MT-B23E049452E5	内六角螺丝套件	exact_current_name	内六角结构加套件形态稳定，名称不含规格、材质、品牌，标准名合格。	frozen	b044edc249912b6b3f9429da22d59d1c539a02ca38208214847f1e8cd3d0c18a
+FAST-000096	MT-B23E049452E5	内六角螺丝套件	exact_current_name	内六角结构加套件形态稳定，名称不含规格、材质、品牌，标准名合格。	frozen	b8ca7bfc92d308ae17a82ba5d18635d3aca2ef625399047f564ad126f7c30b16
+FAST-000097	MT-B23E049452E5	内六角螺丝套件	exact_current_name	内六角结构加套件形态稳定，名称不含规格、材质、品牌，标准名合格。	frozen	10c000a5f9fad12a7ce7b9e9007ad5173fe7a7a44eb5834168abc9c007dc8f7b
+FAST-000098	MT-1C86AD74DABB	螺丝套件	exact_current_name	材质与强度等级均为属性，名称未限定头型或结构；与通用螺丝套件同结构。	frozen	4c72fdaf93930e2d7e5df0a06c2c0f904e79c57ce31f94abdb9534432f8834f0
 FAST-000099	MT-BE833CCCABED	全螺纹丝杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	c1d04861bd08f4b8555327e2cabd3be76d3a585f270e51be3942eefcbc106793
+FAST-000100	MT-1C86AD74DABB	螺丝套件	exact_current_name	未标注头型或驱动类型，“高强度”属于强度或材质属性；套件结构与通用螺丝套件一致，并入螺丝套件。	frozen	ea384496406b9e77b59beed2a011f36ec82dcf083f481136bbb3783a19b9705f
+FAST-000101	MT-C5438E1E84B1	垫片	detailed_evidence	"{""attributes"": {}, ""confidence"": 1.0, ""reason"": ""橡胶材质圆形垫片，用于密封，符合gasket_general定义。""}"	frozen	0b30cec79c98933a3c22cd34acd3d0a9aa1abd715ca8a5012534db0430da30b0
+FAST-000103	MT-33314DBCFB5A	自攻螺丝	exact_current_name	自攻功能即商品结构，驱动类型作为可选属性，名称不含规格、材质、品牌。	frozen	28803fb0ba0b6b488a0f5792b20e7618187738e789c60caaba433512f4016055
+FAST-000104	MT-7CC28F9690C4	钻尾螺丝	exact_current_name	钻尾功能即商品结构，名称不含规格、材质、品牌，标准名合格。	frozen	5ca8e12769f68cc2a6db14c00428d927a7bac4ab808c35b611f0423e8e50f962
+FAST-000105	MT-B23E049452E5	内六角螺丝套件	exact_current_name	内六角结构加套件形态稳定，名称不含规格、材质、品牌，标准名合格。	frozen	eb9e2788f143e71e22e2704b348e196656d60b3a8dd77e3de9fc6bd1b7db9dbf
+FAST-000106	MT-33314DBCFB5A	自攻螺丝	exact_current_name	自攻功能即商品结构，驱动类型作为可选属性，名称不含规格、材质、品牌。	frozen	ab51ce8a3794198390c2d4281cc4f9b05214ccbc19ec87bb9fc54d0bad649967
+FAST-000107	MT-7CC28F9690C4	钻尾螺丝	exact_current_name	钻尾功能即商品结构，名称不含规格、材质、品牌，标准名合格。	frozen	2b14b756d3af00e21f59d93ddf780e550486158a9974c65f6c54e03b4fb5dd3c
+FAST-000108	MT-CACDBAC7EA13	高强度全牙螺栓	exact_current_name	完整证据显示其螺纹形式为全牙、强度等级12.9、材质合金钢；全牙高强度是独立螺栓结构，名称稳定。	frozen	e4d310bf336ad91e303b622b4d3fe7e364258a3f3a584a176c1b96e1a4ac0edf
 FAST-000110	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M10"", ""length"": ""110"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M10*110，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	aee599fb24a9898c1e66da2193664f0ae48ab55642b9a5bd17e08aa975cc3480
 FAST-000112	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M8"", ""length"": ""70"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M8*70，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	f31cdeff364afcedda1ec9fe06126f254c15fa7e148e832840aa7f8a32b5f1f7
 FAST-000113	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M8"", ""length"": ""90"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M8*90，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	cfd34f0634161148bc6a217e1664a3baff7a319297b48d4c5490c7eb4a5d3184
 FAST-000114	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M12"", ""length"": ""110"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M12*110，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	847f2a1ca808275df0c57ad082ea3482af1796b81a327651c4ab8da6b1f9103f
+FAST-000115	MT-664197807A55	十字螺丝	exact_current_name	十字驱动槽即商品结构，名称不含规格、材质、品牌，标准名合格。	frozen	f870b0b537b9ad162abe32e3c0ef990531aede468d80f15bf7fb93953cab1ad4
+FAST-000116	MT-1C86AD74DABB	螺丝套件	exact_current_name	未标注头型或驱动类型，“高强度”属于强度或材质属性；套件结构与通用螺丝套件一致，并入螺丝套件。	frozen	2c0b756013a0b56c22e376c70671700e384afc1609d83b89c8acaa0a2631062d
+FAST-000117	MT-1C86AD74DABB	螺丝套件	exact_current_name	未标注头型或驱动类型，“高强度”属于强度或材质属性；套件结构与通用螺丝套件一致，并入螺丝套件。	frozen	923ea92be936f0239301cb87f2c2c486607c0fb8bdcf8f5b12f6e22317a0f687
 FAST-000118	MT-8250372BC1E7	螺杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	523c23e117fe6831b175edc0414403a85cdb14e7f698682dfb3636d18f355c8d
+FAST-000119	MT-CACDBAC7EA13	高强度全牙螺栓	exact_current_name	完整证据显示其螺纹形式为全牙、强度等级12.9、材质合金钢；全牙高强度是独立螺栓结构，名称稳定。	frozen	2f20c9d84928181e5000a57d90b862d5710ba1f837af97b7a15758fc0b55a99d
 FAST-000120	MT-948FDC7C0C55	膨胀钩	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	6332f34564f3de832ee22c608292154fa2224bcc0f7fa82db4a53b60bdc3ee8f
 FAST-000121	MT-FE0C1CE4AE5E	花篮螺丝	exact_current_name	名称稳定，螺纹规格、长度、表面处理留在SKU属性。	frozen	fd8ac7f2cedd271d8bbe60ce671cfb4087c0e758aeec1a2c54e917524d04d4e4
+FAST-000122	MT-4BD2009DE4A5	圆头螺丝套件	exact_current_name	圆头结构加套件形态稳定，名称不含规格、材质、品牌，标准名合格。	frozen	1b63a7167ec83d5ad2e4814b06e4f4281bd61b90403f5ce4336e0d0f19aa9661
+FAST-000123	MT-1C86AD74DABB	螺丝套件	exact_current_name	未标注头型或驱动类型，“高强度”属于强度或材质属性；套件结构与通用螺丝套件一致，并入螺丝套件。	frozen	455814e5b0bf71560c9e58034ce53f876cde0ee256528403dda0fd381f2f1ee5
 HW-LOCK-000001	MT-4A4F76AB7ED4	门锁	exact_current_name	适用场景和材质作为属性。	frozen	c098b9f90255c5ac18ff3b49652757567a1739355eab1b7eb774af8de859d836
 HW-LOCK-000002	MT-89329144931B	挂锁	exact_current_name	类型定义明确，钥匙类型和特性作为属性。	frozen	95ced345e620b15866c08763af448af299877a4db0322381bf722c9721ba46d6
 HW-LOCK-000003	MT-9349D8EAF899	抽锁	exact_current_name	类型定义明确。	frozen	a9df5867d7c9d9cb8d472eea679d7cd956128ce12c086c972fab5499d48dc3b2
@@ -482,15 +600,20 @@ MAT-000024	MT-DE6BB9DC48EF	吨袋	exact_current_name	吨袋为独立集装袋类
 MAT-000025	MT-D0CD4AFEC0F0	自封袋	exact_current_name	自封袋为独立密封袋类型。	frozen	03eec7a8284eb7f7f835db63f785aed72a3e2b42dc325d26655f836a98e3037f
 MAT-000026	MT-54E76A58AED6	气泡膜	exact_current_name	气泡膜为独立缓冲包装材料类型。	frozen	a4f14951d1a760085d009132087fa79bb5f5d2dd1b7e36c512ffe223ba54ac20
 MAT-000027	MT-D6E4F9E1A829	保鲜膜	exact_current_name	保鲜膜为独立覆盖薄膜类型。	frozen	132a958f7e94d167c5d0b68b72c900de1bfacd8fe3c8e3bd95c26b70d63f63df
+MAT-000028	MT-744EFD05B826	风扇	exact_current_name	电器品类，独立类型	frozen	c43837bc3476f09da37eaa8958f239b74ce477f77187c53c3d7de81a7aac4cd8
 MAT-000029	MT-E766BE628E26	玻璃纸	exact_current_name	玻璃纸为独立透明薄膜类型。	frozen	ebc2de9aa3adc3b7d8198790f632e0840e1198eb734212c17bda40ade3649b91
 MAT-000030	MT-4984424BA111	吊钩保险扣	exact_current_name	名称稳定，载荷、适配类型、特征留在SKU属性。	frozen	5fe0ecf0ffa86c85a31558a9107165fe8fef02b7dfb362dc2b75ef0e80d95c46
 MAT-000031	MT-E8374D6D5BA7	尼龙绳	exact_current_name	名称稳定，直径和编织类型留在SKU属性。	frozen	1cde80943625c17dfa63e185f1c86903144393da4c7b7dc28580659110cffb34
 MAT-000032	MT-D11B904C46F9	小便器感应器	exact_current_name	感应冲洗控制器与小便斗本体边界清楚，保留。	frozen	22f39acb9dfc80118997d95637e0069a196358baed72ce52c5a22b6d5fd2a518
+MAT-000033	MT-1C87F5281145	蒸饭柜	exact_current_name	厨房设备，独立类型	frozen	9121365cc03fc916f82e1c7d760b4568f466a354c3fa2a654c4863fe3283eec5
 MAT-000034	MT-9A3C4FF48BC3	吊装带	exact_current_name	现有名称稳定，载荷和长度留在SKU属性。	frozen	4f0bf90e3ced55c48448b19a0d608b02323deeef6612e8943663c2a375bc6796
 MAT-000035	MT-9A3C4FF48BC3	吊装带	exact_current_name	现有名称稳定，载荷和长度留在SKU属性。	frozen	972146bc0f1634cd5fb0cf2393c3e032664e54acae401b5bff357e040a2f1bfa
 MAT-000036	MT-9A3C4FF48BC3	吊装带	exact_current_name	现有名称稳定，载荷和长度留在SKU属性。	frozen	c2daf73804f95363c81bbfd8f72943bba05a6b35715e0766110400308fa746c0
 MAT-000037	MT-E8374D6D5BA7	尼龙绳	exact_current_name	名称稳定，直径和编织类型留在SKU属性。	frozen	7de413c8c9bbfb97db78c05fb7b1e1fa7e771376a566f5db37d3b640dbcfe4f9
 MAT-000038	MT-46E3EA1E3D56	编织袋	exact_current_name	编织袋为独立包装袋类型。	frozen	a9b1a9fa389995578acb4b2edf76bc5a08a19f321e9070aa386d4baffcd5fb8c
+MAT-000039	MT-5C4C39907424	被子	exact_current_name	床上用品，独立类型	frozen	ee2cc2650494bd6a2acafabfe3d03fd685bcae6c6aecbf12358a61f3d3078903
+MAT-000040	MT-5F070519C060	枕头	exact_current_name	床上用品，独立类型	frozen	9fd217699f4c3a8c70094d601779913714b2997430300fa0d7a6e61ca9b54f45
+MAT-000041	MT-8924C32C14A4	床品四件套	exact_current_name	套件类商品，独立类型	frozen	84c53de2f7524d1b4c34f4b2dd95922274760c8fd435f47eb08979d512e95f45
 MAT-000042	MT-9A3C4FF48BC3	吊装带	exact_current_name	现有名称稳定，载荷和长度留在SKU属性。	frozen	806d179af0abc045defdf9a6c670788ef4369a4755a486d8dcb3994033c55063
 MAT-000043	MT-E3B0BF183C89	生料带	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	e970ded0090533ca49eae5b4c0dd28fb3ad7dfb4bbf0165840d072f1ff0c135f
 MAT-000044	MT-DE6BB9DC48EF	吨袋	exact_current_name	吨袋为独立集装袋类型。	frozen	328852f938226d2c3eafea7df1c79df45241454402d1d0548ecfda527abfcf50
@@ -505,8 +628,11 @@ MAT-000052	MT-6C87FDD9B380	注浆止水针头	exact_current_name	注浆止水专
 MAT-000053	MT-46E3EA1E3D56	编织袋	exact_current_name	编织袋为独立包装袋类型。	frozen	544ef6a679530b3f529e34d574a174ec9ae789f79b2767f8cd8e6a8aac9de6b1
 MAT-000054	MT-7FC51D35E452	沉降观测钉	exact_current_name	沉降观测钉名称合格	frozen	126f4420a8959019ba82484603043053f5006385574cc78b48b5e82e179c182c
 MAT-000055	MT-48207EB01C9C	测钉	exact_current_name	测钉名称合格	frozen	66d2aabc15235fade806b20c0274b3cd52d72f7fb8976eb55259c0c6df0e8487
+MAT-000056	MT-7E3ED09831EA	空调	exact_current_name	电器品类，独立类型	frozen	45fa6f75407a625499882f9010528e2ceb50ac00c035cfda2d40822e272c459b
 MAT-000057	MT-AD4A5D9B4C70	喷头	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	d3daef036835603c1c02e7ac8b1a3c24b18aab622ebc1c0795940a56666611ac
 MAT-000058	MT-E79C39166E68	雾炮机	exact_current_name	降尘设备类型稳定，功率/射程作为属性。	frozen	0edf60ed3d4cf8e8f6bb2bb6f3b77de171731d1acc4d2584fe82de50140e57f5
+MAT-000059	MT-29FAEEBC1DB7	冰块	exact_current_name	名称明确，类型唯一	frozen	120c1d8912b70e45ff5b38833da55a2a87a43ed10a19593d477ee843451a1d76
+MAT-000061	MT-ACECB926948D	电热水壶	exact_current_name	具备电热结构，独立类型	frozen	b01bcb75e93534e8faf1ee50425e03e076b3b651d191dda6b4a25e605f6c7595
 MAT-000062	MT-2494E6EB1AC1	缠绕膜	exact_current_name	缠绕膜为独立拉伸裹包材料类型。	frozen	efcb876b5c02694eec160065c0b42c0164ad7fd7a80866fda608cc64c877d47d
 MAT-000063	MT-D84E754C5B9D	纸箱	exact_current_name	纸箱为独立纸质包装容器类型。	frozen	0e2c0ab4e23ef1f282a55e7e09488a21b5626b8e14f0dcc9f29bb980f0d17189
 MAT-000064	MT-529D79A10976	窗帘支架	exact_current_name	类型定义明确。	frozen	ab97d28bc573a305cf9842037b99b8aad0e5d4f03bce36af147cfae982c98a23
@@ -533,6 +659,8 @@ MAT-000094	MT-9A3C4FF48BC3	吊装带	exact_current_name	现有名称稳定，载
 MAT-000096	MT-E7F9551EF386	卸扣	exact_current_name	未声明形状的卸扣保留为通用卸扣类型，避免无据拆分。	frozen	1ab9566bcc471df26ddf40d1e36e275081b56b38ea4c661a2659a92758d8f1aa
 MAT-000097	MT-7C8DBEF4C3A9	U型卸扣	exact_current_name	U型卸扣按U形结构独立成类，不扩展D型卸扣等无据类型。	frozen	5e1fab5c0f9bcdfc01aa57354f0d546772300b83c07dcd0b2bee75d53b12d895
 MAT-000098	MT-DE6BB9DC48EF	吨袋	exact_current_name	吨袋为独立集装袋类型。	frozen	0ae49cd657fa596c32b46bed30b1256f0ded704e989d01be4d89a0b28eca58f5
+MAT-000100	MT-A96200DCE10B	压力表	exact_current_name	将接口螺纹属性调整为optional，覆盖无接口信息的SKU。	frozen	385e5e447b07ff039ec24e2b0e2a7edb97a84f52ea179a66f0157d6ce481bc1b
+MAT-000101	MT-316F65A55D99	桶装水抽水器	exact_current_name	功能明确，独立类型	frozen	4acf5cc19fdebbfe41c9278d6626411abeb3e21cd0514bd4859a88f9eac62dba
 MAT-000104	MT-9A3C4FF48BC3	吊装带	exact_current_name	现有名称稳定，载荷和长度留在SKU属性。	frozen	cf78a52e452134777d0a4ff8d8043185752d561fdd3d936553639fc3e4f6f398
 MAT-000105	MT-415657C7C04C	手扳葫芦	exact_current_name	名称稳定，载荷和链条参数留在SKU属性。	frozen	8525545979b7c4d1a0dc286b7c3384ef8f33c916d6ffc0781d1a73d76382acae
 MAT-000106	MT-3C4531A8FE86	高压清洗机	exact_current_name	清洗设备类型稳定，功率/压力作为属性。	frozen	fafc4fecd59e657df0ba39afe11b89b23d9209ac783b2d6461a08dc49f04ab37
@@ -552,10 +680,14 @@ MAT-000122	MT-E9DA9C0A46A9	蝴蝶扣	exact_current_name	蝴蝶扣以额定载荷
 MAT-000124	MT-C44A1A5101C5	聚氨酯防水材料	exact_current_name	聚氨酯防水涂料类型稳定，水/油性作为属性。	frozen	8a0928a5022eaf00b26298cd36793c499286f11a0bc3a8e35264ca803d74d28c
 MAT-000125	MT-C44A1A5101C5	聚氨酯防水材料	exact_current_name	聚氨酯防水涂料类型稳定，水/油性作为属性。	frozen	94c2e2a049dbc344832c4f6846bac8ea71a90af8408003aa09435b246e03a2c7
 MAT-000127	MT-CD35747D7362	注浆枪头	exact_current_name	现有名称已是稳定类型，接口放入SKU属性。	frozen	6188ce011b059a158909767f258d7a8ad557f53f48cb90f93584f6d8238b83c2
+MAT-000128	MT-461381BDDA89	凳子	exact_current_name	名称通用，类型覆盖无靠背坐具	frozen	63e59b86ea0d27ac844ccbb30f43be9fb1b04df93685bba8f864fd215f0bd876
 MAT-000129	MT-14C12CAC4D5E	PAC污水处理剂	exact_current_name	PAC污水处理剂为独立水处理药剂类型。	frozen	b7c6a0e3fba53cba6221328a58bf28207ce803e9380d02f483c8f0a1d539d30c
 MAT-000131	MT-3A21FD63066A	高压清洗喷枪	exact_current_name	现有名称已是稳定类型，接口放入SKU属性。	frozen	d4f21e79f8d535dd123409d8a0103886571b9ac3f724c39ac326a50d9f7f0e97
 MAT-000133	MT-C8699FA99171	手拉葫芦	exact_current_name	名称稳定，载荷和链条参数留在SKU属性。	frozen	a0ba94fa13b1fcc30ea6fd459bd729374859d5e8d59376c0a2bfca5c19752f8f
 MAT-000135	MT-E8374D6D5BA7	尼龙绳	exact_current_name	名称稳定，直径和编织类型留在SKU属性。	frozen	31a38b8bf5c0fe130233f89baba6ded540c1c789a00b4e6c55ac4330b14badf7
+MAT-000136	MT-FABE0F5323A6	聚氨酯堵漏剂	exact_current_name	将类型属性改为optional，覆盖主剂/副剂SKU。	frozen	52691a7339383be85efe06d1075a262ba4888e000d88e321b82916304905b12c
+MAT-000137	MT-FABE0F5323A6	聚氨酯堵漏剂	exact_current_name	将类型属性改为optional，覆盖主剂/副剂SKU。	frozen	10ad63d4e98d6bc737d58b972a0b91606e17934ff515faa2ed231635a14359f2
+MAT-000141	MT-A96200DCE10B	压力表	exact_current_name	将接口螺纹属性调整为optional，覆盖无接口信息的SKU。	frozen	08b2ca55d6ae027aa56b37501093caf7c872534a51a382d74be14dfad762c78b
 MAT-000142	MT-5E0BEBC918C1	吊装袋	exact_current_name	现有名称稳定，材质、尺寸、载荷留在SKU属性。	frozen	4ffdd6d039e97bbc02a475c8124a51f314bdec0a1ed8a43be5af38acd28d195e
 MAT-000143	MT-94547C297F6B	弹性销	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	3e5dd8f919d2d8a6367cd28218add4b82b0b8064858471bfd87a878f63db1706
 MAT-000144	MT-94547C297F6B	弹性销	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	4dc7ffe7cb59167e6fbea97ee46cadd932082dc1c93f7ea41d585196bdfa46d3
@@ -567,10 +699,12 @@ MAT-000149	MT-E258B7CA8567	液压油	exact_current_name	液压油为独立液压
 MAT-000151	MT-C44A1A5101C5	聚氨酯防水材料	exact_current_name	聚氨酯防水涂料类型稳定，水/油性作为属性。	frozen	76be8022d6349f8923ca4b0dfa853c0e1727b9c70cc1944b044fffb3b848c4b6
 MAT-000152	MT-B42C3BFF9948	丙酮	exact_current_name	丙酮为独立溶剂类型。	frozen	4e4ff2e829f7e359bd805080c9078da0f2045835fd7feeb0879da97dfa10cee0
 MAT-000155	MT-457D7DF9431C	高压注浆机	exact_current_name	注浆设备类型稳定，保留独立类型。	frozen	79e7ef6aa5d47b146e66d2e72e6246905898e0f599519ff76f19e72d876e59a7
+MAT-000156	MT-7E3ED09831EA	空调	exact_current_name	电器品类，独立类型	frozen	8aa8c08ba9816aa3027a3aa428792cc79e704c37b0fc1cbb576d787c643b446b
 MAT-000157	MT-9A771CE69500	收纳箱	exact_current_name	收纳箱为独立储物容器类型。	frozen	5d3909bbe7dd11a7c7b89417b15e7aca9390382819705760ed38e29c55fc97f9
 MAT-000158	MT-A4B31D70F1B0	水桶	exact_current_name	水桶为独立盛水容器类型。	frozen	04c48feb7f69849353372e12b3f1096b07245508d88434e5a7923e6ede1e573b
 MAT-000159-V1	MT-44D1CF88C9C9	井盖	exact_current_name	井盖类型稳定，用途和规格作为SKU属性。	frozen	2eabb933fb24faa3bb60d3ce39f74aa09f1b7a078f9b3b8de6fc43407fc9c659
 MAT-000160	MT-FF0857960F26	监控摄像头	exact_current_name	补充function属性，覆盖“监控摄像头 变焦”等关键规格，其余属性可完整表达现有SKU。	frozen	8ecdcefaabb3df206d7baf2f2cf87a9238e5379833ece1fa08027159627cfe73
+MAT-000161	MT-316F65A55D99	桶装水抽水器	exact_current_name	功能明确，独立类型	frozen	994d699940f8360200a62d25ebe158a826d4034823525a012afb7b79351f566a
 MAT-000162	MT-23DBD83CFCB5	防潮剂	exact_current_name	现有名称稳定；包装与用途作为SKU属性，不进入标准名称。	frozen	ff18345c19d4630d7c66ec6f2c4ce90edbd30ce3473ce67d88040bb2a5f02f7b
 MAT-000163	MT-76B7F855ABDD	监控套装	exact_current_name	名称稳定，供电、通信和件数属性可覆盖现有SKU。	frozen	01cb1c6c19cfcf4b0dfa94950b5e5c37b9115686a9439b351e07791ab728389c
 MAT-000164	MT-F78041B73FAE	交换机	exact_current_name	交换机类型稳定，端口/速率作为属性。	frozen	eb64f936b1c40bdc748c2440bd1379c5e7568ec3b9b458f061e10510948e0b52
@@ -584,9 +718,13 @@ MAT-000172	MT-428791A708F5	彩条布	exact_current_name	彩条布为独立篷布
 MAT-000173	MT-8985890D2FAF	油布	exact_current_name	油布为独立防水覆盖材料类型。	frozen	bc6f07cb66f2c6ff6655b156a7bc0b1d8bdbdd7a63d9a5058f774188b0d7559c
 MAT-000174	MT-868BE6C90D3D	耦合剂	exact_current_name	耦合剂为稳定检测耗材类型，容量入属性。	frozen	c12f2d8673dea61e584e73f0eac52568f6d2b479db57bc15ef51a20264f8f9de
 MAT-000175	MT-551F0DB8A5F1	手推车	exact_current_name	普通手推车类型稳定，载荷/斗体尺寸作为属性。	frozen	882957684a0a9753dccf223feb016056e089442633549841e13691137b1de262
+MAT-000177	MT-5C4C39907424	被子	exact_current_name	床上用品，独立类型	frozen	0f1f53575f32d3a809aed3d9cb9f54bb1e2b35db653964baa36ff2089b6efbc7
 MAT-000178	MT-3602A5B69E2B	铭牌	exact_current_name	名称稳定，材质和尺寸留在SKU属性。	frozen	94b70cfacc20ee82671756e052a928be7418741113b572dff1939e3552492273
 MAT-000180	MT-5E0BEBC918C1	吊装袋	exact_current_name	现有名称稳定，材质、尺寸、载荷留在SKU属性。	frozen	bc63e226c46df5c9868e128804221cd345fb0ccf0d5c3ec7abac859758c5f862
 MAT-000181	MT-C9482E8FF4CC	万向脚轮	exact_current_name	现有名称已是稳定类型，尺寸、刹车、材质放入SKU属性。	frozen	3722c9afbf14229efb4cd61b4ae5a4da89e6896884dd1490d36534edf2caf96e
+MAT-000183	MT-DB58B3B7C317	漱口杯	exact_current_name	日用杯类，独立类型	frozen	96114e5e6285378bdaebf3ff515317f61e7749cae82dfa03a5113da8fd98e3e7
+MAT-000184	MT-E1B335CB6EC8	洗发露	exact_current_name	洗护用品，独立类型	frozen	dae3d6d548f7dd44ff53265b13fcbe81852c1103527d86e3876b4973ef6a22f3
+MAT-000185	MT-8E18DC152DBE	沐浴露	exact_current_name	洗护用品，独立类型	frozen	eba33570fdfbd60d1be97a96bc833f5566d584131c6c0da91f8e9468c79c1ef2
 MAT-000186	MT-E064D77242F3	洗脸盆	exact_current_name	盆体类型明确，保留并补充加厚特征属性。	frozen	8718031a4ebbf1c9d0327a26781a42734cee533b49b52c0e79e44aadcb6cfd35
 MAT-000187	MT-1C3317497F61	碳带	exact_current_name	类型边界清晰，保留。	frozen	de4baf69ab7990db4f8c9a205f0568e0fbd5422b07e08d8fc82940be22a49dc2
 MAT-000188	MT-8985890D2FAF	油布	exact_current_name	油布为独立防水覆盖材料类型。	frozen	8476c8ca2d77390fa930ba4c0856c3c64e91fc16ac5346217d6d4b4cd0d05521
@@ -599,6 +737,7 @@ MAT-000198	MT-E7F9551EF386	卸扣	exact_current_name	未声明形状的卸扣保
 MAT-000199	MT-E7F9551EF386	卸扣	exact_current_name	未声明形状的卸扣保留为通用卸扣类型，避免无据拆分。	frozen	b0632e6634e2f49f92ad6b1b752c8f779154bb11a33e4180f19d5aff9eca4723
 MAT-000200	MT-1984E72FABCF	成品网线	exact_current_name	成品网线与散装网线不同，长度/类别作为属性。	frozen	7d8996d349b5d6b35ea05690247fa78ce45bb2bb6ea56fdb4da25f3bd586fe52
 MAT-000202	MT-E9A267C1FA93	插销	exact_current_name	类型定义明确，功能作为属性。	frozen	4443feebadd6faba994afe6f2d28a5b5c60f12755a454503d96a78eb9104ba48
+MAT-000203	MT-7E3ED09831EA	空调	exact_current_name	电器品类，独立类型	frozen	9a106db1e02f6069eec738cc96a155139683f383cf119f7edbe6ec5a1a79743f
 MAT-000204	MT-7FE169319A1F	货架	exact_current_name	类型稳定，尺寸和特征归SKU属性。	frozen	e19d52eef1ff17746f968deeba8e7686857959be791e21af8dcd9c438a631536
 MAT-000205	MT-F78041B73FAE	交换机	exact_current_name	交换机类型稳定，端口/速率作为属性。	frozen	741e13f21c12a9e3f9163f404e58657adef4acf3c6aa342bdb08862668099217
 MAT-000206	MT-FF0857960F26	监控摄像头	exact_current_name	补充function属性，覆盖“监控摄像头 变焦”等关键规格，其余属性可完整表达现有SKU。	frozen	47fe5622296ed6fadcf52b4264161356b927674c049888a5eeb13974d339ed1f
@@ -619,7 +758,11 @@ MAT-000220	MT-604A29470741	周转箱	exact_current_name	周转箱为独立周转
 MAT-000221	MT-604A29470741	周转箱	exact_current_name	周转箱为独立周转容器类型。	frozen	49c2c79de6fc9120e4233428ca28141118759afd5121e3c71e028de38d806c8c
 MAT-000223	MT-1C876845B9C7	麻袋	exact_current_name	麻袋为独立麻织包装袋类型。	frozen	a37283920ae458b6e23b25ad4e9b3e5aa6e4b08b37d2c144579d3edc9e87ba06
 MAT-000224	MT-8985890D2FAF	油布	exact_current_name	油布为独立防水覆盖材料类型。	frozen	ed62f8733c39093748d56208e65aead7fd0739281a91b5844dfacf20d34ea68f
+MAT-000225	MT-A96200DCE10B	压力表	exact_current_name	将接口螺纹属性调整为optional，覆盖无接口信息的SKU。	frozen	61971759623db1de242f684934a1217fb86859d5ced5284729b13f2d110fb43e
+MAT-000226	MT-4BD18858B956	遮阳伞	exact_current_name	功能明确，独立类型	frozen	e0a4a68544cf51ef74aa4eaed9bd28515bdd03ad5a0255010cc6cce48e094a20
 MAT-000227	MT-46E3EA1E3D56	编织袋	exact_current_name	编织袋为独立包装袋类型。	frozen	f8032589feb16c647f37a9261de904cf1e809d7e52c48704d01ca5dbbb2adf07
+MAT-000228	MT-2DF162AD6294	毛巾	exact_current_name	名称明确，独立类型	frozen	a45cd67ccc6eb0c377f4d65dffe323392d8866e04b0f673838cabf6b2ff3408d
+MAT-000229	MT-2E6EAF0D3CB8	空气净化器	exact_current_name	电器品类，独立类型	frozen	d535c37ff4d9bd19bd93978e9e1cdb11a72b8b8c445ae003d121aaa6a120028a
 MAT-000230	MT-9D8038C97A29	木方	exact_current_name	方木支撑材料类型稳定，截面/长度作为属性。	frozen	c32c802bdc15820f057bb541240930dac84abfce770cb9c24e696a62ec58a0c8
 MAT-000231	MT-9A3C4FF48BC3	吊装带	exact_current_name	现有名称稳定，载荷和长度留在SKU属性。	frozen	451ef5b1ffbfdbcef6a8b7e797608733c0e139b3dda85815895e1c48c9a88e48
 MAT-000233	MT-2B8B32AFB454	软玻璃门帘	exact_current_name	软玻璃门帘为PVC软质门帘，结构、尺寸等为属性。	frozen	07419d981e7adbc0d923a0463bccf1a7b3c2a149ccbb862b464e3007ee224ffd
@@ -630,8 +773,10 @@ MAT-000237	MT-8985890D2FAF	油布	exact_current_name	油布为独立防水覆盖
 MAT-000238	MT-8985890D2FAF	油布	exact_current_name	油布为独立防水覆盖材料类型。	frozen	a0f41e054d1da55261ee6ee3fa9191039c5be1a0d022b676ef1068a20abc3309
 MAT-000239	MT-C9B21BFFD0A2	混凝土振动棒	exact_current_name	振动棒专用设备，直径/电压作为属性。	frozen	f37bf8419227d343a9b1e0ef5fe61e43a31a784b34ffb9ea4dbcb99b1b45363d
 MAT-000241	MT-9A3C4FF48BC3	吊装带	exact_current_name	现有名称稳定，载荷和长度留在SKU属性。	frozen	b2873e6a01c4d0d4caacddac61a0da67d0c09b3371939b585304996f965a05ba
+MAT-000242	MT-A96200DCE10B	压力表	exact_current_name	将接口螺纹属性调整为optional，覆盖无接口信息的SKU。	frozen	e24ef8ca8dce898708b499e0704fb905fcf20f5f2e5adfe8b5fc74d44a880ac8
 MAT-000243	MT-C9B21BFFD0A2	混凝土振动棒	exact_current_name	振动棒专用设备，直径/电压作为属性。	frozen	304552d7135b0ea41c5f6bf3e0b7b58c84caca386f887d33af68d8c3d1184860
 MAT-000244	MT-FE0C1CE4AE5E	花篮螺丝	exact_current_name	名称稳定，螺纹规格、长度、表面处理留在SKU属性。	frozen	66a41c0535d04cc6995ad062ed7b7b11917c35495039fb95b31af9dfc48cad65
+MAT-000247	MT-FA62CECAC021	方桌	exact_current_name	形状明确，独立类型	frozen	55e14d7ffe09b0b6c4aeec45c0e37487bf06b6cf566fc8e1d173388f9792d983
 MAT-000249	MT-2850A9FC69AB	起重滑轮钩	exact_current_name	名称稳定，载荷留在SKU属性。	frozen	9cdc246736520b0bab17011d5402931fb4503ee49549054ed7a07c4e88a6df07
 MAT-000250	MT-9A771CE69500	收纳箱	exact_current_name	收纳箱为独立储物容器类型。	frozen	9dc4a9a444c7d52effd3c8e8e63111b18f72b3cbc56e12816879bedc5c63abcf
 MAT-000253	MT-75FB55415168	高压清洗机喷嘴	exact_current_name	现有名称已是稳定类型，角度和接口放入SKU属性。	frozen	3dc94ea6ae76410eed4248497a8263c7d5d4fa0f0ba0e938f70f92631fb70428
@@ -665,6 +810,11 @@ METAL-000013	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规�
 METAL-000014	MT-3602A5B69E2B	铭牌	exact_current_name	名称稳定，材质和尺寸留在SKU属性。	frozen	2b7ffa92b258b8dc8cca561b1c79bb93e72195e9d147143ea27cab3ece7af7f1
 METAL-000015	MT-3602A5B69E2B	铭牌	exact_current_name	名称稳定，材质和尺寸留在SKU属性。	frozen	9bd24395092b6da5c2aba9bdfe4559a41e301813e8ef0999827fb88bbe386780
 METAL-000016	MT-3602A5B69E2B	铭牌	exact_current_name	名称稳定，材质和尺寸留在SKU属性。	frozen	6cab38428751a260e3e42d175393e56a56408d55ba267984865cf0c031920c67
+METAL-000017	MT-F4A11720067D	卡扣接头	exact_current_name	卡扣连接结构，保留独立类型。	frozen	004164a6e0b3e04463857134a3960f52bb55d088b6fda15d9ac8df9dfb392ac6
+METAL-000018	MT-F4A11720067D	卡扣接头	exact_current_name	卡扣连接结构，保留独立类型。	frozen	ca275c53ed86f03119852b3fd8e4da105c4af575c43b29d91ad4a15422b5e83d
+METAL-000019	MT-1B4591DB03EA	接头	exact_current_name	无独立结构限定的通用液压接头，作为兜底类型保留。	frozen	c442855c43f3b730080bafdeddacd5e46f0094a9078e73d7cd40b96a9251a1b1
+METAL-000020	MT-B602DCF010E3	卡套接头	exact_current_name	卡套直通结构，保留独立类型。	frozen	13b48f03475be9d728fadb22c9c13dfab8d3c6294aa1b50719a6f421014eeb57
+METAL-000021	MT-B602DCF010E3	卡套接头	exact_current_name	卡套直通结构，保留独立类型。	frozen	907f49036b76e0e4728e781c3404b95ca4967c3fafe00141d30fb806da15e1a6
 METAL-000023	MT-A1289B5C5B16	钢丝绳	detailed_evidence	"{""attributes"": {""diameter_mm"": ""6"", ""material"": ""碳钢"", ""structure"": ""6×37+FC""}, ""confidence"": 0.98, ""reason"": ""SKU名称为普通钢丝绳，未声明环形，按米采购，符合wire_rope定义。""}"	frozen	7e25e67a396f43e8149c16667c3743fbcbc5b354d42a5f643e94a80154075387
 METAL-000024	MT-98DBD8B81980	钢丝绳卡扣	exact_current_name	钢丝绳卡扣是独立配件类型。	frozen	755d7c6d360b275eb82a2bbf380016b9872b8f90e2f808e5a2ce166698eb2b15
 METAL-000025	MT-89200DAE5BFD	钢条	exact_current_name	钢条按单件条钢管理，规格和长度属性完整，保留。	frozen	c9311707ae61051343424d44d0cb13850c91fb4fc25c3e4657ef5a27b91e3cb0
@@ -710,6 +860,7 @@ METAL-000066	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规�
 METAL-000067	MT-0CF505AF57F5	铁丝	exact_current_name	现有名称已是稳定类型，规格/号数放入SKU属性。	frozen	a299ea482762c4cba6480d2d70db993ea0689d17ea5d2c6d913cbefbd4cdb7cc
 METAL-000068	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	e763be18ba68617a2cccbc6e53102fc84d9dd1bf2f134d5ba324c62cf220ef9b
 METAL-000069	MT-C7A58C87DFFF	止回阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	72bf714865521d411e4dc96a939914c303e1845544fa31598bdc310845af01f4
+METAL-000070	MT-5C24AA28230F	通用螺丝	exact_current_name	材质不应进入标准名，且证据无头型或驱动类型；归入通用螺丝并将材质移至属性。	frozen	f9924ec6d43cd0d5b332c9b7cf395b9e5749a846e9d7b32cefba5ce0cccf7283
 METAL-000071	MT-BFDD51510901	刀阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	fe07b49a9e5f4c6f1642ecb6a23505aca8492ec64f1ea5c6d0067f175fa7069b
 METAL-000073	MT-86A7EBA4236B	抱箍	exact_current_name	双半圆对合抱紧型管夹边界明确，保留。	frozen	26470fd1e9a62e97efa4900c32f2dc1e44d4a59b033864b8ce4db9b6593237cf
 METAL-000074	MT-2D6782263518	角钢	exact_current_name	角钢名称稳定，规格、材质和表面处理属性可完整区分SKU。	frozen	e30a6c45167accffbbb8790c88bf5c5a22dba384b180fad0564bc3495e42be8a
@@ -742,6 +893,7 @@ METAL-000105	MT-35ADDB4AD040	工字钢	exact_current_name	工字钢名称稳定�
 METAL-000107	MT-35B16893CFEE	钢丝轮	exact_current_name	钢丝轮为独立打磨轮类型。	frozen	bb12e2aed44acfb002821b65c4f62155f2d3a7d2c8f63349539b38c1cd7146c0
 METAL-000108	MT-3602A5B69E2B	铭牌	exact_current_name	名称稳定，材质和尺寸留在SKU属性。	frozen	f488e81d87f1219fca970459185424b33f0f3e88bc41eaf28e8148fb5ca0d6d4
 METAL-000110	MT-CD4DF2FCC2FF	槽钢	exact_current_name	槽钢名称稳定，规格、材质和特征属性可完整区分SKU。	frozen	a8b4d4511d873e2fd374850de45b0eaef1fee16c0d96635bfd542b2618f35fe1
+METAL-000113	MT-D0A9C0182738	漏斗	exact_current_name	功能明确，独立类型	frozen	97f80a8f2c6454ced8c8c214f4d1f8b40088574e47134a563f0ca31dd3b780a8
 METAL-000114	MT-1575F9ADBD09	花纹钢板	exact_current_name	现有名称已是稳定类型，厚度、尺寸、材质放入SKU属性。	frozen	46918671a195b8faae752fd8fb5973f64a029df68bd55374b237d188094e1c94
 METAL-000115	MT-82057F0CD79F	钢销	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	1eeea0e5aba03175219856c55cff140d469a08e770741edbbe8645a2b1f4df3a
 METAL-000116	MT-350F690ACEEC	钢钉	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	cb8edd0e2b7a8759afe78325edcc6f9360d4e82b2845ab98e273950bdc64d81b
@@ -751,12 +903,16 @@ METAL-000120	MT-69E7B9B860AF	标识字牌	exact_current_name	名称稳定，材�
 METAL-000122	MT-CD4DF2FCC2FF	槽钢	exact_current_name	槽钢名称稳定，规格、材质和特征属性可完整区分SKU。	frozen	1f5a70addc77773451676adc1abb7d007c856854bbd51a0efcd2136f501b1fb2
 METAL-000123	MT-CD4DF2FCC2FF	槽钢	exact_current_name	槽钢名称稳定，规格、材质和特征属性可完整区分SKU。	frozen	85694d58d3e8733f63a249d2957725a437cae843a1529a0fc2c8ea150e04a48c
 METAL-000124	MT-CD4DF2FCC2FF	槽钢	exact_current_name	槽钢名称稳定，规格、材质和特征属性可完整区分SKU。	frozen	2315b5eb88f802aece2913acc622b414be42caa22d2c6f5f355078d362762003
+METAL-000125	MT-6D2BFB2BBF33	双层床	exact_current_name	结构明确，独立类型	frozen	b8d9a4fd10fc9d7ca8658578c7fbe474c2026c3f3fd084748d2fe0f42adcf322
 METAL-000126	MT-646840C3AFFB	电柜	exact_current_name	大型柜体独立成类。	frozen	613aab0578ebb6b9f3ba5ee75464d9c12fd29f0c29f2c96ad46efaee672a03fe
 METAL-000129	MT-346146BAEDB6	门吸	exact_current_name	长度和材质作为属性。	frozen	854beb6a3351a985249a421be93050305a6c4c9758848d098c55cc9d9d33db6f
 METAL-000130	MT-8EE116C4D2BC	链条	detailed_evidence	"{""attributes"": {""link_diameter"": ""22mm"", ""material"": ""锰钢"", ""pitch"": ""64mm""}, ""confidence"": 0.98, ""reason"": ""SKU名称为锰钢链条，规格为链径22mm、节距64mm，符合链条定义。""}"	frozen	14a96f8b7fdc9325eb007dcd629d7be336283d28ef84ab653c7639e12c694871
 METAL-000131	MT-84A4434EC10F	环形钢丝绳	exact_current_name	品名明确为环形钢丝绳，作为闭环索具类型保留。	frozen	c57c86a3e4e142cc6e50ed69de31d73c695ba51e87b7bd327e2dbc60ea62545d
 METAL-000132	MT-A103ED3AAAD1	彩钢板	exact_current_name	彩钢板为平面彩色涂层钢板，类型明确。	frozen	1033bec6300de75e2ff5b31e9a9228235e15786777fe18430b19a8a8ffd4de8e
 METAL-000133	MT-C549B72134A4	钢筋加工件	exact_current_name	名称稳定，钢筋规格/长度/类型留在SKU属性。	frozen	52d80ba04628716c6f97131040aa47c602b5a6c015da7c6de296bdea4942ca45
+METAL-000134	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	cd5def4fd67ee112d79e8c39179fdcf4edc12e28b2867dd2312b64bbdc4bb151
+METAL-000135	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	5214714e1bd1ec2bdc4249d8628cecfb0df85f4334db58067869d71d277fee54
+METAL-000136	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	963dd1410b43ca9f75b9b2fe2b8bb9869bce1ee17e88574edc318036e5263182
 METAL-000137	MT-C549B72134A4	钢筋加工件	exact_current_name	名称稳定，钢筋规格/长度/类型留在SKU属性。	frozen	b3bfc1934d1bcdb8c9f9b582a568819a7f130e8f6ccbcac1320240c8f8757b68
 METAL-000138	MT-E6781F281E7C	烟灰桶	exact_current_name	名称稳定；材质和尺寸作为SKU属性。	frozen	0ef758526b08b92f964c385a83bb43f4b626d9a0849b5ed24c5c78a695f2f1cb
 METAL-000139	MT-35ADDB4AD040	工字钢	exact_current_name	工字钢名称稳定，规格和材质属性可完整区分SKU。	frozen	38ae56270775ff97096a72d6d3343a4c669ec08157bc0e4e0e309d905eaa26b2
@@ -775,6 +931,9 @@ METAL-000151	MT-C87204B06C74	直通快插接头	exact_current_name	型式为外�
 METAL-000152	MT-C87204B06C74	直通快插接头	exact_current_name	型式为外螺纹+快插直通，尺寸和螺纹归SKU属性。	frozen	37b5831e96dfff10a60f6f1d5b1166031ddee3bccc7626ee8349daec1da83520
 METAL-000153	MT-C7A58C87DFFF	止回阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	8c1c7f28e0f7d0f1a4be4d7b1c8acc6388343b4c8066a6091b84b04163473706
 METAL-000154	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""不锈钢"", ""spec"": ""M5""}, ""confidence"": 0.95, ""reason"": ""不锈钢螺母，无防松结构，符合nut定义。""}"	frozen	e60df42ba44cb2c48ec079e241b3d831f8b7209c970b3368c557865629a5d042
+METAL-000155	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	107f934b0bd239ca088ee126d93713e6112c7b4636a22f543da96e8d00eeeffc
+METAL-000156	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	40fa146a8f708c776f4dfeaf3bccda68e8138a803b3e8fafcd6c543ef623c9df
+METAL-000157	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	132d7e0e540ce6bfa67e5e65496da4908080b05036888d1600fb88bea18f65f8
 METAL-000158	MT-271DC337D5AE	排气阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	a5387d07458dda40875feb279d9e8304ec55bd59716bf086246123f8be22f8c8
 METAL-000159	MT-EBAF1AA097EE	保温水箱	exact_current_name	保温水箱类型稳定，容量/材质作为属性。	frozen	e5ee0ff254ff650854a6fb6521211e4be5437105d04cf4c898046615f947fe22
 METAL-000160	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	e13dfd3b0058fab60a42ce6e74fc4efcac5dfac3a372978e2906791c1c7e14e5
@@ -785,38 +944,52 @@ METAL-000164	MT-A1289B5C5B16	钢丝绳	detailed_evidence	"{""attributes"": {""di
 METAL-000165	MT-67D913D032F1	潜水搅拌机	exact_current_name	潜水搅拌设备类型稳定，保留独立类型。	frozen	770388210fe6bf1e912a5067b955a8c55e03e5dfb208e46650fec123c75982a0
 METAL-000167	MT-A1289B5C5B16	钢丝绳	detailed_evidence	"{""attributes"": {""diameter_mm"": ""20"", ""length_m"": ""6"", ""material"": ""碳钢"", ""structure"": ""6×37+FC""}, ""confidence"": 0.97, ""reason"": ""SKU名称为普通钢丝绳，带长度，未声明环形，符合wire_rope定义。""}"	frozen	8959d12d4bd73a0c7154d62df6cebf0c92ceb94820044d463b141f0041ab139b
 METAL-000168	MT-CD4DF2FCC2FF	槽钢	exact_current_name	槽钢名称稳定，规格、材质和特征属性可完整区分SKU。	frozen	fc3fc22e656d474c8fbf5979bd71d1b7f5fdd528f216343a32435f389a246458
+PIPE-000001	MT-52C93398FF40	直管	exact_current_name	刚性直管类型明确，保留独立类型。	frozen	bfef10b0f7d570c2d675560444bec7380b40f31115b53ffc28447610be25bfba
+PIPE-000002	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	4d02bbd48f8cf916d0391080079b4922463c89cd72ed01ab28b8d3d2570795e5
 PIPE-000003	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为PPR弯头，符合弯头定义。""}"	frozen	ad0246de09ff631cbb227f6c4ae1ac3d92b9e676db3ae7864779df582cef5040
 PIPE-000004	MT-3526C7D9267E	热熔机	exact_current_name	商品结构稳定，适用管径作为SKU属性。	frozen	70e7fcaeb0af4ecca9d90ba24d5597fb7e7bdd4378bff2251d12b1a541e8f41c
 PIPE-000005	MT-B1ACC993318A	管剪	exact_current_name	管剪是专用管材剪切工具，名称合格	frozen	aeeb52f9544cf9b5fc6f73b627a4218b4785f37358a0afc3219e9733fd7904dc
 PIPE-000006	MT-E1B1666ADC55	角阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	6fe1015c086fcc7a535697315a37b66b56f3bdcc10b8e1c259af874df8fb4b8b
 PIPE-000007	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为PPR三通，未见异径/Y型/斜三通信息，符合等径三通定义。""}"	frozen	5ba9803892dc4a0530015e3154abe4bae9ddcab728aa2bd1b840999731814606
 PIPE-000008	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为PPR内牙三通，属于等径三通，符合三通定义。""}"	frozen	66cf682842e31e2737621c060a40ca2dfe0f44ec055d3727a15702c1733e5aea
+PIPE-000009	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	560c2f18f84ddb442470a3fd8bcd1f58677e35fbb330cd8da3d4c1991c0b8d99
 PIPE-000010	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为PPR内丝弯头，符合弯头定义。""}"	frozen	2fdda677b6116a691dbbb8b5413aa405d309188d6dffd4b4557a4b7dbd9776b5
+PIPE-000011	MT-988CAD476BBA	堵头/管帽	exact_current_name	封堵管端的功能明确，保留独立类型。	frozen	58c193924913f2f10fcdcc6fbe63c0de26f3666d7ddfbae9c78fa01c1b1d99e7
+PIPE-000012	MT-988CAD476BBA	堵头/管帽	exact_current_name	封堵管端的功能明确，保留独立类型。	frozen	b567ac25097c5feae29c57679db01eda8c0a0b37ec2faf1eddf1362bb2c1f0e2
 PIPE-000013	MT-538F15C36CA2	水管钩	exact_current_name	钩形支撑管件边界明确，保留。	frozen	e7f312602344504d42cac79f2820876e5c580138190b5bb54a754465d253fd00
 PIPE-000014	MT-27BA1EB08A05	下水管	exact_current_name	洁具排水短管边界清晰，保留。	frozen	47bd3a560576b4c2fe08da2cd8b5d8aceae8330c565d15492b2569a32badcf98
 PIPE-000015	MT-7CF2F4264F59	过桥弯	exact_current_name	过桥结构独立成类，与普通弯头不同。	frozen	934efc39952e469bde896258c8718e82efd4a3eb26d167a89eda5c412c68305c
+PIPE-000016	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	aa066986441461d5b7f0024e9d9de741eb58e6856676bc12a083e67885ddadf2
 PIPE-000019	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为排水用PVC三通，未见异径/Y型/斜三通信息，符合等径三通定义。""}"	frozen	0ba468859ffe6950577039fe514b6cb7a6cfe602f54c5b86b4d5d12c4ea8d019
+PIPE-000020	MT-53D944731A77	异径接头/大小头	exact_current_name	补心为变径过渡件，未显示与异径接头/大小头不同的商品结构，合并以减少边界重叠。	frozen	d8f720ce0b14a3ce7cef50ac81160e209521067024a6e0286e1a373fbec3d35c
 PIPE-000021	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为PVC弯头，符合弯头定义。""}"	frozen	28c65c0443b6dd8a4641ba8ac79db0014620ccea850ab6f9e084c643e9b83769
 PIPE-000022	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为排水用PVC三通，未见异径/Y型/斜三通信息，符合等径三通定义。""}"	frozen	4eb40ff6b854de3baf21e121b3d79cc86654da4349c92845ba372730a1db2322
 PIPE-000023	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为PVC弯头，符合弯头定义。""}"	frozen	afe12910e3d66eda2a8ac5baa4323fba22c4a433595b407b2ffc8e9e45cd1b53
 PIPE-000024	MT-71507D1D4A80	异径三通	exact_current_name	变径结构独立成类。	frozen	5eea1d0402aff384d8ad306a1aeea5f88691f0940b152396a29fe6ad1ca734ec
+PIPE-000025	MT-246A1D69D7A3	金属软管	detailed_evidence	"{""attributes"": {}, ""confidence"": 1.0, ""reason"": ""SKU名为金属软管，材质不锈钢编织，按根供应，符合metal_hose定义。""}"	frozen	8fe57d462cc59592ec8902f67c5806d00a0ad822c045709e8fd6abb1bb34e5e4
+PIPE-000026	MT-246A1D69D7A3	金属软管	detailed_evidence	"{""attributes"": {}, ""confidence"": 1.0, ""reason"": ""SKU名为金属软管，材质不锈钢编织，按根供应，符合metal_hose定义。""}"	frozen	e8438ea4a3e76bda0a4bd3c3d7214fda53c083a73c56af6576dc66c787ac8e2d
 PIPE-000027	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	9f870027f4419cf7caf7c2b189a81e49d82acf7ecdc75af8fb0357db4c8d4cf6
+PIPE-000029	MT-52C93398FF40	直管	exact_current_name	刚性直管类型明确，保留独立类型。	frozen	5fe4a24b31522d397bd99083fa95247a7ddd60c350ea95165d5b8e17576a9e08
 PIPE-000030	MT-C7A58C87DFFF	止回阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	392895665ecd601a8d7d91acb3648518fb61671d9463b9fb46016701f6f7716b
+PIPE-000031	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	20de04e90a234f2833a24f9148ef4158ab44cfbee511ad274ae587930b597a91
 PIPE-000033	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为不锈钢三通，未见异径/Y型/斜三通信息，符合等径三通定义。""}"	frozen	d2ec0d691562437a4d026dc5f2bbe631ffee67bfde99001e2d55915573cdd1a5
 PIPE-000034	MT-7D0D5817EC9E	钢管	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""DN25"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.95, ""reason"": ""SKU为镀锌钢管DN25，未注明焊管/无缝工艺，符合gang_guan定义中的现有SKU示例。""}"	frozen	f30124444c62834c5a289d9a9284dd943caa7b186daf798fc930c123f9684a60
 PIPE-000035	MT-CB0A48F7A97D	高压软管	exact_current_name	橡胶基高压软管，与高压胶管、钢丝软管合并为高压软管。	frozen	72cd2d93fa576433bd791b0e239805f764bb728afa4180e52dc30629af02c3d3
 PIPE-000036	MT-C7A58C87DFFF	止回阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	6c5be18d67f46162df245f70f5d5501d1fcd87412a31099ae8c077cf4b80b8f5
 PIPE-000037	MT-F7332C0D9E4F	管卡	exact_current_name	单管固定卡边界明确，保留。	frozen	47b3e70fcf6cebc201a245398fcdfd6896e529de49227ac39538cd08ac1728e3
+PIPE-000038	MT-246A1D69D7A3	金属软管	detailed_evidence	"{""attributes"": {}, ""confidence"": 1.0, ""reason"": ""SKU名为金属软管，材质不锈钢编织，按根供应，符合metal_hose定义。""}"	frozen	85a7969ac8f34d2f57718f59b22f4a23c1f990f305393ad5953b069d3c64060d
 PIPE-000039	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	b95639d82c39cbd9169cf144b5330174109108e039e754c00afbc7ab812d584d
 PIPE-000040	MT-CB0A48F7A97D	高压软管	exact_current_name	橡胶基高压软管，与高压胶管、钢丝软管合并为高压软管。	frozen	290adbfdb92d16c219db81d9022190b24f1f81067474457fc5fa377e767c3c55
 PIPE-000041	MT-CB0A48F7A97D	高压软管	exact_current_name	橡胶基高压软管，与高压胶管、钢丝软管合并为高压软管。	frozen	8a6caa9f1c1dbe34755b5db017e941fe629b56b203d34c3d03b9488fcb63fda9
 PIPE-000042	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为不锈钢弯头，角度90°，符合弯头定义。""}"	frozen	e4df33af911f539d9f9481665a1a462fc4b78a9fcf825e863bfc8fe376964502
 PIPE-000043	MT-1C76E756D933	蝶阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	3bbb3eabaecd86f2548af2a26b5d362fdace1f5d86cd04076f022c0c5d60f58f
 PIPE-000044	MT-DF682A965FB7	安全阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	a940a2f4a2f0c032b3fbaf102c370d22a7939e1e3c278827777e92198fbfa9f5
+PIPE-000045	MT-1BAA5262EAC8	弯头接头	exact_current_name	转角连接结构，保留独立类型。	frozen	84119278c1b0689190a3c40d048602314cfffbd9aace5764ec1259d8a2ae05a2
 PIPE-000046	MT-974B25EE4C8C	通用接头加工件	exact_current_name	避免与管接头、卡箍接头等专用接头类型重叠，更名为通用接头加工件，并补充特征、接口类型属性。	frozen	dc2e0a61fefe66194b436dda6e9335a9ec3231920fc7a114c12cc5cf95c5201d
 PIPE-000047	MT-04D5F9CE22B0	卡箍接头加工件	exact_current_name	卡箍连接接头类型明确，保留。	frozen	6ea5ca52d9a34a151e21024b16bcf54471aa4f8674276c11de3978e4d96189bb
 PIPE-000048	MT-1121AB3E7D64	抱箍接头加工件	exact_current_name	抱箍连接接头类型明确，保留。	frozen	b3ddc30fb5a5f44b4ae424308fda6b4e4261faad23e147ebb8462cd5fb2ba4fa
 PIPE-000049	MT-822ADF0FDB0C	三通抱箍加工件	exact_current_name	三通抱箍结构类型明确，保留。	frozen	db0e65f0d86f42be2ace3600975a9358a0f4a808df446d753daa7b656abe96a6
+PIPE-000050	MT-7262E4DF8F8B	卡套三通	exact_current_name	卡套连接三通，连接接口不同，保留独立类型。	frozen	6d4dd30cfdf13633744bf87e814679acc01ce53395aace9e02481374aa2517b8
 PIPE-000051	MT-6D9419806083	弯头加工件	exact_current_name	弯头类型保留，并补充口径、连接、结构、特征、适用设备等属性。	frozen	07e09a5cb42b47df4c9c2b407a5af0b3568ff6c5c7683b059de66c0d682b8ce7
 PIPE-000052	MT-6D9419806083	弯头加工件	exact_current_name	弯头类型保留，并补充口径、连接、结构、特征、适用设备等属性。	frozen	b27db05184bd9f6d26045f124e8ade6aef1a071c9ff0dbae906fe79e406c0b88
 PIPE-000053	MT-6D9419806083	弯头加工件	exact_current_name	弯头类型保留，并补充口径、连接、结构、特征、适用设备等属性。	frozen	a9f58d40a4af53420f6e4329382759582c4956e1ff69535461dd6d683c03e7cd
@@ -832,24 +1005,38 @@ PIPE-000062	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""con
 PIPE-000063	MT-86A7EBA4236B	抱箍	exact_current_name	双半圆对合抱紧型管夹边界明确，保留。	frozen	4652aad65895aced70ac5c9cc433ce48987ab886b2ef2bd1a0e812880416b87e
 PIPE-000064	MT-11BC391A4AC6	卡槽接头加工件	exact_current_name	卡槽连接接头类型明确，保留。	frozen	df63db1267887291916949193b885c0ace4543ed66f36952216c7cf59610fde2
 PIPE-000065	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为碳钢焊接弯头，壁厚8mm加厚，符合弯头定义。""}"	frozen	913d3ece54f844751351eeff715d83f0b9fe0fae2b87cfacaaf8b8c7621157d8
+PIPE-000067	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	dda3b92efe4f1896ced4f72173a81f9f7d06ded2434efa56dd25cd47f0fd0608
+PIPE-000068	MT-52C93398FF40	直管	exact_current_name	刚性直管类型明确，保留独立类型。	frozen	0442fbae0ed1f796323b888bc35286a8cd234db4bb114e411fa72948beee11d7
 PIPE-000069	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为UPVC三通，未见异径/Y型/斜三通信息，符合等径三通定义。""}"	frozen	01c04c0ccc9c549af10f5ab044255ad5c12e5123ccda7ffefb3b4cfc78c9d5d3
+PIPE-000070	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	ae9c2e30d1c3d484f0daf1ab001b2897a66524c48e78aaa65614f7aa6ba7d441
 PIPE-000071	MT-7DC217FA22EE	斜三通	exact_current_name	45°斜向结构独立成类。	frozen	30bddf1dea3857cc250a9b9c981c6330fa02a76e2dc6a8694e9d98e9f5a13164
 PIPE-000072	MT-F7332C0D9E4F	管卡	exact_current_name	单管固定卡边界明确，保留。	frozen	c7c31dff209b88c151c88911bdaa2aa2ea2b14f2e6d00854bfe139cb03c65080
+PIPE-000073	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	4f245d7e575cd64ae5cc09dc77cd0167cc7e7f8a5caed1ef9c64d74b5af2af78
 PIPE-000074	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为UPVC弯头，角度90°，符合弯头定义。""}"	frozen	8fb2f0fef73178fcf97b13c8c3bc42dfa50b131418b6de58cd01fdd509bc6d5c
 PIPE-000075	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为UPVC弯头，角度45°，符合弯头定义。""}"	frozen	a7b61584bd531022025da2d73faf7ec425f796d4f50a73449dac2bfabb4e3470
 PIPE-000076	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	03209f540e253bd15dbe30114f4328bdb81e5c1b002f342307f0d4126e467b70
+PIPE-000077	MT-988CAD476BBA	堵头/管帽	exact_current_name	封堵管端的功能明确，保留独立类型。	frozen	0bcd0ba1a9c3b8f2d6394420397ba05d7541ad0d4e7fc7e84333c6bfebd93f34
 PIPE-000078	MT-00E9C8F1F6A5	变径接头加工件	exact_current_name	变径功能类型明确，并补充大小头等类型属性。	frozen	5537c315a442f585d24b5ad07b2045fa1f4d1fa228d603f99dececf8c313f5d3
 PIPE-000079	MT-00E9C8F1F6A5	变径接头加工件	exact_current_name	变径功能类型明确，并补充大小头等类型属性。	frozen	2b88215c3b4619e5ca8b37037dc9d4636a2b1d7dd3435d068e8a1fc37ae7a9ba
 PIPE-000080	MT-9DC675466E36	进水软管	exact_current_name	软管在该洁具配件族中特指洁具进水软管，改为进水软管以与管道软管族区分。	frozen	18b5fc4ef51db95f04e43aea6a29ec6e6f1cb5e078768bd4871269f03affc191
+PIPE-000084	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	b5b2c30a8863398f2f6bfb69a72284bacd8012a31ff47800456ca0bd0fa1b1d9
+PIPE-000085	MT-9E547BD1FBFF	注浆管	exact_current_name	注浆用途管材，按米或套供应，保留独立类型；定义已修正供应方式。	frozen	0f47c45585701e32fd364b9800d52d79c882bf649bcef1be89c9bb6be2796a32
+PIPE-000086	MT-8FB37309A8AD	钢丝增强软管	detailed_evidence	"{""attributes"": {}, ""confidence"": 1.0, ""reason"": ""SKU名为PVC钢丝增强软管，按米供应，符合reinforced_hose定义。""}"	frozen	8bfddf99d1eaab5ef82387e36a227a6bdecbae60393a6157a7678235f062d8cc
+PIPE-000087	MT-52C93398FF40	直管	exact_current_name	刚性直管类型明确，保留独立类型。	frozen	203eddc524157ea1b4db52de6f04479c4b4671d38fc40f5caf5621d9251fbcec
+PIPE-000088	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	18e5ec2b5eb97eb4277ebf447110c80b0b75aed6efb1aa3b302c083474de5175
 PIPE-000089	MT-7D0D5817EC9E	钢管	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""DN20"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.95, ""reason"": ""SKU为镀锌钢管DN20，未注明焊管/无缝工艺，符合gang_guan定义中的现有SKU示例。""}"	frozen	e7fc24be1f2f7ee04e1707789638fd287759b87431d1eab4f98f0b641be9b6f1
 PIPE-000090	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	9f03ab4e6c1f4f4476b56ce4a1a3f9e70f3302094099bfe036cddd338482668e
+PIPE-000091	MT-52C93398FF40	直管	exact_current_name	刚性直管类型明确，保留独立类型。	frozen	ae68b1967b7e8c6f880a28089095ae0cfe217a4ee0cf9be47167a990de980cbe
 PIPE-000092	MT-71507D1D4A80	异径三通	exact_current_name	变径结构独立成类。	frozen	56a25df5400e2d7635540fdb8de430f63b17b9dfe68669e4932dea05a7b05219
 PIPE-000093	MT-71507D1D4A80	异径三通	exact_current_name	变径结构独立成类。	frozen	46f4e399e82e45b8d189576cad6e8d1bee1373a2b61a0aadb49af2980ff6ae87
 PIPE-000094	MT-F7332C0D9E4F	管卡	exact_current_name	单管固定卡边界明确，保留。	frozen	e6941cd50230316babecac675ad2d1bf1fadb9691ff9a74c70766bf7c405d728
 PIPE-000095	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为PVC弯头，角度45°，符合弯头定义。""}"	frozen	715f15ce84d3fc514416fb3dd20e151037bb3d7e8df4669aa4aa221f9d34bd60
+PIPE-000096	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	da1a40e5777ba8b44b08ef17a956fa8c31eff412e40809bb6ec09e05ce21423c
+PIPE-000097	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	fc4df8b4a06e4e2b083dd3c43d7d8b36f8847d271d4dd989b75b1b95d8da427e
 PIPE-000098	MT-F7332C0D9E4F	管卡	exact_current_name	单管固定卡边界明确，保留。	frozen	60865d8c55e2699400de9c2950827935b40d9c34f79d19efd3a8854baeff630b
 PIPE-000099	MT-3456430B26D2	集水斗	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	9af7ab29c405ba69dd3670d66f3b1973db3846e8d813d114190eae63247bb4a7
 PIPE-000100	MT-F70D097AA294	无缝钢管	exact_current_name	无缝工艺类型明确，按外径×壁厚采购，保留。	frozen	b3319691a7adc7a5cfb4df8a36adab148424dbe442e0ab7c8408466e838d7127
+PIPE-000101	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	d71d23d2e4bee85b3b4a7eb1a14f49865a54d7e1cbb85faab51ab839eec034e8
 PIPE-000102	MT-4CF6625D5C80	抱箍	exact_current_name	名称稳定，规格/适用管径/材质留在SKU属性。	frozen	5eca9015bc7577fc00a82f41a62f35650eccfa1409b8af787f96de9dd7eed89d
 PIPE-000103	MT-4CF6625D5C80	抱箍	exact_current_name	名称稳定，规格/适用管径/材质留在SKU属性。	frozen	18c1220d206189a3e7eabd5295d2dd873dbbedb3bcce2a13cb54bcf8abbc2f98
 PIPE-000104	MT-6FFBB6BCE331	管加工件	exact_current_name	管段加工件类型保留，并补充加工内容、用途等属性。	frozen	7b2e7980ce52b014903f8623e25b6bb5566b8f5a2ea430268aeb6a269f8d1209
@@ -860,8 +1047,11 @@ PIPE-000108	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""con
 PIPE-000109	MT-FCFA733580C1	消防水带	exact_current_name	名称稳定，口径、特性、压力、接口留在SKU属性。	frozen	f53f69d4e32477e4da76376dd0b13210f8188d45dd28386d6dcee28eb37e451e
 PIPE-000110	MT-7D0D5817EC9E	钢管	detailed_evidence	"{""attributes"": {""length"": ""6m"", ""material"": ""碳钢"", ""spec"": ""48"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.85, ""reason"": ""SKU为镀锌钢管外径48mm长度6m，未注明焊管/无缝/脚手架属性，属于通用钢管类别。""}"	frozen	c82a200e79f73d9cc6b288ae4ea9f87e090b2d20f73b86ae9ac23bf43f4eed42
 PIPE-000111	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	c6cbbafa1f50996e799c2a310c5a72bd40da3e74ff1f48e9aa74b8827086b315
+PIPE-000112	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	821011a950c14d144d750cc743dbdc85ecf9e604ff2aa94ff0a4622d804bb6d3
 PIPE-000113	MT-92A9B34FE9A4	混水阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	248a66cadf4afa6438c9b8cffc5274ba7388cc92abe50c3a806e55f781ba16a8
 PIPE-000116	MT-F7332C0D9E4F	管卡	exact_current_name	单管固定卡边界明确，保留。	frozen	4dd56fff9de5c8fac9f8c38b762e636d667b886fecdade9c9fd542a5f530374a
+PIPE-000118	MT-52C93398FF40	直管	exact_current_name	刚性直管类型明确，保留独立类型。	frozen	5e8fc9c7cdedd07cd96931d5a907d26edb680ff9e1fcec3a81bbb498ad38e090
+PIPE-000119	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	ce20931294a015a475035a434c4f20d5d17c56ba67b9a9b65eb3962d2a5b010a
 PIPE-000120	MT-7D0D5817EC9E	钢管	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""32*4.5""}, ""confidence"": 0.95, ""reason"": ""SKU为钢管32*4.5，未注明焊管/无缝工艺，符合gang_guan定义中的现有SKU示例。""}"	frozen	498610d36b6ea4cb2fdb8de8b6a2b446bfd972d824de6827fcc3ffb108bfe266
 PIPE-000121	MT-A638D24D43BF	卡扣加工件	exact_current_name	按口径和连接方式区分的卡扣加工件类型独立，保留。	frozen	1f5c3a1ec4dc79d1a1e8b99ffaa0200f7dc3dda328d8007c9332b82a5e12985b
 PIPE-000122	MT-6FFBB6BCE331	管加工件	exact_current_name	管段加工件类型保留，并补充加工内容、用途等属性。	frozen	736ff54eff22375556e87ac96864b2ddd796f825146547ea6449a8398722713b
@@ -875,36 +1065,64 @@ PIPE-000129	MT-F70D097AA294	无缝钢管	exact_current_name	无缝工艺类型�
 PIPE-000131	MT-12C09DAF8019	法兰垫片	exact_current_name	限定为法兰密封面用垫片，排除快速接头胶垫。	frozen	3c411b8f6825222108196cbbe343f85b565546f9e874d2e6be425b83537217d0
 PIPE-000132	MT-F7332C0D9E4F	管卡	exact_current_name	单管固定卡边界明确，保留。	frozen	36842085d6aed130d6daa7e402c97455c4fda7e9cc50bf82d69da3b61d7e27e7
 PIPE-000133	MT-AE495F6536BA	卡槽导轨	exact_current_name	证据明确为适配管径的注浆管导向导轨，与通用卡槽区分。	frozen	728ad721bec424110517c167b906254edbb39130b42202c7508439f214cd9233
+PIPE-000134	MT-8FB37309A8AD	钢丝增强软管	detailed_evidence	"{""attributes"": {}, ""confidence"": 1.0, ""reason"": ""SKU名为透明加厚钢丝增强PVC软管，带钢丝增强并按米供应，符合reinforced_hose定义。""}"	frozen	7d5d25027d8b6c88876df4ecd781f4832047480eb11d8ed7024e3bc76948b72d
 PIPE-000135	MT-CB0A48F7A97D	高压软管	exact_current_name	橡胶基高压软管，与高压胶管、钢丝软管合并为高压软管。	frozen	6cbb15ab74005ff0d04d04cb18d70aa870067ca8b2826cdee743a19f48c0022a
+PIPE-000136	MT-589596B471F0	胶管接头	exact_current_name	证据未显示与胶管接头的商品结构差异，合并为胶管接头类型。	frozen	9d3df486f31f5d20b189177086e3b56b054cc72150f049368541555d0d0a290f
+PIPE-000137	MT-1B4591DB03EA	接头	exact_current_name	无独立结构限定的通用液压接头，作为兜底类型保留。	frozen	8ce7d5cb59c6755a4a544d733872297413b083e3f40c2457091c17e7ecc55e86
 PIPE-000138	MT-9646A1348608	气源分配器	exact_current_name	定制气源分配装置类型独立，保留。	frozen	6cb33c0a0b5e79ef180ec691c5597dc1705a396967d0df75c39ff7b8e9f95d42
 PIPE-000139	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为镀锌三通，未见异径/Y型/斜三通信息，符合等径三通定义。""}"	frozen	bb324d2755b2f3eb34bcb60973d4e9f926925a4bea495bbcc415e4ee16762262
+PIPE-000140	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	adfb6bddf47f17a5ceeb68ff270a6688bdd30fab59d84fdcb9ff650c4b9c2fda
+PIPE-000141	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	3ec5947ebd7ec0696148d792f5a6f0c7ce2e239856f5daf22bbe6c8f7c25717f
+PIPE-000142	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	e32542ab54facce65638363a83a5577b6acc58de46646f5bdc762c9037ed3514
+PIPE-000143	MT-988CAD476BBA	堵头/管帽	exact_current_name	封堵管端的功能明确，保留独立类型。	frozen	fb7d865b062c31db0f36419a352b2e7a67f9339775d5f41de134802b0b8a9606
 PIPE-000144	MT-F70D097AA294	无缝钢管	exact_current_name	无缝工艺类型明确，按外径×壁厚采购，保留。	frozen	cd3b0f952477f9370609d3a02874e69e20409d19b447b9836bb1ee4208d1b838
 PIPE-000145	MT-B31CC9A0EEF0	消防卡箍	exact_current_name	为与普通卡箍区分，并体现消防沟槽连接，标准名使用消防卡箍。	frozen	2116f98ea2249d967dd3f9b53343460f4dfb0922c717abd4cc653c59b7673d12
 PIPE-000146	MT-740837097BDE	卡槽加工件	exact_current_name	卡槽结构类型明确，保留。	frozen	4563e9768f26f3cb71dc43fab564025f624ac0df91f4614aa3c00f1a4666f545
 PIPE-000148	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为碳钢焊接弯头，角度90°，符合弯头定义。""}"	frozen	7701ac49ec9daf23a951e88120fdfdf9e0cbb26e38b1036c2d1c553e6283a160
 PIPE-000149	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为碳钢焊接弯头，角度45°，符合弯头定义。""}"	frozen	f8b75a2a4456fb4b6c177b56317bc4ff596fe60115da26b53ffb8d67f10c9544
 PIPE-000152	MT-F7332C0D9E4F	管卡	exact_current_name	单管固定卡边界明确，保留。	frozen	d7b616b5782083c509570d2291ab1e7c68d94ba59b423a13b2eab6d572535504
+PIPE-000153	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	720c886d54bb8bb175e6f60ce36e48e764a18cd47b8ac2d1ec9b39a49cae8efb
 PIPE-000154	MT-974B25EE4C8C	通用接头加工件	exact_current_name	避免与管接头、卡箍接头等专用接头类型重叠，更名为通用接头加工件，并补充特征、接口类型属性。	frozen	0c3eb56c245c2095e3a9a448bc47337fcb426d7b3e62133ee3e26a5c5d32facd
+PIPE-000155	MT-CC2BB9D13DC7	快速接头	exact_current_name	快速连接功能明确，保留独立类型。	frozen	686dd8e5b08d43e335c4c6318a5e95f1d86991ddebab50394aec52a4de7756fe
+PIPE-000156	MT-1B4591DB03EA	接头	exact_current_name	无独立结构限定的通用液压接头，作为兜底类型保留。	frozen	b96e34c14df486de110ac37f2f57575b8af20986b2730ec30e13d69be602b32f
+PIPE-000157	MT-1B4591DB03EA	接头	exact_current_name	无独立结构限定的通用液压接头，作为兜底类型保留。	frozen	18d72d36c45cd5a915813c6f55998c6df163ae69b876945f996aa0457bbbe19e
+PIPE-000158	MT-1B4591DB03EA	接头	exact_current_name	无独立结构限定的通用液压接头，作为兜底类型保留。	frozen	4cc58e28159c91bc92dad9ecb8d8aaf8d48ba50c05d210acfba273764cc8741c
 PIPE-000159	MT-6D9419806083	弯头加工件	exact_current_name	弯头类型保留，并补充口径、连接、结构、特征、适用设备等属性。	frozen	3646f42dee976acdef4e52ccbe0a69d540037f4787611f55157a643c94b78e77
 PIPE-000160	MT-1C76E756D933	蝶阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	de4b46407ff171378b66c4497568a12a457d246c7b68245c096af3f61bb4c246
 PIPE-000161	MT-1C76E756D933	蝶阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	bfb6a1778f8081d23cae9d1e551a1675a0b310e382ada57ab49900be0d2a5ae6
+PIPE-000162	MT-056167A2C6A9	波纹管	exact_current_name	波纹结构管材，保留独立类型。	frozen	f4fc60fa599e4eabff26b7271d41075ce0c54521ca45d5b6cfef71d510b613ee
 PIPE-000163	MT-6DCF22B62A16	电磁阀	exact_current_name	电磁驱动方式构成独立类型，型号/电压/接口归SKU属性。	frozen	746d1b166ba44f0360affa6657ade75a7795ad2b36f0369d4d9252e08c8e99a0
+PIPE-000164	MT-1B4591DB03EA	接头	exact_current_name	无独立结构限定的通用液压接头，作为兜底类型保留。	frozen	71afe5079cc1c38bd6619733ad62183b72a1f203a658a6d63a08edf32a1b8e61
+PIPE-000165	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	0ac37fba2fe8f4cc1ddaf8aa3590ccaead7cb3de3fbbb1c29e7483a38b9b2c96
 PIPE-000166	MT-022ACA1C727A	法兰	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""nominal_diameter"": ""DN273"", ""pressure_rating"": ""16kg""}, ""confidence"": 0.99, ""reason"": ""SKU名称为碳钢法兰，规格含公称直径和压力等级，符合flange定义。""}"	frozen	b041f0ae18ea807cbf57e83beb9258a8a3374cd0bdb6caa952e4b2709faa21d0
 PIPE-000168	MT-974B25EE4C8C	通用接头加工件	exact_current_name	避免与管接头、卡箍接头等专用接头类型重叠，更名为通用接头加工件，并补充特征、接口类型属性。	frozen	b49b5c0cf099c0981616e394f71f25033b9dcdf9097ac8aedbfed4c055a6685e
+PIPE-000169	MT-76EB3DF1493B	活接	exact_current_name	可拆卸活接结构明确，保留独立类型。	frozen	56ff33907c71b061e5f17c8e28e854032a6ded375c5dc9313ef74249db9e8358
 PIPE-000170	MT-A638D24D43BF	卡扣加工件	exact_current_name	按口径和连接方式区分的卡扣加工件类型独立，保留。	frozen	1fd564e269dfd0faadb625afbcecc90498835482d28c281fc9d1714061b71f97
+PIPE-000171	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	de43cf03feeec4ef9eda2d80cde04d5bf31786c2816e6b18c0c728d5c666ec29
 PIPE-000172	MT-36F5A07C4343	气管接头	exact_current_name	名称稳定，规格/口径作为SKU属性。	frozen	fcbcb7c620beaabe5fd0b6484ab305ca26eb850b487113862c4ed19263230e9b
+PIPE-000173	MT-61D3467E01CF	堵头	exact_current_name	用于封堵管路的管件，保留独立类型。	frozen	c8fc539009973debfaa2313c46201e9a1d65e88bab28dd95592dc79b0ab9ffd8
+PIPE-000174	MT-61D3467E01CF	堵头	exact_current_name	用于封堵管路的管件，保留独立类型。	frozen	69bb12c937a0f624c6a22a72b87ce77a33b9036b2730c533eabdcbeb5f3b77e0
+PIPE-000175	MT-61D3467E01CF	堵头	exact_current_name	用于封堵管路的管件，保留独立类型。	frozen	d6493c9f67f546a37090e3be33685e877e0a36b1e52a44de4bbd25a50615b6b8
+PIPE-000176	MT-61D3467E01CF	堵头	exact_current_name	用于封堵管路的管件，保留独立类型。	frozen	9e0d0f863709ed13c40880b9b3396dea501be430ded9211d74e1b77c31ed08f5
+PIPE-000177	MT-61D3467E01CF	堵头	exact_current_name	用于封堵管路的管件，保留独立类型。	frozen	0187ed7c35a48b0d53a04df16cb99828db42a4a7458b32a0917db161c80b6490
 PIPE-000178	MT-92792CE97FCF	减压阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	47368350f1c67e6ea513ffd604a475e56c491aaefd98eafda0f049038d14f79b
+PIPE-000179	MT-4F7F2ED2A09E	水带	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.8, ""reason"": ""透明PVC软管为合成材料柔性软管，按米供应，未含钢丝或金属结构，归入water_hose类。""}"	frozen	b3c28f5daf5c57fff8fc7ff4876bcf0dc7e844212209936f09b7983a845f14fa
 PIPE-000180	MT-974B25EE4C8C	通用接头加工件	exact_current_name	避免与管接头、卡箍接头等专用接头类型重叠，更名为通用接头加工件，并补充特征、接口类型属性。	frozen	d210db525c17eee6913f57b35cf1665ad4ee3de31f73bd7dfe071a201ee4e59a
 PIPE-000181	MT-6DCF22B62A16	电磁阀	exact_current_name	电磁驱动方式构成独立类型，型号/电压/接口归SKU属性。	frozen	94ea75c6f306430ae4735fa52ca45216862c79e5fd11dd5e3681fea8a3b37368
 PIPE-000182	MT-CB0A48F7A97D	高压软管	exact_current_name	橡胶基高压软管，与高压胶管、钢丝软管合并为高压软管。	frozen	66f748501ea88cd97efd11662367938bf9a41affc4e5c90041c936ff5cb49ef1
+PIPE-000183	MT-1B4591DB03EA	接头	exact_current_name	无独立结构限定的通用液压接头，作为兜底类型保留。	frozen	b7ac0762065dfe9efbe7eae7e481b92d2b54d93586e9bf125263d0ef6697e47b
+PIPE-000184	MT-E59789CA6AB1	接头组件	exact_current_name	铜头+铝扣组合件的标准类型，保留独立类型。	frozen	eafd176f247cbbd4d1d3ea61ea815c62391dcf4c9510a34e182bcea6bd5ac1de
 PIPE-000185	MT-022ACA1C727A	法兰	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""nominal_diameter"": ""DN89"", ""pressure_rating"": ""16kg""}, ""confidence"": 0.99, ""reason"": ""SKU名称为碳钢法兰，规格含公称直径和压力等级，符合flange定义。""}"	frozen	bd4da10ceb68c2f0415ce63cb118b6174a32f630447be88aaa8b3787b347ac57
 PIPE-000186	MT-33678DFF6077	Y型过滤器	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	4ab31bf89fc70b2e61987b19ca8fab286d5c80356fc66841d916a656c13af5e4
 PIPE-000187	MT-9646A1348608	气源分配器	exact_current_name	定制气源分配装置类型独立，保留。	frozen	de6317af04a924de654dd4796d9e436a2d493080138bdedfc2cc04147a6ba2f1
+PIPE-000188	MT-D084CA6EA8FB	快速接头	exact_current_name	快速连接方式明确，保留独立类型。	frozen	32472f35352966a3feb5471b3eeda510c7067089f2ac3437b7e1a246a466049c
+PIPE-000189	MT-1B4591DB03EA	接头	exact_current_name	无独立结构限定的通用液压接头，作为兜底类型保留。	frozen	932c0f01072dc9b9acf15adf8400ed9089fc4f5a515bffd75084571e55d7e212
 PIPE-000190	MT-C6D1159B83ED	气动阀	exact_current_name	阀类型稳定，型号/口径/阀位状态归SKU属性。	frozen	26ba23452b4c7a58c2ab5d914a29badb50caabd9d890ed73015cdbac7de72652
 PIPE-000191	MT-6FFBB6BCE331	管加工件	exact_current_name	管段加工件类型保留，并补充加工内容、用途等属性。	frozen	f3f5dd4803e777340e4b0ec7503c9b917b243f4f33706bc793983bb591afeef1
 PIPE-000192	MT-B31CC9A0EEF0	消防卡箍	exact_current_name	为与普通卡箍区分，并体现消防沟槽连接，标准名使用消防卡箍。	frozen	81c5f69b5a06ddf247d694329ea7caeb9997c6929479cb8b51ad595f4a43cf4d
 PIPE-000193	MT-B31CC9A0EEF0	消防卡箍	exact_current_name	为与普通卡箍区分，并体现消防沟槽连接，标准名使用消防卡箍。	frozen	874abc4c784f5215088d9767c68a3ad2768bec409ca6c06950158aceadaa54ea
 PIPE-000194	MT-B31CC9A0EEF0	消防卡箍	exact_current_name	为与普通卡箍区分，并体现消防沟槽连接，标准名使用消防卡箍。	frozen	1bae271f881112e5356cbd6629321640a8e777ac2709e36327e6dac4f874ba70
+PIPE-000196	MT-61D3467E01CF	堵头	exact_current_name	用于封堵管路的管件，保留独立类型。	frozen	3f178dd8068f5f93e13150266f8198f97966b0c08d7b7f92982126a0bddb9d1d
 PIPE-000197	MT-F30245D44E64	高压树脂管	exact_current_name	名称可保留；已明确以热塑性树脂为基材，与橡胶基高压软管互斥。	frozen	7e9bf27cf8085bdcd586d9e1b38f17b697d50db8fb6593a5d6bf3621c6c19e2a
 PIPE-000198	MT-D2C4339DFB76	直通接头	exact_current_name	无螺纹气管直通，保持独立类型。	frozen	c9d13e3bd679d11b64470fe3b7dac96caa005bd7d02e648953e8d10b88c18f13
 PIPE-000199	MT-D2C4339DFB76	直通接头	exact_current_name	无螺纹气管直通，保持独立类型。	frozen	b9a74729b9a44a28400ff479b4cd4e62d34c94927070232e7c894cbb992cb63a
@@ -915,11 +1133,23 @@ PIPE-000203	MT-E1355DBA413E	弯头接头	exact_current_name	结构类型明确�
 PIPE-000204	MT-B3C8B06BB00B	三通接头	exact_current_name	结构类型明确，口径与材质归SKU属性。	frozen	bf4e92dd9c9ca4adc1209e474c7e590334b880c4071dba7bca9f81045d5afe00
 PIPE-000205	MT-B3C8B06BB00B	三通接头	exact_current_name	结构类型明确，口径与材质归SKU属性。	frozen	6bb7c2b25770158267e99607353117d7131d3e586f71913caa752c1477049f30
 PIPE-000206	MT-B3C8B06BB00B	三通接头	exact_current_name	结构类型明确，口径与材质归SKU属性。	frozen	cc05653cb79ba450971d3ef98ccf1de74fd302a60a110732e16313b95982aa66
+PIPE-000207	MT-E59789CA6AB1	接头组件	exact_current_name	与接头组件同为铜头+铝扣/铝夹组合件，合并以消除边界重叠。	frozen	2be44b093f8e0f55459e55be0a46bcae4498cbbbe056651d696bae335a0ef653
 PIPE-000208	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为镀锌弯头DN80，符合弯头定义。""}"	frozen	755f9271cc1dab611a798667b2928a382d283bda5ec523cfdb1423afcb8e1584
+PIPE-000209	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	bc5acc20255251fb763f1dbf4153c37f656ed925d4b5b94e02455cf8df8f8396
 PIPE-000210	MT-6FFBB6BCE331	管加工件	exact_current_name	管段加工件类型保留，并补充加工内容、用途等属性。	frozen	7f6408ef714c0fa51c9a476b2591ca63be7025fea10832df929200631a22942d
+PIPE-000211	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	17d0f9ece2eb42a910a42b5ff2a611c9c636af4f8418264f39445d6bbf6eca6b
+PIPE-000212	MT-52C93398FF40	直管	exact_current_name	刚性直管类型明确，保留独立类型。	frozen	6b8ee1b7f55f48b31f77e200185905bc642c425f4a5d89e4138dd99a9396f0f2
 PIPE-000213	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为PPR弯头，符合弯头定义。""}"	frozen	0080f433f71cee42010b8307dc0bf8d76dea129d5baab4dd5df870f3ce455707
 PIPE-000214	MT-3F071E5610CC	截止阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	7ee7562a03053027d998acc94c0645380f9783b7419b4be4940f49cc9987a5b3
+PIPE-000215	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	b37e7957a39a854ae24475f317c8f5a08d70a417c6b51bce5ff874c6eac24e03
+PIPE-000216	MT-1BAA5262EAC8	弯头接头	exact_current_name	转角连接结构，保留独立类型。	frozen	f62e745bbe89fcdb2e02b58492d6e42c0c773290814dc4d0f91a16e202550904
 PIPE-000217	MT-CB0A48F7A97D	高压软管	exact_current_name	钢丝增强橡胶软管，属于高压软管，与高压油管、胶管合并。	frozen	e469cdad3648b65e387d9b88b94334ae9af7aff6f80869f27ee27b542c702a78
+PIPE-000218	MT-E59789CA6AB1	接头组件	exact_current_name	与接头组件同为铜头+铝扣/铝夹组合件，合并以消除边界重叠。	frozen	eb3f82da372044b57537a068d10455573bad3a65f1832fd73fef0ee525fa8a0d
+PIPE-000219	MT-4F7F2ED2A09E	水带	exact_current_name	输水软管类型明确，保留独立类型。	frozen	fd5b61fa37fdc27fd12f4f564e709853daf9c0434b993e7bb27a2afa92bd7211
+PIPE-000220	MT-CC2BB9D13DC7	快速接头	exact_current_name	快速连接功能明确，保留独立类型。	frozen	aa63bfd1b085414036da64de7b8dee43df417c776de42f84e8d875db5aa18909
+PIPE-000221	MT-CC2BB9D13DC7	快速接头	exact_current_name	快速连接功能明确，保留独立类型。	frozen	6f100f90180e093741cd2f9cdcc48692a77c451080aa432afb6af435cc172cb2
+PIPE-000222	MT-CC2BB9D13DC7	快速接头	exact_current_name	快速连接功能明确，保留独立类型。	frozen	d172835f867fccad11147cc7f149559ea423887a426af28244f74974a5e4e6b7
+PIPE-000223	MT-CC2BB9D13DC7	快速接头	exact_current_name	快速连接功能明确，保留独立类型。	frozen	7d4ec511b029aa7b7c461ee01817a1c777b3c26964645acad314f0f71772e58b
 PIPE-000224	MT-6D9419806083	弯头加工件	exact_current_name	弯头类型保留，并补充口径、连接、结构、特征、适用设备等属性。	frozen	761d05e37b4466c2e211e7a2dba9b86ca0d2534b26a912d1ebebf79e6fab0346
 PIPE-000225	MT-6D9419806083	弯头加工件	exact_current_name	弯头类型保留，并补充口径、连接、结构、特征、适用设备等属性。	frozen	350bd6d2e710020d187c6e809c1cced785e0ea36b206a5e46ab78a170788bea8
 PIPE-000226	MT-6D9419806083	弯头加工件	exact_current_name	弯头类型保留，并补充口径、连接、结构、特征、适用设备等属性。	frozen	1d7666f12d4eda81651d01a798217469c5a2ca57ada2e243e4538ea96801f153
@@ -927,6 +1157,7 @@ PIPE-000227	MT-A503CEBE22B8	管卡箍组件	exact_current_name	管+卡箍组件�
 PIPE-000228	MT-6D9419806083	弯头加工件	exact_current_name	弯头类型保留，并补充口径、连接、结构、特征、适用设备等属性。	frozen	aa9e8b36ece50428663018e834752ae8101a103fce60e4a1b9b0dd68e08a8e85
 PIPE-000229	MT-EFDFAF45D43E	自锁接头公头	exact_current_name	与自锁接头本体及套装的使用场景不同，保持独立。	frozen	dcac3cf0afdf33579e67f3ed3a99805e121e70c0931b0d266afd1adb31de1300
 PIPE-000230	MT-324CEADD8DD4	自锁接头螺母	exact_current_name	属于自锁接头的专用配件，独立成类。	frozen	f4ec3a4ef0df6049adc361eb54fc5d21190ba2936575ea4cd35ee54021fd8fd2
+PIPE-000231	MT-8FB37309A8AD	钢丝增强软管	detailed_evidence	"{""attributes"": {}, ""confidence"": 1.0, ""reason"": ""SKU名为钢丝增强PVC软管，按米供应，符合reinforced_hose定义。""}"	frozen	749e8685e0febba4f730e3b6d21cf3377f90f7f6a9bd9cf63f603b7b289b3768
 PIPE-000232	MT-934FB9788B17	气管	detailed_evidence	"{""attributes"": {""material"": ""PU"", ""outer_diameter"": ""10mm""}, ""confidence"": 0.98, ""reason"": ""SKU名与规格明确为PU气管，外径10mm，按米采购。""}"	frozen	8a0ea4952fc9e8f8a04aeb2d841239369d5a8843a5a3c0361b1d6ed39bd60ba1
 PIPE-000233	MT-934FB9788B17	气管	detailed_evidence	"{""attributes"": {""material"": ""PU"", ""outer_diameter"": ""16mm""}, ""confidence"": 0.98, ""reason"": ""SKU名与规格明确为PU气管，外径16mm，按米采购。""}"	frozen	433e9b7f36ed9f7cdd31bab6c1734db6baaade7f087c74ffb97765e12a6eea83
 PIPE-000234	MT-974B25EE4C8C	通用接头加工件	exact_current_name	避免与管接头、卡箍接头等专用接头类型重叠，更名为通用接头加工件，并补充特征、接口类型属性。	frozen	6c3e7123e54a93666a296f57d96dd34402a999618f668701f13d45fc9c341fdc
@@ -935,9 +1166,14 @@ PIPE-000236	MT-974B25EE4C8C	通用接头加工件	exact_current_name	避免与�
 PIPE-000237	MT-974B25EE4C8C	通用接头加工件	exact_current_name	避免与管接头、卡箍接头等专用接头类型重叠，更名为通用接头加工件，并补充特征、接口类型属性。	frozen	2b91e8bd88a5df884ca3180d35e2f13bbc2cf67e76b42ccc3a99363cc2fd2fb9
 PIPE-000238	MT-6D9419806083	弯头加工件	exact_current_name	弯头类型保留，并补充口径、连接、结构、特征、适用设备等属性。	frozen	1128bf97c410d1de13ed206e77e4f764c528626a61e92c417d50591c8c0bfa69
 PIPE-000239	MT-E3B0BF183C89	生料带	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	a7a6d72885ca01da2f0fa9b981234f005b92706c565bde8eaa2fccb11a8fb583
+PIPE-000240	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	4073cc379a6c297b7153b5d1f6568066bb236e594aec4246e28c419ce47a13c4
+PIPE-000241	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	4469553b74ff486fa2c41f5273e3001e1112c7741a872635a04d877807178ad4
 PIPE-000242	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为镀锌三通，未见异径/Y型/斜三通信息，符合等径三通定义。""}"	frozen	d25c295153f4b4f5d05337447ee7deda9d05c8f44bf18e7e356ef7baad028174
+PIPE-000243	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	bdcc82e0ee99daf83feb8e1c50411bbc5c7b7b84739be01a9c88e998e6b4b356
 PIPE-000244	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	1757234391f930ede53492416732486b2864782ea3f4b28b1b108facab890bf7
 PIPE-000245	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	ec23e4a65ed20e02c382ee71f6e92fda07e707c743b9d239ec7675fa682e7c6f
+PIPE-000246	MT-5F703D944B93	直接/直通	exact_current_name	证据仅为同径螺纹铜接头，未提供活接/异径等独立结构特征，并入直接/直通。	frozen	19c688cb721dd94429f2249bed6ec1925e5129aad44795d0cdc38b9d9aa67e61
+PIPE-000247	MT-5F703D944B93	直接/直通	exact_current_name	证据仅为同径螺纹铜接头，未提供活接/异径等独立结构特征，并入直接/直通。	frozen	9224a5e52e89c2937eb92c671ed597eb43b693ee4846415ed4303c27108caf37
 PIPE-000248	MT-974B25EE4C8C	通用接头加工件	exact_current_name	避免与管接头、卡箍接头等专用接头类型重叠，更名为通用接头加工件，并补充特征、接口类型属性。	frozen	79660421f05f9712ea5fef19618fface9fc0c20c797adcdecdd15e147dad78c6
 PIPE-000249	MT-974B25EE4C8C	通用接头加工件	exact_current_name	避免与管接头、卡箍接头等专用接头类型重叠，更名为通用接头加工件，并补充特征、接口类型属性。	frozen	4e43a1b0d273cacfd19507d59a7bd2a77e38af3e3711c1a51bd73cff241cd3b0
 PIPE-000250	MT-04D5F9CE22B0	卡箍接头加工件	exact_current_name	卡箍连接接头类型明确，保留。	frozen	c10af6fb41ef668b7bf32180e0f5d7cca2ff3662a5d2351d4576914342827754
@@ -950,6 +1186,7 @@ PIPE-000256	MT-00E9C8F1F6A5	变径接头加工件	exact_current_name	变径功�
 PIPE-000257	MT-92792CE97FCF	减压阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	7063a29e97b1dd8beed562b6c759987a3d67a849fde6191c20b0e0d1def379b7
 PIPE-000259	MT-7E5B43E6368C	自锁接头	exact_current_name	自锁连接方式构成独立类型。	frozen	99e8dae200d8d6647e010d2f367663cd38bc323975e1f30adb7d31a60ec2630e
 PIPE-000260	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.9, ""reason"": ""SKU为碳钢焊接三通，未见异径/Y型/斜三通信息，符合等径三通定义。""}"	frozen	abc26360e7ee2d49363703460be17c5f1008edb0a517e3ae9053f255718f3782
+PIPE-000261	MT-ADDC440B3D3D	管片螺栓	exact_current_name	管片用途即加工对象，名称稳定；按审核意见补充是否定制属性以保留“定制：是”证据。	frozen	ab09c3f36ee278bc07184681921ac72b1f7e36a5c30752e693213aaf3efee005
 PIPE-000263	MT-FCFA733580C1	消防水带	exact_current_name	名称稳定，口径、特性、压力、接口留在SKU属性。	frozen	94e506a8f8ef2ae34bfa51ebc7e243867a7247d800c10e33bbc778324321997d
 PIPE-000264	MT-C6D1159B83ED	气动阀	exact_current_name	阀类型稳定，型号/口径/阀位状态归SKU属性。	frozen	414769ae556c23f3373075aec53357548a859b4f1311aab5b8aa18063ae32a5c
 PIPE-000265	MT-F70D097AA294	无缝钢管	exact_current_name	无缝工艺类型明确，按外径×壁厚采购，保留。	frozen	059e30eb2f002bdd2ae6cde2a7d93c25cc8b103bdb781c2538aaf8bfc94ae2b9
@@ -963,6 +1200,7 @@ PIPE-000272	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""con
 PIPE-000276	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	083ed7e65f277bb9affd99d783f714c73d4c8f18e9e35d25bdec25b3e15ec8f3
 PIPE-000277	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	fbba94d50cce05389b49d21644496a99e8c5c548633ed740324ea3f7e9c20cbd
 PIPE-000278	MT-577B97F325BD	浮球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	7c3a66c432fa870b8705b7ac3f49c82fdf6abb2806ed6d8b6bc856ec4942f7c1
+PIPE-000279	MT-52C93398FF40	直管	exact_current_name	刚性直管类型明确，保留独立类型。	frozen	f0d908db79e3edda2cba442bd2f5c1d0f00cb58f71d27fb7b10b7518e7f76356
 PIPE-000280	MT-86A7EBA4236B	抱箍	exact_current_name	双半圆对合抱紧型管夹边界明确，保留。	frozen	6c603ac95f6e3599fef0ed0953db3db3aa5b53440160905f135a414c253d6a87
 PIPE-000281	MT-86A7EBA4236B	抱箍	exact_current_name	双半圆对合抱紧型管夹边界明确，保留。	frozen	e2b9d8477245b971508e5fc7423bb592037cf652b6a6efa9d4a4b01321bfbb42
 PIPE-000282	MT-F7332C0D9E4F	管卡	exact_current_name	单管固定卡边界明确，保留。	frozen	376af2d280b87e9a08415b2cffa5382ff603eb573ab801a1f6a0e8d9d392ab24
@@ -971,17 +1209,34 @@ PIPE-000284	MT-F651F47615F1	消防接头	exact_current_name	名称稳定，口�
 PIPE-000285	MT-F651F47615F1	消防接头	exact_current_name	名称稳定，口径、接口、材质、压力留在SKU属性。	frozen	c4ea8e555032e47d419abaa4c535ef016ae3a3c7a7d4be2aa156241cff415c95
 PIPE-000286	MT-F7332C0D9E4F	管卡	exact_current_name	单管固定卡边界明确，保留。	frozen	9f4cb0b5275ff68dd79067db031f03bdd83fc1b1b2107cb77c5a8f68a493fae8
 PIPE-000287	MT-F7332C0D9E4F	管卡	exact_current_name	单管固定卡边界明确，保留。	frozen	28820e6a8bbcef1716d5775df378f372148422d9f308d939b7ac8d1c05d398cd
+PIPE-000288	MT-D2B7156FD44B	软接头	exact_current_name	柔性连接结构明确，保留独立类型。	frozen	d1cfd24a6c1c40885b56f926e928571c22a35c7cce4375624a461d7572a5b8db
 PIPE-000289	MT-4CF6625D5C80	抱箍	exact_current_name	名称稳定，规格/适用管径/材质留在SKU属性。	frozen	d1deb471c9755530ce25c1a52be1ef3a657a117ba28de03bc0d96836bae888f2
 PIPE-000290	MT-4CF6625D5C80	抱箍	exact_current_name	名称稳定，规格/适用管径/材质留在SKU属性。	frozen	cf8ce493dcdab682537c617242a96cb30bc309e71ef82257d2fb7b9f3d9e4b9a
 PIPE-000291	MT-022ACA1C727A	法兰	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""nominal_diameter"": ""DN50"", ""pressure_rating"": ""16kg""}, ""confidence"": 0.99, ""reason"": ""SKU名称为碳钢法兰，规格含公称直径和压力等级，符合flange定义。""}"	frozen	e6114c7e7dec7aa9bd6f53b3ac9ea11c00bb09b86a7f78c8411dbb4a8d04f9b8
 PIPE-000292	MT-022ACA1C727A	法兰	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""nominal_diameter"": ""DN65"", ""pressure_rating"": ""16kg""}, ""confidence"": 0.99, ""reason"": ""SKU名称为碳钢法兰，规格含公称直径和压力等级，符合flange定义。""}"	frozen	284ecaaa002ad433e2181233209897da70884afb3c683424936eea33378e1fb9
 PIPE-000293	MT-CB0A48F7A97D	高压软管	exact_current_name	橡胶基高压软管，与高压胶管、钢丝软管合并为高压软管。	frozen	82c757f5633db2aef05736374a17facef3cc30288aa2bf047c8ae39440ef320b
 PIPE-000294	MT-BBADC6FC54E6	骑马卡	exact_current_name	U形骑马管卡边界明确，保留。	frozen	b59bebfe9c725adce99846d500ee22624852fd2b4bc5048223937dfb4301dc0e
+PIPE-000296	MT-E8CB871F9C32	两半扣	exact_current_name	与两半扣均为扣合式管接头，合并到统一类型以消除边界重叠。	frozen	338c6229a15786b2bc887f269e00078a8ad8256be0e242586ae4bd61156bf2c1
+PIPE-000297	MT-E8CB871F9C32	两半扣	exact_current_name	与两半扣均为扣合式管接头，合并到统一类型以消除边界重叠。	frozen	7d2633c900d2475f7c6cd4aac035b312dd7eaff6e1bcdea91b58ccebf20c006d
+PIPE-000298	MT-53D944731A77	异径接头/大小头	exact_current_name	补心为变径过渡件，未显示与异径接头/大小头不同的商品结构，合并以减少边界重叠。	frozen	9497f1066ee962f2ce6ddd6644ee707650f3dc923c905a04a53c3dc2287afcb0
 PIPE-000299	MT-CB0A48F7A97D	高压软管	exact_current_name	橡胶基高压软管，与高压油管、钢丝软管合并为高压软管。	frozen	2e3afab17a83653a134e67c4b47bc4fb0a74f469a31805c7ee39aeebc51779a4
+PIPE-000300	MT-1B4591DB03EA	接头	exact_current_name	无独立结构限定的通用液压接头，作为兜底类型保留。	frozen	82bf277f2e6ad213a37ae83d2d189dee7eba85f775d863a691fdb6cc6247540d
+PIPE-000301	MT-E8CB871F9C32	两半扣	exact_current_name	与两半扣均为扣合式管接头，合并到统一类型以消除边界重叠。	frozen	018269266f0a2685f737d20dadb09d830bf084da0ed12f5f7c818c0cef88f085
+PIPE-000302	MT-1B4591DB03EA	接头	exact_current_name	无独立结构限定的通用液压接头，作为兜底类型保留。	frozen	5d2636449317968ee4c971f5c3997b59cd6f2f426e05c61650cdc737482d00a2
 PIPE-000303	MT-F70D097AA294	无缝钢管	exact_current_name	无缝工艺类型明确，按外径×壁厚采购，保留。	frozen	ffa9369434a1103ff84324845878d351dd7d930dc493b05b6c5c304de295a2de
+PIPE-000304	MT-4F7F2ED2A09E	水带	exact_current_name	输水软管类型明确，保留独立类型。	frozen	05c78e31512e1857ff84e95afea4410960ef52c12f54df410a6ab3af3bdaf069
+PIPE-000305	MT-61D3467E01CF	堵头	exact_current_name	用于封堵管路的管件，保留独立类型。	frozen	fc3d6d6265ecc3371f4cc8df844e89c505213c914aca025da5d77522f9b9717a
 PIPE-000306	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	6d7f9ad9d72dedda93abba6f965c66d8b7a7c4af1bcfcb36373be1d1a57ebc78
+PIPE-000307	MT-EBF78A50A89B	对丝接头	exact_current_name	双外丝等径直通接头，保留独立类型。	frozen	3911bcb52435d9fa83867aba5ae8c76e5f619ff6523a08e2e18b613a3b41eb54
+PIPE-000308	MT-52C93398FF40	直管	exact_current_name	刚性直管类型明确，保留独立类型。	frozen	f07bbd18e489924713ac3422254b4776bead8dbde86ba5c177766489322d325b
+PIPE-000309	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	33466e96b8ca4e5362d1e02fd4dc8f7e261631fd4ef558f1f52825389924367c
 PIPE-000310	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	07523574a04749403e73c427095d609f9bcbb6da526b1145f9ef38a7a685a6c9
+PIPE-000312	MT-9EF252A24B64	转换接头	exact_current_name	接口转换功能明确，保留独立类型。	frozen	0cb8715802252fb452aed1964af1997ddfc3aaa81db4dcf871af65efa15d1dd6
 PIPE-000313	MT-CB0A48F7A97D	高压软管	exact_current_name	橡胶基高压软管，与高压油管、钢丝软管合并为高压软管。	frozen	8ec632074715ba89b336793e32dc5b577032e29523d5008e1da44c69c1102fe1
+PIPE-000314	MT-589596B471F0	胶管接头	exact_current_name	软管连接接头标准类型，保留独立类型。	frozen	48630bc1c7f6f80b8a1bfb20a85a991260259ffb55d876d39cfbb505f405445f
+PIPE-000315	MT-61D3467E01CF	堵头	exact_current_name	用于封堵管路的管件，保留独立类型。	frozen	9df745593497b56b7cdc1b036ae4a023e7dc647542ab4f1657dfc8cd6bcd70aa
+PIPE-000316	MT-61D3467E01CF	堵头	exact_current_name	用于封堵管路的管件，保留独立类型。	frozen	ed2e4952f4aabdf6fc80ac70854b7ca758e79847c7231bf915dfcdd864daff6a
+PIPE-000317	MT-1B4591DB03EA	接头	exact_current_name	无独立结构限定的通用液压接头，作为兜底类型保留。	frozen	1761a5f9cb311cff05be835a93784059a9039eeaacb842ecf62deb4b0dd2761a
 PIPE-000318	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""layer_count"": ""2层"", ""length"": ""12米"", ""spec"": ""36*2""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	79cf8a9ef5c30d60df609a0faf1fc0bf74097b38fb6ec127e0d0a95f80b8b658
 PIPE-000319	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""layer_count"": ""2层"", ""length"": ""17.7米"", ""spec"": ""36*2""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	0e9c9305e86c49303f325df9687921fa0cfcb44c5cdcb1cdfe00b6939b3c679d
 PIPE-000320	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""layer_count"": ""2层"", ""length"": ""5.2米"", ""spec"": ""36*2""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	ca6116a84a2f32fcaa96c9ff214926ba4fbeee96cb1dd8105ba6b964cec57323
@@ -998,21 +1253,42 @@ PIPE-000330	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""
 PIPE-000331	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""layer_count"": ""2层"", ""length"": ""3.3米"", ""spec"": ""36*2""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	4c0da099ee7a551b82251e37088dccb8eef3b5bd4ec92adbd6af4d962ea0fe16
 PIPE-000332	MT-BBADC6FC54E6	骑马卡	exact_current_name	U形骑马管卡边界明确，保留。	frozen	7e97ba5c2ce4b0be75ffa36a74b0c5acda02bad097d94f9409fa7f003e9f5a91
 PIPE-000333	MT-41A91AC401A0	直角接头加工件	exact_current_name	直角结构接头类型明确，保留。	frozen	843d052f1db326bb6e401341d598343987854248d2afca62ff015ba6b21d0282
+PIPE-000334	MT-B678AF8CC659	变径接头	exact_current_name	一般变径接头，保留独立类型。	frozen	3e422049e22ff2de06d6d70fa698dc909971b9dda6de325577a273de761f6496
 PIPE-000335	MT-B81F004D63BE	管夹	exact_current_name	多联/单管组合夹具边界明确，保留。	frozen	693d8389f342bf1d0b055991820f3048aa7e2bee72ea44aeccd361db2ecd6967
 PIPE-000336	MT-B81F004D63BE	管夹	exact_current_name	多联/单管组合夹具边界明确，保留。	frozen	61fc4f84328c4153038f9e235d67bb7819c114a122d4d757772e5f0e3dd1d259
+PIPE-000337	MT-D5FE3FB5A880	三通接头	exact_current_name	普通三通结构，保留独立类型；卡套三通已单独拆分。	frozen	96dc9e49a948d7e6dcdea8053c31fe189cb7d896357a21f97b7bba2820239b41
+PIPE-000338	MT-EBF78A50A89B	对丝接头	exact_current_name	双外丝等径直通接头，保留独立类型。	frozen	c8eeb497510722663c0fe1fda49df887761f2db5a7f4b0d147d33de53a0d91fa
 PIPE-000339	MT-5378004E11ED	管接头加工件	exact_current_name	管道连接接头类型明确，保留。	frozen	ebaa3af5d09d244a61a05d7c0fbacca7da0f99ec0c64e2c62161573572132788
+PIPE-000340	MT-B63247B85664	扣头	exact_current_name	单体扣合头，非完整接头，保留独立类型。	frozen	3bd5a61f01da88ea131999bfb65752cb8cc3a30d6b6481c1a5105ee868c8b734
 PIPE-000341	MT-C7A58C87DFFF	止回阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	74c0c94a557eadd6d5793eb9321b4043f37af973d3fc030d5513c82df0175fa5
 PIPE-000342	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""layer_count"": ""2层"", ""length"": ""8.3米"", ""spec"": ""36*2""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	f6bba1396f44eca05a732bff78059a8f6d3d794f3d67e693d680a3d4b2dfcae3
 PIPE-000343	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""layer_count"": ""2层"", ""length"": ""4.2米"", ""spec"": ""36*2""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	9eede7fe8381c93ed04814cf60c8c9fba48b3ca1d5b41b7a6d11fc46c90f94a2
 PIPE-000344	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""layer_count"": ""2层"", ""length"": ""1.2米"", ""spec"": ""36*2""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	abc0549688b27ba28b376a110e8add7d7681956b94f5ed7515acae9e21e13c3c
 PIPE-000345	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""layer_count"": ""2层"", ""length"": ""7.3米"", ""spec"": ""36*2""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	dc0647c3750d1a525258a17179c51ed19fc8ce02ad4c939a2bcd7200a9c17a91
+PIPE-000346	MT-EBF78A50A89B	对丝接头	exact_current_name	双外丝等径直通接头，保留独立类型。	frozen	3d09e5a6178b294da952a724be2e63b90fdb5ce33d88515d280a00a822bf0581
+PIPE-000347	MT-B678AF8CC659	变径接头	exact_current_name	一般变径接头，保留独立类型。	frozen	f6800bdad472d800bf8a353ff1de102a99a7f5d4a5a2f1123447d06aba9d342d
+PIPE-000348	MT-F70190706417	直接接头	exact_current_name	内丝直通结构明确，保留独立类型。	frozen	fa9f330dcf6c2af377ea8cdebc7ee36208aa0971a0f2a55a46a54e85f14f9c4d
+PIPE-000349	MT-9EF252A24B64	转换接头	exact_current_name	接口转换功能明确，保留独立类型。	frozen	79ec549f08e8b4243fd868785fba0ffb1d58e438d23b0f865524cfeccbce0788
+PIPE-000350	MT-9EF252A24B64	转换接头	exact_current_name	接口转换功能明确，保留独立类型。	frozen	d1b4cb6650b745d4e06bad6119aa4d1361bd1bf694b9e83a2f87c7c239ea229f
+PIPE-000351	MT-9EF252A24B64	转换接头	exact_current_name	接口转换功能明确，保留独立类型。	frozen	819af1b09633fe6339be9e7b34174dbe5e8becfd0297f57ce01f64ef44d59ffc
+PIPE-000353	MT-EBF78A50A89B	对丝接头	exact_current_name	双外丝等径直通接头，保留独立类型。	frozen	102ee0cd06b4fcdf45c567459cca0bd37c9f9de3858789c0ae3128ccb0cb6bb7
+PIPE-000354	MT-EBF78A50A89B	对丝接头	exact_current_name	双外丝等径直通接头，保留独立类型。	frozen	26120ba02dafcfee236d9c39cd75e9c172ab4e0226c890469a5b9b4f3b609190
+PIPE-000356	MT-EBF78A50A89B	对丝接头	exact_current_name	双外丝等径直通接头，保留独立类型。	frozen	3b671d29a09c0800be856f356a5a48cf137613b2a19cb3cbd8896fc3df923789
+PIPE-000357	MT-1B4591DB03EA	接头	exact_current_name	无独立结构限定的通用液压接头，作为兜底类型保留。	frozen	ba52ebe3b26e5d4f943bddeec46e31343e09fc3d20ad1085170cee8a92801ec0
 PIPE-000358	MT-6DCF22B62A16	电磁阀	exact_current_name	电磁驱动方式构成独立类型，型号/电压/接口归SKU属性。	frozen	cc39440ce3ded79ebd158a3fefb5964933108dc6dbac71ec906d221cfb3d198a
 PIPE-000359	MT-E0907AC05A53	管夹	exact_current_name	名称稳定，类型/适用管径/联数/材质留在SKU属性。	frozen	e2ab94b006e3a622f82c20ff77842b1a11a0d597ce382e3ddb312e2d76af1e01
+PIPE-000360	MT-1B4591DB03EA	接头	exact_current_name	无独立结构限定的通用液压接头，作为兜底类型保留。	frozen	f4eec4e35176d8e65c88adae51e170bb24fb115abed53cb74025cdb7fd8356d5
+PIPE-000361	MT-1B4591DB03EA	接头	exact_current_name	无独立结构限定的通用液压接头，作为兜底类型保留。	frozen	b637c4db17c89a895abeccb9b2e88efe75d547d36bd5fbe44f68436e316591a9
+PIPE-000362	MT-1B4591DB03EA	接头	exact_current_name	无独立结构限定的通用液压接头，作为兜底类型保留。	frozen	d2417d6b6543c53c52468bc1d15c8353ae2b2412b944132a8a9ef35b85aa0fb9
 PIPE-000363	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""layer_count"": ""2层"", ""length"": ""3米"", ""spec"": ""36*2H""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	75dcaf0c9c86c65e74e92bb268ab690313ddb52d920dc81b1a1b488823e2bee7
 PIPE-000364	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""layer_count"": ""2层"", ""length"": ""2米"", ""spec"": ""36*2H""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	98686ae5d38d2377aff295f4e5c2782b6d278112506cdc1f0f8d6a9e4ebfe1af
+PIPE-000365	MT-1B4591DB03EA	接头	exact_current_name	无独立结构限定的通用液压接头，作为兜底类型保留。	frozen	6f8c01a03301a27e610b69c9786b73e455d05e5f12d30ee595e0d3257d250546
 PIPE-000366	MT-E0907AC05A53	管夹	exact_current_name	名称稳定，类型/适用管径/联数/材质留在SKU属性。	frozen	1917959ea9c53686462ba40895fa6a4ff442fba1c5f68bb6ac535d92aa1809d1
 PIPE-000367	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	b9bb1efc967a0bc215aa18e93f20ad78d00bdf1dbe80427622f794d021643754
+PIPE-000368	MT-1B4591DB03EA	接头	exact_current_name	无独立结构限定的通用液压接头，作为兜底类型保留。	frozen	156d8c8df8a1b07a09922114e15dde16889b427daae06673434f4491dbaaacae
 PIPE-000369	MT-DF682A965FB7	安全阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	38e279d7a35042c813f7d1275306e2177eab8d35b53608629639fe82d2abd52e
+PIPE-000370	MT-9E547BD1FBFF	注浆管	exact_current_name	注浆用途管材，按米或套供应，保留独立类型；定义已修正供应方式。	frozen	7c237bbd22dc0132b88310186d9b6efd3dfad05ee9643663c4f2f9d4e0c23423
+PIPE-000371	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	bf1723d1fb8cb8f95916ee4ecfd7c0ff69a4329bcdbbfa2ec9484ed6da8237ca
 PIPE-000372	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为PVC弯头，角度45°，符合弯头定义。""}"	frozen	ddde476b248886ce4fcffab2db4577742e3f30543b12158f7e8529d2e189e64f
 PIPE-000373	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为PVC弯头，角度90°，符合弯头定义。""}"	frozen	58ce709173e2f8674445615ff83f46ea4a6efc380b9ddc03bac5163c95a819a3
 PIPE-000374	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为碳钢三通，未见异径/Y型/斜三通信息，符合等径三通定义。""}"	frozen	dc3488302bdd38100c136744656ef59487b377fe56dd966279159ae387ef176d
@@ -1025,8 +1301,10 @@ PIPE-000381	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""
 PIPE-000382	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""layer_count"": ""2层"", ""length"": ""15米"", ""spec"": ""36*2""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	d5e4eb4c75372269f3641c4befb1a3c9fe614a4a02b7b6ed7e210b4811c1dd72
 PIPE-000383	MT-B81F004D63BE	管夹	exact_current_name	多联/单管组合夹具边界明确，保留。	frozen	92ae3932acf44c6e1533f04e4883f029aa78cb596a8088501a24902a2ecff896
 PIPE-000384	MT-B81F004D63BE	管夹	exact_current_name	多联/单管组合夹具边界明确，保留。	frozen	df693b6018e2057443b2382db74dd2de092ac5135792bd6fd91af051e73d0da1
+PIPE-000386	MT-3EB2D082C1A6	变径对丝接头	exact_current_name	双外丝且变径，结构明确，保留独立类型。	frozen	bb19a76b08ae9e98afb54f76600f9e4ac2c663c904e575b5626b4301796cbd30
 PIPE-000387	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""layer_count"": ""2层"", ""length"": ""1米"", ""spec"": ""M20*1.5""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	5fd36824b732ac2cc5af73f890306b6616dddee3e71d87ad121dff6ccbaccf60
 PIPE-000388	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""layer_count"": ""2层"", ""length"": ""0.5米"", ""spec"": ""M20*1.5""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	43cd7510744c8be8220b114ce74d7ae99be160458a0e7851b76053143c567331
+PIPE-000389	MT-D5FE3FB5A880	三通接头	exact_current_name	普通三通结构，保留独立类型；卡套三通已单独拆分。	frozen	4b121910fd50bc8caf4ada564a8da4d2ec929852814dfa00306e0a7229230026
 PIPE-000391	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""layer_count"": ""2层"", ""length"": ""2.5米"", ""spec"": ""36*2H""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	69972811067a8f9a8051bdf054d3d089fdc3ae5b4538880672ece4ea137ce71f
 PIPE-000392	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""layer_count"": ""2层"", ""length"": ""1米"", ""spec"": ""36*2H""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	86db77bd411def1bca90489e127436c85f9d7de5e4bb7d8395a703219613556b
 PIPE-000393	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""layer_count"": ""2层"", ""length"": ""3.4米"", ""spec"": ""36*2H""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	687709c287ecb084e4e05f417dffe3fcf965b2552ab288d347a389cbbfabf097
@@ -1040,45 +1318,83 @@ PIPE-000400	MT-E3CAA90B6ED1	油管护套	exact_current_name	商品结构稳定�
 PIPE-000401	MT-E3CAA90B6ED1	油管护套	exact_current_name	商品结构稳定，螺纹规格和材质归SKU属性。	frozen	df23cf83d2ae13a7189bf9686bfef4fe6f238a8f55b35248780fafb36e3d22bd
 PIPE-000402	MT-E3CAA90B6ED1	油管护套	exact_current_name	商品结构稳定，螺纹规格和材质归SKU属性。	frozen	ac118f94f39063ddeac79f59834e66e1b4978d7bf1a3f5def56f23c38efc08e5
 PIPE-000403	MT-E3CAA90B6ED1	油管护套	exact_current_name	商品结构稳定，螺纹规格和材质归SKU属性。	frozen	22649ffa771c2118b2dcd58e2ee8e1a20b447c8697af5658f9288b3c3acfac7e
+PIPE-000404	MT-988CAD476BBA	堵头/管帽	exact_current_name	封堵管端的功能明确，保留独立类型。	frozen	f6d990f9208bade53822085797f60d1eb6f5ae4ccf300097148cad8df2d850b0
+PIPE-000405	MT-988CAD476BBA	堵头/管帽	exact_current_name	封堵管端的功能明确，保留独立类型。	frozen	a9d3be4cf20ea040871cdad20704583ce8f7632fcabdfdfb522e77f218e4f5d4
+PIPE-000406	MT-988CAD476BBA	堵头/管帽	exact_current_name	封堵管端的功能明确，保留独立类型。	frozen	c12b2127acc7fba294121cde60cdbfca7fa6d5722ebe7e0c2f076a7b475fa562
+PIPE-000407	MT-988CAD476BBA	堵头/管帽	exact_current_name	封堵管端的功能明确，保留独立类型。	frozen	63c786051f20b7f63f8223b3b7229f6da833898302381476d0f27efeb7a8994c
+PIPE-000409	MT-5F703D944B93	直接/直通	exact_current_name	原始证据未说明非螺纹连接，无法可靠拆分；按同径直通件并入直接/直通，避免无依据限定连接形式。	frozen	9c2c3aaf61ebb91337be6a0eeeb99c7d6e49c905e4b50404e543dd86ae1a65c8
+PIPE-000410	MT-E8CB871F9C32	两半扣	exact_current_name	两半扣为完整扣合式管接头标准类型，与扣件合并以消除边界重叠。	frozen	897e8abc2cd731e44897102a80533e077587e5fb8491eab40f6d80694cc22516
 PIPE-000411	MT-F70D097AA294	无缝钢管	exact_current_name	无缝工艺类型明确，按外径×壁厚采购，保留。	frozen	6dcab57259624a6c1746cfab8aa9d1df9374b8718848c59d79dc4ddb0d412829
+PIPE-000412	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	fdeae4b5cbb1291219b70ec98fffc12256d7ecde832cd3e6a5cfebd948d43c46
+PIPE-000413	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	7827d67c2d054db9577c3f6a7a9e64bd13b0bb651b476714d7593b5bd58bbfac
+PIPE-000414	MT-52C93398FF40	直管	exact_current_name	刚性直管类型明确，保留独立类型。	frozen	8d2761aa3cf61a2b0168bd0a990126e1243eabe7fe9bafc317d4d2a774248a33
+PIPE-000415	MT-52C93398FF40	直管	exact_current_name	刚性直管类型明确，保留独立类型。	frozen	ed2786fa8907027fd61702d4c324524419be4f23643b0f6994182ce723e699c7
 PIPE-000418	MT-A47993827FA7	网线对接头	exact_current_name	普通对接头与防水接头不同，保留独立类型。	frozen	85196d4574f0c0d3a7e20288205e2de800096123d8e6d26fd10bb33ad5b7578b
+PIPE-000419	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	0dbca8ba759ce9994911d7aff3afc4ac73df24f0cd332c9d068f437d1f11a100
 PIPE-000421	MT-C7A58C87DFFF	止回阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	c8b55003dbd2120e20585ccec2e59292cb1b4a7a3c8c9476d0255b3c2421a77d
+PIPE-000422	MT-52C93398FF40	直管	exact_current_name	刚性直管类型明确，保留独立类型。	frozen	9aeed808b2965548e8f10fc9d7d894bf5c7f69662398590316ba9e2c8bdfc2fe
 PIPE-000423	MT-8F2813D017E1	Y型三通	exact_current_name	Y型结构独立成类。	frozen	a2543ad61ff15c1dd36de62110ff6bd12915311b049f935e9afc847b5da9b149
 PIPE-000424	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为UPVC三通，未见异径/Y型/斜三通信息，符合等径三通定义。""}"	frozen	80654ff668f07e665ae3b61a3234aec4d70b2f047317059a3c0deab1d35cccec
 PIPE-000425	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为UPVC弯头，角度90°，符合弯头定义。""}"	frozen	290c5fb3b878195176ff6823147d0c5cc115c1ff12b96ba460c3607646cf0488
 PIPE-000426	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为UPVC弯头，角度45°，符合弯头定义。""}"	frozen	5a0ca2896899ae8ab6e5c4102168c118b1f8bf7e202ba01a31ed19415b8ac17a
+PIPE-000427	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	516de64edd2e466be1177b15c0f4169fb8db7c345e1df3e426c4692405a00b71
+PIPE-000428	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	a4f15ae7476babc29f9e2ba74a15902760c9a2a63c18a7de415210344e73fee4
+PIPE-000429	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	73adc61c570befd3b04e25cd61cd29a606c2a3f2c065e7fd75f58936658e6eaa
+PIPE-000430	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	a8cb0a254e23616d8fb585009e87ba705f9e396c757296ce54fc1649bb2f1eb5
 PIPE-000431	MT-1C76E756D933	蝶阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	b9313ac1783fae49f4e7b95c00bbb868442e7afe0f9a26762b127fef18254cbb
 PIPE-000432	MT-1C76E756D933	蝶阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	fc8c980354cfaff944cb21a99931a1275f2e161b4308be8fb5fe2e3fdf7dfb0b
 PIPE-000433	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为镀锌三通，未见异径/Y型/斜三通信息，符合等径三通定义。""}"	frozen	f52011a3ca1049959a09aba7435858a6b59d3def6e226eeeef4cdaced9405b8a
 PIPE-000434	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为镀锌内丝弯头，符合弯头定义。""}"	frozen	6621e22131865397e3fb2c228b7aeaa777610305ec976b168b37d376390a30a8
 PIPE-000435	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为镀锌内丝弯头，符合弯头定义。""}"	frozen	5471bece076e59b220deb2d746023efc650e1854910718b9854b4a5440edc41e
+PIPE-000436	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	4502ed8b7002b1a0e05f2e873c9870beaca103f0cac8d39cd315d4e7b841ed46
+PIPE-000437	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	e7576c19168bd77e60a623d2fb43c880161cc396f5a27308fee4bef8a9719dad
 PIPE-000438	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""length"": ""50m"", ""spec"": ""Φ13""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	61d9a20e7c43d2e42cc84792e68a3d935ed20c1be536268078e2fdce445050c3
 PIPE-000440	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为镀锌内丝弯头，符合弯头定义。""}"	frozen	d4ae62a6acbfcf8851d8e7635ab34eb8e539f29f6d306b2def2b12b9162e9d2e
 PIPE-000441	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	1e739173ab63370bcb0d50910b5b5d37a912e3d8da212fba34d6fd3934e0e772
+PIPE-000442	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	1dcfb8da24dd69cb4f2bacabeba7a1fbc03d823e45a6ac0a6a2cf429f86dd500
+PIPE-000443	MT-EBF78A50A89B	对丝接头	exact_current_name	双外丝等径直通接头，保留独立类型。	frozen	84658b4d4f5ab7b572b7bfb5cb056f3350129ba7959e58ee86555a3e4d5e6aa2
 PIPE-000444	MT-6D9419806083	弯头加工件	exact_current_name	弯头类型保留，并补充口径、连接、结构、特征、适用设备等属性。	frozen	4bb4ac6f31b06449fd17dc793a4f8cd59a0acf1e77c96de31971328dc91b88f1
+PIPE-000445	MT-3EB2D082C1A6	变径对丝接头	exact_current_name	双外丝且变径，结构明确，保留独立类型。	frozen	6b8e1d3cab3c4b36485d5ed13e68034d9f7dd7b9fcd97e164f014892056c72f0
 PIPE-000447	MT-DF682A965FB7	安全阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	f8ed0efbfd01fc0b7d3af24b90b4de491a90d1ff2353372aa89a9c0da85723cd
+PIPE-000448	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	c70f870c213d47d6409b375dd7436960f0aa570f733e934ad4c9176393552a15
 PIPE-000449	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为碳钢焊接弯头，角度90°，符合弯头定义。""}"	frozen	f251cf644067c1f228b2a5cf99e7ce653b2377b8d32cda26c50bc484bc336a13
 PIPE-000450	MT-ABEFCF12A024	焊管	exact_current_name	焊接工艺类型明确，按公称口径、壁厚和长度采购，保留。	frozen	3df03fffba11639027d001097bc96814cee0ccf32ec6caacad5379c635651dd3
+PIPE-000451	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	6d8443d8946e886600eb79cd4cd8d727a3421f3006293a81e202b943392e0303
 PIPE-000452	MT-5378004E11ED	管接头加工件	exact_current_name	管道连接接头类型明确，保留。	frozen	f1798aef90fd8cd5ab3ea5bdb6a0dd5ce4be478f8032ed6999db6d8a63a105f7
+PIPE-000453	MT-8FB37309A8AD	钢丝增强软管	detailed_evidence	"{""attributes"": {}, ""confidence"": 1.0, ""reason"": ""SKU名为PVC钢丝增强软管，按米供应，符合reinforced_hose定义。""}"	frozen	c13c0b11fd9e607442cfed70ef72f387dd3564a0cef664f01ab7d07b7e05274c
 PIPE-000454	MT-FDD7DB56BC18	卡箍	exact_current_name	环形抱紧式卡箍边界明确，保留。	frozen	8849cb5d6d070dee80a8fa4be30108fe5c329509b55324cdd47bbad931b27b30
+PIPE-000455	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	21aab460b80766aea3fbf83468e7f418aa9d39e3a31d438668363995487301cd
+PIPE-000456	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	bd943022aa7e456c3d40d69cd5ad995e73b7737a76eddca951a5a1a1a4387bad
 PIPE-000457	MT-6FFBB6BCE331	管加工件	exact_current_name	管段加工件类型保留，并补充加工内容、用途等属性。	frozen	b429fd6adeda84c0add7aca59a9e0081962bfecb9de62bb9792962a9fabc7ef3
+PIPE-000458	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	71112ed62d319a2789399fb567137b7c1c28b9d2e5221f83afbb0a27e722b629
 PIPE-000459	MT-BBADC6FC54E6	骑马卡	exact_current_name	U形骑马管卡边界明确，保留。	frozen	c1bed6756b43deccc7b6dfbe3c6d2cb4eeb9ab69fefb94f6745eef03dc4e7eaf
 PIPE-000460	MT-3F071E5610CC	截止阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	a73f9bfb62299a1fc0abb63a232fa3aa452bc6b5a9ffe7de43e6112cf622c7ca
 PIPE-000462	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为PPR三通，未见异径/Y型/斜三通信息，符合等径三通定义。""}"	frozen	b4e178ef15ac01003135e7f0ee71e96e1b1cd308e3023cd70c91291f5db00363
 PIPE-000463	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为PPR弯头，符合弯头定义。""}"	frozen	743057e20d2e6cd04ac443a3aa5186186904ad36fb2684d7d7749b045b09d69a
+PIPE-000464	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	4118c44f0aaa2b6a2fefce738b2cc089328afe5a27fd58d66d9670cc102942eb
+PIPE-000465	MT-52C93398FF40	直管	exact_current_name	刚性直管类型明确，保留独立类型。	frozen	41fb5a00f6324320e0e62b5c839636bcd7ea74fc3d43efbe35146b02c1219fe0
 PIPE-000466	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为PVC弯头，符合弯头定义。""}"	frozen	64db52a5c49d336124f82ea67ff980e9dfb455b4de47abbc0cb8ba6628ba2b25
 PIPE-000467	MT-C7A58C87DFFF	止回阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	8dc1e421ae06c97fb7a667a5e1da415102eca6333c66249998cd5d1fc445bb18
 PIPE-000468	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为PVC三通，未见异径/Y型/斜三通信息，符合等径三通定义。""}"	frozen	5fcccf59b9cd8ea90c6a0bae30caa80d49f9c03a2e5907064b0977b1d265b998
 PIPE-000469	MT-6FFBB6BCE331	管加工件	exact_current_name	管段加工件类型保留，并补充加工内容、用途等属性。	frozen	e78929bc3510a02f75fb3c95480e4c13f7a844628812a5176295c52d3108e1c0
+PIPE-000470	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	59417bce3c55241288a0360fc73273ea574767d13e3cf1d4b93a93e901cf1aed
+PIPE-000471	MT-B678AF8CC659	变径接头	exact_current_name	一般变径接头，保留独立类型。	frozen	91a5e8a6992a09c68388c3458d6e3bd0139b531c986ad8e0acf16e3fe770a342
 PIPE-000472	MT-B47C75759752	气体软管	exact_current_name	名称稳定，介质、内径、长度和压力等级作为SKU属性。	frozen	4322666b4fd969e1c825357c7bb09c7cf4e8034e116ba914baf73e87b1fc6306
 PIPE-000473	MT-B47C75759752	气体软管	exact_current_name	名称稳定，介质、内径、长度和压力等级作为SKU属性。	frozen	36ac356005f45d46a0dfde6ab038d1f348d2816f8eb76333176bce9ec6b58b0b
 PIPE-000474	MT-86A7EBA4236B	抱箍	exact_current_name	双半圆对合抱紧型管夹边界明确，保留。	frozen	2e8e6ed50283a7bd58545b864cdd7647f1406fd08edd233c9ccf8be7be39cb29
+PIPE-000475	MT-4F7F2ED2A09E	水带	exact_current_name	输水软管类型明确，保留独立类型。	frozen	c563c2e8302f79c4b5f4420cb6807042dd286c3753ef43a8616e5ffafd1ea62b
 PIPE-000476	MT-8ADBDA416038	软管卡箍	exact_current_name	名称稳定，管径和材质作为SKU属性。	frozen	8cab23465a490c22367d6a8fde47dbfe73e6fa51eb73258f5bf401e4a4c5e9ad
 PIPE-000477	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为镀锌三通，未见异径/Y型/斜三通信息，符合等径三通定义。""}"	frozen	6e7e653c4e9003d3727877fb75a2628bbf2f5f24e561066fd0b5fbdcc6fd4b76
 PIPE-000478	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为镀锌弯头，符合弯头定义。""}"	frozen	0dec2ef3b33f4025f964b503e604b52084641f00d1a1afb329caa9fac2ee1825
 PIPE-000479	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	da85b7188a8163b273d12f2811908728a339fe16e856543b53d576a3db98062c
+PIPE-000480	MT-53D944731A77	异径接头/大小头	exact_current_name	变径连接结构明确，保留独立类型；补心并入此类。	frozen	beb9c54d02eefb4b3c071221831ef8c6debb29777701e155aeefe5ad48d80e95
+PIPE-000481	MT-E8CB871F9C32	两半扣	exact_current_name	两半扣为完整扣合式管接头标准类型，与扣件合并以消除边界重叠。	frozen	f0b7dc0208bdd0d2c25e44cabb15cadd4ce83b5f0091acb4abbca042381e95af
+PIPE-000482	MT-E8CB871F9C32	两半扣	exact_current_name	两半扣为完整扣合式管接头标准类型，与扣件合并以消除边界重叠。	frozen	2b390235cd0722a420f467523c41477697311d402cb13224340a71eb31b9a70d
+PIPE-000483	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	ccf98bdd0eacdca074b35bad78d1d590da73a7cfca974346af904f14f4d2fcba
 PIPE-000485	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为镀锌弯头，符合弯头定义。""}"	frozen	9f434bb9d1efddcbbd63c52322a2fdca6ca7ed2bb7a0d8fc6404df2fc494d4c4
+PIPE-000486	MT-5F703D944B93	直接/直通	exact_current_name	同径直通连接的标准类型，保留独立类型。	frozen	955a652ba4f03caf252572da4fc2f969d1bb7d35126c69a04e08a8434efe3660
 PIPE-000487	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为镀锌三通，未见异径/Y型/斜三通信息，符合等径三通定义。""}"	frozen	dff429de4713aec18a0e2790cbee67f7d44fc843a9d7ac6a4ed134f788403ba6
+PIPE-000489	MT-D084CA6EA8FB	快速接头	exact_current_name	快速连接方式明确，保留独立类型。	frozen	9d325b82a744fc6eba8f8cf915e50f75f69748887c481ed2c7e0d7800fe129cc
 PIPE-000490	MT-CB0A48F7A97D	高压软管	exact_current_name	钢丝增强橡胶软管，属于高压软管，与高压油管、胶管合并。	frozen	9dc59a8bb19e97c741cd0bd42624071b2860973a8de2ec88d7730e7348965db5
 PIPE-000491	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	06b61177d53e8af6ee9878db4d0c5bfe14a537106d79fef0684ac5ae8bd607e1
 PIPE-000492	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	5627184abe9a0ad8ae3df0347f4c4bd79f1570d35f6c7ed6c2b3fd13264ee9a0
@@ -1204,20 +1520,49 @@ SPARE-000005	MT-34FFED3870B0	合页	exact_current_name	补充了特征（加厚�
 SPARE-000006	MT-07EE7149A508	闭门器	exact_current_name	规格作为属性。	frozen	9f2701c189b2f86195598792d7d8f1b49dad8e37aa106cb0ea756643937a23ab
 SPARE-000009	MT-CBB125262D03	钢圈	exact_current_name	名称稳定，外径/内径/高度/材质留在SKU属性。	frozen	e8c6295ca08336f4f362b21621a02fdb08e7939d3695785b469dad544d5b172a
 SPARE-000010	MT-CBB125262D03	钢圈	exact_current_name	名称稳定，外径/内径/高度/材质留在SKU属性。	frozen	38b660caf43c6dd4933b9122c39c6d364afbf318ce65c3614f1d02860a94ca47
+SPARE-000011	MT-C5438E1E84B1	垫片	detailed_evidence	"{""attributes"": {}, ""confidence"": 1.0, ""reason"": ""加工非标尺寸110*100*5mm，符合非标/定制垫片定义。""}"	frozen	c5c5aa5cae1ebd3d48d9abbe66629bbc4bb5829c2ee19a1daa830c5da2e768ad
 SPARE-000012	MT-34FFED3870B0	合页	exact_current_name	补充了特征（加厚）和工艺（焊接）属性，满足现有SKU区分需求。	frozen	28c084f8063d85c7a791a8ebf49873d813da9625b956e8fa88d253790ae5a59d
 SPARE-000013	MT-34FFED3870B0	合页	exact_current_name	补充了特征（加厚）和工艺（焊接）属性，满足现有SKU区分需求。	frozen	1f6443cdec8c3633960afecfe1ffbaeb42cb76c2f438f5278160cece3a1aa53c
+SPARE-000014	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	1312c855869b02538c6c4aa76794379072142c6dfb75ebccc86014d67c510b02
+SPARE-000014-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	ae2abd3c2c68c7bab9ce961340ee947b47bbf616a3c9b049220dd33a340f0409
+SPARE-000015	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	505aebe23965f22b8e9d78f0bb81657cdd7322a640e1733cc4b2334c6349acb8
+SPARE-000015-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	fead95434cd35cab8031cb34420d0a5e7b7e696ed9bcec26fe2212c76d802de6
+SPARE-000016	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	1e57427c37652b74985096eebb096463ca1038d1a4a02d5f577873ee413370a6
+SPARE-000016-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	797db8b91bc69ac32c54ed33e9a3df3bf9f4efbf048410c9e5a2468376f52a2b
+SPARE-000017	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	60d7fac60485dca12615f84e6df4c22ed806741a3fd142664cafe27ca1e7edf5
+SPARE-000017-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	db0b4e9e820c6c49b8653bcf98002e2984396304a71a802190f80ecf55610481
+SPARE-000018	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	b16ac6d425966df3778d2b21233c57ec9684133a78275a1a379e5f1cb031e26a
+SPARE-000018-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	aa08d9869080193500bb7327fe018f4605d05bc8e10469449bb8c0b270fabe95
+SPARE-000019	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	9740b759821074d96f4e9897e9158e5ece0ea4ffea4dfdb84346425241f9c5f1
+SPARE-000019-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	ae37c865fb33b1eb0e4925de9cf02ed1d745eba264e614bf69745a59406e0158
+SPARE-000020	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	aeb897c9d2d0c91e374ec59071dbcbc4ed20620c18ca7683db1d9cd78ca7d78a
+SPARE-000020-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	93e5aa08eec2ca206a7d4897825740586ac0922928c072ba064fb9a20a9ec4b0
 SPARE-000021	MT-889DCAC8BAC2	高压水枪过滤总成	exact_current_name	现有名称已是稳定类型，接口和适用设备放入SKU属性。	frozen	55e37dbd1957af0bf90db63d736c1e102f352553568ace279337735ad91b540f
 SPARE-000022	MT-345E9C1C98A9	高压水枪滤芯	exact_current_name	现有名称已是稳定类型，过滤精度放入SKU属性。	frozen	895c59b4b40c80f51d9606358b4a016d5eda74510c254561e365a91a89fbc014
+SPARE-000023	MT-C5438E1E84B1	垫片	detailed_evidence	"{""attributes"": {}, ""confidence"": 1.0, ""reason"": ""定制非标尺寸12*600*5mm，符合定制垫片定义。""}"	frozen	15d83f3f1fa2ccfbe59318f21cf46cb34be3a0366422f835008880d775e1b786
+SPARE-000026	MT-566BCD48A53F	鱼尾螺栓	exact_current_name	鱼尾用途即专用结构，名称不含规格、材质、品牌，标准名合格。	frozen	7dc4053fa5d0bee3c91475ca4c70ef4de84f03a83654e7b6b696577d7b9378ce
+SPARE-000027	MT-566BCD48A53F	鱼尾螺栓	exact_current_name	鱼尾用途即专用结构，名称不含规格、材质、品牌，标准名合格。	frozen	5f91b3bbe95b50607b92f43dce4f7e9d29c509feb456dda61d7b7696f9ec71eb
+SPARE-000028	MT-566BCD48A53F	鱼尾螺栓	exact_current_name	鱼尾用途即专用结构，名称不含规格、材质、品牌，标准名合格。	frozen	5776032d81aa8b7c14d43b2fb3cbfb87f50acb67267194dcf4f9d823e81beb58
+SPARE-000029	MT-131809A261F8	U型螺栓	exact_current_name	U型形状即商品结构，名称不含规格、材质、品牌，标准名合格。	frozen	18799c81898ac32c0871ff978d542dc4fc3cb47ffeeec3f6212b4951dd9f7e7a
 SPARE-000030	MT-DB161D20A503	轴套	exact_current_name	钢套与轴套同属套类零件，仅材质和加厚等属性差异。	frozen	18f69efa30d99c72001fc42e7a3b940bac5ba4925d413e4eb5cfdda3a62d086a
+SPARE-000031	MT-275FAE855873	内六角螺丝	exact_current_name	内六角驱动结构明确，名称不含规格、材质、品牌，标准名合格。	frozen	c5185be97378a40b7e024a43c95f0665ebf16dd872197ea6ecc3b22cba05a68f
+SPARE-000032	MT-275FAE855873	内六角螺丝	exact_current_name	内六角驱动结构明确，名称不含规格、材质、品牌，标准名合格。	frozen	9733830be726656e93f4e4ead40ab8cccbf0f88403e19329a44760c554e37aeb
 SPARE-000033	MT-663D0AD47CE1	刮泥板	exact_current_name	商品结构为板式刮泥件，名称已合格且不含尺寸材质。	frozen	41adf2ea72f2699c5387e42f66bbb47c45843f17d8b10994b29473c602bb20fc
+SPARE-000034	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	7e310f8ffd107926d9164e78844a3f364b1955e04a1478b7381428d5320ec98d
+SPARE-000034-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	f3b07486fbc667e5aba6e79fa96cbaf21b0611cde5789aaaabed36ea38146168
 SPARE-000035	MT-6BB67091F91F	板件	exact_current_name	名称稳定，材质、尺寸、加工留在SKU属性。	frozen	7894733307c56ef386885067d34e868415553c9e387bc691ff5325e20fcac496
 SPARE-000036	MT-C3EC9D599373	夹板	exact_current_name	名称稳定，尺寸和材质留在SKU属性。	frozen	74c0375e59df8f1fb6a47450b11e16bd7171cde8d8656c41b886e2c329d1d826
 SPARE-000040	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M4"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	2bed9714a3e060d55f1c79d0d235c6c3673d965d7f1cbea028e990ea9bc80b56
 SPARE-000041	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M5"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	2cc18d24d13d2aa04ea2799d1f6f424fac88c15a25ac15df94acdc454bcd07f9
+SPARE-000042	MT-6C0FF6E30774	高强度螺栓	exact_current_name	证据支持10.8、10.9、12.9级高强度螺栓为独立类型；无头型证据，故不并入外六角螺栓。	frozen	81033f08246d4e8bdb023df7bd1624904cbb0e0d414b77050eec36a41b78e760
 SPARE-000044	MT-6D9419806083	弯头加工件	exact_current_name	弯头类型保留，并补充口径、连接、结构、特征、适用设备等属性。	frozen	61db27b5fd3534af02a35fa6aabcd2658b63bc8a1420618eac3cb08d2e6e09c4
+SPARE-000045	MT-54F0098B9EB5	外六角螺栓	exact_current_name	外六角头型由名称明确，标准名合格；不再将无头型证据的螺栓并入。	frozen	96d2d8979c861c2664e2550a492c6c6b144610f6a1cca192429ec88c5e3f9635
 SPARE-000046	MT-998F41BCECD4	活塞	exact_current_name	注浆机为适用设备，商品类型为活塞。	frozen	6ca5805fc15fba8b07beac38207e070c228cb46ea852bbe1fa85981f0c80a703
 SPARE-000047	MT-CC3DAB6A510F	污水泵	exact_current_name	排污泵与污水泵为同一污水输送泵类型的常见名称，统一并入污水泵。	frozen	506bca9bb10ebdf05cdfb65784312e6bb080ff05e5a2b1f399a8fa858ee50096
+SPARE-000048	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	22601ec229942c5cd34d09ef55331cae85ccfb552170116ad860c8f5af653586
+SPARE-000048-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	de816d2689fe2edeb1f6197f21997e70cbabdbf530a085221a9fd872b2b98ae5
 SPARE-000049	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M14"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	90c0d6a9d5c8c27f94b51badad3571a919ddcb0f3b48a47c5280c0c7e1b18049
+SPARE-000050	MT-1927AFDD6E07	弹簧垫圈	exact_current_name	开口弹性防松结构明确，保留独立类型。	frozen	dd93a11325713e08b717b5131412882a7f0e890b56340257a4dd515cf6b43604
 SPARE-000051	MT-0B08DC7D356A	箱体	exact_current_name	名称稳定，容量和材质留在SKU属性。	frozen	2c0aade8a0a4c5162f1c421dde2a1d742a7bae9f233c1283fa3c646e61241d72
 SPARE-000052	MT-093DDC2D8A8E	扎丝	exact_current_name	现有名称已是稳定类型，直径、长度、包装、颜色等放入SKU属性。	frozen	a99b22a559cd6e9c535f9ec6b67513393b81d1c5a7b11be1133001b9527de77f
 SPARE-000053	MT-C2F8DEE7ACA5	铁钉	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	08bf49a890e5a4585cb7307283c72b72cc97ade55d417eefb8f4ce97fd477272
@@ -1227,14 +1572,29 @@ SPARE-000057	MT-8250372BC1E7	螺杆	exact_current_name	名称稳定，未含规�
 SPARE-000058	MT-832B4993ED38	潜水泵	exact_current_name	通用潜水泵类型稳定，保留独立类型。	frozen	384921a4af6c7699c1f313e2dd6ea1931a427186c305d9cd1683f8a2938753b9
 SPARE-000059	MT-093DDC2D8A8E	扎丝	exact_current_name	现有名称已是稳定类型，直径、长度、包装、颜色等放入SKU属性。	frozen	9acca321f0ea599defcbc7a60488f292cbc9a002daef922824528bf1f5f0abd6
 SPARE-000060	MT-093DDC2D8A8E	扎丝	exact_current_name	现有名称已是稳定类型，直径、长度、包装、颜色等放入SKU属性。	frozen	ae0b987d7de0bd61cceb8bcb381288c5da56620fec8364315feb81b399ab2e94
+SPARE-000061	MT-33314DBCFB5A	自攻螺丝	exact_current_name	自攻功能即商品结构，驱动类型作为可选属性，名称不含规格、材质、品牌。	frozen	7917e798399e50388f6f849232937b6517472626ab5381619ae3a2c58a9f37cc
 SPARE-000062	MT-C0368FC166E7	定向脚轮	exact_current_name	现有名称已是稳定类型，尺寸、刹车、材质放入SKU属性。	frozen	062146425d99dafd790c93eca50ebfa82863608ee0eb66da0a49659ba715c68a
 SPARE-000063	MT-C0368FC166E7	定向脚轮	exact_current_name	现有名称已是稳定类型，尺寸、刹车、材质放入SKU属性。	frozen	c5e63f2c2dde7a6026722a8888e0e1eab1eeff0886fb83185a4d683f8cf1cfc5
 SPARE-000064	MT-CC3DAB6A510F	污水泵	exact_current_name	污水泵为标准类型，排污泵作为同义项并入。	frozen	19d91be717f510dc0f8cdb7dcfccb6647fba856484b97ede6111313e46fdc6b8
+SPARE-000065	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	df338ad96153af56dbccd17a9fd2e40abc0e03884b4438b54c181881e2d380ab
+SPARE-000065-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	1351785410feb113aca06661d0e023d9f6652a29ecfa7eaa13f91d770b0a3af0
+SPARE-000067	MT-1927AFDD6E07	弹簧垫圈	exact_current_name	开口弹性防松结构明确，保留独立类型。	frozen	84aa49dd01a1fa0e35d71862f1d07608f1972d9a978025846f67907bfa2352cd
+SPARE-000068	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	34cb982dc91bd265aa2d76d3051d2c434a915b717a0c30b5b32b057afdc3198d
+SPARE-000068-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	a9316d8b28197b19fdd3df580fca0a0db1e5b254c743111638dd89c01271a8a0
+SPARE-000070	MT-1927AFDD6E07	弹簧垫圈	exact_current_name	开口弹性防松结构明确，保留独立类型。	frozen	0a435d5757f1ddd63045a0b4846472bfe5b866ab6fe4bdd50930a2de7aae7968
+SPARE-000071	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	a490208a97e71cd0481d15277fb62482918993ccdda50a4248d4b3304e1ffd54
+SPARE-000071-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	ecbb2b2b57413df57d6d5618276ea608c3b2c37402abc051e311534f7673c7b0
 SPARE-000072	MT-4B8387D02EE7	钢格板	exact_current_name	名称稳定，材质/长度/宽度留在SKU属性。	frozen	c9376bda447421f47673b033fc33655bf7dc539a963e599776714b2a62e752fd
 SPARE-000073	MT-948FDC7C0C55	膨胀钩	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	b1e738a967580e905b8aa656df5b959aa316ac75082e05a939f6e8d2b196bbf3
 SPARE-000074	MT-181CE295C9C7	吸轮	exact_current_name	推进泵为适用设备，商品类型为泵用吸轮。	frozen	d9229d8984417692cf40858bd410054b1dec41006101e499b21912095b13564a
+SPARE-000077	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	338fd296bae746403a079b9ded7edc03e8ccc91fe1593562985589c0c191a701
+SPARE-000077-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	fb045f19152dbe25f3bfdb86a6d2b651b38792f6ca7d90923bc5e7c746fc7f04
+SPARE-000079	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	3c476ab490d784558389ceb2db725b4abf2702e6ffe5c50a6e640f2b520f5ace
+SPARE-000079-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	e48c85462b27f8d667a11d4958b22474aeff6a2ea3353642a5ec0faa531f26fd
 SPARE-000080	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M22"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	7573ee77196a7492ff0cd667b46ba0b9c82dd0658eb20776efd0b9430ff4c155
 SPARE-000081	MT-61B9E5E11D72	卡簧	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	db1caaf67fbf3f43a0d4b2cf6ee3a48a1798b028be9e4d973262dd19cb820140
+SPARE-000082	MT-18CEC5595F10	通用螺栓	exact_current_name	证据未提供头型，仅为8.8级普通螺栓；与6.8级螺栓同属通用螺栓，强度等级作为属性。	frozen	b2eb184595e354b66106f77e93f542355829c8b224be634b91a9719b666a5bf7
+SPARE-000082-68	MT-18CEC5595F10	通用螺栓	exact_current_name	证据仅含强度等级6.8，未提供头型；不得并入外六角螺栓，改为按强度等级属性归入通用螺栓。	frozen	ed0e2e9cd160e15bf9d96b5872c1904ad649833940c4e9bc7a2bac2905cf4eba
 SPARE-000083	MT-E1D1050E67AD	垫木	exact_current_name	名称稳定，尺寸/截面/材质/长度留在SKU属性。	frozen	9426ce80fe8c1bca21a2da23bd538d12130d289e59b6a17133870462563e008c
 SPARE-000084	MT-E1D1050E67AD	垫木	exact_current_name	名称稳定，尺寸/截面/材质/长度留在SKU属性。	frozen	0514a7756190c1369e018eee98257d08e837b17a6d461b127c9e5836ed9eaf61
 SPARE-000085	MT-F418DA9EFFF3	传动皮带	exact_current_name	现有名称已是稳定类型，皮带型号放入SKU属性。	frozen	2e8cc8a23e7a284abaca1b342c635a6bd514a7e1014af6d9c50ccf36516233af
@@ -1316,12 +1676,14 @@ TOOL-000023	MT-5FDDB6494DEB	毛刷	exact_current_name	毛刷为稳定刷涂耗�
 TOOL-000024	MT-B1ED50F1FA25	钢丝刷	exact_current_name	钢丝刷为独立刷类类型，形状和柄材质入属性。	frozen	4e5acf4b71d9786cb23593ce9387c5649a3de3e0035d56e4a3d7d67c73e95355
 TOOL-000026	MT-43A2FAACE87F	电钻	exact_current_name	商品结构稳定，供电方式、电压、配置和品牌作为SKU属性。	frozen	f5bf4cb65713a1472bfd99a86a98adb6a26485312f8351889ebd75baf6eda824
 TOOL-000027	MT-3D0E3C5F5114	角磨机	exact_current_name	商品结构独立，供电方式、电压、砂轮片直径和配置作为SKU属性。	frozen	3b6f7c47ab4f48c6ac39bb26792a1483b84d38a237f3ee727c1c9a268aa14196
+TOOL-000028	MT-B4A4B158BCE0	内六角扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	e541511076ba1de5eaefe4bbf6697dcf22e171c5db7bd2ec3f2a84615ff32382
 TOOL-000029	MT-6EA7B03C5756	砖刀	exact_current_name	砖刀名称合格	frozen	5e140dce5b55caa3964ac50724f26125165f48da96d41e49c5a7a79c294e9778
 TOOL-000030	MT-617B3FC8E4B5	灰刀	exact_current_name	单刃小铲用途稳定，保留为独立类型。	frozen	661b61617d0da7fc24ebff57443e1f5b008c97c40da1bf6e18f8702e6f839f35
 TOOL-000031	MT-C50DDC6D6023	扫把	exact_current_name	名称稳定；材质和规格作为SKU属性。	frozen	b71850a0313b7b1601ef6cf1c2da8d2af28a5913fb613343ed8ac15228a50a31
 TOOL-000032	MT-D7F37815CD23	切割片	exact_current_name	切割片为稳定耗材类型，尺寸和磨料入属性。	frozen	a303daac3902468ebc4a716bc29fc5dd76ecd82cd393d3bacd5c31074a554063
 TOOL-000033	MT-829314545111	磨光片	exact_current_name	磨光片为稳定磨片类型。	frozen	118e513b4fa3d55bc60948592a9d42d142658c0b51fd0c86cd89ec006d0dd61a
 TOOL-000038	MT-5FDDB6494DEB	毛刷	exact_current_name	毛刷为稳定刷涂耗材类型，规格和材质入属性。	frozen	bcf23216a47357b0d26ed3312b470c90ce499726e61ae88178d26a753af60141
+TOOL-000039	MT-D7D1A2071778	链条扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	778038ca774de2d1b04c5a40eeb4e8978b0a8ad66878c165e716dcfe03d04d88
 TOOL-000041	MT-0F56E25B6B50	砂纸	exact_current_name	砂纸为稳定磨料类型，粒度入属性。	frozen	8f78df81a9a03c160ba576d58ff4b1bcce35eacd37ab5411c8ed60481ada684b
 TOOL-000043	MT-5FDDB6494DEB	毛刷	exact_current_name	毛刷为稳定刷涂耗材类型，规格和材质入属性。	frozen	85ef86ce62e93645801c38885bf8104e7d5108805fd8edfeb0cfcefbb4d48b3b
 TOOL-000047	MT-471094B784D5	砂轮机	exact_current_name	商品结构独立，功率、结构、电压和砂轮规格作为SKU属性。	frozen	19b3bb605632f5a6841dd5751c84332b84a3cf4399819f852b6bdbfb651ca5b9
@@ -1348,6 +1710,7 @@ TOOL-000069	MT-DAEE38B914A7	丝锥	exact_current_name	丝锥为稳定的螺纹�
 TOOL-000070	MT-786E1F5DE6F1	汽油桶	exact_current_name	汽油桶为独立燃料容器类型。	frozen	1a18e0979e934eff40911b3add20e78891ecf2921e44d8576f4b9eda6a3338e7
 TOOL-000071	MT-310EA2FFDD11	拖把	exact_current_name	名称稳定；拖头材质和规格作为SKU属性。	frozen	1ea9994de03a623ff49cc41bbd925bcdf5122b81e4e2a4db78ad8ee92e7a4653
 TOOL-000072	MT-C56CE5C33644	套筒	detailed_evidence	"{""attributes"": {""drive_size"": ""1/2英寸"", ""length"": ""200mm"", ""size"": ""18mm"", ""socket_type"": ""六角""}, ""confidence"": 0.95, ""reason"": ""加长套筒，18mm*200mm，六角，1/2英寸方头，符合 socket 定义中的加长套筒。""}"	frozen	aed2b53ca1223a4fd3d53ea542a63ee0f74aedfa36744ef3ecf48ea7d6610a02
+TOOL-000074	MT-4FDE0862D5F4	测厚仪	exact_current_name	名称与标准类型一致，边界清晰。	frozen	5a7df7dab91adb85e20c4f75c2f2d3a9c072feda85ebbf86dc18daaefc8e512f
 TOOL-000075	MT-D14D58B7721A	五坑钻头	exact_current_name	五坑是稳定连接柄型名称，保留为标准类型；五坑三槽作为别名/全称。	frozen	ac685a799a164aa0b25e9ffe34bdec7f1e012cc8b17e5efa90d8b38531ec05b7
 TOOL-000076	MT-E8A1C9D50AD5	冲击钻头	exact_current_name	冲击钻头按用途和使用方式独立成类，名称合格，保留。	frozen	4bc772f03f4661584b703014444bbfb7c646256bb4594f36e208b12ac7783b30
 TOOL-000077	MT-E8A1C9D50AD5	冲击钻头	exact_current_name	冲击钻头按用途和使用方式独立成类，名称合格，保留。	frozen	7fdf5af543ff1723b3eb495f40ee89d893921a01726152aa6282a908a2143ee6
@@ -1360,15 +1723,18 @@ TOOL-000083	MT-D7F37815CD23	切割片	exact_current_name	切割片为稳定耗�
 TOOL-000084	MT-CF90BC99F8B7	塞尺	exact_current_name	塞尺名称合格	frozen	e41ae7ac12bcc9573c2473c0d06f35eaa4c5828074224565f4a2fa74a0a1f821
 TOOL-000086	MT-5FDDB6494DEB	毛刷	exact_current_name	毛刷为稳定刷涂耗材类型，规格和材质入属性。	frozen	d7129f6144666f3a6b698fe95923c21de586351c48707be2cb51eea95265683e
 TOOL-000087	MT-0696DA12AEBE	通用钻头	detailed_evidence	"{""attributes"": {""diameter"": ""5mm"", ""length"": ""85mm"", ""usage"": ""不锈钢""}, ""confidence"": 0.8, ""reason"": ""SKU仅标注用途为不锈钢及尺寸，未标明柄型或结构；通用钻头定义包含用途属性，故映射为通用钻头。""}"	frozen	a073e743af9067084243e3146dbc88f2a91f55f8202adde3169cd7a8366ae673
+TOOL-000088	MT-316F1BE1D8F3	噪音计	exact_current_name	名称与标准类型一致，边界清晰。	frozen	b68b0d4d223e5b924bd849069b484ebd56767b28089ccef768e72c8c1ee26108
 TOOL-000089	MT-BBB7EE1AB632	测电笔	exact_current_name	测电笔名称合格，额定电压设为必填以满足区分要求	frozen	a791e4c646a832abe194a696e0fa3529ff5c4b33b546572784ab812763675838
 TOOL-000091	MT-BBB7EE1AB632	测电笔	exact_current_name	测电笔名称合格，额定电压设为必填以满足区分要求	frozen	72b8fd173ed3f361644d70c44c4f075d5fdf572831d86e89fd427798f3a022d3
 TOOL-000092	MT-B1ED50F1FA25	钢丝刷	exact_current_name	钢丝刷为独立刷类类型，形状和柄材质入属性。	frozen	5ceac0c1d381aecb9c2edbf661ade762c3cecab9256456734b6cef59ad7577be
+TOOL-000093	MT-963325DAF9C0	绝缘电阻表	exact_current_name	名称与标准类型一致，边界清晰。	frozen	0ccb4ddffd7a698620d1959545abe9bbe5f4cb1b95eb06d9ec019288f2067f65
 TOOL-000094	MT-F191C6642EBA	表笔	exact_current_name	表笔为稳定仪器配件类型，适用设备和插头类型入属性。	frozen	53f000fbc48cd9fe8de662d23e03af123699e6a55b0c3ef8c05f9c44878d3e91
 TOOL-000095	MT-EBC9E2C72731	胶带切割器	exact_current_name	胶带切割器名称合格	frozen	a7f82c9a6d2f2625a7c4764922c8cc524e19dcddb5addb585bc1450a8d5dd191
 TOOL-000097	MT-1FA4304673A9	厕所刷	exact_current_name	名称稳定且商品结构清晰。	frozen	bf4841a997a209026af25be10e8724a3b518d59495d265fe33c78f93993c9882
 TOOL-000100	MT-E5CE27BC4AAB	滚筒刷	exact_current_name	滚筒刷为稳定刷涂耗材类型，规格和宽度入属性。	frozen	a606133257c80ad0906cd789d6ca3ab2da7304ed1ed53d7b7281caae344ed0cf
 TOOL-000102	MT-E5CE27BC4AAB	滚筒刷	exact_current_name	滚筒刷为稳定刷涂耗材类型，规格和宽度入属性。	frozen	3102de55ff90abbf4a534c14bb96c47f5415f7c561cd4f6e116992b9911005c0
 TOOL-000103	MT-B045D28A7E61	压线钳	exact_current_name	已有独立功能边界，保留为独立类型。	frozen	47c46bfd8f033a6d255e2adfae31df46fbcc9f4cef4d0575cb1fd3a604246315
+TOOL-000104	MT-1873997F52BD	玛氏漏斗粘度计	exact_current_name	名称与标准类型一致，边界清晰。	frozen	8b2395cbe9c44637e3b92bd3f260fc1453b19adfc4043aa8f963f2a480d4b7b4
 TOOL-000105	MT-FDECC97185F0	铁锹	exact_current_name	铲运工具类型稳定，头型/规格作为属性。	frozen	f9fe970caf19592006909a958b50fa9c2a0a2780791ebf0878dd4f6357b3951c
 TOOL-000106	MT-FDECC97185F0	铁锹	exact_current_name	铲运工具类型稳定，头型/规格作为属性。	frozen	2a2d2a27d0222faa3a6a872873f9785800b89cc011be80f8d8e3f35cd997c2f3
 TOOL-000107	MT-A35545301B28	铁锹柄	exact_current_name	铁锹柄以材质和长度采购，类型边界清楚。	frozen	84e5d80e1932f8a5a0c69610b330ad4723be8cf3c1178d5cba65beaf4efeb375
@@ -1379,6 +1745,7 @@ TOOL-000111	MT-D9396FDD8FC7	网线钳	exact_current_name	RJ45压接专用，保�
 TOOL-000114	MT-81B7BBE8C359	刀片	exact_current_name	美工刀片是刀片类型的一种，通过blade_type属性区分	frozen	65b8d0e71423b1fb2db051c93424e7b9d8c86f3c30cdc15824a065d8a1c0c6a4
 TOOL-000115	MT-A01005FE6F07	钢丝钳	exact_current_name	通用夹剪功能稳定，保留为独立类型。	frozen	ab81ac102b3e77d746b81cc4a7b9a336d1628c0ad5dd577b57a324a1190a51e5
 TOOL-000116	MT-A1CBA18A04E3	尖嘴钳	exact_current_name	钳口形态稳定，保留为独立类型。	frozen	41fa6c1833bd72c6a9d15cef656c19e5ee0b0912c3fe3b71a887f50f82f4a436
+TOOL-000117	MT-27EA53568BD1	活动扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	0f78fcffa03ad512a659949d48410ba12263a5bb4a910cb547c084a32c4d7684
 TOOL-000119	MT-B115C59783C5	水平尺	exact_current_name	水平尺名称合格	frozen	134e3d1c0dc734b488097aa7b347f1d65f648560fb9158bb0454ea09ee65a8f7
 TOOL-000120	MT-B115C59783C5	水平尺	exact_current_name	水平尺名称合格	frozen	838b900046a326d9c529e1bb5721c0095cb5c81b8ec99c6f6724c15b1e61354f
 TOOL-000121	MT-0696DA12AEBE	通用钻头	detailed_evidence	"{""attributes"": {""diameter"": ""4mm"", ""length"": ""100mm"", ""material"": ""高速钢""}, ""confidence"": 0.85, ""reason"": ""SKU仅标注材质为高速钢及尺寸，未标明柄型或结构；通用钻头涵盖高速钢钻头，故映射为通用钻头。""}"	frozen	e3473fe10d66ff6cc7a4fa4827d5f5cbbaa989ac44f012bb17f33bfbbd390227
@@ -1391,13 +1758,23 @@ TOOL-000127	MT-E5E622BCB627	伸缩梯	exact_current_name	伸缩梯以可伸缩�
 TOOL-000128	MT-2DA6ABE75AE6	管钳	exact_current_name	管件旋拧专用，保留为独立类型。	frozen	6744d3969585ada4d642a72e4e2480b420d72a95c7ef767982f9184a97284404
 TOOL-000129	MT-2DA6ABE75AE6	管钳	exact_current_name	管件旋拧专用，保留为独立类型。	frozen	605ee70619ad5b71c03f99c0b55db88ea686e27130742b7c01a7b3005ff329df
 TOOL-000130	MT-2DA6ABE75AE6	管钳	exact_current_name	管件旋拧专用，保留为独立类型。	frozen	e364c972662d11fb35f3559d008bcef99feda201026a02e796ac404e302cdc70
+TOOL-000131	MT-52DCD9EA3D18	内六角扳手套装	exact_current_name	名称与标准类型一致，边界清晰。	frozen	7eaf882c1a4aaea0bba18ba655edf73fd5c586027ee0d9c880a9ed5cbe9f0e66
+TOOL-000132	MT-07BEBC4451D0	两用扳手	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""size"": ""42mm""}, ""confidence"": 0.86, ""reason"": ""SKU别名明确为“开口/梅花扳手”，符合两用扳手定义（开口+梅花同规格），规格42mm。""}"	frozen	5607f1557b4db370a34e995762030923af13e98724155bd8f3974620aaec4d5a
+TOOL-000133	MT-07BEBC4451D0	两用扳手	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""size"": ""12mm""}, ""confidence"": 0.86, ""reason"": ""SKU别名明确为“开口/梅花扳手”，符合两用扳手定义（开口+梅花同规格），规格12mm。""}"	frozen	8ffa4d6da77c14a4e8dd35fac5a54dd15711c45be79af676ca2c1723955a2f65
+TOOL-000134	MT-07BEBC4451D0	两用扳手	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""size"": ""19mm""}, ""confidence"": 0.86, ""reason"": ""SKU别名明确为“开口/梅花扳手”，符合两用扳手定义（开口+梅花同规格），规格19mm。""}"	frozen	578d2216ab316f52c1ab7b763c1b9c1099c4423cd63e8e6959a015c1e43c1f7a
 TOOL-000135	MT-C56CE5C33644	套筒	detailed_evidence	"{""attributes"": {""applicable_tool"": ""电动扳手"", ""drive_size"": ""1/2英寸"", ""size"": ""12mm"", ""socket_type"": ""六角""}, ""confidence"": 0.95, ""reason"": ""电动扳手套筒，六角，12mm，符合 socket 定义中的电动扳手套筒。""}"	frozen	547b490650ef0e6da05705215d5897637bbcc36ba4fbed204564bbfe485a01e0
 TOOL-000136	MT-C56CE5C33644	套筒	detailed_evidence	"{""attributes"": {""applicable_tool"": ""电动扳手"", ""drive_size"": ""1/2英寸"", ""size"": ""42mm"", ""socket_type"": ""六角""}, ""confidence"": 0.95, ""reason"": ""电动扳手套筒，六角，42mm，符合 socket 定义中的电动扳手套筒。""}"	frozen	0575bb54889064efb0c4bc28700f0ac25b3f1bd726af7299b7e1c3b3d637b515
+TOOL-000137	MT-27EA53568BD1	活动扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	55d1e8f7fb25980bf7624ab5d17295b15d37d1c5cb2037c609cc2d481bd8bbd1
 TOOL-000138	MT-558C48CF98CF	螺丝取出器	exact_current_name	螺丝取出器名称合格	frozen	086455faea80e58dd6f4c07249966c9ee758f1766d4047f144df3d22892d75bb
 TOOL-000140	MT-1D685DE22266	热风机	exact_current_name	限定为通用热风工具，定义与排除中删除塑焊用途，排除塑料焊接专用工具，避免跨族重叠。	frozen	a2132b107df531621daedb603381d160b86e56c059a638941f9cf412e6537b60
+TOOL-000141	MT-A2F817AEB464	固定扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	c996a612fd543803919c68cfde2f99b351dff41dfd666c6e22782a6f3378a09a
 TOOL-000144	MT-C56CE5C33644	套筒	detailed_evidence	"{""attributes"": {""applicable_tool"": ""电动扳手"", ""brand"": ""世达"", ""drive_size"": ""1/2英寸"", ""size"": ""23mm"", ""socket_type"": ""六角""}, ""confidence"": 0.95, ""reason"": ""电动扳手套筒，六角，23mm，符合 socket 定义中的电动扳手套筒。""}"	frozen	b5b06cbf7429cabfa3ae7e50f024f6a4cd75a879ae744730e00ee71baf9e3422
 TOOL-000145	MT-C56CE5C33644	套筒	detailed_evidence	"{""attributes"": {""applicable_tool"": ""电动扳手"", ""brand"": ""世达"", ""drive_size"": ""1/2英寸"", ""size"": ""24mm"", ""socket_type"": ""六角""}, ""confidence"": 0.95, ""reason"": ""电动扳手套筒，六角，24mm，符合 socket 定义中的电动扳手套筒。""}"	frozen	7f7d9da9f788530a9ed3103564028ea559ff92f3aaa88d93ea5a9dd94c743392
+TOOL-000146	MT-FF832B3C3B20	通用扳手	detailed_evidence	"{""attributes"": {""brand"": ""世达"", ""material"": ""铬钒钢"", ""size"": ""13mm""}, ""confidence"": 0.68, ""reason"": ""SKU名称仅笼统为“扳手”，且品牌为世达，未提供开口/梅花/固定等具体头型证据，故归入通用扳手。""}"	frozen	4610b8515b0bc1c6580239127daa890c64077de210abe70fe2d08500cbb88eb8
 TOOL-000147	MT-929A65CDC793	高压清洗枪头	exact_current_name	现有名称已是稳定类型，口径、异径、接口、特征、材质放入SKU属性。	frozen	128cf60eab00cdd5097b6d1c1023ddac77b78ee6d39bad7b618b0856dc65d2a5
+TOOL-000148	MT-464882904351	梅花敲击扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	a5e7eb795c868a0e61a3c4cc81b098c28c39c535067dd9ddec39d00f7e5b5c8f
+TOOL-000149	MT-464882904351	梅花敲击扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	c09dd956663f91a41612a1f26a36b472ab0f7395e286861887133071c2cac098
+TOOL-000150	MT-464882904351	梅花敲击扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	325c7f011d63d8236d2313481ac45055b70de9444679d34290812af2499725ba
 TOOL-000151	MT-15CB416C64EE	万向套筒	exact_current_name	万向套筒因带万向节形成独立结构类型。	frozen	c7508706c31b87e36251393df724229d1d0c037d1a0c012f24373262c795ae86
 TOOL-000152	MT-F5F6C62BD942	手锤	exact_current_name	通用手锤类型稳定，保留为独立类型。	frozen	e6f072d8812732edaacc24206c08fa667e64486e7900c5b2a4e788d7538c152b
 TOOL-000153	MT-9A7B6CDDA0CC	铝合金梯	exact_current_name	铝合金梯为独立登高工具类型，长度型式入属性。	frozen	a4103d8fe5edfdc8df6640f68db5e03fd4ff2e1ce17c09e4b6e99a20cce02c5b
@@ -1405,6 +1782,9 @@ TOOL-000155	MT-962655832D53	液压扳手	exact_current_name	套装为配置属�
 TOOL-000156	MT-9A7B6CDDA0CC	铝合金梯	exact_current_name	铝合金梯为独立登高工具类型，长度型式入属性。	frozen	d15568fa9632e08943fed47da301ce535eaa37a0ba77697811678ed8e2671926
 TOOL-000157	MT-279CE4AA9714	电子秤	exact_current_name	电子秤名称合格	frozen	e34a12795f8631e4a0db386f534662af334385de4bcc627a785405ab78f96f49
 TOOL-000158	MT-49B9AB70099B	刻度勺	exact_current_name	刻度勺名称合格	frozen	1e5e61c7111fa1dcae06b222ab2d4dd44a76876d6149894bb7b9060112d5d1da
+TOOL-000159	MT-27EA53568BD1	活动扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	4d95ff8fbee6c32b7810fdf3c247d7b8610d9f49cb18fbd1aa6d042f4f7a91bf
+TOOL-000160	MT-D349133A39AF	万用表	exact_current_name	名称与标准类型一致，边界清晰。	frozen	78f7c041a9faf37d583ad7ce97d1879d0ba38ffa1819285581b7c0be8269e3c6
+TOOL-000161	MT-3ABD6EEC75F8	钳形电流表	exact_current_name	名称与标准类型一致，边界清晰。	frozen	6ff25c3d0f6b68562814cc7b5a78dd29553790f6760996eef766105c43fefd26
 TOOL-000162	MT-F5F6C62BD942	手锤	exact_current_name	通用手锤类型稳定，保留为独立类型。	frozen	bef91a26dd9e3259ec5894123e21edcc4b94ae1d6f271419a1b8583e6a94be8b
 TOOL-000163	MT-F5F6C62BD942	手锤	exact_current_name	通用手锤类型稳定，保留为独立类型。	frozen	d95b7dbbe719ca4c5b45af79404d3737c8e056e194897c72b729aca2e4e7d9f5
 TOOL-000164	MT-16D79104C50B	钉锤	exact_current_name	敲钉起钉专用，保留为独立类型。	frozen	032594f8bc208d517ecfc3221358556a1d5f6610ea8b12f4da9cd46c6eec264f
@@ -1424,7 +1804,9 @@ TOOL-000180	MT-C56CE5C33644	套筒	detailed_evidence	"{""attributes"": {""drive_
 TOOL-000181	MT-9985D8D7287B	混凝土试模	exact_current_name	混凝土试模为稳定试验器具类型，尺寸和材质入属性。	frozen	33440505e3eab7a3f4ad41616d740f7eecef569369d0bb8a57d23d9957694a02
 TOOL-000182	MT-E414D491E2D3	橡胶锤	exact_current_name	锤头材质特殊，保留为独立类型。	frozen	4b8ddb5fa4551d1f50777f2ae8160a0cedd8c8054af1d1fea3ad24740dcc55b8
 TOOL-000186	MT-A9938CFD4ABF	台钳	exact_current_name	台式夹持工装，与手持钳类结构不同。	frozen	bddc25c33dcab8baaf0047f5245e56f773caebb49844335d4c582b8e01b4d174
+TOOL-000188	MT-4CAB204B1D8F	开口梅花扳手套装	exact_current_name	名称与标准类型一致，边界清晰。	frozen	30c51b2b633e88ff5f38a3e7a2a8998f6bde3ec76b83ae6dfb7b5c6c6dd42009
 TOOL-000189	MT-8DBBFA396E41	碳刷	exact_current_name	现有名称已是稳定商品类型，适用设备和规格作为SKU属性。	frozen	1d0ac9bdb4e0bc5671ff9eaa534f5d38495d1b1dc18d10a08c198207d7f37b90
+TOOL-000190	MT-07BEBC4451D0	两用扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	8e5ea4e797eef39b44140a65851152a0682005f65ba563a17c7b911547c99dd2
 TOOL-000191	MT-9A7B6CDDA0CC	铝合金梯	exact_current_name	铝合金梯为独立登高工具类型，长度型式入属性。	frozen	29209d9f776239bb8b5cc3ba689dfd9250001760f74ecc7ebe72e42c6eeff494
 TOOL-000195	MT-490567281559	气动扳手	exact_current_name	现有名称已是稳定商品类型，接口尺寸作为SKU属性。	frozen	c7155b32a2b71ba29bd1f9174cc8b3aebf6880efd4144d7a9ded146798d7d63a
 TOOL-000197	MT-FDECC97185F0	铁锹	exact_current_name	铲运工具类型稳定，头型/规格作为属性。	frozen	e41690fb49292a1273c11e78a66956c5981b18a57025e63e4c620f9ee8e5ab0e
@@ -1461,6 +1843,7 @@ TOOL-000236	MT-5FDDB6494DEB	毛刷	exact_current_name	毛刷为稳定刷涂耗�
 TOOL-000238	MT-3D0E3C5F5114	角磨机	exact_current_name	商品结构独立，供电方式、电压、砂轮片直径和配置作为SKU属性。	frozen	0cc7b2fb74425f05c347b3fba50dcbf32780a7fe01db39341c7dfb4c9c34cc63
 TOOL-000239	MT-40E3F8410CEE	螺丝刀	exact_current_name	螺丝刀名称合格	frozen	44ae48112d8f90c84c3fbb81952e00f367400f752c6168e2660da9f7189493fb
 TOOL-000240	MT-06D5260D2301	吹尘枪	exact_current_name	现有名称已是稳定商品类型，接口作为SKU属性。	frozen	1cd193794d433762ed5518db7b1f15f546862888e007730c5c1bf55b086683b6
+TOOL-000242	MT-07BEBC4451D0	两用扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	0c77c1f1c06c7a3d3b1013e4a54aae2c6430ef056fb4ef0407d6e33819b87df1
 TOOL-000244	MT-5FDDB6494DEB	毛刷	exact_current_name	毛刷为稳定刷涂耗材类型，规格和材质入属性。	frozen	fe32b3366ac3af09d62a4bdd5d54106269f00fc9d88138384b6959cdbc2c84cf
 TOOL-000246	MT-D19163844356	气体减压器	exact_current_name	原名称“减压表”是俗称，统一为气体减压器；与不带表的减压阀和总成区分。	frozen	7cca79108146a6cc3770f4a67105481ea8161f917fb43f42199d801b99fd8e17
 TOOL-000247	MT-C50DDC6D6023	扫把	exact_current_name	名称稳定；材质和规格作为SKU属性。	frozen	83d035b94dd1df9067152a5dfe76419f66b506d57b4cb277f4003af2b7d10fb3
@@ -1470,6 +1853,7 @@ TOOL-000254	MT-3D0E3C5F5114	角磨机	exact_current_name	商品结构独立，�
 TOOL-000255	MT-310EA2FFDD11	拖把	exact_current_name	名称稳定；拖头材质和规格作为SKU属性。	frozen	3a96e19aef2575c773daa038eb4281822d0043a36416e9fedd1dc67e591da50a
 TOOL-000256	MT-58E4C2C11EDE	卷尺	exact_current_name	卷尺名称合格	frozen	dbfc7a9229b80bab041da56f5bdce78d0a9e4c5d84fa56022f49fd4a2d0d0276
 TOOL-000257	MT-9D96F96A0EDB	墨斗	exact_current_name	墨斗名称合格	frozen	f32b3de941f751a1fc8bc8a5ed518205a3d7b52316c846e70c0ae70170c095bf
+TOOL-000258	MT-56C0F98F8191	牙刷	exact_current_name	清洁用品，独立类型	frozen	2d68f2b19bd68894846808a882289fe8492e021aea2a46e3d36c96faa3b3e7d2
 TOOL-000261	MT-BBB7EE1AB632	测电笔	exact_current_name	测电笔名称合格，额定电压设为必填以满足区分要求	frozen	483cefdb96a6a494f04307cc6a8440c1525a3fa733c5a8fa5d64fcb0b200db90
 TOOL-000262	MT-9326FEAEADF8	直尺	exact_current_name	直尺名称合格	frozen	b715ae87d0fb857ac5f3a716e01f8546edb6d23dbd3b76845cd353ff629cec00
 TOOL-000263	MT-1A0F090ACF39	抹子	exact_current_name	抹灰收面工具，与抹刀不同，保留为独立类型。	frozen	e392bd52fc194c480b30dbb0f21f9e56e9663021e63ddbfceb9fa8589caef002
@@ -1498,6 +1882,8 @@ TOOL-000292	MT-43A2FAACE87F	电钻	exact_current_name	商品结构稳定，供�
 TOOL-000293	MT-497D11A95BDB	石笔	exact_current_name	石笔为稳定耗材类型，包装规格入属性。	frozen	7b44278ff96a50cef35f0ac63ee0308fa6d7bb6af152a2605fd1da3e165bb53f
 TOOL-000294	MT-68D70D679F4F	焊机地线夹	exact_current_name	现有名称已是稳定商品类型，额定电流作为SKU属性。	frozen	a701d911d0f20e8b873a61ebdbdef01eba45ce8901f7968cb5d2691c4a1cc36e
 TOOL-000295	MT-8E0745C32BBC	胶枪	exact_current_name	胶枪名称合格，适用材料设为必填	frozen	906da6a0d901fa75a016c5ad107f98d7c895a717bf739cc8f14838b8dc8c77f9
+TOOL-000296	MT-27EA53568BD1	活动扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	ebb182c88cd07b4c5c9b6af588ae523fc64fc10b97421b65ecfaf35afadee332
+TOOL-000297	MT-27EA53568BD1	活动扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	0c3300fdb17ffe1052ffad9dfb3c1dc6dd1f3d76571ce5fc44f9469760f2373c
 TOOL-000300	MT-58E4C2C11EDE	卷尺	exact_current_name	卷尺名称合格	frozen	f699285319e069db2de491099e1491dad9b84dc4bf1a52abae5231f24aa275d2
 TOOL-000302	MT-A15792602A79	二坑三槽钻头	exact_current_name	坑槽组合属于连接接口，决定设备兼容性；名称不含尺寸/品牌，保留为标准类型。	frozen	e720413da42ab74ce6151ec01f2fb9d54c183e7ead62b7abd830c17e3cdcb6d2
 TOOL-000303	MT-A15792602A79	二坑三槽钻头	exact_current_name	坑槽组合属于连接接口，决定设备兼容性；名称不含尺寸/品牌，保留为标准类型。	frozen	81294a0461984c80d9256c83eb88bb14fe59e6b8b4c95b5d74fb393de1a13730
@@ -1506,6 +1892,10 @@ TOOL-000305	MT-8DBBFA396E41	碳刷	exact_current_name	现有名称已是稳定�
 TOOL-000306	MT-BB96F182E482	火钳	exact_current_name	长柄夹持燃烧物用途特殊，保留为独立类型。	frozen	11435b03ca0ba10cf7cddea15ab96492a8b67ed754f4d5c5effd70fd52611416
 TOOL-000308	MT-BBB7EE1AB632	测电笔	exact_current_name	测电笔名称合格，额定电压设为必填以满足区分要求	frozen	fb10dac17677dd5562a80e3424da4d4a7a729fb8b991d967e145d581603337ea
 TOOL-000309	MT-808AE839E55B	电工包	exact_current_name	名称可保留；材质改为可选，以覆盖仅有品牌/规格的SKU。	frozen	73e6562d84f60419fc6d63b5a4b1aca7c87025f0f07c12b63744b867b731f622
+TOOL-000310	MT-4EBD74764273	三叉套筒扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	6070073cad53d3f1aa38a95bddf06755f9bf23a41a3ca76590051a322a999d7d
+TOOL-000311	MT-4EBD74764273	三叉套筒扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	8605570d1ba95ed1e500e7f77f9638c27e192b667da13b926a57b18b1ea45d1b
+TOOL-000312	MT-4EBD74764273	三叉套筒扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	e7698f1b8ecc861cd308cb67d75cc9c43e6a1945da0865d7e8e9d3e96cf681d3
+TOOL-000313	MT-29F7F131F7D4	T型套筒扳手套装	exact_current_name	名称与标准类型一致，边界清晰。	frozen	7881e6250d07b677a70d151123dddef27cfe16349c8bde22e60a59618b6cbb05
 TOOL-000314	MT-40E3F8410CEE	螺丝刀	exact_current_name	螺丝刀名称合格	frozen	17e392fcdc102f21f4ca2ad0e9e66e354158a1c8a92ba4a136350aca8395bda5
 TOOL-000315	MT-40E3F8410CEE	螺丝刀	exact_current_name	螺丝刀名称合格	frozen	f93400f254439031ef372f8fa742006b6bebbbafcb2845dae284ead0aa06c9a1
 TOOL-000316	MT-40E3F8410CEE	螺丝刀	exact_current_name	螺丝刀名称合格	frozen	d1f541cd91ceeb69a4c4ad021bb9fe87c3f55deae03de8d660fc2a00d2ec317e
@@ -1529,10 +1919,12 @@ TOOL-000336	MT-3925E7EC5DFC	灰斗	exact_current_name	灰斗为独立灰浆容�
 TOOL-000337	MT-2BD23953B5CD	电动螺丝刀	exact_current_name	电动螺丝刀名称合格，定义已厘清与电钻的边界，包含锂电电钻螺丝刀套装	frozen	30f6e3b90c9ae52336a7fc92d925afeb313656b3c1d3aeb572fcf4231a74be42
 TOOL-000338	MT-BFABE7889E75	圆珠笔	exact_current_name	笔类型稳定，笔尖规格归SKU属性。	frozen	0a5b053f54d5d591f7d1091242cd85d9e9e5ab3ce46de6166a34b8812abd9adf
 TOOL-000340	MT-F53AEA2AF2FC	车轮胎套件	exact_current_name	现有名称已是稳定类型，适配对象、轮径、轴孔等放入SKU属性。	frozen	45327bb87be5846233088512c4c9cf0f79dbb8f532c5264a9485249c85f1afd0
+TOOL-000341	MT-07BEBC4451D0	两用扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	74eff5c028d2cbe6a95c664cee8a0c466e5bc104cea5539e8f3d75edf99f5521
 TOOL-000342	MT-67BA543B480B	探照灯	exact_current_name	独立灯具类型。	frozen	c00244399213e281b985bba5bc6ffc2cf8a6c30d55b6e7e8639a33f6e6898f2b
 TOOL-000343	MT-C0D5D245AEFB	二坑二槽钻头	exact_current_name	坑槽组合属于连接接口，决定设备兼容性；名称合格，保留为标准类型。	frozen	838cd112a9a40d7b2276148496b50df112db6fe473c293bee5b6478dcb5a74f8
 TOOL-000344	MT-C0D5D245AEFB	二坑二槽钻头	exact_current_name	坑槽组合属于连接接口，决定设备兼容性；名称合格，保留为标准类型。	frozen	3ad1448ed272a535915c840c0322980ceb9c880290c1e63f66f8f97a439085d6
 TOOL-000345	MT-C0D5D245AEFB	二坑二槽钻头	exact_current_name	坑槽组合属于连接接口，决定设备兼容性；名称合格，保留为标准类型。	frozen	2bcfa8d052e7d74cfe85abff914795d59408478b9f17a8b80aa9d9fa624fe986
+TOOL-000346	MT-07BEBC4451D0	两用扳手	exact_current_name	名称与标准类型一致，边界清晰。	frozen	bc7fc6929ae57f1e78729798dfb56e9763c17ee18073160c5512c59aba963ac2
 TOOL-000348	MT-A01005FE6F07	钢丝钳	exact_current_name	通用夹剪功能稳定，保留为独立类型。	frozen	4319b62045b8ac4dbea71d20f8cdc4a4d1108ea8268d5565469a707ef24dd108
 WELD-000001	MT-31A1F72CE334	焊丝	exact_current_name	保留现有标准名，删除无源证据的‘实心’限定，仅以‘明确标注药芯焊丝的除外’为边界。	frozen	3b0d08894738bf5657738616ec35203f0cd461de450e8ece7931b9ef1f76d630
 WELD-000002	MT-8FA92C8A8A93	焊机快速接头	exact_current_name	现有名称已是稳定商品类型，规格和接口类型作为SKU属性。	frozen	2db467ba898db58ab40ded6bfb03eb163660bef7049e900f0460f8f0e764b2b5
@@ -1581,6 +1973,7 @@ WELD-000057	MT-7428CECCA622	焊机分流器	exact_current_name	现有名称已�
 WELD-000058	MT-7428CECCA622	焊机分流器	exact_current_name	现有名称已是稳定商品类型，型号/材质/适用焊机作为SKU属性。	frozen	b0e237f748aae7568acf19f6f27c795edd643d4014c83ab87c29b8ddfc97dd93
 WELD-000059	MT-896D9DEDACB6	气体减压阀	exact_current_name	补充“气体”限定为气体减压阀，与工业气体附件族内其他阀类区分。	frozen	c3b04705457ff876efa700f2cadc160403833b9681587688e54d82bbd3337248
 WELD-000060	MT-4CDABCA53509	割炬	exact_current_name	现有名称已是稳定商品类型，型号/长度/材质作为SKU属性。	frozen	8b8a5f58a2eee2dc8cd706efd230b6c7d792ff10643c82f5f4b4a4ed43c58adb
+WELD-000061	MT-EAAF8A16E169	气体检测表	exact_current_name	名称与标准类型一致，边界清晰。	frozen	7342ccc61b613533729138a1432232102b6921c5ee216644886ba2b7dbf79f79
 WELD-000062	MT-7EE0F8C042F1	检测表	exact_current_name	名称稳定，介质、量程和精度作为SKU属性。	frozen	fd0dcfc6434e9ff40523a5c7f6fdcffb3b9317e310f7f9f74b7b271b2a62b49e
 WELD-000065	MT-94B7581F516A	割嘴	exact_current_name	现有名称已是稳定商品类型，规格/型号作为SKU属性。	frozen	1c339d26013d4e669482146784255f016cec39708ddaa90da099b5e86ad29a45
 WELD-000066	MT-92AF8B17F0A7	压力表	exact_current_name	名称稳定，介质、量程和接口作为SKU属性。	frozen	079b842611701c9cbecf83382bc0fc16970955c609153975d9d1bbdf8a6e0259

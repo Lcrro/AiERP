@@ -112,6 +112,8 @@ def write_tsv(path: Path, rows: list[dict[str, Any]], fields: list[str] | None =
 def build_generation_messages(
     batch: GovernanceBatchInput,
     repair_feedback: dict[tuple[str, str], list[dict[str, str]]] | None = None,
+    *,
+    final_convergence: bool = False,
 ) -> list[dict[str, str]]:
     feedback_payload = [
         {
@@ -130,6 +132,14 @@ def build_generation_messages(
         if feedback_payload
         else ""
     )
+    convergence_instruction = (
+        "这是最终收敛轮。目标是在不虚构事实的前提下给每个SKU建立稳定归属。证据不足时必须创建"
+        "中性、宽泛但真实的标准类型，不得猜测头型、材质、接口、用途或性能；历史数据缺失的属性"
+        "设为optional并留待实际采购时确认。只有SKU证据明确支持不同商品结构时才拆分。不得使用"
+        "needs_evidence逃避归类，每个现有名称都必须获得可执行的目标类型。"
+        if final_convergence
+        else ""
+    )
     return [
         {
             "role": "system",
@@ -141,6 +151,7 @@ def build_generation_messages(
                 "兼容性接口只有在它会决定设备能否使用时才允许进入标准名称。"
                 "不得跨物料族移动，不得补造输入没有支持的商品类型。每个现有名称必须且只能有一个决定。"
                 f"{repair_instruction}"
+                f"{convergence_instruction}"
                 "只输出符合给定JSON Schema的JSON object。"
             ),
         },
@@ -163,6 +174,7 @@ def build_generation_messages(
                     "output_schema": GovernanceGenerationResult.model_json_schema(),
                     "batch": batch.model_dump(mode="json"),
                     "review_feedback": feedback_payload,
+                    "final_convergence": final_convergence,
                 },
                 ensure_ascii=False,
             ),
@@ -173,7 +185,16 @@ def build_generation_messages(
 def build_review_messages(
     batch: GovernanceBatchInput,
     generation: GovernanceGenerationResult,
+    *,
+    final_convergence: bool = False,
 ) -> list[dict[str, str]]:
+    convergence_review = (
+        "本轮采用最终收敛口径：中性宽泛类型是有意的安全兜底。不得仅因为历史数据缺少材质、头型、"
+        "接口或用途而否决提案；这些字段设为optional并在使用时确认即可。只有提案虚构事实、类型边界"
+        "仍会导致错误选择、遗漏现有名称或无法覆盖SKU时才判revise/reject。"
+        if final_convergence
+        else ""
+    )
     return [
         {
             "role": "system",
@@ -182,6 +203,7 @@ def build_review_messages(
                 "检查标准名称是否混合了结构、材质、接口、用途、品牌或尺寸，类型边界是否重叠，"
                 "旧名称是否全部覆盖，是否存在无依据推断，以及属性模板是否足以区分采购SKU。"
                 "有任何实质问题必须判为revise或reject，不得为了通过而放宽标准。"
+                f"{convergence_review}"
                 "每个提议类型和每个名称决定都必须有一条复核记录。只输出JSON object。"
             ),
         },
@@ -201,6 +223,7 @@ def build_review_messages(
                     "output_schema": GovernanceReviewResult.model_json_schema(),
                     "source_evidence": batch.model_dump(mode="json"),
                     "proposal": generation.model_dump(mode="json"),
+                    "final_convergence": final_convergence,
                 },
                 ensure_ascii=False,
             ),
@@ -379,6 +402,7 @@ def run_batch(
     reuse_responses: bool,
     defer_detailed: bool = False,
     repair_feedback: dict[tuple[str, str], list[dict[str, str]]] | None = None,
+    final_convergence: bool = False,
 ) -> GovernanceSnapshot:
     log_stage(batch.batch_id, "generation_started")
     batch_dir = output_dir / "batches" / batch.batch_id
@@ -387,7 +411,11 @@ def run_batch(
     request_dir.mkdir(parents=True, exist_ok=True)
     response_dir.mkdir(parents=True, exist_ok=True)
 
-    generation_messages = build_generation_messages(batch, repair_feedback)
+    generation_messages = build_generation_messages(
+        batch,
+        repair_feedback,
+        final_convergence=final_convergence,
+    )
     generation_request = request_dir / "generation.json"
     generation_response = response_dir / "generation.json"
     generation_request.write_text(
@@ -411,7 +439,11 @@ def run_batch(
         log_stage(batch.batch_id, "generation_completed")
 
     log_stage(batch.batch_id, "review_started")
-    review_messages = build_review_messages(batch, generation)
+    review_messages = build_review_messages(
+        batch,
+        generation,
+        final_convergence=final_convergence,
+    )
     review_request = request_dir / "review.json"
     review_response = response_dir / "review.json"
     review_request.write_text(
@@ -511,6 +543,7 @@ def run_batch(
         review_model=settings.model,
         detailed_mapping=detailed_mapping,
         detailed_review=detailed_review,
+        minimum_detailed_confidence=0.65 if final_convergence else 0.75,
     )
     (batch_dir / "snapshot.json").write_text(
         snapshot.model_dump_json(indent=2) + "\n",
@@ -632,6 +665,11 @@ def parse_args() -> argparse.Namespace:
         help="Batch all families with open non-SKU review issues and feed the review feedback into regeneration.",
     )
     parser.add_argument(
+        "--final-convergence",
+        action="store_true",
+        help="Resolve remaining open families with neutral fallback types and optional unknown attributes.",
+    )
+    parser.add_argument(
         "--export-only",
         action="store_true",
         help="Refresh TSV, browser data, and coverage summary without calling DeepSeek.",
@@ -679,7 +717,11 @@ def load_repair_feedback(
     _, issue_rows = read_tsv(issue_path)
     feedback: dict[tuple[str, str], list[dict[str, str]]] = {}
     for row in issue_rows:
-        if row.get("status") != "open" or row.get("item_code"):
+        if row.get("status") != "open":
+            continue
+        # The unresolved row is a derived coverage symptom. A concrete SKU-level
+        # review failure is actionable evidence and must stay in the repair queue.
+        if row.get("item_code") and row.get("issue_type") == "sku_mapping_unresolved":
             continue
         key = (row.get("top_group", ""), row.get("material_family", ""))
         if not all(key):
@@ -688,6 +730,7 @@ def load_repair_feedback(
             {
                 "issue_type": row.get("issue_type", ""),
                 "current_name": row.get("current_name", ""),
+                "item_code": row.get("item_code", ""),
                 "detail": row.get("detail", ""),
             }
         )
@@ -697,8 +740,11 @@ def load_repair_feedback(
 def repair_batch_id(
     batch: GovernanceBatchInput,
     feedback: dict[tuple[str, str], list[dict[str, str]]],
+    *,
+    mode: str = "repair",
 ) -> str:
     payload = {
+        "mode": mode,
         "families": [
             {
                 "top_group": family.top_group,
@@ -731,7 +777,7 @@ def main() -> int:
         families = list(batches[0].families)
     else:
         families = build_family_evidence(source_rows)
-        if args.repair_open_issues:
+        if args.repair_open_issues or args.final_convergence:
             repair_feedback = load_repair_feedback(args.output_dir)
             repair_keys = set(repair_feedback)
             families = [
@@ -748,16 +794,24 @@ def main() -> int:
         if not families:
             raise RuntimeError("No matching material families found")
         frozen_hashes = catalog.frozen_family_hashes(prompt_version=PROMPT_VERSION)
-        if not args.force and not args.repair_open_issues:
+        if not args.force and not (args.repair_open_issues or args.final_convergence):
             families = [
                 family
                 for family in families
                 if frozen_hashes.get((family.top_group, family.material_family)) != family.source_hash
             ]
         batches = pack_family_batches(families, max_names=args.max_names) if families else []
-        if args.repair_open_issues:
+        if args.repair_open_issues or args.final_convergence:
             batches = [
-                batch.model_copy(update={"batch_id": repair_batch_id(batch, repair_feedback)})
+                batch.model_copy(
+                    update={
+                        "batch_id": repair_batch_id(
+                            batch,
+                            repair_feedback,
+                            mode="final_convergence" if args.final_convergence else "repair",
+                        )
+                    }
+                )
                 for batch in batches
             ]
 
@@ -775,6 +829,7 @@ def main() -> int:
                     reuse_responses=args.reuse_responses,
                     defer_detailed=args.defer_detailed,
                     repair_feedback=repair_feedback,
+                    final_convergence=args.final_convergence,
                 ): batch
                 for batch in batches
             }

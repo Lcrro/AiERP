@@ -105,6 +105,12 @@ python scripts\material_master\run_type_dictionary_governance.py --repair-open-i
 
 问题修复采用有界迭代，不无限重跑：最多执行三轮；如果某轮新增冻结映射少于该轮开始时未映射 SKU 的 `10%`，立即停止。此时剩余项视为真实业务口径争议，继续保留在问题队列，避免模型反复改名造成治理漂移。
 
+三轮结束后可执行一次最终收敛。该模式要求证据不足的 SKU 进入中性宽泛类型，不猜测缺失属性；缺失属性改为选填并留待实际采购时确认：
+
+```powershell
+python scripts\material_master\run_type_dictionary_governance.py --final-convergence --max-names 60 --concurrency 5
+```
+
 ## 规则
 
 - 新脚本优先写成可重复运行、可 dry-run 的命令。

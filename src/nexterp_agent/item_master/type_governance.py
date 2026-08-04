@@ -609,6 +609,7 @@ def build_snapshot(
     review_model: str,
     detailed_mapping: DetailedMappingResult | None = None,
     detailed_review: DetailedMappingReviewResult | None = None,
+    minimum_detailed_confidence: float = 0.75,
 ) -> GovernanceSnapshot:
     rows = [{key: str(value or "").strip() for key, value in row.items()} for row in source_rows]
     issues = validate_generation_and_review(
@@ -786,7 +787,7 @@ def build_snapshot(
                     item_review = item_reviews.get(item.item_code)
                     if (
                         item.target_key not in proposal_type_keys
-                        or item.confidence < 0.75
+                        or item.confidence < minimum_detailed_confidence
                         or item_review is None
                         or item_review.verdict != "approve"
                     ):

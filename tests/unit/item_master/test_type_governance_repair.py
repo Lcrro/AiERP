@@ -37,7 +37,7 @@ def _batch():
     return pack_family_batches(build_family_evidence(rows))[0]
 
 
-def test_load_repair_feedback_excludes_sku_and_resolved_issues(tmp_path: Path) -> None:
+def test_load_repair_feedback_keeps_actionable_sku_reviews(tmp_path: Path) -> None:
     output_dir = tmp_path
     issue_path = output_dir / "material_governance_issues.tsv"
     fields = [
@@ -55,6 +55,7 @@ def test_load_repair_feedback_excludes_sku_and_resolved_issues(tmp_path: Path) -
     rows = [
         ["1", "B", "紧固件与连接件", "螺丝/螺栓", "螺栓", "", "type_review_not_approved", "high", "边界重叠", "open"],
         ["2", "B", "紧固件与连接件", "螺丝/螺栓", "螺栓", "FAST-001", "sku_mapping_unresolved", "high", "未映射", "open"],
+        ["4", "B", "紧固件与连接件", "螺丝/螺栓", "螺栓", "FAST-001", "detailed_mapping_not_approved", "high", "置信度不足", "open"],
         ["3", "B", "紧固件与连接件", "螺丝/螺栓", "螺栓", "", "old", "low", "已解决", "resolved"],
     ]
     with issue_path.open("w", encoding="utf-8", newline="") as handle:
@@ -69,7 +70,14 @@ def test_load_repair_feedback_excludes_sku_and_resolved_issues(tmp_path: Path) -
             {
                 "issue_type": "type_review_not_approved",
                 "current_name": "螺栓",
+                "item_code": "",
                 "detail": "边界重叠",
+            },
+            {
+                "issue_type": "detailed_mapping_not_approved",
+                "current_name": "螺栓",
+                "item_code": "FAST-001",
+                "detail": "置信度不足",
             }
         ]
     }
@@ -93,6 +101,28 @@ def test_repair_feedback_is_disclosed_in_generation_prompt() -> None:
     assert "边界重叠" in messages[1]["content"]
 
 
+def test_final_convergence_prompts_require_neutral_fallbacks() -> None:
+    batch = _batch()
+    feedback = {
+        ("紧固件与连接件", "螺丝/螺栓"): [
+            {
+                "issue_type": "type_review_not_approved",
+                "current_name": "螺栓",
+                "detail": "缺少头型证据",
+            }
+        ]
+    }
+
+    generation_messages = build_generation_messages(
+        batch,
+        feedback,
+        final_convergence=True,
+    )
+
+    assert "中性、宽泛但真实" in generation_messages[0]["content"]
+    assert '"final_convergence": true' in generation_messages[1]["content"]
+
+
 def test_repair_batch_id_changes_with_review_feedback() -> None:
     batch = _batch()
     first = {
@@ -108,3 +138,8 @@ def test_repair_batch_id_changes_with_review_feedback() -> None:
 
     assert repair_batch_id(batch, first) == repair_batch_id(batch, first)
     assert repair_batch_id(batch, first) != repair_batch_id(batch, second)
+    assert repair_batch_id(batch, first) != repair_batch_id(
+        batch,
+        first,
+        mode="final_convergence",
+    )
