@@ -791,12 +791,6 @@ MGI-549979BAA01CF1	MGB-2BE74267602E	管材管件阀门	水龙头/洁具配件	�
 MGI-941D06CBA8FEE3	MGB-2BE74267602E	管材管件阀门	水龙头/洁具配件	软管		type_review_not_approved	high	标准名“软管”与管材族中的“软管”重复，且本定义包含“不锈钢编织软管”，与管材族软管（含金属软管/PVC钢丝增强软管）边界重叠，需收窄或改名。	open
 MGI-C713D59EB49E89	MGB-2BE74267602E	管材管件阀门	水龙头/洁具配件	软管	PIPE-000080	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
 MGI-6692470D227ABA	MGB-2BE74267602E	管材管件阀门	水龙头/洁具配件	隔电堵	MAT-000022	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-27ACA38F4FE31C	MGB-2BE74267602E	管材管件阀门	法兰	法兰	PIPE-000185	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-4576A8C56440A1	MGB-2BE74267602E	管材管件阀门	法兰	法兰	PIPE-000166	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-47E944E566BDCA	MGB-2BE74267602E	管材管件阀门	法兰	法兰	PIPE-000291	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-4E706A4294E46D	MGB-2BE74267602E	管材管件阀门	法兰	法兰		detailed_mapping_required	medium	该名称需要查看完整 SKU 证据后再映射。	open
-MGI-664A0D14A83DFC	MGB-2BE74267602E	管材管件阀门	法兰	法兰	PIPE-000125	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-E84724245933BC	MGB-2BE74267602E	管材管件阀门	法兰	法兰	PIPE-000292	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
 MGI-59A487BAF8C202	MGB-2BE74267602E	管材管件阀门	直接/接头			family_review_not_approved	high	主要问题为“接头”过于通用，与“直接/直通”等同为直通螺纹连接件，类型边界不清；其余类型覆盖旧名称。	open
 MGI-02232C4C2CBA0B	MGB-2BE74267602E	管材管件阀门	直接/接头	堵头/管帽	PIPE-000077	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
 MGI-083FF33D1CC521	MGB-2BE74267602E	管材管件阀门	直接/接头	堵头/管帽	PIPE-000405	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
@@ -901,9 +895,6 @@ MGI-8A8E7630806733	MGB-2BE74267602E	管材管件阀门	管材	软管	PIPE-000134
 MGI-9E9A7EFE8C786E	MGB-2BE74267602E	管材管件阀门	管材	软管	PIPE-000231	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
 MGI-EB4DA2AAB1F8D6	MGB-2BE74267602E	管材管件阀门	管材	软管		decision_review_not_approved	high	同名“软管”跨族重复且类型定义包含与洁具软管重叠的不锈钢编织软管，不能直接保留。	open
 MGI-F328171CADF01B	MGB-2BE74267602E	管材管件阀门	管材	软管	PIPE-000026	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-3AAFA5B40E3B9D	MGB-2BE74267602E	管材管件阀门	软连接	软连接	PIPE-000270	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-73FFCBEE272E10	MGB-2BE74267602E	管材管件阀门	软连接	软连接	PIPE-000271	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-983F92E13AB8D5	MGB-2BE74267602E	管材管件阀门	软连接	软连接		detailed_mapping_required	medium	该名称需要查看完整 SKU 证据后再映射。	open
 MGI-483FE1E1F41E51	MGB-2BE74267602E	紧固件与连接件	垫圈/垫片			family_review_not_approved	high	垫片与平垫圈存在同规格重叠（M27/M30），类型边界不成立；弹簧垫圈无问题。	open
 MGI-1F54EBD27EC519	MGB-2BE74267602E	紧固件与连接件	垫圈/垫片	垫片	FAST-000101	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
 MGI-3EC1B63D2F7607	MGB-2BE74267602E	紧固件与连接件	垫圈/垫片	垫片	SPARE-000011	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
@@ -973,26 +964,6 @@ MGI-1FCDCD8A73ECAD	MGB-2BE74267602E	紧固件与连接件	管卡/抱箍	骑马�
 MGI-23E1AA78A6B39E	MGB-2BE74267602E	紧固件与连接件	管卡/抱箍	骑马卡	PIPE-000459	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
 MGI-450D9DECA4450A	MGB-2BE74267602E	紧固件与连接件	管卡/抱箍	骑马卡	PIPE-000294	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
 MGI-F89A4F655B39FF	MGB-2BE74267602E	紧固件与连接件	管卡/抱箍	骑马卡	METAL-000055	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-012BEDD011B635	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000009	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-0164919284BAF3	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000004	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-12B9B6E1E6F8FE	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓		detailed_mapping_required	medium	该名称需要查看完整 SKU 证据后再映射。	open
-MGI-28399F4A519A49	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000059	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-2917044A7A2C70	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000110	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-356A266716A90A	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000011	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-3688DD8BB7DAED	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000062	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-3A6DC5DBEF301D	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000114	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-44C60C091C04B2	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000072	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-4A8C0CB2E4A806	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000023	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-75FF881B3A3C05	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000008	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-7932C57498A577	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000001	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-802279F5CBB1C2	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000012	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-99FFC613849EB1	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000112	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-AED44681A5A6DE	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000002	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-AEF16CAD973EDD	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000113	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-B10D7E5650A250	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000028	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-B40D5652F3A0F4	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000063	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-E5E09C1A45F676	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000042	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-F6698515C372A1	MGB-2BE74267602E	紧固件与连接件	膨胀锚栓	膨胀锚栓	FAST-000024	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
 MGI-D65535DB3DF081	MGB-2BE74267602E	紧固件与连接件	螺丝/螺栓			family_review_not_approved	high	存在多处专用套件与通用螺丝套件、高强度螺栓与外六角螺栓的类型边界重叠，需明确归口；6.8/8.8级螺栓并入外六角螺栓合理。	open
 MGI-028296B024EED6	MGB-2BE74267602E	紧固件与连接件	螺丝/螺栓	6.8级螺栓	SPARE-000014-68	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
 MGI-0D61105A9ACEE8	MGB-2BE74267602E	紧固件与连接件	螺丝/螺栓	6.8级螺栓	FAST-000053-68	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
@@ -1104,20 +1075,6 @@ MGI-E91C7BC98ADE78	MGB-2BE74267602E	紧固件与连接件	螺丝/螺栓	高强�
 MGI-1C45083EF88001	MGB-2BE74267602E	紧固件与连接件	螺丝/螺栓	鱼尾螺栓	SPARE-000028	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
 MGI-A0F3619201BDCF	MGB-2BE74267602E	紧固件与连接件	螺丝/螺栓	鱼尾螺栓	SPARE-000027	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
 MGI-E1D6529384D946	MGB-2BE74267602E	紧固件与连接件	螺丝/螺栓	鱼尾螺栓	SPARE-000026	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-0C94E884C44FEE	MGB-2BE74267602E	紧固件与连接件	螺母	螺母	FAST-000019	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-26F63B5ABE93E2	MGB-2BE74267602E	紧固件与连接件	螺母	螺母	SPARE-000041	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-272EABCF9E7A6A	MGB-2BE74267602E	紧固件与连接件	螺母	螺母	FAST-000081	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-27F7E85F0B7FCD	MGB-2BE74267602E	紧固件与连接件	螺母	螺母	SPARE-000049	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-28636F0F48189C	MGB-2BE74267602E	紧固件与连接件	螺母	螺母	SPARE-000040	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-48E808057E52B7	MGB-2BE74267602E	紧固件与连接件	螺母	螺母	FAST-000056	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-618F394843F108	MGB-2BE74267602E	紧固件与连接件	螺母	螺母	FAST-000065	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-726A3DFF9CE27A	MGB-2BE74267602E	紧固件与连接件	螺母	螺母		detailed_mapping_required	medium	该名称需要查看完整 SKU 证据后再映射。	open
-MGI-82F633E73E1EB6	MGB-2BE74267602E	紧固件与连接件	螺母	螺母	METAL-000154	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-98F7CF542C5908	MGB-2BE74267602E	紧固件与连接件	螺母	螺母	SPARE-000080	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-A70A174D5722A8	MGB-2BE74267602E	紧固件与连接件	螺母	螺母	FAST-000076	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-CE7D300E3047D4	MGB-2BE74267602E	紧固件与连接件	螺母	螺母	FAST-000031	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-DB95A629F4BC36	MGB-2BE74267602E	紧固件与连接件	螺母	螺母	FAST-000041	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
-MGI-DF50D4A742C895	MGB-2BE74267602E	紧固件与连接件	螺母	螺母	FAST-000021	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
 MGI-05A3B1618FF1D0	MGB-D768914054AD	设备备件	密封垫片			family_review_not_approved	high	胶垫与法兰垫片类型边界重叠，需修订后通过。	open
 MGI-1852ED890919D4	MGB-D768914054AD	设备备件	密封垫片	四氟垫片	SPARE-000098	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open
 MGI-45167E2856DB98	MGB-D768914054AD	设备备件	密封垫片	四氟垫片	FAST-000083	sku_mapping_unresolved	high	该 SKU 尚未获得经生成、独立复核和程序校验共同确认的标准类型映射。	open

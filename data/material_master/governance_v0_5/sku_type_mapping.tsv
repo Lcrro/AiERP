@@ -155,22 +155,49 @@ ELEC-000236	MT-6C33E0A79B78	灯泡	exact_current_name	现有名称即标准类�
 ELEC-000237	MT-77F38575DBC0	电缆	exact_current_name	多芯电力电缆独立成类。	frozen	ed2747fe40350892ee0616bf39463a33f2809f07b9029f1c7443c461702b7ee3
 ELEC-000239	MT-77F38575DBC0	电缆	exact_current_name	多芯电力电缆独立成类。	frozen	326ab7459df3b7a186bb446e35cafcc9dc93f6ebaf22b52ea46e9046ed0968ff
 ELEC-000241	MT-77F38575DBC0	电缆	exact_current_name	多芯电力电缆独立成类。	frozen	532b3e15449c8d607612ab0619d2ac462c3c8f69d70813a5380b1cd389148369
+FAST-000001	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M14"", ""length"": ""120"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M14*120，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	b299b0e4d24bfd766508df1f4864fc96741c2c34a81b2f4b0d234e548fced216
+FAST-000002	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M10"", ""length"": ""70"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M10*70，别名爆炸螺丝，符合expansion_bolt定义。""}"	frozen	8cae57063221145c1d007f1b5cf8c698527f7c7bbb2471650b684e0fe63a62ce
+FAST-000004	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M12"", ""length"": ""80"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M12*80，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	1376b678830ec65a2b7521a88896ae2c426f73f116d0f5844a033bd26b7bd131
 FAST-000005	MT-FE0C1CE4AE5E	花篮螺丝	exact_current_name	名称稳定，螺纹规格、长度、表面处理留在SKU属性。	frozen	1d2c387a94a662168c54418d3963295fa46e916a8307dfbd654e9fbb3868f8c2
+FAST-000008	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M20"", ""length"": ""140"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M20*140，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	c2236dd37f63e1b98acdc4bf80fe4c16fe93b50decb3c75c7270f08bf42587bc
+FAST-000009	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M22"", ""length"": ""140"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M22*140，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	b6833af96f740b466706e4164a6715e1505bfcb3f13dc75b17bcfba0d2595a89
 FAST-000010	MT-FE0C1CE4AE5E	花篮螺丝	exact_current_name	名称稳定，螺纹规格、长度、表面处理留在SKU属性。	frozen	e2d517ddad045c0f4a36166c946f907cad8731b98e4d058271222f8c8e66554b
+FAST-000011	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M8"", ""length"": ""60"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M8*60，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	fb085b2cfca1f05a26347cf7c99bbc1c0847365ddccf22a181bc68a7e94297e3
+FAST-000012	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M6"", ""length"": ""60"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M6*60，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	dae3704bb3ea5221847eb1b1b24d1d4bfa9f5636bd6748f27b5686d88fd11b87
 FAST-000017	MT-8250372BC1E7	螺杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	4d3e12193f46dc1f276c86c2ae2f661707d05d6fc7f13f315d74cc35b46ddda8
 FAST-000018	MT-8250372BC1E7	螺杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	4c3bba509c934e9c37c05a0c7b122ad4e1a72878df6ed912362bf92af283d684
+FAST-000019	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M20"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	012df9ee3819acfab60541f41e19c8284ce02a29b27352fe121d53919624da03
 FAST-000020	MT-8250372BC1E7	螺杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	5d2e8d781b93166ade16b89cc70daa9d1907b2b70e00ae04c41e282fb03bb9f1
+FAST-000021	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M16"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	ef6ffb711bb4de53d7378c5080091651711739f49c9d977bbecd6a5d64d73375
+FAST-000023	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M14"", ""length"": ""100"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M14*100，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	85b567c494973317814cf91775e0777ca68665652efbd4c9fd1fdf0f6998aa72
+FAST-000024	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M10"", ""length"": ""80"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M10*80，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	2e2db34d8ca9f52c519d2afecacb55c924ae2b450848a39995656180c7898be0
+FAST-000028	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M14"", ""length"": ""150"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M14*150，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	6044d6e6b227651f95075f42d3d8610b01852eedaea811f8a6b45f25bafa68aa
 FAST-000029	MT-8250372BC1E7	螺杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	6320ddbf2a4fc06972270c8fcd7e48fe7b037b43c6988317f5476e9ac414e6b6
+FAST-000031	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M10"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	b30936299d2fd330698844d5cdd990c81b6776fd3cd3fede1f6b560516c7924c
 FAST-000040	MT-8250372BC1E7	螺杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	6794b3cb7b60e3226fefbc9c54f6256b93752f252c6e36461e176eab03b62da8
+FAST-000041	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M48"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	fa52ed97458b56a5bd0a2b0430da396b26f3424973352eed6dae647fd1ad5683
+FAST-000042	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M24"", ""length"": ""150"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M24*150，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	27786f81a21fc0b9cb8b2a94bdea465d03b8ab8cf8bcae3d64380649fd1b635f
 FAST-000050	MT-99FF090373BB	防松螺母	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	22d4f20dc324dc1a583e75bdad2869c0c6ef408b6aadcec0509d8d19cce8c088
+FAST-000056	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M27"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	4fce83d83e5b7951bace471123413276eef82a3fbca1c1d9fe43d69ee410f3bc
+FAST-000059	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M20"", ""length"": ""150"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M20*150，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	5a01717134d71c33f8945f7388c07c74297ba2b773151c0a232922d3fcbea8e0
 FAST-000060	MT-FE0C1CE4AE5E	花篮螺丝	exact_current_name	名称稳定，螺纹规格、长度、表面处理留在SKU属性。	frozen	76ec57fa93229109c3ad390cf227951c5dacad358db94ba95bd5b0a9460ef18b
+FAST-000062	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M10"", ""length"": ""60"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M10*60，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	108c72b164562866687b3748594e711ccc4c04b064c362cd584c4c96f0851578
+FAST-000063	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M14"", ""length"": ""70"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M14*70，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	09883b8f061f0123170f1c6534dbf5f4d13d9fae580029160f70952834f02eb1
+FAST-000065	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M30"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	41651c82dbb92edd131984c9caa45c127a5a3324d134bb11f5eb6df5bf815c28
 FAST-000071	MT-BE833CCCABED	全螺纹丝杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	c711bbc313bdd136683aa7f1d6f263f81eb5f90d4e8525bce5f5680d1ffd59b2
+FAST-000072	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M12"", ""length"": ""100"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M12*100，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	76f04f0bbe73afa473a118f62b2144bc3b8daf13719a04180fb5fa3caa84a7cb
+FAST-000076	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""304不锈钢"", ""spec"": ""M6""}, ""confidence"": 0.95, ""reason"": ""不锈钢螺母，无防松结构，符合nut定义。""}"	frozen	592780857249c78814a8126ea639762cc7dfc404cb7a44b106eed1aede1c1d54
 FAST-000079	MT-99FF090373BB	防松螺母	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	59716667726bccafa71af2ddbf1b5c58f8162c640e4692fd81b7a50de151ae7f
 FAST-000080	MT-BE833CCCABED	全螺纹丝杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	fbf9611df2ea30286197c62319a6dd2c08923ea80aa808a844dc410c17729a06
+FAST-000081	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""合金钢"", ""spec"": ""M30"", ""strength_grade"": ""12.9""}, ""confidence"": 0.93, ""reason"": ""高强度合金钢螺母，无防松结构，符合nut定义。""}"	frozen	84cea82ce4bb02b565c5dbd04141859f5756f49badfbec5817c82cb418de51d2
 FAST-000086	MT-A910340E89B8	膨胀止水条	exact_current_name	遇水膨胀密封条类型稳定，规格作为属性。	frozen	74c200c30d95c7b8a0fe5f9a9c4d3c81ea32e3e1b36c7f5e074a6fa86f875615
 FAST-000089	MT-948FDC7C0C55	膨胀钩	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	6ca73987e433faef0c5358e152ecda9858de028c09447eaf297818518592ff95
 FAST-000092	MT-25B26D59F8C2	异形垫片	exact_current_name	名称稳定，尺寸和材质留在SKU属性。	frozen	cdb88d0fd9c0ecab95c0ff5c012d49359e944c006dc77068efa5eb7be0594134
 FAST-000099	MT-BE833CCCABED	全螺纹丝杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	c1d04861bd08f4b8555327e2cabd3be76d3a585f270e51be3942eefcbc106793
+FAST-000110	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M10"", ""length"": ""110"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M10*110，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	aee599fb24a9898c1e66da2193664f0ae48ab55642b9a5bd17e08aa975cc3480
+FAST-000112	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M8"", ""length"": ""70"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M8*70，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	f31cdeff364afcedda1ec9fe06126f254c15fa7e148e832840aa7f8a32b5f1f7
+FAST-000113	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M8"", ""length"": ""90"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M8*90，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	cfd34f0634161148bc6a217e1664a3baff7a319297b48d4c5490c7eb4a5d3184
+FAST-000114	MT-0A950F7E0187	膨胀锚栓	detailed_evidence	"{""attributes"": {""caliber"": ""M12"", ""length"": ""110"", ""surface_treatment"": ""镀锌""}, ""confidence"": 0.98, ""reason"": ""SKU为膨胀锚栓，规格为M12*110，别名膨胀螺丝，符合expansion_bolt定义。""}"	frozen	847f2a1ca808275df0c57ad082ea3482af1796b81a327651c4ab8da6b1f9103f
 FAST-000118	MT-8250372BC1E7	螺杆	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	523c23e117fe6831b175edc0414403a85cdb14e7f698682dfb3636d18f355c8d
 FAST-000120	MT-948FDC7C0C55	膨胀钩	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	6332f34564f3de832ee22c608292154fa2224bcc0f7fa82db4a53b60bdc3ee8f
 FAST-000121	MT-FE0C1CE4AE5E	花篮螺丝	exact_current_name	名称稳定，螺纹规格、长度、表面处理留在SKU属性。	frozen	fd8ac7f2cedd271d8bbe60ce671cfb4087c0e758aeec1a2c54e917524d04d4e4
@@ -364,6 +391,7 @@ METAL-000150	MT-C87204B06C74	直通快插接头	exact_current_name	型式为外�
 METAL-000151	MT-C87204B06C74	直通快插接头	exact_current_name	型式为外螺纹+快插直通，尺寸和螺纹归SKU属性。	frozen	b7b3aa1b1df6d0363b5a4f2252fa4fb510663d4022d47d719848d18a6877639e
 METAL-000152	MT-C87204B06C74	直通快插接头	exact_current_name	型式为外螺纹+快插直通，尺寸和螺纹归SKU属性。	frozen	37b5831e96dfff10a60f6f1d5b1166031ddee3bccc7626ee8349daec1da83520
 METAL-000153	MT-C7A58C87DFFF	止回阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	8c1c7f28e0f7d0f1a4be4d7b1c8acc6388343b4c8066a6091b84b04163473706
+METAL-000154	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""不锈钢"", ""spec"": ""M5""}, ""confidence"": 0.95, ""reason"": ""不锈钢螺母，无防松结构，符合nut定义。""}"	frozen	e60df42ba44cb2c48ec079e241b3d831f8b7209c970b3368c557865629a5d042
 METAL-000158	MT-271DC337D5AE	排气阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	a5387d07458dda40875feb279d9e8304ec55bd59716bf086246123f8be22f8c8
 METAL-000159	MT-EBAF1AA097EE	保温水箱	exact_current_name	保温水箱类型稳定，容量/材质作为属性。	frozen	e5ee0ff254ff650854a6fb6521211e4be5437105d04cf4c898046615f947fe22
 METAL-000160	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	e13dfd3b0058fab60a42ce6e74fc4efcac5dfac3a372978e2906791c1c7e14e5
@@ -411,6 +439,7 @@ PIPE-000109	MT-FCFA733580C1	消防水带	exact_current_name	名称稳定，口�
 PIPE-000111	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	c6cbbafa1f50996e799c2a310c5a72bd40da3e74ff1f48e9aa74b8827086b315
 PIPE-000113	MT-92A9B34FE9A4	混水阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	248a66cadf4afa6438c9b8cffc5274ba7388cc92abe50c3a806e55f781ba16a8
 PIPE-000124	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为碳钢焊接弯头，加厚，角度90°，符合弯头定义。""}"	frozen	eac111385b5b21c9c4d61b20be38bf4c0eab2095a07d8c3befd2383b7130195d
+PIPE-000125	MT-022ACA1C727A	法兰	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""nominal_diameter"": ""DN325"", ""pressure_rating"": ""16kg""}, ""confidence"": 0.99, ""reason"": ""SKU名称为碳钢法兰，规格含公称直径和压力等级，符合flange定义。""}"	frozen	90a35fc318cd01c7d7e0cd128692e04522da52ad153fd0f4b9d9b758a81e6104
 PIPE-000139	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为镀锌三通，未见异径/Y型/斜三通信息，符合等径三通定义。""}"	frozen	bb324d2755b2f3eb34bcb60973d4e9f926925a4bea495bbcc415e4ee16762262
 PIPE-000145	MT-B31CC9A0EEF0	消防卡箍	exact_current_name	为与普通卡箍区分，并体现消防沟槽连接，标准名使用消防卡箍。	frozen	2116f98ea2249d967dd3f9b53343460f4dfb0922c717abd4cc653c59b7673d12
 PIPE-000148	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为碳钢焊接弯头，角度90°，符合弯头定义。""}"	frozen	7701ac49ec9daf23a951e88120fdfdf9e0cbb26e38b1036c2d1c553e6283a160
@@ -418,8 +447,10 @@ PIPE-000149	MT-81A9FB6F50A4	弯头	detailed_evidence	"{""attributes"": {}, ""con
 PIPE-000160	MT-1C76E756D933	蝶阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	de4b46407ff171378b66c4497568a12a457d246c7b68245c096af3f61bb4c246
 PIPE-000161	MT-1C76E756D933	蝶阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	bfb6a1778f8081d23cae9d1e551a1675a0b310e382ada57ab49900be0d2a5ae6
 PIPE-000163	MT-6DCF22B62A16	电磁阀	exact_current_name	电磁驱动方式构成独立类型，型号/电压/接口归SKU属性。	frozen	746d1b166ba44f0360affa6657ade75a7795ad2b36f0369d4d9252e08c8e99a0
+PIPE-000166	MT-022ACA1C727A	法兰	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""nominal_diameter"": ""DN273"", ""pressure_rating"": ""16kg""}, ""confidence"": 0.99, ""reason"": ""SKU名称为碳钢法兰，规格含公称直径和压力等级，符合flange定义。""}"	frozen	b041f0ae18ea807cbf57e83beb9258a8a3374cd0bdb6caa952e4b2709faa21d0
 PIPE-000178	MT-92792CE97FCF	减压阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	47368350f1c67e6ea513ffd604a475e56c491aaefd98eafda0f049038d14f79b
 PIPE-000181	MT-6DCF22B62A16	电磁阀	exact_current_name	电磁驱动方式构成独立类型，型号/电压/接口归SKU属性。	frozen	94ea75c6f306430ae4735fa52ca45216862c79e5fd11dd5e3681fea8a3b37368
+PIPE-000185	MT-022ACA1C727A	法兰	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""nominal_diameter"": ""DN89"", ""pressure_rating"": ""16kg""}, ""confidence"": 0.99, ""reason"": ""SKU名称为碳钢法兰，规格含公称直径和压力等级，符合flange定义。""}"	frozen	bd4da10ceb68c2f0415ce63cb118b6174a32f630447be88aaa8b3787b347ac57
 PIPE-000186	MT-33678DFF6077	Y型过滤器	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	4ab31bf89fc70b2e61987b19ca8fab286d5c80356fc66841d916a656c13af5e4
 PIPE-000190	MT-C6D1159B83ED	气动阀	exact_current_name	阀类型稳定，型号/口径/阀位状态归SKU属性。	frozen	26ba23452b4c7a58c2ab5d914a29badb50caabd9d890ed73015cdbac7de72652
 PIPE-000192	MT-B31CC9A0EEF0	消防卡箍	exact_current_name	为与普通卡箍区分，并体现消防沟槽连接，标准名使用消防卡箍。	frozen	81c5f69b5a06ddf247d694329ea7caeb9997c6929479cb8b51ad595f4a43cf4d
@@ -453,6 +484,8 @@ PIPE-000260	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""con
 PIPE-000263	MT-FCFA733580C1	消防水带	exact_current_name	名称稳定，口径、特性、压力、接口留在SKU属性。	frozen	94e506a8f8ef2ae34bfa51ebc7e243867a7247d800c10e33bbc778324321997d
 PIPE-000264	MT-C6D1159B83ED	气动阀	exact_current_name	阀类型稳定，型号/口径/阀位状态归SKU属性。	frozen	414769ae556c23f3373075aec53357548a859b4f1311aab5b8aa18063ae32a5c
 PIPE-000267	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	c57df584d7faf368f815d881da3b2e882c141333f98d374b10e049c8dc460e18
+PIPE-000270	MT-5913CF437050	软连接	detailed_evidence	"{""attributes"": {""connection_method"": ""法兰"", ""end_spec"": ""65*40""}, ""confidence"": 0.99, ""reason"": ""SKU名称为法兰软连接，规格为两端异径，符合soft_connection定义。""}"	frozen	ba8d6a4109b809d0bccc27c317f0ff1917721cfe7ce13bdc1dfa25430f166c84
+PIPE-000271	MT-5913CF437050	软连接	detailed_evidence	"{""attributes"": {""connection_method"": ""法兰"", ""end_spec"": ""65*50""}, ""confidence"": 0.99, ""reason"": ""SKU名称为法兰软连接，规格为两端异径，符合soft_connection定义。""}"	frozen	7af44670ad0b87ab82083d8315668a7c8b0f253a0481832e9b33ae130a9f3995
 PIPE-000272	MT-A6E56B3BA604	三通	detailed_evidence	"{""attributes"": {}, ""confidence"": 0.95, ""reason"": ""SKU为PPR三通，未见异径/Y型/斜三通信息，符合等径三通定义。""}"	frozen	8fc806da8bc6700b2ea3685b36589b188811e99ad9c6e62ff4a146031d2c2ff9
 PIPE-000276	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	083ed7e65f277bb9affd99d783f714c73d4c8f18e9e35d25bdec25b3e15ec8f3
 PIPE-000277	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	fbba94d50cce05389b49d21644496a99e8c5c548633ed740324ea3f7e9c20cbd
@@ -462,6 +495,8 @@ PIPE-000284	MT-F651F47615F1	消防接头	exact_current_name	名称稳定，口�
 PIPE-000285	MT-F651F47615F1	消防接头	exact_current_name	名称稳定，口径、接口、材质、压力留在SKU属性。	frozen	c4ea8e555032e47d419abaa4c535ef016ae3a3c7a7d4be2aa156241cff415c95
 PIPE-000289	MT-4CF6625D5C80	抱箍	exact_current_name	名称稳定，规格/适用管径/材质留在SKU属性。	frozen	d1deb471c9755530ce25c1a52be1ef3a657a117ba28de03bc0d96836bae888f2
 PIPE-000290	MT-4CF6625D5C80	抱箍	exact_current_name	名称稳定，规格/适用管径/材质留在SKU属性。	frozen	cf8ce493dcdab682537c617242a96cb30bc309e71ef82257d2fb7b9f3d9e4b9a
+PIPE-000291	MT-022ACA1C727A	法兰	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""nominal_diameter"": ""DN50"", ""pressure_rating"": ""16kg""}, ""confidence"": 0.99, ""reason"": ""SKU名称为碳钢法兰，规格含公称直径和压力等级，符合flange定义。""}"	frozen	e6114c7e7dec7aa9bd6f53b3ac9ea11c00bb09b86a7f78c8411dbb4a8d04f9b8
+PIPE-000292	MT-022ACA1C727A	法兰	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""nominal_diameter"": ""DN65"", ""pressure_rating"": ""16kg""}, ""confidence"": 0.99, ""reason"": ""SKU名称为碳钢法兰，规格含公称直径和压力等级，符合flange定义。""}"	frozen	284ecaaa002ad433e2181233209897da70884afb3c683424936eea33378e1fb9
 PIPE-000306	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	6d7f9ad9d72dedda93abba6f965c66d8b7a7c4af1bcfcb36373be1d1a57ebc78
 PIPE-000310	MT-8D95FADCFD52	球阀	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	07523574a04749403e73c427095d609f9bcbb6da526b1145f9ef38a7a685a6c9
 PIPE-000318	MT-B5EB103B46E6	胶管总成	detailed_evidence	"{""attributes"": {""joint_form"": ""两端接头"", ""layer_count"": ""2层"", ""length"": ""12米"", ""spec"": ""36*2""}, ""confidence"": 0.97, ""reason"": ""SKU名与规格均为两端接头的胶管总成，按根销售。""}"	frozen	79cf8a9ef5c30d60df609a0faf1fc0bf74097b38fb6ec127e0d0a95f80b8b658
@@ -666,8 +701,11 @@ SPARE-000030	MT-DB161D20A503	轴套	exact_current_name	钢套与轴套同属套�
 SPARE-000033	MT-663D0AD47CE1	刮泥板	exact_current_name	商品结构为板式刮泥件，名称已合格且不含尺寸材质。	frozen	41adf2ea72f2699c5387e42f66bbb47c45843f17d8b10994b29473c602bb20fc
 SPARE-000035	MT-6BB67091F91F	板件	exact_current_name	名称稳定，材质、尺寸、加工留在SKU属性。	frozen	7894733307c56ef386885067d34e868415553c9e387bc691ff5325e20fcac496
 SPARE-000036	MT-C3EC9D599373	夹板	exact_current_name	名称稳定，尺寸和材质留在SKU属性。	frozen	74c0375e59df8f1fb6a47450b11e16bd7171cde8d8656c41b886e2c329d1d826
+SPARE-000040	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M4"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	2bed9714a3e060d55f1c79d0d235c6c3673d965d7f1cbea028e990ea9bc80b56
+SPARE-000041	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M5"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	2cc18d24d13d2aa04ea2799d1f6f424fac88c15a25ac15df94acdc454bcd07f9
 SPARE-000046	MT-998F41BCECD4	活塞	exact_current_name	注浆机为适用设备，商品类型为活塞。	frozen	6ca5805fc15fba8b07beac38207e070c228cb46ea852bbe1fa85981f0c80a703
 SPARE-000047	MT-CC3DAB6A510F	污水泵	exact_current_name	排污泵与污水泵为同一污水输送泵类型的常见名称，统一并入污水泵。	frozen	506bca9bb10ebdf05cdfb65784312e6bb080ff05e5a2b1f399a8fa858ee50096
+SPARE-000049	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M14"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	90c0d6a9d5c8c27f94b51badad3571a919ddcb0f3b48a47c5280c0c7e1b18049
 SPARE-000051	MT-0B08DC7D356A	箱体	exact_current_name	名称稳定，容量和材质留在SKU属性。	frozen	2c0aade8a0a4c5162f1c421dde2a1d742a7bae9f233c1283fa3c646e61241d72
 SPARE-000052	MT-093DDC2D8A8E	扎丝	exact_current_name	现有名称已是稳定类型，直径、长度、包装、颜色等放入SKU属性。	frozen	a99b22a559cd6e9c535f9ec6b67513393b81d1c5a7b11be1133001b9527de77f
 SPARE-000053	MT-C2F8DEE7ACA5	铁钉	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	08bf49a890e5a4585cb7307283c72b72cc97ade55d417eefb8f4ce97fd477272
@@ -683,6 +721,7 @@ SPARE-000064	MT-CC3DAB6A510F	污水泵	exact_current_name	污水泵为标准类�
 SPARE-000072	MT-4B8387D02EE7	钢格板	exact_current_name	名称稳定，材质/长度/宽度留在SKU属性。	frozen	c9376bda447421f47673b033fc33655bf7dc539a963e599776714b2a62e752fd
 SPARE-000073	MT-948FDC7C0C55	膨胀钩	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	b1e738a967580e905b8aa656df5b959aa316ac75082e05a939f6e8d2b196bbf3
 SPARE-000074	MT-181CE295C9C7	吸轮	exact_current_name	推进泵为适用设备，商品类型为泵用吸轮。	frozen	d9229d8984417692cf40858bd410054b1dec41006101e499b21912095b13564a
+SPARE-000080	MT-033B2F7CA899	螺母	detailed_evidence	"{""attributes"": {""material"": ""碳钢"", ""spec"": ""M22"", ""strength_grade"": ""8""}, ""confidence"": 0.98, ""reason"": ""通用碳钢螺母，无防松结构，符合nut定义。""}"	frozen	7573ee77196a7492ff0cd667b46ba0b9c82dd0658eb20776efd0b9430ff4c155
 SPARE-000081	MT-61B9E5E11D72	卡簧	exact_current_name	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	db1caaf67fbf3f43a0d4b2cf6ee3a48a1798b028be9e4d973262dd19cb820140
 SPARE-000083	MT-E1D1050E67AD	垫木	exact_current_name	名称稳定，尺寸/截面/材质/长度留在SKU属性。	frozen	9426ce80fe8c1bca21a2da23bd538d12130d289e59b6a17133870462563e008c
 SPARE-000084	MT-E1D1050E67AD	垫木	exact_current_name	名称稳定，尺寸/截面/材质/长度留在SKU属性。	frozen	0514a7756190c1369e018eee98257d08e837b17a6d461b127c9e5836ed9eaf61

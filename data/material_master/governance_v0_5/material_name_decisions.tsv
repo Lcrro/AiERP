@@ -648,7 +648,7 @@ top_group	material_family	current_name	action	target_type_ids	reason	decision_st
 管材管件阀门	水龙头/洁具配件	蹲便器	keep	MT-98906F0FE57D	名称稳定，未含规格/品牌，作为标准类型保留。	review_required	a8451a4178a10e212b866092b2fae41e4bd50e5ffbfb9568de295d1a2e7fb69d	除“软管”跨族同名且定义重叠外，其余名称和属性基本稳定；需将洁具软管与管材软管明确区分。
 管材管件阀门	水龙头/洁具配件	软管	keep	MT-BB8FA63927B5	名称稳定，未含规格/品牌，作为标准类型保留。	review_required	a8451a4178a10e212b866092b2fae41e4bd50e5ffbfb9568de295d1a2e7fb69d	除“软管”跨族同名且定义重叠外，其余名称和属性基本稳定；需将洁具软管与管材软管明确区分。
 管材管件阀门	水龙头/洁具配件	隔电堵	keep	MT-476D359DC169	名称稳定，未含规格/品牌，作为标准类型保留。	review_required	a8451a4178a10e212b866092b2fae41e4bd50e5ffbfb9568de295d1a2e7fb69d	除“软管”跨族同名且定义重叠外，其余名称和属性基本稳定；需将洁具软管与管材软管明确区分。
-管材管件阀门	法兰	法兰	keep	MT-022ACA1C727A	名称稳定，未含规格/品牌，作为标准类型保留。	review_required	5a56cf5fcb162bc6c4a4d910e7020bd562a2e4befbd99425c7531f258da9b9f1	单一类型，名称与属性均能表达法兰盘结构，未发现实质问题。
+管材管件阀门	法兰	法兰	keep	MT-022ACA1C727A	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	5a56cf5fcb162bc6c4a4d910e7020bd562a2e4befbd99425c7531f258da9b9f1	单一类型，名称与属性均能表达法兰盘结构，未发现实质问题。
 管材管件阀门	直接/接头	堵头/管帽	keep	MT-988CAD476BBA	名称稳定，未含规格/品牌，作为标准类型保留。	review_required	95ce5c6eea1724167afd4d31b7c5b2339b0ec72f9f03d662c5b1d35e088c0e4c	主要问题为“接头”过于通用，与“直接/直通”等同为直通螺纹连接件，类型边界不清；其余类型覆盖旧名称。
 管材管件阀门	直接/接头	异径接头/大小头	keep	MT-53D944731A77	名称稳定，未含规格/品牌，作为标准类型保留。	review_required	95ce5c6eea1724167afd4d31b7c5b2339b0ec72f9f03d662c5b1d35e088c0e4c	主要问题为“接头”过于通用，与“直接/直通”等同为直通螺纹连接件，类型边界不清；其余类型覆盖旧名称。
 管材管件阀门	直接/接头	快速接头	keep	MT-D084CA6EA8FB	名称稳定，未含规格/品牌，作为标准类型保留。	review_required	95ce5c6eea1724167afd4d31b7c5b2339b0ec72f9f03d662c5b1d35e088c0e4c	主要问题为“接头”过于通用，与“直接/直通”等同为直通螺纹连接件，类型边界不清；其余类型覆盖旧名称。
@@ -666,7 +666,7 @@ top_group	material_family	current_name	action	target_type_ids	reason	decision_st
 管材管件阀门	管道辅材	喷头	keep	MT-AD4A5D9B4C70	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	d9421a514dd215df08c17c9b511ead505cbd874aef7197a805c43a133099237a	名称、属性均覆盖源证据，未发现实质问题。
 管材管件阀门	管道辅材	生料带	keep	MT-E3B0BF183C89	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	d9421a514dd215df08c17c9b511ead505cbd874aef7197a805c43a133099237a	名称、属性均覆盖源证据，未发现实质问题。
 管材管件阀门	管道辅材	集水斗	keep	MT-3456430B26D2	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	d9421a514dd215df08c17c9b511ead505cbd874aef7197a805c43a133099237a	名称、属性均覆盖源证据，未发现实质问题。
-管材管件阀门	软连接	软连接	keep	MT-5913CF437050	名称稳定，未含规格/品牌，作为标准类型保留。	review_required	6596b7719173443da6d94d5e119e473cb9ae3821943c0ff4bd8616da904fcc69	法兰软连接属性足够，边界清晰。
+管材管件阀门	软连接	软连接	keep	MT-5913CF437050	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	6596b7719173443da6d94d5e119e473cb9ae3821943c0ff4bd8616da904fcc69	法兰软连接属性足够，边界清晰。
 管材管件阀门	过滤器/水处理附件	Y型过滤器	keep	MT-33678DFF6077	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	43440d3746fbd6d5274ae85ef40777a248d16017ebeb9fd63d85a0ff3d9c7247	Y型过滤器结构名称稳定，属性足够。
 管材管件阀门	阀门	减压阀	keep	MT-92792CE97FCF	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	f2cc1c30ac06108429e2b801b7352cdd33e5aee8b7164e1f98de050516fccb50	各阀类名称均为结构/功能类型，属性模板足以区分规格。
 管材管件阀门	阀门	刀阀	keep	MT-BFDD51510901	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	f2cc1c30ac06108429e2b801b7352cdd33e5aee8b7164e1f98de050516fccb50	各阀类名称均为结构/功能类型，属性模板足以区分规格。
@@ -700,8 +700,8 @@ top_group	material_family	current_name	action	target_type_ids	reason	decision_st
 紧固件与连接件	管卡/抱箍	管夹	keep	MT-B81F004D63BE	名称稳定，未含规格/品牌，作为标准类型保留。	review_required	e67c615d73a582b0a614f4d0034d7e8d118325c929d6a51313fbfc37c593ff35	卡箍/抱箍/管箍三类环形抱紧件边界不清、且管箍跨族同名，需调整。
 紧固件与连接件	管卡/抱箍	管箍	keep	MT-9640B3CF481D	名称稳定，未含规格/品牌，作为标准类型保留。	review_required	e67c615d73a582b0a614f4d0034d7e8d118325c929d6a51313fbfc37c593ff35	卡箍/抱箍/管箍三类环形抱紧件边界不清、且管箍跨族同名，需调整。
 紧固件与连接件	管卡/抱箍	骑马卡	keep	MT-BBADC6FC54E6	名称稳定，未含规格/品牌，作为标准类型保留。	review_required	e67c615d73a582b0a614f4d0034d7e8d118325c929d6a51313fbfc37c593ff35	卡箍/抱箍/管箍三类环形抱紧件边界不清、且管箍跨族同名，需调整。
-紧固件与连接件	膨胀锚栓	膨胀钩	keep	MT-948FDC7C0C55	名称稳定，未含规格/品牌，作为标准类型保留。	review_required	1b08f3d31b51f18ac904f098e370ebc6bad9565e4e8bbb9133abee8eab71a5f1	膨胀钩与膨胀锚栓按端部结构区分，属性足够。
-紧固件与连接件	膨胀锚栓	膨胀锚栓	keep	MT-0A950F7E0187	名称稳定，未含规格/品牌，作为标准类型保留。	review_required	1b08f3d31b51f18ac904f098e370ebc6bad9565e4e8bbb9133abee8eab71a5f1	膨胀钩与膨胀锚栓按端部结构区分，属性足够。
+紧固件与连接件	膨胀锚栓	膨胀钩	keep	MT-948FDC7C0C55	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	1b08f3d31b51f18ac904f098e370ebc6bad9565e4e8bbb9133abee8eab71a5f1	膨胀钩与膨胀锚栓按端部结构区分，属性足够。
+紧固件与连接件	膨胀锚栓	膨胀锚栓	keep	MT-0A950F7E0187	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	1b08f3d31b51f18ac904f098e370ebc6bad9565e4e8bbb9133abee8eab71a5f1	膨胀钩与膨胀锚栓按端部结构区分，属性足够。
 紧固件与连接件	螺丝/螺栓	6.8级螺栓	merge	MT-54F0098B9EB5	强度等级仅为属性，与8.8级螺栓/外六角螺栓同属外六角螺栓类型。	review_required	22a27702e7f09514c5c93d99c5f51bc6d610f31c3e400ce60cfeeda088374528	存在多处专用套件与通用螺丝套件、高强度螺栓与外六角螺栓的类型边界重叠，需明确归口；6.8/8.8级螺栓并入外六角螺栓合理。
 紧固件与连接件	螺丝/螺栓	8.8级螺栓	merge	MT-54F0098B9EB5	强度等级仅为属性，与6.8级螺栓/外六角螺栓同属外六角螺栓类型。	review_required	22a27702e7f09514c5c93d99c5f51bc6d610f31c3e400ce60cfeeda088374528	存在多处专用套件与通用螺丝套件、高强度螺栓与外六角螺栓的类型边界重叠，需明确归口；6.8/8.8级螺栓并入外六角螺栓合理。
 紧固件与连接件	螺丝/螺栓	T型螺丝套件	keep	MT-8AE4D626B8FD	名称稳定，未含规格/品牌，作为标准类型保留。	review_required	22a27702e7f09514c5c93d99c5f51bc6d610f31c3e400ce60cfeeda088374528	存在多处专用套件与通用螺丝套件、高强度螺栓与外六角螺栓的类型边界重叠，需明确归口；6.8/8.8级螺栓并入外六角螺栓合理。
@@ -724,8 +724,8 @@ top_group	material_family	current_name	action	target_type_ids	reason	decision_st
 紧固件与连接件	螺丝/螺栓	鱼尾螺栓	keep	MT-566BCD48A53F	名称稳定，未含规格/品牌，作为标准类型保留。	review_required	22a27702e7f09514c5c93d99c5f51bc6d610f31c3e400ce60cfeeda088374528	存在多处专用套件与通用螺丝套件、高强度螺栓与外六角螺栓的类型边界重叠，需明确归口；6.8/8.8级螺栓并入外六角螺栓合理。
 紧固件与连接件	螺杆/丝杆	全螺纹丝杆	keep	MT-BE833CCCABED	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	4b19ec71e9f42bc24a734dd045b7fcd43a87862a8cd3972420d5dab04bec1bda	全螺纹丝杆与螺杆按全螺纹/长杆与短杆边界区分，属性足够。
 紧固件与连接件	螺杆/丝杆	螺杆	keep	MT-8250372BC1E7	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	4b19ec71e9f42bc24a734dd045b7fcd43a87862a8cd3972420d5dab04bec1bda	全螺纹丝杆与螺杆按全螺纹/长杆与短杆边界区分，属性足够。
-紧固件与连接件	螺母	螺母	keep	MT-033B2F7CA899	名称稳定，未含规格/品牌，作为标准类型保留。	review_required	5410b64fa232b7a1851450b1b2fbe6a10d770f5aaaedb43ee2a3e6a7af38c0bf	螺母与防松螺母边界清晰。
-紧固件与连接件	螺母	防松螺母	keep	MT-99FF090373BB	名称稳定，未含规格/品牌，作为标准类型保留。	review_required	5410b64fa232b7a1851450b1b2fbe6a10d770f5aaaedb43ee2a3e6a7af38c0bf	螺母与防松螺母边界清晰。
+紧固件与连接件	螺母	螺母	keep	MT-033B2F7CA899	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	5410b64fa232b7a1851450b1b2fbe6a10d770f5aaaedb43ee2a3e6a7af38c0bf	螺母与防松螺母边界清晰。
+紧固件与连接件	螺母	防松螺母	keep	MT-99FF090373BB	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	5410b64fa232b7a1851450b1b2fbe6a10d770f5aaaedb43ee2a3e6a7af38c0bf	螺母与防松螺母边界清晰。
 紧固件与连接件	钉类	水泥钉	keep	MT-E9CCD3B7126C	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	5bf2418a0a6886df3c4346785f5dcd8c59838cee46221914657c8cab7fd7e2c2	三类钉按用途/材质区分，属性足以覆盖。
 紧固件与连接件	钉类	钢钉	keep	MT-350F690ACEEC	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	5bf2418a0a6886df3c4346785f5dcd8c59838cee46221914657c8cab7fd7e2c2	三类钉按用途/材质区分，属性足以覆盖。
 紧固件与连接件	钉类	铁钉	keep	MT-C2F8DEE7ACA5	名称稳定，未含规格/品牌，作为标准类型保留。	frozen	5bf2418a0a6886df3c4346785f5dcd8c59838cee46221914657c8cab7fd7e2c2	三类钉按用途/材质区分，属性足以覆盖。
