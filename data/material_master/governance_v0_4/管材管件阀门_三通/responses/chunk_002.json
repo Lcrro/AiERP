@@ -1,0 +1,75 @@
+{
+  "rows": [
+    {
+      "item_code": "PIPE-000433",
+      "proposed_item_name": "三通",
+      "proposed_sku_name": "镀锌三通 DN50",
+      "proposed_required_specs": "材质：镀锌；规格/口径：DN50",
+      "proposed_optional_specs": "",
+      "proposed_stock_uom": "个",
+      "proposed_aliases": "镀锌三通2寸；镀锌三通",
+      "proposed_brand": "",
+      "proposed_model": "",
+      "duplicate_with_item_code": "PIPE-000139",
+      "change_reason": "2寸按行业口径换算为DN50，与既有DN50镀锌三通重复"
+    },
+    {
+      "item_code": "PIPE-000462",
+      "proposed_item_name": "三通",
+      "proposed_sku_name": "PPR三通 32mm",
+      "proposed_required_specs": "材质：PPR；规格/口径：32mm",
+      "proposed_optional_specs": "",
+      "proposed_stock_uom": "个",
+      "proposed_aliases": "PPR三通",
+      "proposed_brand": "",
+      "proposed_model": "",
+      "duplicate_with_item_code": "",
+      "change_reason": "规格保持一致，材质归一为PPR"
+    },
+    {
+      "item_code": "PIPE-000468",
+      "proposed_item_name": "三通",
+      "proposed_sku_name": "PVC三通 100mm",
+      "proposed_required_specs": "材质：PVC；规格/口径：100mm",
+      "proposed_optional_specs": "",
+      "proposed_stock_uom": "个",
+      "proposed_aliases": "PVC三通",
+      "proposed_brand": "",
+      "proposed_model": "",
+      "duplicate_with_item_code": "",
+      "change_reason": "PVC材质，无排水标识，不补用途"
+    },
+    {
+      "item_code": "PIPE-000477",
+      "proposed_item_name": "三通",
+      "proposed_sku_name": "镀锌三通 DN80",
+      "proposed_required_specs": "材质：镀锌；规格/口径：DN80",
+      "proposed_optional_specs": "",
+      "proposed_stock_uom": "个",
+      "proposed_aliases": "镀锌三通3寸；镀锌三通",
+      "proposed_brand": "",
+      "proposed_model": "",
+      "duplicate_with_item_code": "PIPE-000242",
+      "change_reason": "3寸按行业口径换算为DN80，与既有DN80镀锌三通重复"
+    },
+    {
+      "item_code": "PIPE-000487",
+      "proposed_item_name": "三通",
+      "proposed_sku_name": "镀锌三通 DN20",
+      "proposed_required_specs": "材质：镀锌；规格/口径：DN20",
+      "proposed_optional_specs": "",
+      "proposed_stock_uom": "个",
+      "proposed_aliases": "镀锌三通6分；镀锌三通",
+      "proposed_brand": "",
+      "proposed_model": "",
+      "duplicate_with_item_code": "",
+      "change_reason": "6分按行业口径换算为DN20，无既有重复"
+    }
+  ],
+  "family_observations": [
+    "全族25条三通中，等径三通占多数，另有异径三通、斜三通和Y型三通；",
+    "英制规格（2寸、3寸、6分）统一换算为DN50、DN80、DN20，与既有DN表述保持一致；",
+    "PVC与UPVC按原文区分，未默认排水/给水用途；",
+    "发现2寸镀锌三通（PIPE-000433）与PIPE-000139、3寸镀锌三通（PIPE-000477）与PIPE-000242疑似重复。"
+  ]
+}

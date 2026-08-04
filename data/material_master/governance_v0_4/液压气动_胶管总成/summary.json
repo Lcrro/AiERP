@@ -1,0 +1,32 @@
+{
+  "source_rows": 34,
+  "proposed_rows": 34,
+  "item_code_coverage": 34,
+  "proposed_item_name_count": 1,
+  "proposed_item_names": {
+    "胶管总成": 34
+  },
+  "duplicate_link_count": 0,
+  "duplicate_links": [],
+  "warnings": [],
+  "family_observations": [
+    "胶管总成族各SKU已统一为单一商品类型；规格集中于36*2与36*2H，均为2层两端接头，不同长度作为独立SKU保留。",
+    "本批次未发现规格、长度、层数、接头形式完全相同的疑似重复项；长度单位统一为米。",
+    "该族SKU统一归为胶管总成，主要差异在规格（36*2、36*2H、M20*1.5、Φ13）、层数和长度，长度不作为物料名称区隔。",
+    "所有目标行均标注两端接头，PIPE-000438未提供层数，按规则不补推断。",
+    "未发现完全相同的SKU重复项，不同长度条目需独立保留。"
+  ],
+  "generated_at": "2026-08-03T17:49:13",
+  "source": "data\\material_master\\release_v1_0\\material_master_release_v1_0.tsv",
+  "top_group": "液压气动",
+  "material_family": "胶管总成",
+  "chunk_count": 2,
+  "model": "deepseek-v4-flash",
+  "authoritative": false,
+  "note": "Preview only. The authoritative release_v1_0 file was not modified.",
+  "independent_review": {
+    "verdict": "pass",
+    "issue_count": 0,
+    "severity_counts": {}
+  }
+}

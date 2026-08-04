@@ -1,0 +1,47 @@
+{
+  "source_rows": 54,
+  "proposed_rows": 54,
+  "item_code_coverage": 54,
+  "proposed_item_name_count": 10,
+  "proposed_item_names": {
+    "SDS-Max五坑冲击钻头": 8,
+    "SDS-Plus四坑冲击钻头": 6,
+    "不锈钢用钻头": 4,
+    "不锈钢用铣刀钻头": 2,
+    "二坑三槽钻头": 2,
+    "冲击钻头": 5,
+    "圆柄钻头": 1,
+    "方柄钻头": 2,
+    "硬质合金钻头": 12,
+    "高速钢麻花钻头": 12
+  },
+  "duplicate_link_count": 0,
+  "duplicate_links": [],
+  "warnings": [],
+  "family_observations": [
+    "整族钻头命名横向比较后，按用途、材质和接口归入混凝土冲击钻头、硬质合金钻头、高速钢麻花钻头、SDS-Max五坑冲击钻头等稳定类别。",
+    "五坑钻头对应SDS-Max五坑接口；无四坑/五坑描述的冲击钻头不推断接口，统一归为混凝土冲击钻头。",
+    "钨钢、合金是硬质合金钻头的常见叫法，原别名保留，材质规格统一为硬质合金。",
+    "整族中五坑/五孔/五坑三槽均为SDS-Max五坑接口，统一归为SDS-Max五坑冲击钻头。",
+    "高速钢且无冲击结构信息的普通钻头统一为高速钢麻花钻头；不锈钢钻头是用途描述，不应理解为不锈钢材质。",
+    "钨钢/合金等同义表述归入硬质合金钻头，原异名保留在aliases中；品牌统一放brand字段。",
+    "本批目标未发现完全相同直径、长度和类型组合的重复SKU。",
+    "族内钻头按普通高速钢/不锈钢专用麻花钻、硬质合金冲击钻及方柄/圆柄等柄型分类，名称需在三级物料层稳定。",
+    "二坑二槽按规范归入SDS-Plus四坑接口，五坑归入SDS-Max五坑接口；二坑三槽保留原接口命名。",
+    "不锈钢钻头/铣刀钻头原资料中的“材质：不锈钢”实为用途，已统一改为“用途：不锈钢”。",
+    "库存单位统一为支，原有“只”的写法已修正。"
+  ],
+  "generated_at": "2026-08-03T17:19:46",
+  "source": "data\\material_master\\release_v1_0\\material_master_release_v1_0.tsv",
+  "top_group": "工具耗材",
+  "material_family": "钻头",
+  "chunk_count": 3,
+  "model": "deepseek-v4-flash",
+  "authoritative": false,
+  "note": "Preview only. The authoritative release_v1_0 file was not modified.",
+  "independent_review": {
+    "verdict": "pass",
+    "issue_count": 0,
+    "severity_counts": {}
+  }
+}

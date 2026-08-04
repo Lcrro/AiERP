@@ -1,0 +1,10 @@
+{
+  "verdict": "pass",
+  "issue_count": 0,
+  "severity_counts": {},
+  "issues": [],
+  "family_summary": "本批钻头物料共54条，整体符合已批准的三级名称与SKU归一化口径，合金/钨钢、SDS-Plus/SDS-Max、不锈钢用途及方柄/圆柄等处理均有原始依据。尺寸、品牌、别名等关键采购信息未丢失，未发现规格矛盾或重复SKU。",
+  "generated_at": "2026-08-03T17:19:46",
+  "model": "deepseek-v4-flash",
+  "authoritative": false
+}

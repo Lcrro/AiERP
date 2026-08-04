@@ -1,0 +1,36 @@
+{
+  "source_rows": 32,
+  "proposed_rows": 32,
+  "item_code_coverage": 32,
+  "proposed_item_name_count": 3,
+  "proposed_item_names": {
+    "内丝弯头": 4,
+    "弯头": 27,
+    "过桥弯": 1
+  },
+  "duplicate_link_count": 0,
+  "duplicate_links": [],
+  "warnings": [],
+  "family_observations": [
+    "整族统一以弯头、内丝弯头、过桥弯为稳定三级名称；塑料管以公称外径mm表示，碳钢焊接以公称外径mm（可加壁厚）表示，镀锌以DN/寸/分表示。",
+    "多条碳钢焊接弯头存在角度与壁厚信息互补但未完整标注的情况，本批未默认补全角度或合并为同规格；镀锌弯头基体材质未标注，按要求不推断。",
+    "整族弯头包含PVC/UPVC/PPR塑料弯头、碳钢焊接弯头、镀锌弯头和镀锌内丝弯头，原始命名中角度符号不统一（°与度混用），需统一为‘90度/45度’。",
+    "部分弯头未标注角度，按规范不得默认补全；镀锌弯头未提供基体材质，仅保留表面处理属性。",
+    "镀锌内丝弯头原始item_name均为‘弯头’，根据接口属性应归入‘内丝弯头’三级类型。"
+  ],
+  "generated_at": "2026-08-03T17:49:13",
+  "source": "data\\material_master\\release_v1_0\\material_master_release_v1_0.tsv",
+  "top_group": "管材管件阀门",
+  "material_family": "弯头",
+  "chunk_count": 2,
+  "model": "deepseek-v4-flash",
+  "authoritative": false,
+  "note": "Preview only. The authoritative release_v1_0 file was not modified.",
+  "independent_review": {
+    "verdict": "needs_revision",
+    "issue_count": 3,
+    "severity_counts": {
+      "medium": 3
+    }
+  }
+}

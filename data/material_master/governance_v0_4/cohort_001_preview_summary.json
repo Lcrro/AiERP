@@ -1,0 +1,40 @@
+{
+  "generated_at": "2026-08-03T17:49:15",
+  "authoritative": false,
+  "source_rows": 1979,
+  "governed_rows": 91,
+  "family_count": 3,
+  "review_pass_family_count": 2,
+  "review_pending_family_count": 1,
+  "review_issue_count": 3,
+  "review_severity_counts": {
+    "medium": 3
+  },
+  "families": [
+    {
+      "top_group": "液压气动",
+      "material_family": "胶管总成",
+      "source_rows": 34,
+      "proposed_rows": 34,
+      "review_verdict": "pass",
+      "review_issue_count": 0
+    },
+    {
+      "top_group": "管材管件阀门",
+      "material_family": "弯头",
+      "source_rows": 32,
+      "proposed_rows": 32,
+      "review_verdict": "needs_revision",
+      "review_issue_count": 3
+    },
+    {
+      "top_group": "管材管件阀门",
+      "material_family": "三通",
+      "source_rows": 25,
+      "proposed_rows": 25,
+      "review_verdict": "pass",
+      "review_issue_count": 0
+    }
+  ],
+  "note": "Preview only. The authoritative release file was not modified."
+}

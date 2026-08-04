@@ -1,0 +1,10 @@
+{
+  "verdict": "pass",
+  "issue_count": 0,
+  "severity_counts": {},
+  "issues": [],
+  "family_summary": "本批34条胶管总成SKU均统一为商品类型「胶管总成」，规格、长度、层数及接头形式按原始资料结构化保留，未发现无依据推断、信息丢失、规格矛盾或重复SKU。长度单位已按政策统一为米，库存单位均为根，符合已批准口径。",
+  "generated_at": "2026-08-03T17:44:29",
+  "model": "deepseek-v4-flash",
+  "authoritative": false
+}

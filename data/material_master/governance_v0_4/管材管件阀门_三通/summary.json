@@ -1,0 +1,45 @@
+{
+  "source_rows": 25,
+  "proposed_rows": 25,
+  "item_code_coverage": 25,
+  "proposed_item_name_count": 4,
+  "proposed_item_names": {
+    "Y型三通": 1,
+    "三通": 20,
+    "异径三通": 3,
+    "斜三通": 1
+  },
+  "duplicate_link_count": 2,
+  "duplicate_links": [
+    {
+      "item_code": "PIPE-000433",
+      "duplicate_with_item_code": "PIPE-000139"
+    },
+    {
+      "item_code": "PIPE-000477",
+      "duplicate_with_item_code": "PIPE-000242"
+    }
+  ],
+  "warnings": [],
+  "family_observations": [
+    "全族25行中目标20行，覆盖三通、异径三通、斜三通、Y型三通四类稳定商品类型；材质有碳钢、镀锌、不锈钢、PPR、PVC、UPVC。",
+    "规格存在mm、DN与英制俗称混用，已按允许口径将4分换算为DN15；未发现目标编码内的疑似重复。",
+    "全族25条三通中，等径三通占多数，另有异径三通、斜三通和Y型三通；",
+    "英制规格（2寸、3寸、6分）统一换算为DN50、DN80、DN20，与既有DN表述保持一致；",
+    "PVC与UPVC按原文区分，未默认排水/给水用途；",
+    "发现2寸镀锌三通（PIPE-000433）与PIPE-000139、3寸镀锌三通（PIPE-000477）与PIPE-000242疑似重复。"
+  ],
+  "generated_at": "2026-08-03T17:49:13",
+  "source": "data\\material_master\\release_v1_0\\material_master_release_v1_0.tsv",
+  "top_group": "管材管件阀门",
+  "material_family": "三通",
+  "chunk_count": 2,
+  "model": "deepseek-v4-flash",
+  "authoritative": false,
+  "note": "Preview only. The authoritative release_v1_0 file was not modified.",
+  "independent_review": {
+    "verdict": "pass",
+    "issue_count": 0,
+    "severity_counts": {}
+  }
+}

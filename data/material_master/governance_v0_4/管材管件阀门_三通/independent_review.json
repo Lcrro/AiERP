@@ -1,0 +1,10 @@
+{
+  "verdict": "pass",
+  "issue_count": 0,
+  "severity_counts": {},
+  "issues": [],
+  "family_summary": "本批25条三通族物料整体符合已批准的命名与规格规范，商品类型、材质称谓、英制口径换算及接口同义词均按要求归一。未发现无依据推断、原始信息丢失、规格自相矛盾或未标记的重复SKU。两处英制口径（2寸/3寸镀锌三通）已正确标记为既有DN50/DN80镀锌三通的重复项。",
+  "generated_at": "2026-08-03T17:34:58",
+  "model": "deepseek-v4-flash",
+  "authoritative": false
+}

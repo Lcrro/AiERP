@@ -1,0 +1,33 @@
+{
+  "generated_at": "2026-08-03T17:44:36",
+  "cohort": "data\\material_master\\governance_v0_4\\cohort_001_repair.tsv",
+  "family_count": 2,
+  "success_count": 2,
+  "pass_count": 1,
+  "results": [
+    {
+      "top_group": "液压气动",
+      "material_family": "胶管总成",
+      "success": true,
+      "return_code": 0,
+      "duration_seconds": 79.04,
+      "source_rows": 34,
+      "proposed_rows": 34,
+      "review_verdict": "pass",
+      "review_issue_count": 0,
+      "output_dir": "data\\material_master\\governance_v0_4\\液压气动_胶管总成"
+    },
+    {
+      "top_group": "管材管件阀门",
+      "material_family": "弯头",
+      "success": true,
+      "return_code": 0,
+      "duration_seconds": 86.23,
+      "source_rows": 32,
+      "proposed_rows": 32,
+      "review_verdict": "needs_revision",
+      "review_issue_count": 3,
+      "output_dir": "data\\material_master\\governance_v0_4\\管材管件阀门_弯头"
+    }
+  ]
+}

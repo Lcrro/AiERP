@@ -131,6 +131,30 @@ data/material_master/release_v0_3/sku_governance_unique_all.tsv
 
 ## 专项治理样板
 
+按完整物料族调用 DeepSeek 的治理试验：
+
+```powershell
+python scripts\material_master\deepseek_family_governance.py `
+  --top-group 工具耗材 `
+  --material-family 钻头
+```
+
+该流程会把同一物料族的全部 SKU 作为横向比较上下文，分批输出需要整理的编码，生成：
+
+```text
+data/material_master/governance_v0_4/工具耗材_钻头/family_governed.tsv
+data/material_master/governance_v0_4/工具耗材_钻头/before_after.tsv
+data/material_master/governance_v0_4/工具耗材_钻头/independent_review.tsv
+data/material_master/governance_v0_4/工具耗材_钻头/independent_review.json
+data/material_master/governance_v0_4/工具耗材_钻头/material_master_family_governed_preview.tsv
+data/material_master/governance_v0_4/工具耗材_钻头/material_master_family_governed_browser_data.json
+data/material_master/governance_v0_4/工具耗材_钻头/summary.json
+```
+
+流程固定为“整族生成 -> 硬校验 -> 独立语义复核 -> 人工确认 -> 发布”。独立复核只标记问题，不直接修改模型输出。对应问题会同时写入预览表的 `governance_note`，便于在网页中逐项查看。
+
+这组文件仅为治理预览，不覆盖正式 `release_v1_0`。确认后再通过发布流程合入正式物料表。需要只重跑程序校验和输出生成时，可使用 `--reuse-responses --reuse-review`，不会再次调用 DeepSeek。
+
 手套类物料专项治理样板：
 
 ```powershell
@@ -258,3 +282,31 @@ data/material_master/reclassification/family_governance/material_family_rules.ts
 ```
 
 浏览数据生成脚本会读取这张规则表。`solidify` 规则用于生成物料族，`split` 规则用于展示拆分候选和复核提示；如果拆分候选族明确出现在标准名称里，脚本会保守归入该候选族，例如 `502胶水 -> 胶水`。`attribute_only` 规则用于提示族内属性词。这些规则目前只用于浏览和治理判断，不直接写回 ERPNext。
+
+## DeepSeek 完整物料族治理 v0.4
+
+完整物料族治理以正式发布表为只读输入，按物料族隔离生成规则、治理建议和独立复核结果。第一批包含：
+
+```text
+液压气动 / 胶管总成
+管材管件阀门 / 弯头
+管材管件阀门 / 三通
+```
+
+治理优先队列、批次清单、全量预览和待人工确认问题分别位于：
+
+```text
+data/material_master/governance_v0_4/family_governance_queue.tsv
+data/material_master/governance_v0_4/cohort_001.tsv
+data/material_master/governance_v0_4/cohort_001_material_master_preview.tsv
+data/material_master/governance_v0_4/cohort_001_review_queue.tsv
+```
+
+执行与合并命令：
+
+```powershell
+python scripts\material_master\run_family_governance_cohort.py --cohort data\material_master\governance_v0_4\cohort_001.tsv --family-concurrency 3 --row-concurrency 2 --chunk-size 20
+python scripts\material_master\build_family_governance_cohort_preview.py
+```
+
+浏览页选择“第一批多族治理预览”即可查看结果。该视图不会修改 `release_v1_0/material_master_release_v1_0.tsv`；独立复核发现的疑似重复保留在待人工确认队列，不自动合并。
