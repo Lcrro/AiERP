@@ -185,6 +185,17 @@ def test_standard_type_rejects_sku_dimensions() -> None:
         )
 
 
+def test_attribute_proposal_supports_boolean_values() -> None:
+    attribute = AttributeProposal(
+        attribute_key="is_flame_retardant",
+        display_name="是否阻燃",
+        requirement="optional",
+        value_type="boolean",
+    )
+
+    assert attribute.value_type == "boolean"
+
+
 def test_approved_family_maps_every_exact_name_sku() -> None:
     family = build_family_evidence(source_rows())[0]
     batch = pack_family_batches([family])[0]

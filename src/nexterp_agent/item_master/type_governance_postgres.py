@@ -54,12 +54,18 @@ create table if not exists material_type_alias (
 create table if not exists material_attribute_definition (
     attribute_key text primary key,
     display_name text not null,
-    value_type text not null check (value_type in ('text', 'number', 'enum')),
+    value_type text not null check (value_type in ('text', 'number', 'enum', 'boolean')),
     unit text not null default '',
     enum_values jsonb not null default '[]'::jsonb,
     description text not null default '',
     updated_at timestamptz not null default now()
 );
+
+alter table material_attribute_definition
+    drop constraint if exists material_attribute_definition_value_type_check;
+alter table material_attribute_definition
+    add constraint material_attribute_definition_value_type_check
+    check (value_type in ('text', 'number', 'enum', 'boolean'));
 
 create table if not exists material_type_attribute (
     type_id text not null references material_type_dictionary(type_id) on delete cascade,
@@ -205,6 +211,10 @@ class PostgresTypeGovernanceCatalog:
                 if row.get("top_group") and row.get("material_family")
             }
             for top_group, material_family in family_keys:
+                conn.execute(
+                    "delete from material_governance_issue where top_group = %s and material_family = %s",
+                    (top_group, material_family),
+                )
                 conn.execute(
                     """
                     delete from material_sku_mapping msm

@@ -36,6 +36,7 @@ from nexterp_agent.item_master.type_governance import (  # noqa: E402
     approved_detail_family_keys,
     build_family_evidence,
     build_snapshot,
+    content_hash,
     names_requiring_detailed_mapping,
     pack_family_batches,
 )
@@ -108,7 +109,27 @@ def write_tsv(path: Path, rows: list[dict[str, Any]], fields: list[str] | None =
             )
 
 
-def build_generation_messages(batch: GovernanceBatchInput) -> list[dict[str, str]]:
+def build_generation_messages(
+    batch: GovernanceBatchInput,
+    repair_feedback: dict[tuple[str, str], list[dict[str, str]]] | None = None,
+) -> list[dict[str, str]]:
+    feedback_payload = [
+        {
+            "top_group": family.top_group,
+            "material_family": family.material_family,
+            "issues": (repair_feedback or {}).get(
+                (family.top_group, family.material_family), []
+            ),
+        }
+        for family in batch.families
+        if (repair_feedback or {}).get((family.top_group, family.material_family))
+    ]
+    repair_instruction = (
+        "这是一次问题闭环修订。必须针对review_feedback中的审核意见重新给出该物料族的完整提案，"
+        "不能只回复局部修改，也不能原样重复被否决的名称或边界。"
+        if feedback_payload
+        else ""
+    )
     return [
         {
             "role": "system",
@@ -119,6 +140,7 @@ def build_generation_messages(batch: GovernanceBatchInput) -> list[dict[str, str
                 "的词才进入标准名称；直径、长度、规格、品牌和包装必须留在SKU属性。"
                 "兼容性接口只有在它会决定设备能否使用时才允许进入标准名称。"
                 "不得跨物料族移动，不得补造输入没有支持的商品类型。每个现有名称必须且只能有一个决定。"
+                f"{repair_instruction}"
                 "只输出符合给定JSON Schema的JSON object。"
             ),
         },
@@ -140,6 +162,7 @@ def build_generation_messages(batch: GovernanceBatchInput) -> list[dict[str, str
                     ],
                     "output_schema": GovernanceGenerationResult.model_json_schema(),
                     "batch": batch.model_dump(mode="json"),
+                    "review_feedback": feedback_payload,
                 },
                 ensure_ascii=False,
             ),
@@ -355,6 +378,7 @@ def run_batch(
     settings: Any,
     reuse_responses: bool,
     defer_detailed: bool = False,
+    repair_feedback: dict[tuple[str, str], list[dict[str, str]]] | None = None,
 ) -> GovernanceSnapshot:
     log_stage(batch.batch_id, "generation_started")
     batch_dir = output_dir / "batches" / batch.batch_id
@@ -363,7 +387,7 @@ def run_batch(
     request_dir.mkdir(parents=True, exist_ok=True)
     response_dir.mkdir(parents=True, exist_ok=True)
 
-    generation_messages = build_generation_messages(batch)
+    generation_messages = build_generation_messages(batch, repair_feedback)
     generation_request = request_dir / "generation.json"
     generation_response = response_dir / "generation.json"
     generation_request.write_text(
@@ -603,6 +627,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--all", action="store_true", help="Govern every family that has not been frozen.")
     parser.add_argument(
+        "--repair-open-issues",
+        action="store_true",
+        help="Batch all families with open non-SKU review issues and feed the review feedback into regeneration.",
+    )
+    parser.add_argument(
         "--export-only",
         action="store_true",
         help="Refresh TSV, browser data, and coverage summary without calling DeepSeek.",
@@ -641,6 +670,48 @@ def load_saved_batch(output_dir: Path, batch_id: str) -> GovernanceBatchInput:
     return batch
 
 
+def load_repair_feedback(
+    output_dir: Path,
+) -> dict[tuple[str, str], list[dict[str, str]]]:
+    issue_path = output_dir / SNAPSHOT_FILES["material_governance_issues"]
+    if not issue_path.exists():
+        raise RuntimeError(f"Governance issue snapshot not found: {issue_path}")
+    _, issue_rows = read_tsv(issue_path)
+    feedback: dict[tuple[str, str], list[dict[str, str]]] = {}
+    for row in issue_rows:
+        if row.get("status") != "open" or row.get("item_code"):
+            continue
+        key = (row.get("top_group", ""), row.get("material_family", ""))
+        if not all(key):
+            continue
+        feedback.setdefault(key, []).append(
+            {
+                "issue_type": row.get("issue_type", ""),
+                "current_name": row.get("current_name", ""),
+                "detail": row.get("detail", ""),
+            }
+        )
+    return feedback
+
+
+def repair_batch_id(
+    batch: GovernanceBatchInput,
+    feedback: dict[tuple[str, str], list[dict[str, str]]],
+) -> str:
+    payload = {
+        "families": [
+            {
+                "top_group": family.top_group,
+                "material_family": family.material_family,
+                "source_hash": family.source_hash,
+                "issues": feedback.get((family.top_group, family.material_family), []),
+            }
+            for family in batch.families
+        ]
+    }
+    return f"MGR-{content_hash(payload)[:12].upper()}"
+
+
 def main() -> int:
     args = parse_args()
     load_dotenv(REPO_ROOT / ".env")
@@ -651,6 +722,7 @@ def main() -> int:
     catalog = PostgresTypeGovernanceCatalog(dsn)
     settings = replace(load_deepseek_settings(), timeout_seconds=240)
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    repair_feedback: dict[tuple[str, str], list[dict[str, str]]] = {}
     if args.export_only:
         families = build_family_evidence(source_rows)
         batches = []
@@ -659,7 +731,15 @@ def main() -> int:
         families = list(batches[0].families)
     else:
         families = build_family_evidence(source_rows)
-        if not args.all:
+        if args.repair_open_issues:
+            repair_feedback = load_repair_feedback(args.output_dir)
+            repair_keys = set(repair_feedback)
+            families = [
+                family
+                for family in families
+                if (family.top_group, family.material_family) in repair_keys
+            ]
+        elif not args.all:
             families = [
                 family
                 for family in families
@@ -668,13 +748,18 @@ def main() -> int:
         if not families:
             raise RuntimeError("No matching material families found")
         frozen_hashes = catalog.frozen_family_hashes(prompt_version=PROMPT_VERSION)
-        if not args.force:
+        if not args.force and not args.repair_open_issues:
             families = [
                 family
                 for family in families
                 if frozen_hashes.get((family.top_group, family.material_family)) != family.source_hash
             ]
         batches = pack_family_batches(families, max_names=args.max_names) if families else []
+        if args.repair_open_issues:
+            batches = [
+                batch.model_copy(update={"batch_id": repair_batch_id(batch, repair_feedback)})
+                for batch in batches
+            ]
 
     failures: list[dict[str, str]] = []
     completed: list[dict[str, Any]] = []
@@ -689,6 +774,7 @@ def main() -> int:
                     settings=settings,
                     reuse_responses=args.reuse_responses,
                     defer_detailed=args.defer_detailed,
+                    repair_feedback=repair_feedback,
                 ): batch
                 for batch in batches
             }

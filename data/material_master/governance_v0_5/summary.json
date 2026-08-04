@@ -1,23 +1,54 @@
 {
-  "generated_at": "2026-08-04T15:16:06",
+  "generated_at": "2026-08-04T16:33:02",
   "input": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_master\\release_v1_0\\material_master_release_v1_0.tsv",
   "prompt_version": "material-type-dictionary-v0.5",
   "model": "deepseek-v4-flash",
-  "selected_family_count": 147,
-  "batch_count": 0,
-  "completed_batches": [],
+  "selected_family_count": 11,
+  "batch_count": 3,
+  "completed_batches": [
+    {
+      "batch_id": "MGR-EE0CA1C223EA",
+      "prompt_version": "material-type-dictionary-v0.5",
+      "generator_model": "deepseek-v4-flash",
+      "reviewer_model": "deepseek-v4-flash",
+      "input_hash": "dedfd376599024c38bd9cbbfa3216feb1a9adb15ce7e5588d05747cce26f88bd",
+      "family_count": 4,
+      "name_count": 47,
+      "status": "review_required"
+    },
+    {
+      "batch_id": "MGR-C5A4172627A0",
+      "prompt_version": "material-type-dictionary-v0.5",
+      "generator_model": "deepseek-v4-flash",
+      "reviewer_model": "deepseek-v4-flash",
+      "input_hash": "93eef39711b46e2ada51edf2644d9511a012ef30ddb3d0201ec2cf1cb1c01365",
+      "family_count": 3,
+      "name_count": 59,
+      "status": "review_required"
+    },
+    {
+      "batch_id": "MGR-02E110E8A08D",
+      "prompt_version": "material-type-dictionary-v0.5",
+      "generator_model": "deepseek-v4-flash",
+      "reviewer_model": "deepseek-v4-flash",
+      "input_hash": "047050d1fd8bae80bf78aa4ea75987510334aa66221b3e6c4ec7d985af53cde0",
+      "family_count": 4,
+      "name_count": 35,
+      "status": "review_required"
+    }
+  ],
   "failures": [],
   "preview": {
-    "type_count": 773,
-    "mapped_sku_count": 979,
-    "decision_count": 785,
-    "open_issue_count": 1154,
+    "type_count": 762,
+    "mapped_sku_count": 1586,
+    "decision_count": 786,
+    "open_issue_count": 428,
     "prompt_version": "material-type-dictionary-v0.5"
   },
   "coverage": {
     "source_sku_count": 1979,
-    "mapped_sku_count": 979,
-    "issue_covered_sku_count": 1000,
+    "mapped_sku_count": 1586,
+    "issue_covered_sku_count": 393,
     "uncovered_sku_count": 0,
     "all_skus_accounted_for": true
   }

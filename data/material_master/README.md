@@ -358,4 +358,12 @@ python scripts\material_master\run_type_dictionary_governance.py --export-only
 python scripts\material_master\run_type_dictionary_governance.py --batch-id <BATCH_ID> --reuse-responses --defer-detailed
 ```
 
+全量初审后的开放问题可按轻量反馈批量闭环：
+
+```powershell
+python scripts\material_master\run_type_dictionary_governance.py --repair-open-issues --max-names 60 --concurrency 5
+```
+
+修复模式按物料族和现有名称压缩问题，不逐条发送未映射 SKU。最多迭代三轮；单轮新增冻结映射低于轮前未映射数量的 `10%` 时停止，把剩余边界争议交给明确口径确认。
+
 浏览页默认选择“标准名称字典 v0.5”，可查看旧名称、标准类型 ID、名称决定、双 AI 复核、程序校验和问题项。治理阶段只写治理数据库和预览文件，不修改正式发布表，也不写 ERPNext。

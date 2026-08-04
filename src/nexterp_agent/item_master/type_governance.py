@@ -62,7 +62,7 @@ class AttributeProposal(StrictModel):
     attribute_key: str = Field(pattern=r"^[a-z][a-z0-9_]{1,63}$")
     display_name: str
     requirement: Literal["required", "optional"]
-    value_type: Literal["text", "number", "enum"] = "text"
+    value_type: Literal["text", "number", "enum", "boolean"] = "text"
     unit: str = ""
     enum_values: list[str] = Field(default_factory=list)
     affects_sku_identity: bool = True

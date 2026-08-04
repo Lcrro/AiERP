@@ -97,6 +97,14 @@ build_glove_governance_sample.py
 
 已保存批次可用 `--batch-id <ID> --reuse-responses` 离线重建。模型服务暂不可用时，可再加 `--defer-detailed`，保留已完成的族级判断，并将尚未下钻的 SKU 逐条记录到问题队列；该模式不会把未确认映射伪装成已完成结果。
 
+全量初审后，使用下列命令把所有仍有上层审核意见的物料族压缩成轻量修复批次。命令只选择存在名称、类型或族级开放问题的物料族，将原审核意见反馈给生成模型，再交给独立模型复核；不会逐条处理全部未映射 SKU。
+
+```powershell
+python scripts\material_master\run_type_dictionary_governance.py --repair-open-issues --max-names 60 --concurrency 5
+```
+
+问题修复采用有界迭代，不无限重跑：最多执行三轮；如果某轮新增冻结映射少于该轮开始时未映射 SKU 的 `10%`，立即停止。此时剩余项视为真实业务口径争议，继续保留在问题队列，避免模型反复改名造成治理漂移。
+
 ## 规则
 
 - 新脚本优先写成可重复运行、可 dry-run 的命令。
