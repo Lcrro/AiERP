@@ -461,6 +461,7 @@
       </label>
       <label class="control">
         <select id="categoryMode" title="分类视图">
+          <option value="type_dictionary_v0_5">标准名称字典 v0.5</option>
           <option value="price_ready_v0_1">价格就绪版 v0.1</option>
           <option value="release_v0_3">发布版 v0.3</option>
           <option value="family_cohort_001">第一批多族治理预览</option>
@@ -530,6 +531,7 @@
 
   <script>
     const DATA_URLS = {
+      type_dictionary_v0_5: "../data/material_master/governance_v0_5/material_master_type_governed_browser_data.json",
       price_ready_v0_1: "../data/material_master/price_ready_release_v0_1/material_master_price_ready_browser_data.json",
       release_v0_3: "../data/material_master/release_v0_3/material_master_release_v0_3_browser_data.json",
       family_cohort_001: "../data/material_master/governance_v0_4/cohort_001_browser_data.json",
@@ -543,6 +545,7 @@
     };
 
     const VIEW_LABELS = {
+      type_dictionary_v0_5: "标准名称字典 v0.5",
       price_ready_v0_1: "价格就绪版 v0.1",
       release_v0_3: "发布版 v0.3",
       family_cohort_001: "第一批多族治理预览",
@@ -559,7 +562,7 @@
       dataSets: {},
       data: null,
       view: "materials",
-      mode: "price_ready_v0_1",
+      mode: "type_dictionary_v0_5",
       query: "",
       status: "",
       quality: "",
@@ -639,6 +642,14 @@
       original_sku_name: "原始SKU名称",
       original_required_specs: "原始必填规格",
       original_unit: "原始单位",
+      v05_original_item_name: "v0.5旧名称",
+      v05_type_id: "标准类型ID",
+      v05_standard_name: "v0.5标准名称",
+      v05_decision: "名称治理决定",
+      v05_review: "双AI复核结论",
+      v05_validation: "程序校验状态",
+      v05_attribute_template: "标准属性模板",
+      v05_issues: "未解决问题",
     };
 
     function fmt(n) {
@@ -646,9 +657,9 @@
     }
 
     function classFor(value) {
-      if (["active", "standard", "auto_select_allowed"].includes(value)) return "ok";
+      if (["active", "standard", "auto_select_allowed", "frozen"].includes(value)) return "ok";
       if (["candidate", "usable", "confirm_before_use"].includes(value)) return "warn";
-      if (["needs_review", "clarify_specs_before_use", "disabled", "blocked"].includes(value)) return "bad";
+      if (["needs_review", "clarify_specs_before_use", "disabled", "blocked", "review_required"].includes(value)) return "bad";
       return "blue";
     }
 
@@ -1161,6 +1172,8 @@
         "estimated_rate", "currency", "price_basis", "default_fill_basis",
         "aliases", "brand", "model", "status", "quality_level", "agent_use_policy",
         "original_item_name", "original_sku_name", "original_required_specs", "original_unit",
+        "v05_original_item_name", "v05_type_id", "v05_standard_name", "v05_decision", "v05_review",
+        "v05_validation", "v05_attribute_template", "v05_issues",
         "family_rule", "family_note", "family_type", "family_material", "family_use",
         "family_connection", "family_surface", "family_attributes", "family_split_candidates",
         "family_attribute_terms", "drill_use_type", "drill_material", "drill_shank",

@@ -25,5 +25,8 @@ data/runtime/*_report.json
 data/runtime/openclaw_*.json
 data/runtime/openclaw_*.log
 data/runtime/workbench-*.log
+data/runtime/material-type-v05-*.log
 !data/runtime/logs/.gitkeep
 !data/runtime/sessions/.gitkeep
+data/material_master/governance_v0_5/batches/
+data/material_master/governance_v0_5/retry-summary-*.json

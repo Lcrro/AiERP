@@ -310,3 +310,52 @@ python scripts\material_master\build_family_governance_cohort_preview.py
 ```
 
 浏览页选择“第一批多族治理预览”即可查看结果。该视图不会修改 `release_v1_0/material_master_release_v1_0.tsv`；独立复核发现的疑似重复保留在待人工确认队列，不自动合并。
+
+## 标准名称字典与批量治理 v0.5
+
+v0.5 不再逐 SKU 重写整张物料表，而是先治理正式发布表中的“物料名称”，形成稳定的四级结构：
+
+```text
+一级类目 -> 二级物料族 -> 三级标准物料名称 -> 四级 SKU 属性
+```
+
+PostgreSQL 保存批次状态、类型关系和冻结决定；Git 中的 TSV 是供人审查和回滚的快照。生成模型与独立复核模型都同意、且程序校验通过的物料族才会冻结。旧名称过于宽泛或需要拆分时，第二阶段会读取该名称下的全部 SKU 逐条映射；证据不足或两次判断不一致的项目进入问题队列。
+
+输出目录：
+
+```text
+data/material_master/governance_v0_5/material_type_dictionary.tsv
+data/material_master/governance_v0_5/material_type_aliases.tsv
+data/material_master/governance_v0_5/material_attribute_templates.tsv
+data/material_master/governance_v0_5/material_name_decisions.tsv
+data/material_master/governance_v0_5/sku_type_mapping.tsv
+data/material_master/governance_v0_5/material_governance_issues.tsv
+```
+
+先运行单个物料族样板：
+
+```powershell
+python scripts\material_master\run_type_dictionary_governance.py --top-group 工具耗材 --material-family 钻头 --max-names 100 --concurrency 1
+```
+
+样板通过后增量运行全表：
+
+```powershell
+python scripts\material_master\run_type_dictionary_governance.py --all --max-names 100 --concurrency 5
+```
+
+重复运行会跳过来源哈希未变化且已冻结的物料族。需要重新生成某个已冻结族时显式使用 `--force`；需要复用已经保存的模型响应做本地重建时使用 `--reuse-responses`。
+
+只刷新 PostgreSQL 导出的 TSV、网页数据和覆盖统计，不调用 DeepSeek：
+
+```powershell
+python scripts\material_master\run_type_dictionary_governance.py --export-only
+```
+
+中断批次可按批次编号恢复。若仅希望先保存已完成的名称级判断，并把待下钻 SKU 留入明确问题队列，可使用：
+
+```powershell
+python scripts\material_master\run_type_dictionary_governance.py --batch-id <BATCH_ID> --reuse-responses --defer-detailed
+```
+
+浏览页默认选择“标准名称字典 v0.5”，可查看旧名称、标准类型 ID、名称决定、双 AI 复核、程序校验和问题项。治理阶段只写治理数据库和预览文件，不修改正式发布表，也不写 ERPNext。

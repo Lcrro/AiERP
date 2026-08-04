@@ -1,0 +1,24 @@
+{
+  "generated_at": "2026-08-04T14:57:21",
+  "input": "C:\\Users\\Administrator\\Documents\\nexterp agent 2\\data\\material_master\\release_v1_0\\material_master_release_v1_0.tsv",
+  "prompt_version": "material-type-dictionary-v0.5",
+  "model": "deepseek-v4-flash",
+  "selected_family_count": 147,
+  "batch_count": 0,
+  "completed_batches": [],
+  "failures": [],
+  "preview": {
+    "type_count": 773,
+    "mapped_sku_count": 940,
+    "decision_count": 785,
+    "open_issue_count": 1197,
+    "prompt_version": "material-type-dictionary-v0.5"
+  },
+  "coverage": {
+    "source_sku_count": 1979,
+    "mapped_sku_count": 940,
+    "issue_covered_sku_count": 1039,
+    "uncovered_sku_count": 0,
+    "all_skus_accounted_for": true
+  }
+}

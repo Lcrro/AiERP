@@ -2,7 +2,7 @@
 
 这个目录保存物料主数据从原始采购清单到发布版物料表的处理脚本。
 
-当前开发优先围绕发布版 v0.3，不建议新功能直接依赖早期草案脚本。
+当前开发优先读取 `release_v1_0` 正式表，并通过治理 v0.5 生成可审查预览；不建议新功能直接依赖早期草案脚本。
 
 ## 常用入口
 
@@ -15,6 +15,9 @@
 | 生成三级治理工作包 | `python scripts\material_master\build_third_layer_work_batches.py` |
 | 生成三级人工预览 | `python scripts\material_master\build_third_layer_mapping_preview.py` |
 | 生成二级物料族人工预览 | `python scripts\material_master\build_manual_family_mapping_preview.py` |
+| 运行标准名称字典单族样板 | `python scripts\material_master\run_type_dictionary_governance.py --top-group 工具耗材 --material-family 钻头 --max-names 100 --concurrency 1` |
+| 增量治理全表标准名称 | `python scripts\material_master\run_type_dictionary_governance.py --all --max-names 100 --concurrency 5` |
+| 仅刷新 v0.5 快照与覆盖汇总 | `python scripts\material_master\run_type_dictionary_governance.py --export-only` |
 
 ## 生命周期分组
 
@@ -88,10 +91,16 @@ build_material_master_release_v0_3.py
 build_glove_governance_sample.py
 ```
 
+### 7. 标准名称字典 v0.5
+
+`run_type_dictionary_governance.py` 按完整物料族组织轻量证据，依次执行名称字典生成、独立复核、必要时的完整 SKU 下钻映射和第二次复核。结果先写 PostgreSQL，再导出到 `data/material_master/governance_v0_5/`；不会覆盖正式发布表或写 ERPNext。
+
+已保存批次可用 `--batch-id <ID> --reuse-responses` 离线重建。模型服务暂不可用时，可再加 `--defer-detailed`，保留已完成的族级判断，并将尚未下钻的 SKU 逐条记录到问题队列；该模式不会把未确认映射伪装成已完成结果。
+
 ## 规则
 
 - 新脚本优先写成可重复运行、可 dry-run 的命令。
-- 新开发优先读取 `data/material_master/release_v0_3/`。
+- 新开发优先读取 `data/material_master/release_v1_0/`。
 - 不要让 Agent Runtime 直接读取 `outputs/`。
 - 不提交 `outputs/`，它是 DeepSeek 批处理和本地实验缓存。
 - 如果某个脚本只服务历史过程，先在 README 中标明，不急着删除。
