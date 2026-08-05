@@ -76,6 +76,11 @@ const plugin: OpenClawPluginDefinition = definePluginEntry({
             operation_id: Type.String({ pattern: "^op\\.[a-z0-9_.]+$" }),
             request_id: Type.String({ minLength: 1, maxLength: 180 }),
             query: Type.Optional(Type.String({ maxLength: 500 })),
+            attributes: Type.Optional(Type.Record(Type.String(), Type.String(), {
+              description: "Only facts explicitly stated or confirmed by the user, such as diameter, length, material, interface, or unit.",
+            })),
+            top_group_hint: Type.Optional(Type.String({ maxLength: 140 })),
+            material_family_hint: Type.Optional(Type.String({ maxLength: 140 })),
             item_codes: Type.Optional(Type.Array(Type.String(), { maxItems: 50 })),
             document_type: Type.Optional(Type.String({ maxLength: 140 })),
             document_name: Type.Optional(Type.String({ maxLength: 180 })),

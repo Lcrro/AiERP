@@ -18,6 +18,7 @@ from nexterp_agent.agent_runtime.tool_gateway import ToolGateway, ToolSession
 from nexterp_agent.erpnext.adapter import ERPNextAdapter
 from nexterp_agent.erpnext.client import ERPNextClient
 from nexterp_agent.item_master.release_resolver import normalize_text
+from nexterp_agent.item_master.type_classifier import MaterialTypeClassifier
 
 from .catalog import CapabilityCatalogRepository, ExternalIdentity
 from .compiler import CatalogEvaluation, OperationCompilerRegistry
@@ -71,11 +72,13 @@ class CapabilityManualService:
         reference_data: OperationReferenceDataCatalog | None = None,
         client_factory: Callable[[str], ERPNextClient] | None = None,
         compiler_registry: OperationCompilerRegistry | None = None,
+        material_classifier: MaterialTypeClassifier | None = None,
     ) -> None:
         self.repository = repository
         self.reference_data = reference_data or OperationReferenceDataCatalog(ROOT)
         self.client_factory = client_factory or self._default_client_factory
         self.compiler_registry = compiler_registry or OperationCompilerRegistry()
+        self.material_classifier = material_classifier or MaterialTypeClassifier()
         self.context_builder = AgentContextBuilder(ROOT)
 
     def search(self, request: CapabilitySearchRequest, identity_request: RequestIdentity) -> dict[str, Any]:
@@ -147,6 +150,8 @@ class CapabilityManualService:
         identity = self._identity(identity_request)
         if request.operation_id == "op.material.search":
             return self._search_materials(request, identity, identity_request)
+        if request.operation_id == "op.material.classify":
+            return self._classify_material(request)
         if request.operation_id == "op.document.search":
             return self._search_visible_documents(request, identity, identity_request)
         bundle = self.repository.operation_bundle(request.operation_id)
@@ -801,6 +806,23 @@ class CapabilityManualService:
             "inventory_status": inventory_status,
             "candidates": enriched,
             "catalog_revision": self.repository.current_revision(),
+        }
+
+    def _classify_material(self, request: PrepareOperationRequest) -> dict[str, Any]:
+        query = str(request.query or "").strip()
+        result = self.material_classifier.classify(
+            query,
+            attributes=request.attributes,
+            top_group_hint=str(request.top_group_hint or ""),
+            material_family_hint=str(request.material_family_hint or ""),
+            limit=request.limit,
+        )
+        return {
+            **result.model_dump(mode="json"),
+            "operation_id": request.operation_id,
+            "operation_mode": "analyze",
+            "catalog_revision": self.repository.current_revision(),
+            "writes_erpnext": False,
         }
 
     def _search_visible_documents(

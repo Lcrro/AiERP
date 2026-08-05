@@ -1,16 +1,16 @@
 # 项目状态
 
-更新日期：`2026-08-04`
+更新日期：`2026-08-05`
 
 ## 当前基线
 
-- 分支：`codex/material-type-dictionary-v0.5`
+- 分支：`codex/material-classifier-v0.6`
 - ERPNext 开发账套：`http://localhost:8002`
 - 员工 Agent 工作台：`http://127.0.0.1:8788/`
 - Tool schema 与 Adapter handler：`160 / 160`
 - 主数据来源：`data/master_data/` 与 `data/material_master/`
 - Agent 主入口：员工工作台使用 `OpenClawWorkbenchRunner`；旧 `DeepSeekAgentRuntime` 仅作为 A/B 回归基线
-- 测试：Python 全量 `444 passed`；v0.6 聚焦回归通过；OpenClaw Plugin `5 passed`
+- 测试：Python 全量 `485 passed`；OpenClaw Plugin `5 passed`；TypeScript 构建通过
 
 ## 已具备
 
@@ -86,6 +86,8 @@
 - 正式 `/api/agent/turn` 已完成真实 DeepSeek 冒烟：只按需调用能力搜索和 Guide 加载，返回 `openclaw_manual` 运行标识且未产生 ERPNext 写入。
 - 物料标准名称字典 v0.5 已完成最终收敛，覆盖正式发布表全部 `147` 个物料族和 `1,979` 个 SKU：`1,979` 个 SKU 均已通过生成、独立复核和程序校验形成冻结映射，开放问题、未解释 SKU 和无归属 SKU 均为 `0`。常规详细映射阈值保持 `0.75`；最终收敛仅在独立复核通过时允许最低 `0.65` 的中性兜底映射。治理结果只进入 PostgreSQL 与 Git 快照，尚未改写正式物料表或 ERPNext。
 - v0.5 支持按来源哈希增量治理、按批次复用模型响应、延期详细映射和零 Token 快照导出；DeepSeek 余额中断不会丢失已完成结果，也不会把待复核项伪装成已放行。
+- 新物料分类能力 v0.6 已接入 OpenClaw 渐进式说明书：Agent 只提取原始事实，确定性分类器依据 `20` 个一级类目、`147` 个物料族、`766` 个标准名称和 `1,979` 个 SKU 判断 `existing_sku / needs_choice / needs_input / new_sku / new_type_review`。分类阶段不写正式物料表和 ERPNext。
+- 新物料分类会检查标准类型边界、字段同义名、必填属性和重复 SKU；已补充 `SDS-Plus -> 二坑二槽钻头`、`SDS-Max -> 五坑钻头` 等兼容接口别名，避免把关键接口误当成普通“冲击钻头”。
 
 ## 数据状态
 
@@ -97,8 +99,8 @@
 
 ## 下一步
 
-1. 审查 v0.5 问题队列，优先补跑 `39` 条因模型余额中断而延期的详细 SKU 映射，再按采购频次处理其余证据不足项。
-2. 从冻结映射生成新的物料表候选版本，经过人工抽样后再决定是否替换 `release_v1_0`。
+1. 在工作台用真实 DeepSeek 验证新物料分类的五种结果和多轮补充规格体验。
+2. 分类结果为 `new_sku` 时，增加独立的 Item 建档准备能力，继续保持预览、确认、写入和回读边界。
 3. 增加正式登录和员工身份绑定，替换本地身份切换。
 
 ## 维护规则

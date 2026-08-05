@@ -435,6 +435,9 @@ MT-C04D1CEA6631	三脚插头	三脚插头	governance
 MT-C04D1CEA6631	工业插头	工业插头	governance
 MT-C04D1CEA6631	快速插头	快速插头	governance
 MT-C097BA8EA2A8	松香水12KG	松香水12kg	governance
+MT-C0D5D245AEFB	SDS-Plus钻头	sdsplus钻头	compatibility
+MT-C0D5D245AEFB	四坑钻头	四坑钻头	compatibility
+MT-C0D5D245AEFB	四坑冲击钻头	四坑冲击钻头	compatibility
 MT-C3EC9D599373	夹板加工件	夹板加工件	governance
 MT-C44A1A5101C5	水性聚氨酯	水性聚氨酯	governance
 MT-C44A1A5101C5	油性聚氨酯	油性聚氨酯	governance
@@ -467,6 +470,7 @@ MT-D0CD4AFEC0F0	10#自封袋	10#自封袋	governance
 MT-D11B904C46F9	小便器感应冲洗器	小便器感应冲洗器	governance
 MT-D14D58B7721A	五坑三槽钻头	五坑三槽钻头	governance
 MT-D14D58B7721A	五孔钻头	五孔钻头	governance
+MT-D14D58B7721A	SDS-Max钻头	sdsmax钻头	compatibility
 MT-D18BFC170626	扁铁	扁铁	governance
 MT-D19163844356	乙炔减压表	乙炔减压表	governance
 MT-D19163844356	二氧化碳减压表	二氧化碳减压表	governance

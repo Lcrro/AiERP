@@ -73,19 +73,19 @@ CONTEXT_GUIDES = {
 ROLE_CAPABILITY_LINKS: dict[str, tuple[str, ...]] = {
     "ROLE-GM": ("cap.document_lookup",),
     "ROLE-MAT-EQP-MGR": (
-        "cap.material_lookup", "cap.document_lookup", "cap.material_request",
+        "cap.material_lookup", "cap.material_classification", "cap.document_lookup", "cap.material_request",
         "cap.request_for_quotation", "cap.supplier_quotation", "cap.purchase_order",
         "cap.purchase_receipt", "cap.purchase_return",
     ),
     "ROLE-MATERIAL-CLERK": (
-        "cap.material_lookup", "cap.document_lookup", "cap.material_request",
+        "cap.material_lookup", "cap.material_classification", "cap.document_lookup", "cap.material_request",
         "cap.purchase_receipt", "cap.purchase_return",
     ),
     "ROLE-PROJ-MGR": ("cap.material_lookup", "cap.document_lookup", "cap.material_request"),
-    "ROLE-TECH-LEAD": ("cap.material_lookup", "cap.document_lookup"),
+    "ROLE-TECH-LEAD": ("cap.material_lookup", "cap.material_classification", "cap.document_lookup"),
     "ROLE-OPS-MGR": (
         "cap.document_lookup", "cap.request_for_quotation", "cap.supplier_quotation", "cap.purchase_order",
     ),
     "ROLE-FINANCE": ("cap.document_lookup",),
-    "ROLE-SYSADMIN": ("cap.material_lookup", "cap.document_lookup"),
+    "ROLE-SYSADMIN": ("cap.material_lookup", "cap.material_classification", "cap.document_lookup"),
 }

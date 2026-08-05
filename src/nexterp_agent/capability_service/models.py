@@ -68,10 +68,15 @@ class PrepareOperationRequest(StrictModel):
     items: list[PrepareItem] = Field(default_factory=list, max_length=100)
     full_return: bool = False
     query: str | None = Field(default=None, max_length=500)
+    attributes: dict[str, str] = Field(default_factory=dict)
+    top_group_hint: str | None = Field(default=None, max_length=140)
+    material_family_hint: str | None = Field(default=None, max_length=140)
     item_codes: list[str] = Field(default_factory=list, max_length=50)
     document_type: str | None = Field(default=None, max_length=140)
     document_name: str | None = Field(default=None, max_length=180)
     limit: int = Field(default=10, ge=1, le=50)
+
+
 class ExecuteOperationRequest(StrictModel):
     pending_id: str = Field(min_length=1, max_length=80)
 

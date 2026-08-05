@@ -2,6 +2,16 @@
 
 当前共 20 项，发现时受员工岗位与底层 Tool 权限过滤。标记“写”的能力必须经过 Capability 编译和用户确认，不能通过通用 `execute_tool` 绕过。
 
+除这 20 项业务流程能力外，OpenClaw 说明书目录还提供不写 ERPNext 的通用入口：
+
+| 模块 | Operation ID | 用途 | 类型 |
+| --- | --- | --- | --- |
+| 物料 | `op.material.search` | 查询标准物料、SKU 和相关仓库库存 | 读 |
+| 物料 | `op.material.classify` | 按冻结名称字典判断新物料类型、缺失属性和重复 SKU | 分析 |
+| 通用 | `op.document.search` | 查询当前员工可见单据和状态 | 读 |
+
+`op.material.classify` 的具体口径见[新物料分类与建档判断标准 v0.6](material-classification-standard-v0.6.md)。
+
 | 模块 | Capability ID | 用途 | 类型 |
 | --- | --- | --- | --- |
 | 采购 | `material_request.create` | 创建采购类型材料申请草稿 | 写 |

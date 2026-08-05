@@ -69,3 +69,24 @@ def test_procurement_chain_is_seeded_and_searchable() -> None:
     for query, operation_id in queries.items():
         matches = repository.search_nodes(query, module="buying", limit=5)
         assert operation_id in {row["node_id"] for row in matches}
+
+
+@pytest.mark.integration
+def test_material_classification_capability_is_seeded_as_analyze_only() -> None:
+    dsn = os.getenv("MATERIAL_CATALOG_DATABASE_URL")
+    if not dsn:
+        pytest.skip("MATERIAL_CATALOG_DATABASE_URL is not configured")
+    repository = CapabilityCatalogRepository(dsn)
+    repository.migrate()
+
+    matches = repository.search_nodes("新物料怎么分类", module="stock", limit=5)
+    capability_guide = repository.load_guides(["cap.material_classification"])[0]
+    guide = repository.load_guides(["op.material.classify"])[0]
+
+    assert "cap.material_classification" in {row["node_id"] for row in matches}
+    assert "op.material.classify" in {
+        row["node_id"] for row in capability_guide["relations"]
+    }
+    assert guide["operation_mode"] == "analyze"
+    assert guide["is_write"] is False
+    assert "不得猜测缺失属性" in guide["prohibitions"]

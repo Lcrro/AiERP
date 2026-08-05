@@ -793,6 +793,8 @@ class CapabilityCatalogRepository:
         nodes = (
             ("cap.material_lookup", "capability", "stock", "物料查询", "查询标准物料、SKU 详情和相关仓库库存。", "read", "Item", "lookup_material"),
             ("op.material.search", "operation", "stock", "查询标准物料与库存", "按名称、别名、规格或编码查询候选，并返回相关仓库库存。", "read", "Item", "lookup_material"),
+            ("cap.material_classification", "capability", "stock", "新物料分类", "依据冻结的类目、物料族、标准名称和属性模板判断新物料。", "analyze", "Item", "classify_material"),
+            ("op.material.classify", "operation", "stock", "分析新物料分类", "识别现有标准类型、必填属性和重复 SKU，或进入新类型审核。", "analyze", "Item", "classify_material"),
             ("cap.document_lookup", "capability", "generic", "业务单据查询", "查询当前员工可见的业务单据及状态。", "read", "Document", "lookup_document"),
             ("op.document.search", "operation", "generic", "查询业务单据状态", "按单号、类型和项目查询当前员工可见单据。", "read", "Document", "lookup_document"),
         )
@@ -810,13 +812,12 @@ class CapabilityCatalogRepository:
                        business_object = EXCLUDED.business_object,
                        intent_kind = EXCLUDED.intent_kind, is_active = TRUE""",
                 (node_id, node_type, module, label, summary,
-                "这是只读能力。返回真实候选以及当前员工相关项目仓库的实时库存，不创建、不修改任何 ERPNext 数据。"
-                "候选中的 inventory 是已查询结果；inventory_status=available 且明细为空时表示相关仓库当前库存为 0，"
-                "应直接告知员工，不要再次承诺以后查询库存。",
-                 "不得把查询升级成申请或其他写操作。", f"read.{intent}.v1",
+                 self._read_capability_guide(intent),
+                 self._read_capability_prohibition(intent), f"read.{intent}.v1",
                  mode, business_object, intent),
             )
         for source, target in (("cap.material_lookup", "op.material.search"),
+                               ("cap.material_classification", "op.material.classify"),
                                ("cap.document_lookup", "op.document.search")):
             conn.execute(
                 """INSERT INTO nexterp_manual.capability_edge(source_node_id, target_node_id, relation_type, position)
@@ -825,6 +826,8 @@ class CapabilityCatalogRepository:
         aliases = {
             "cap.material_lookup": ("查物料", "有没有物料", "物料表", "SKU查询", "查库存"),
             "op.material.search": ("物料查询", "规格查询", "候选物料", "库存查询", "有没有14的钻头"),
+            "cap.material_classification": ("新物料分类", "物料怎么分类", "物料建档", "新增物料", "标准名称判断"),
+            "op.material.classify": ("分析物料分类", "判断类目", "判断物料族", "匹配标准名称", "检查重复SKU"),
             "cap.document_lookup": ("查单据", "单据状态", "最近单据"),
             "op.document.search": ("查询材料申请", "查询采购订单", "单据进度"),
         }
@@ -836,6 +839,31 @@ class CapabilityCatalogRepository:
                          DO UPDATE SET alias_text = EXCLUDED.alias_text""",
                     (node_id, value, normalize_text(value)),
                 )
+
+    @staticmethod
+    def _read_capability_guide(intent: str) -> str:
+        if intent == "classify_material":
+            return (
+                "这是只分析、不写入的物料分类能力。先从员工原话提取客观事实：物料叫法、用途、结构、"
+                "兼容接口、材质、尺寸和单位；不得补造原话中没有的品牌、型号或技术参数。调用时把原始描述放入 query，"
+                "把已明确事实放入 attributes。若已知可提供 top_group_hint 和 material_family_hint，但它们只是提示，"
+                "最终边界由冻结字典决定。结果 existing_sku 表示已有完全匹配 SKU；needs_choice 表示必须让员工选择；"
+                "needs_input 表示标准类型已确定但关键属性不足；new_sku 表示可进入新 SKU 建档准备；"
+                "new_type_review 表示现有字典没有可靠类型，必须交物料管理员审核。"
+            )
+        if intent == "lookup_material":
+            return (
+                "这是只读能力。返回真实候选以及当前员工相关项目仓库的实时库存，不创建、不修改任何 ERPNext 数据。"
+                "候选中的 inventory 是已查询结果；inventory_status=available 且明细为空时表示相关仓库当前库存为 0，"
+                "应直接告知员工，不要再次承诺以后查询库存。"
+            )
+        return "这是只读能力，只能解释实际返回的数据，不得创建或修改 ERPNext 数据。"
+
+    @staticmethod
+    def _read_capability_prohibition(intent: str) -> str:
+        if intent == "classify_material":
+            return "不得猜测缺失属性，不得自行新增标准类型，不得创建 Item，也不得把分析升级成任何写操作。"
+        return "不得把查询升级成申请或其他写操作。"
 
     def _write_revision(self, conn: Any) -> str:
         nodes = conn.execute(

@@ -5,12 +5,20 @@ from .postgres_catalog import CatalogPaths, PostgresCatalogSearchClient, Postgre
 from .release_resolver import ReleaseMaterialCandidate, ReleaseMaterialResolver
 from .rules import ItemIntent, MaterialRules, prepare_item_from_intent
 from .search import MaterialSearch, SearchCandidate
+from .type_classifier import (
+    MaterialClassificationCandidate,
+    MaterialClassificationResult,
+    MaterialTypeClassifier,
+)
 
 __all__ = [
     "CatalogPaths",
     "ItemIntent",
     "MaterialRules",
     "MaterialSearch",
+    "MaterialClassificationCandidate",
+    "MaterialClassificationResult",
+    "MaterialTypeClassifier",
     "PostgresCatalogSearchClient",
     "PostgresMaterialCatalog",
     "ReleaseMaterialCandidate",
