@@ -101,6 +101,12 @@
       .candidate-title span { color: var(--accent); font-size: 11px; font-weight: 700; }
       .candidate-specs { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.45; }
       .candidate-stock { display: block; margin-top: 6px; color: #3f4a53; font-size: 11px; }
+      .confirmation-summary { margin-top: 10px; overflow: hidden; border: 1px solid #dfc26f; border-radius: 6px; background: #fffaf0; }
+      .confirmation-summary > strong { display: block; padding: 9px 10px; border-bottom: 1px solid #ead8a1; color: #765006; font-size: 12px; }
+      .confirmation-summary > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .confirmation-summary span { min-width: 0; padding: 8px 10px; border-bottom: 1px solid #f0e3bd; color: #4a4030; font-size: 11px; overflow-wrap: anywhere; }
+      .confirmation-summary span:nth-child(odd) { border-right: 1px solid #f0e3bd; }
+      .confirmation-summary b { display: block; margin-bottom: 3px; color: #8b6a18; font-size: 10px; }
       .confirm-bar { display: none; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 15px; border-top: 1px solid #ecd18a; background: var(--warning-soft); }
       .confirm-bar.visible { display: flex; }
       .confirm-copy strong, .confirm-copy span { display: block; }

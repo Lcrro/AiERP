@@ -840,6 +840,33 @@ class CapabilityManualService:
         bundle = self.repository.operation_bundle(request.operation_id)
         if not self._operation_allowed(bundle, identity):
             raise PermissionError("当前岗位不能创建物料主数据。")
+        if request.items:
+            return {
+                "status": "needs_input",
+                "operation_id": request.operation_id,
+                "operation_mode": "write",
+                "catalog_revision": self.repository.current_revision(),
+                "questions": [],
+                "agent_repair": {
+                    "error": "invalid_item_creation_shape",
+                    "message": (
+                        "标准物料建档不使用 items。请从员工原话提取简洁物料名称到 query，"
+                        "并把规格、材质、强度等级、表面处理等已明确键值放入 attributes 后重新 prepare。"
+                    ),
+                    "required_shape": {
+                        "operation_id": "op.material.create_item",
+                        "request_id": request.request_id,
+                        "query": "内六角螺丝",
+                        "attributes": {
+                            "规格": "M8×45",
+                            "材质": "碳钢",
+                            "强度等级": "8.8",
+                            "表面处理": "镀锌",
+                        },
+                    },
+                },
+                "writes_erpnext": False,
+            }
         classification = self.item_creation_planner.classify(
             str(request.query or "").strip(),
             attributes=request.attributes,

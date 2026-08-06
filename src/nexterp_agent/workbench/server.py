@@ -44,6 +44,7 @@ RUNTIME_COMPARE_PATH = ROOT / "tools" / "agent_runtime_compare.html"
 ASSET_DIR = ROOT / "tools" / "workbench"
 ASSET_TYPES = {".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8"}
 DOCTYPE_ROUTES = {
+    "Item": "item",
     "Material Request": "material-request",
     "Request for Quotation": "request-for-quotation",
     "Supplier Quotation": "supplier-quotation",
@@ -438,6 +439,9 @@ def compact_chat_result(result: dict[str, Any], erpnext_base_url: str, *, includ
         "document_links": document_links,
         "pending_tool_call": result.get("pending_tool_call"),
         "tool_call": result.get("tool_call"),
+        "confirmation": result.get("confirmation")
+        or ((result.get("pending_tool_call") or {}).get("summary")
+            if isinstance(result.get("pending_tool_call"), dict) else None),
     }
     if include_trace:
         payload.update({
@@ -531,7 +535,7 @@ def infer_intent_mode(text: str) -> str:
     """Conservatively classify effect level; capability selection remains model-driven."""
     normalized = str(text or "").strip()
     write_markers = (
-        "创建", "新建", "申请", "帮我买", "帮我采购", "采购一批", "下单", "提交", "批准", "驳回",
+        "创建", "新建", "新增", "申请", "帮我买", "帮我采购", "采购一批", "下单", "提交", "批准", "驳回",
         "收货", "退货", "调拨", "领料", "付款", "修改", "删除", "录入", "生成", "转成",
     )
     analyze_markers = ("分析", "比较", "汇总", "异常", "建议", "风险", "趋势", "延期")
@@ -1558,6 +1562,29 @@ class AgentWorkbenchService:
         if doctype not in ALLOWED_DOCUMENT_TYPES:
             raise ValueError(f"测试台暂不支持查看 {doctype}")
         client = self.client(user)
+        if doctype == "Item":
+            result = client.get_document(doctype, name)
+            if not result.ok or not isinstance(result.data, dict):
+                raise ValueError(result.user_message or result.error or f"无法读取 {doctype} {name}")
+            document = dict(result.data)
+            enabled = not bool(document.get("disabled"))
+            return {
+                "doctype": doctype,
+                "name": name,
+                "label": "标准物料",
+                "document": document,
+                "process": {
+                    "state": "已启用" if enabled else "已停用",
+                    "description": "这是 ERPNext 中的物料主数据，不参与单据审批流程。",
+                    "workflow_configured": False,
+                    "assignees": [],
+                    "notification": "后续采购、库存和领料单据可引用该物料编码。" if enabled else "该物料当前不可用于新的业务单据。",
+                    "available_actions": [],
+                    "can_submit": False,
+                    "history": [],
+                    "comments": [],
+                },
+            }
         result = client.call_method(
             "agent_bridge.api.get_document_with_workflow_actions",
             {"doctype": doctype, "name": name},

@@ -213,7 +213,11 @@ class OpenClawWorkbenchRunner:
         document = result.get("document") if isinstance(result.get("document"), dict) else {}
         if status == "completed" and document.get("doctype") and document.get("name"):
             document_status = document.get("workflow_state") or document.get("status") or "草稿"
-            message = f"已完成：{document['doctype']} {document['name']}，当前状态为 {document_status}。"
+            if document["doctype"] == "Item":
+                item_name = document.get("item_name") or document["name"]
+                message = f"标准物料 {item_name}（{document['name']}）已创建并通过 ERPNext 回读验证。"
+            else:
+                message = f"已完成：{document['doctype']} {document['name']}，当前状态为 {document_status}。"
         else:
             message = str(result.get("user_message") or "操作执行失败，请查看错误信息后重试。")
         links = []

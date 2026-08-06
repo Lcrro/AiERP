@@ -34,6 +34,8 @@
         grand_total:"含税总额", net_total:"未税总额", currency:"币种", party:"往来方", payment_type:"收付类型",
         paid_amount:"支付金额", subject:"主题", priority:"优先级", purpose:"用途", stock_entry_type:"库存移动类型",
         per_ordered:"已转订单比例", per_received:"已收货比例", buying_price_list:"采购价格表",
+        item_code:"物料编码", item_name:"物料名称", item_group:"物料分组", stock_uom:"库存单位",
+        is_stock_item:"库存物料", is_purchase_item:"可采购", is_sales_item:"可销售", disabled:"是否停用",
       };
       const PRIMARY_FIELDS = {
         "Material Request": ["material_request_type","company","transaction_date","schedule_date","status","project","owner","modified","per_ordered","per_received"],
@@ -46,6 +48,7 @@
         "Stock Entry": ["stock_entry_type","purpose","company","posting_date","project","owner","modified"],
         "Task": ["subject","status","priority","project","owner","modified"],
         "ToDo": ["description","status","reference_type","reference_name","owner","modified"],
+        "Item": ["item_code","item_name","item_group","stock_uom","is_stock_item","is_purchase_item","is_sales_item","disabled","owner","modified"],
       };
       const ITEM_COLUMNS = ["item_code","item_name","description","qty","received_qty","returned_qty","uom","rate","amount","s_warehouse","t_warehouse","warehouse","project","schedule_date"];
       const ITEM_LABELS = {item_code:"物料编码",item_name:"物料名称",description:"描述",qty:"数量",received_qty:"已收数量",returned_qty:"已退数量",uom:"单位",rate:"单价",amount:"金额",s_warehouse:"调出仓库",t_warehouse:"调入仓库",warehouse:"仓库",project:"项目",schedule_date:"需求日期"};
@@ -221,13 +224,14 @@
           for (const turn of history.turns || []) {
             if (turn.user_text) addMessage("user", turn.user_text);
             const result = turn.result || {};
-            if (result.message) addMessage(result.status === "failed" ? "error" : "agent", result.message, result.document_links || [], result.candidates || [], result.business_errors || []);
+            if (result.message) addMessage(result.status === "failed" ? "error" : "agent", result.message, result.document_links || [], result.candidates || [], result.business_errors || [], result.confirmation);
           }
           state.preview = history.latest_result || null;
           state.lastText = history.latest_user_text || "";
           state.executeId = crypto.randomUUID();
           const canExecute = state.preview?.status === "needs_confirmation" && (state.preview.pending_tool_call || state.preview.tool_call);
           $("confirmBar").classList.toggle("visible", Boolean(canExecute));
+          if (canExecute) renderConfirmationBar(state.preview);
           renderOperations();
         } catch (error) {
           if (token === state.historyToken) addMessage("error", `读取会话记录失败：${error.message}`);
@@ -280,11 +284,11 @@
         }
       }
 
-      function addMessage(kind, text, links = [], candidates = [], businessErrors = []) {
+      function addMessage(kind, text, links = [], candidates = [], businessErrors = [], confirmation = null) {
         $("welcome")?.remove();
         const node = document.createElement("div");
         node.className = `message ${kind}`;
-        node.innerHTML = `<div>${esc(text)}</div>${businessErrorCards(businessErrors)}${candidateCards(candidates)}${links.map(link => `<button class="message-doc" data-doctype="${esc(link.doctype)}" data-name="${esc(link.name)}"><span><strong>${esc(link.name)}</strong><small>${esc(link.doctype)} · 在测试台查看</small></span><span>查看详情 ›</span></button>`).join("")}`;
+        node.innerHTML = `<div>${esc(text)}</div>${businessErrorCards(businessErrors)}${confirmationSummaryHtml(confirmation)}${candidateCards(candidates)}${links.map(link => `<button class="message-doc" data-doctype="${esc(link.doctype)}" data-name="${esc(link.name)}"><span><strong>${esc(link.name)}</strong><small>${esc(link.doctype)} · 在测试台查看</small></span><span>查看详情 ›</span></button>`).join("")}`;
         $("messages").appendChild(node);
         bindDocumentButtons(node);
         node.querySelectorAll(".candidate-card").forEach(button => button.onclick = () => selectCandidate(button.dataset.code, button.dataset.name));
@@ -300,6 +304,36 @@
         const groups = state.preview?.candidates || [];
         const rows = groups.flatMap(group => Array.isArray(group?.candidates) ? group.candidates : group?.item_code ? [group] : []);
         return rows.find(row => row.item_code === code) || {item_code:code};
+      }
+
+      function confirmationSummary(result) {
+        return result?.confirmation || result?.pending_tool_call?.summary || result?.tool_call?.summary || null;
+      }
+
+      function confirmationFields(summary) {
+        if (!summary || typeof summary !== "object") return [];
+        const fields = [
+          ["标准名称", summary.standard_name], ["SKU 名称", summary.sku_name],
+          ["物料编码", summary.item_code], ["物料分组", summary.item_group],
+          ["库存单位", summary.stock_uom], ["必填规格", summary.required_specs],
+          ["项目", summary.project_label || summary.project], ["仓库", summary.warehouse],
+          ["来源单据", summary.source_document], ["业务影响", summary.effect],
+        ];
+        return fields.filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== "");
+      }
+
+      function confirmationSummaryHtml(summary) {
+        const fields = confirmationFields(summary);
+        if (!fields.length) return "";
+        return `<section class="confirmation-summary"><strong>${esc(summary.title || "待确认操作")}</strong><div>${fields.map(([label, value]) => `<span><b>${esc(label)}</b>${esc(typeof value === "object" ? pretty(value) : value)}</span>`).join("")}</div></section>`;
+      }
+
+      function renderConfirmationBar(result) {
+        const summary = confirmationSummary(result);
+        const copy = document.querySelector("#confirmBar .confirm-copy");
+        if (!copy) return;
+        const fields = confirmationFields(summary).slice(0, 4).map(([label, value]) => `${label}：${typeof value === "object" ? pretty(value) : value}`);
+        copy.innerHTML = `<strong>${esc(summary?.title || "尚未执行操作")}</strong><span>${esc(fields.join(" · ") || "操作已准备好，确认后才会使用当前员工身份写入 ERPNext。")}</span>`;
       }
 
       function updateProcessing(label) {
@@ -382,9 +416,11 @@
 
       function handleAgentResult(result, executed) {
         state.preview = result;
-        addMessage(result.status === "failed" ? "error" : "agent", result.message, result.document_links || [], result.candidates || [], result.business_errors || []);
+        const confirmation = confirmationSummary(result);
+        addMessage(result.status === "failed" ? "error" : "agent", result.message, result.document_links || [], result.candidates || [], result.business_errors || [], confirmation);
         const canExecute = !executed && result.status === "needs_confirmation" && (result.pending_tool_call || result.tool_call);
         $("confirmBar").classList.toggle("visible", Boolean(canExecute));
+        if (canExecute) renderConfirmationBar(result);
         if (executed) {
           $("confirmBar").classList.remove("visible");
           prependCreatedDocuments(result.document_links || []);
@@ -749,7 +785,7 @@
         }
         const doc = detail.document || {};
         const process = detail.process || {};
-        const status = statusText(doc);
+        const status = detail.doctype === "Item" ? (process.state || (Number(doc.disabled) ? "已停用" : "已启用")) : statusText(doc);
         $("drawerTitle").innerHTML = `<h2>${esc(detail.name)} <span class="status-badge ${statusClass(doc)}">${esc(status)}</span></h2><p>${esc(detail.label)} · ${esc(doc.owner || "-")} · ${esc(dateShort(doc.modified || doc.creation))}</p>`;
         const fields = (PRIMARY_FIELDS[detail.doctype] || ["company","status","owner","modified"]).filter(key => doc[key] !== undefined && doc[key] !== null && doc[key] !== "");
         const childRows = Array.isArray(doc.items) ? doc.items : [];
@@ -994,6 +1030,8 @@
 
       function formatField(key, value) {
         if (key === "docstatus") return Number(value) === 1 ? "已提交" : Number(value) === 2 ? "已取消" : "草稿";
+        if (["is_stock_item","is_purchase_item","is_sales_item"].includes(key)) return Number(value) ? "是" : "否";
+        if (key === "disabled") return Number(value) ? "是" : "否";
         if (typeof value === "number") return Number.isInteger(value) ? String(value) : value.toFixed(2);
         if (typeof value === "object") return pretty(value);
         return String(value ?? "-");
@@ -1031,7 +1069,12 @@
       $("drawerShade").onclick = closeDrawer;
       $("contextToggle").onclick = () => $("contextPanel").classList.toggle("open");
       $("operationsToggle").onclick = () => $("operationsPanel").classList.toggle("open");
-      document.querySelectorAll("[data-example]").forEach(button => button.onclick = () => { $("input").value = button.dataset.example; $("input").focus(); });
+      document.addEventListener("click", event => {
+        const button = event.target.closest("[data-example]");
+        if (!button) return;
+        $("input").value = button.dataset.example;
+        $("input").focus();
+      });
       document.querySelectorAll(".operations-tab").forEach(button => button.onclick = () => {
         state.panel = button.dataset.panel;
         if (state.panel === "pending" && !state.procurement) loadPendingProcurement();

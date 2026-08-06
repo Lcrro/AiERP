@@ -112,6 +112,81 @@ def test_result_document_links_build_internal_workbench_route() -> None:
     ]
 
 
+def test_item_result_builds_internal_workbench_route() -> None:
+    result = {
+        "tool_results": [{"data": {"doctype": "Item", "name": "FAST-000124"}}],
+    }
+
+    assert MODULE.result_document_links(result, "http://localhost:8002") == [
+        {
+            "doctype": "Item",
+            "name": "FAST-000124",
+            "url": "#document/Item/FAST-000124",
+        }
+    ]
+
+
+def test_compact_chat_result_preserves_item_creation_confirmation() -> None:
+    summary = {
+        "title": "创建标准物料",
+        "item_code": "FAST-000124",
+        "sku_name": "内六角螺丝 M9*47 碳钢 8.8 镀锌",
+        "item_group": "紧固件与连接件/螺丝/螺栓",
+        "stock_uom": "个",
+    }
+    result = MODULE.compact_chat_result(
+        {
+            "status": "needs_confirmation",
+            "message": "请确认创建标准物料。",
+            "pending_tool_call": {
+                "tool": "nexterp_execute_prepared_operation",
+                "arguments": {"pending_id": "pending-item"},
+                "summary": summary,
+            },
+        },
+        "http://localhost:8002",
+    )
+
+    assert result["confirmation"] == summary
+    assert result["pending_tool_call"]["arguments"]["pending_id"] == "pending-item"
+
+
+def test_item_detail_uses_direct_document_read_without_workflow_api() -> None:
+    calls = []
+
+    class FakeClient:
+        def get_document(self, doctype, name):
+            calls.append(("get_document", doctype, name))
+            return SimpleNamespace(
+                ok=True,
+                data={
+                    "doctype": "Item",
+                    "name": name,
+                    "item_code": name,
+                    "item_name": "内六角螺丝 M9*47",
+                    "item_group": "紧固件与连接件/螺丝/螺栓",
+                    "stock_uom": "个",
+                    "disabled": 0,
+                },
+                user_message=None,
+                error=None,
+            )
+
+        def call_method(self, method, arguments):
+            calls.append(("call_method", method, arguments))
+            raise AssertionError("Item 不应读取单据工作流")
+
+    service = MODULE.AgentWorkbenchService.__new__(MODULE.AgentWorkbenchService)
+    service.client = lambda _user: FakeClient()
+
+    detail = service.document("manager@example.com", "Item", "FAST-000124")
+
+    assert detail["label"] == "标准物料"
+    assert detail["process"]["state"] == "已启用"
+    assert detail["process"]["can_submit"] is False
+    assert calls == [("get_document", "Item", "FAST-000124")]
+
+
 def test_pending_confirmation_history_is_explicitly_not_created() -> None:
     result = MODULE.compact_chat_result(
         {

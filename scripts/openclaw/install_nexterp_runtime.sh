@@ -32,9 +32,9 @@ if [[ ! -x "$CLI_HOME/node_modules/.bin/openclaw" ]]; then
 fi
 OPENCLAW="$CLI_HOME/node_modules/.bin/openclaw"
 
-if [[ ! -f "$ROOT/integrations/openclaw-nexterp/dist/index.js" ]]; then
-  npm --prefix "$ROOT/integrations/openclaw-nexterp" run build
-fi
+# The checked-in source is authoritative. Always rebuild before packing so an
+# existing dist directory cannot leave the isolated gateway on an old schema.
+npm --prefix "$ROOT/integrations/openclaw-nexterp" run build
 mkdir -p "$RUNTIME/packages"
 npm pack "$ROOT/integrations/openclaw-nexterp" --pack-destination "$RUNTIME/packages" >/dev/null
 NEXTERP_PLUGIN="$(find "$RUNTIME/packages" -maxdepth 1 -name 'nexterp-openclaw-capability-plugin-*.tgz' | sort | tail -n 1)"

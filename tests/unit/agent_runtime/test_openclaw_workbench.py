@@ -25,6 +25,7 @@ from nexterp_agent.workbench.server import AgentWorkbenchService, infer_intent_m
         ("查询采购订单的状态", "read"),
         ("采购订单有哪些延期", "analyze"),
         ("帮我采购一批帆布手套", "write"),
+        ("新增标准物料：内六角螺丝 M8×45", "write"),
         ("把刚才的申请提交", "write"),
     ],
 )
@@ -145,6 +146,37 @@ def test_capability_client_executes_frozen_pending_with_trusted_headers() -> Non
     assert request.headers["Authorization"] == "Bearer service-token"
     assert request.headers["X-nexterp-external-subject"] == "subject-1"
     assert json.loads(request.data)["pending_id"] == "pending-1"
+
+
+def test_openclaw_confirmation_reports_verified_item_and_returns_item_link(tmp_path: Path) -> None:
+    class CapabilityClient:
+        def execute(self, pending_id, *, external_subject, session_key):
+            assert pending_id == "pending-item"
+            assert external_subject.startswith("nexterp-workbench-")
+            assert ":workbench:" in session_key
+            return {
+                "status": "completed",
+                "result": {
+                    "document": {
+                        "doctype": "Item",
+                        "name": "FAST-000124",
+                        "item_name": "内六角螺丝 M9*47 碳钢 8.8 镀锌",
+                        "disabled": 0,
+                    }
+                },
+            }
+
+    runner = OpenClawWorkbenchRunner(tmp_path, capability_client=CapabilityClient())
+    result = runner.confirm(
+        pending_id="pending-item",
+        user="pan.feng@stec-up.local",
+        project_code="PRJ-HL-13",
+        conversation_id="item-create",
+    )
+
+    assert result["status"] == "completed"
+    assert "通过 ERPNext 回读验证" in result["message"]
+    assert result["document_links"] == [{"doctype": "Item", "name": "FAST-000124"}]
 
 
 def test_workbench_service_uses_openclaw_and_confirms_same_pending(tmp_path: Path) -> None:

@@ -4,13 +4,13 @@
 
 ## 当前基线
 
-- 分支：`codex/item-master-create-v0.7`
+- 分支：`codex/item-master-workbench-v0.8`
 - ERPNext 开发账套：`http://localhost:8002`
 - 员工 Agent 工作台：`http://127.0.0.1:8788/`
 - Tool schema 与 Adapter handler：`161 / 161`
 - 主数据来源：`data/master_data/` 与 `data/material_master/`
 - Agent 主入口：员工工作台使用 `OpenClawWorkbenchRunner`；旧 `DeepSeekAgentRuntime` 仅作为 A/B 回归基线
-- 测试：Python 全量 `490 passed`；OpenClaw Plugin `5 passed`；TypeScript 构建通过
+- 测试：Python 全量 `497 passed`；OpenClaw Plugin `5 passed`；TypeScript 构建通过
 
 ## 已具备
 
@@ -91,6 +91,9 @@
 - 标准物料建档 v0.7 已贯通：只有 `new_sku` 且规格完整时才能准备建档；服务端重新分类和查重，确定性生成编码、SKU 名称、物料组和单位，再经不可修改确认、员工本人权限执行和 Item 回读。模型不能直接决定底层字段。
 - 建档说明书已把 7 个字段来源和 4 条跨字段规则写入 PostgreSQL；专用 `erpnext.stock.create_item` 仅暴露给物料设备管理和系统管理策略，仓库和项目岗位不可调用。
 - 真实 Capability API 无写入预览通过：生成 `FAST-000124` 确认卡并验证 ERPNext Item Group/UOM，未执行创建，临时待确认记录已清理。
+- 标准物料建档已接入员工工作台：支持自然语言进入分类与建档说明书、展示不可修改的建档确认摘要，并可在业务单据抽屉直接读取 ERPNext `Item`；普通员工不需要看到底层 ToolCall。
+- 工作台真实 DeepSeek 无写入预览通过：示例“内六角螺丝 M9×61，碳钢，8.8级，镀锌”生成 `FAST-000124` 确认卡，项目、身份、类型、编码、名称、分组、单位和规格均由服务端确定；未执行创建，临时待确认记录已清理。
+- OpenClaw Plugin 部署链已修复：安装脚本每次打包前强制重新构建 TypeScript，防止源代码已支持新字段但隔离 Profile 仍加载旧 `dist` Schema。
 
 ## 数据状态
 
@@ -102,8 +105,8 @@
 
 ## 下一步
 
-1. 在工作台用真实 DeepSeek 验证分类五种结果，以及 `new_sku -> 建档确认卡` 的自然多轮体验。
-2. 由物料设备主管明确确认一次测试 Item 写入，核对 ERPNext 回读后删除测试物料。
+1. 由物料设备主管明确确认一次测试 Item 写入，核对工作台确认卡、ERPNext 回读和 Item 单据抽屉后删除测试物料。
+2. 把物料建档后的审批/复核状态和物料字典增量更新纳入后续版本，避免 ERPNext 与发布目录产生长期分叉。
 3. 增加正式登录和员工身份绑定，替换本地身份切换。
 
 ## 维护规则

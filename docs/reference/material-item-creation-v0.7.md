@@ -91,4 +91,24 @@ stock_uom
 - 示例“内六角螺丝 M9*47，碳钢，8.8 级，镀锌”生成 `FAST-000124` 确认卡。
 - 真实 ERPNext 已确认目标 Item Group 和 UOM 存在。
 - 预览停在 `needs_confirmation`，未创建 Item；临时待确认记录已清理。
-- Python 全量测试 `490 passed`，Tool Schema 与 Adapter handler 为 `161 / 161`。
+- Python 全量测试 `497 passed`，Tool Schema 与 Adapter handler 为 `161 / 161`。
+
+## 工作台接入 v0.8
+
+员工工作台现在可以直接发起标准物料建档请求。Agent 仍只负责理解原话和提取事实，工作台显示的确认卡来自 Capability API 冻结结果，包含：
+
+```text
+标准类型
+物料编码
+SKU 名称
+ERPNext 物料组
+库存单位
+必填规格
+辅助规格
+```
+
+用户确认后执行同一个 `pending_id`，不重新让模型规划。成功后工作台可直接读取并展示 ERPNext `Item`，不跳转到 ERPNext 原生页面。
+
+真实无写入验收使用“内六角螺丝 M9×61，碳钢，8.8级，镀锌”，生成 `FAST-000124` 确认卡并停在确认阶段；临时待确认记录随后清理，ERPNext 中没有创建测试 Item。
+
+本阶段同时修复了隔离 OpenClaw Profile 的插件部署问题：安装脚本现在总是在 `npm pack` 前重新构建 TypeScript，防止旧 `dist` 的 Tool Schema 拒绝新增的 `attributes` 字段。

@@ -133,3 +133,26 @@ def test_item_creation_requires_confirmation_then_reads_back_item() -> None:
     assert executed["status"] == "completed"
     assert executed["result"]["document"]["item_code"] == "FAST-1000000"
     assert executed["result"]["readback"]["mismatches"] == {}
+
+
+def test_item_creation_rejects_material_request_items_shape_with_agent_repair() -> None:
+    repository = ItemCreationRepository()
+    service = CapabilityManualService(
+        repository,  # type: ignore[arg-type]
+        client_factory=lambda _user: ItemCreationClient(),  # type: ignore[arg-type]
+    )
+
+    result = service.prepare(
+        PrepareOperationRequest(
+            operation_id="op.material.create_item",
+            request_id="create-item-wrong-shape",
+            items=[{"raw_item_text": "内六角螺丝 M9×53 碳钢 8.8级 镀锌"}],
+        ),
+        REQUEST_IDENTITY,
+    )
+
+    assert result["status"] == "needs_input"
+    assert result["questions"] == []
+    assert result["agent_repair"]["error"] == "invalid_item_creation_shape"
+    assert result["agent_repair"]["required_shape"]["attributes"]["材质"] == "碳钢"
+    assert repository.pending == {}

@@ -929,6 +929,22 @@ class CapabilityCatalogRepository:
                  self._read_capability_prohibition(intent), f"catalog.{intent}.v1", is_write,
                  mode, business_object, intent),
             )
+        conn.execute(
+            """UPDATE nexterp_manual.capability_node
+                  SET examples_json = %s::jsonb
+                WHERE node_id IN ('cap.material_creation', 'op.material.create_item')""",
+            (self._psycopg.types.json.Jsonb([{
+                "operation_id": "op.material.create_item",
+                "request_id": "create-item-example-1",
+                "query": "内六角螺丝",
+                "attributes": {
+                    "规格": "M8×45",
+                    "材质": "碳钢",
+                    "强度等级": "8.8",
+                    "表面处理": "镀锌",
+                },
+            }]),),
+        )
         for source, target in (("cap.material_lookup", "op.material.search"),
                                ("cap.material_classification", "op.material.classify"),
                                ("cap.material_creation", "op.material.create_item"),
@@ -1062,9 +1078,13 @@ class CapabilityCatalogRepository:
     def _read_capability_guide(intent: str) -> str:
         if intent == "create_material":
             return (
-                "这是写入型标准物料建档能力。必须先提供客观物料描述和已确认属性；Nexterp 会重新执行冻结字典分类、"
-                "必填属性检查和重复 SKU 检查。只有分类结果为 new_sku 时才会生成编码和确认卡。编码、标准名称、"
-                "物料组和单位由确定性程序生成；确认后以当前员工身份创建 ERPNext Item，并回读核对。"
+                "这是写入型标准物料建档能力。调用 nexterp_prepare_operation 时，query 只放简洁物料名称或客观描述，"
+                "从员工原话提取出的规格键值必须放入 attributes 对象；本操作不使用 items，禁止把物料名称和规格塞入 "
+                "items[].raw_item_text。示例：operation_id=op.material.create_item，query=内六角螺丝，"
+                "attributes={规格:M8×45, 材质:碳钢, 强度等级:8.8, 表面处理:镀锌}。不得遗漏员工已经明确提供的属性，"
+                "也不得补造原话中没有的品牌、型号或技术参数。Nexterp 会重新执行冻结字典分类、必填属性检查和重复 SKU "
+                "检查。只有分类结果为 new_sku 时才会生成编码和确认卡。编码、标准名称、物料组和单位由确定性程序生成；"
+                "确认后以当前员工身份创建 ERPNext Item，并回读核对。"
             )
         if intent == "classify_material":
             return (
@@ -1086,7 +1106,10 @@ class CapabilityCatalogRepository:
     @staticmethod
     def _read_capability_prohibition(intent: str) -> str:
         if intent == "create_material":
-            return "不得自行填写物料编码，不得跳过分类或查重，不得修改冻结确认卡，也不得在用户确认前写 ERPNext。"
+            return (
+                "不得使用 items 字段，不得自行填写物料编码，不得跳过分类或查重，不得修改冻结确认卡，"
+                "也不得在用户确认前写 ERPNext。"
+            )
         if intent == "classify_material":
             return "不得猜测缺失属性，不得自行新增标准类型，不得创建 Item，也不得把分析升级成任何写操作。"
         return "不得把查询升级成申请或其他写操作。"
