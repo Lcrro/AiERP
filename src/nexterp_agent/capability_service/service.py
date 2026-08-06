@@ -18,6 +18,7 @@ from nexterp_agent.agent_runtime.tool_gateway import ToolGateway, ToolSession
 from nexterp_agent.erpnext.adapter import ERPNextAdapter
 from nexterp_agent.erpnext.client import ERPNextClient
 from nexterp_agent.item_master.release_resolver import normalize_text
+from nexterp_agent.item_master.item_creation import ItemMasterCreationPlanner
 from nexterp_agent.item_master.type_classifier import MaterialTypeClassifier
 
 from .catalog import CapabilityCatalogRepository, ExternalIdentity
@@ -42,7 +43,8 @@ from .procurement_catalog import (
 
 ROOT = Path(__file__).resolve().parents[3]
 MATERIAL_REQUEST_OPERATION_ID = "op.material_request.create"
-ALL_OPERATION_IDS = (MATERIAL_REQUEST_OPERATION_ID, *PROCUREMENT_OPERATION_IDS)
+ITEM_CREATE_OPERATION_ID = "op.material.create_item"
+ALL_OPERATION_IDS = (MATERIAL_REQUEST_OPERATION_ID, ITEM_CREATE_OPERATION_ID, *PROCUREMENT_OPERATION_IDS)
 
 
 class CatalogRepositoryLike(Protocol):
@@ -79,6 +81,7 @@ class CapabilityManualService:
         self.client_factory = client_factory or self._default_client_factory
         self.compiler_registry = compiler_registry or OperationCompilerRegistry()
         self.material_classifier = material_classifier or MaterialTypeClassifier()
+        self.item_creation_planner = ItemMasterCreationPlanner(self.material_classifier)
         self.context_builder = AgentContextBuilder(ROOT)
 
     def search(self, request: CapabilitySearchRequest, identity_request: RequestIdentity) -> dict[str, Any]:
@@ -152,6 +155,8 @@ class CapabilityManualService:
             return self._search_materials(request, identity, identity_request)
         if request.operation_id == "op.material.classify":
             return self._classify_material(request)
+        if request.operation_id == ITEM_CREATE_OPERATION_ID:
+            return self._prepare_item_creation(request, identity, identity_request)
         if request.operation_id == "op.document.search":
             return self._search_visible_documents(request, identity, identity_request)
         bundle = self.repository.operation_bundle(request.operation_id)
@@ -722,6 +727,7 @@ class CapabilityManualService:
             )
         capability_operation = {
             "cap.material_request": MATERIAL_REQUEST_OPERATION_ID,
+            "cap.material_creation": ITEM_CREATE_OPERATION_ID,
             **CAPABILITY_OPERATION_IDS,
         }.get(node_id)
         if capability_operation:
@@ -823,6 +829,112 @@ class CapabilityManualService:
             "operation_mode": "analyze",
             "catalog_revision": self.repository.current_revision(),
             "writes_erpnext": False,
+        }
+
+    def _prepare_item_creation(
+        self,
+        request: PrepareOperationRequest,
+        identity: ExternalIdentity,
+        identity_request: RequestIdentity,
+    ) -> dict[str, Any]:
+        bundle = self.repository.operation_bundle(request.operation_id)
+        if not self._operation_allowed(bundle, identity):
+            raise PermissionError("当前岗位不能创建物料主数据。")
+        classification = self.item_creation_planner.classify(
+            str(request.query or "").strip(),
+            attributes=request.attributes,
+            top_group_hint=str(request.top_group_hint or ""),
+            material_family_hint=str(request.material_family_hint or ""),
+            limit=request.limit,
+        )
+        if classification.status != "new_sku" or not classification.ready_to_create:
+            return {
+                **classification.model_dump(mode="json"),
+                "operation_id": request.operation_id,
+                "operation_mode": "write",
+                "catalog_revision": self.repository.current_revision(),
+                "writes_erpnext": False,
+            }
+
+        prefix = self.item_creation_planner.code_prefix(classification)
+        client = self._verified_client(identity)
+        existing = client.search_documents(
+            "Item",
+            filters={"item_code": ["like", f"{prefix}-%"]},
+            fields=["item_code"],
+            limit=5000,
+            order_by="item_code asc",
+        )
+        if not existing.ok:
+            return {
+                "status": "blocked",
+                "operation_id": request.operation_id,
+                "message": existing.user_message or "无法读取现有物料编码，未生成建档动作。",
+            }
+        existing_codes = [
+            str(row.get("item_code") or "")
+            for row in (existing.data if isinstance(existing.data, list) else [])
+            if isinstance(row, dict)
+        ]
+        try:
+            draft = self.item_creation_planner.build_draft(
+                classification,
+                existing_item_codes=existing_codes,
+            )
+        except ValueError as exc:
+            return {
+                "status": "needs_input",
+                "operation_id": request.operation_id,
+                "questions": [str(exc)],
+            }
+
+        dependency_errors: list[str] = []
+        for doctype, name in (("Item Group", draft.item_group), ("UOM", draft.stock_uom)):
+            result = client.document_exists(doctype, name)
+            if not result.ok:
+                dependency_errors.append(result.user_message or f"无法校验 {doctype} {name}")
+            elif not bool((result.data or {}).get("exists")):
+                dependency_errors.append(f"ERPNext 中不存在 {doctype}：{name}")
+        if dependency_errors:
+            return {
+                "status": "blocked",
+                "operation_id": request.operation_id,
+                "message": "；".join(dependency_errors),
+                "draft": draft.model_dump(mode="json"),
+            }
+
+        tool_call = {"tool": "erpnext.stock.create_item", "arguments": dict(draft.item_doc)}
+        summary = {
+            "title": "创建标准物料",
+            "type_id": draft.type_id,
+            "top_group": draft.top_group,
+            "material_family": draft.material_family,
+            "standard_name": draft.standard_name,
+            "item_code": draft.item_code,
+            "sku_name": draft.sku_name,
+            "item_group": draft.item_group,
+            "stock_uom": draft.stock_uom,
+            "required_specs": draft.required_specs,
+            "optional_specs": draft.optional_specs,
+            "effect": "将在 ERPNext 中创建一个可采购、可库存的 Item 主数据。",
+        }
+        pending = self.repository.create_pending(
+            operation_id=request.operation_id,
+            identity=identity,
+            project_code=identity.default_project or "MASTER-DATA",
+            session_key=identity_request.session_key,
+            request_id=request.request_id,
+            tool_call=tool_call,
+            summary=summary,
+        )
+        return {
+            "status": "needs_confirmation",
+            "operation_id": request.operation_id,
+            "catalog_revision": pending["catalog_revision"],
+            "pending_id": pending["pending_id"],
+            "expires_at": pending["expires_at"].isoformat(),
+            "summary": summary,
+            "classification": classification.model_dump(mode="json"),
         }
 
     def _search_visible_documents(
@@ -983,6 +1095,27 @@ class CapabilityManualService:
         tool_result: dict[str, Any],
     ) -> dict[str, Any]:
         operation_id = str(pending["operation_id"])
+        if operation_id == ITEM_CREATE_OPERATION_ID:
+            result_data = tool_result.get("data") if isinstance(tool_result, dict) else None
+            item_code = str((result_data or {}).get("name") or pending["summary"].get("item_code") or "")
+            if not item_code:
+                return {"ok": False, "error": "创建结果没有返回物料编码。"}
+            readback = gateway.adapter.client.get_document("Item", item_code)
+            if not readback.ok or not isinstance(readback.data, dict):
+                return {"ok": False, "error": readback.user_message or f"无法回读 Item {item_code}"}
+            document = dict(readback.data)
+            expected = pending["summary"]
+            mismatches = {
+                field: {"expected": expected[summary_key], "actual": document.get(field)}
+                for field, summary_key in (
+                    ("item_code", "item_code"),
+                    ("item_name", "sku_name"),
+                    ("item_group", "item_group"),
+                    ("stock_uom", "stock_uom"),
+                )
+                if str(document.get(field) or "") != str(expected.get(summary_key) or "")
+            }
+            return {"ok": not mismatches, "document": document, "mismatches": mismatches}
         goal = operation_goal(operation_id)
         prepared = PreparedBusinessAction(
             capability=operation_capability(operation_id),

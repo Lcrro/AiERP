@@ -12,6 +12,13 @@ def test_procurement_can_prepare_and_submit_stock_transfer() -> None:
     assert policy.decide("erpnext.stock.submit_document").allowed
 
 
+def test_item_master_creation_is_limited_to_governance_roles() -> None:
+    assert make_tool_access_policy("procurement").decide("erpnext.stock.create_item").allowed
+    assert make_tool_access_policy("system_admin").decide("erpnext.stock.create_item").allowed
+    assert not make_tool_access_policy("stock").decide("erpnext.stock.create_item").allowed
+    assert not make_tool_access_policy("project").decide("erpnext.stock.create_item").allowed
+
+
 def test_project_profile_can_issue_and_submit_but_not_create_transfer() -> None:
     policy = make_tool_access_policy("project")
 

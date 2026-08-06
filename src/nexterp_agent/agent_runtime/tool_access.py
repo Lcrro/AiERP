@@ -93,6 +93,8 @@ STOCK_MOVEMENT_TOOLS = frozenset(
     }
 )
 
+ITEM_MASTER_WRITE_TOOLS = frozenset({"erpnext.stock.create_item"})
+
 PROJECT_READ_TOOLS = frozenset(
     {
         "erpnext.projects.get_project_cost_context",
@@ -208,7 +210,7 @@ def make_tool_access_policy(
     if profile_key in {"system_admin", "admin", "administrator", "系统管理员"}:
         return ToolAccessPolicy(
             profile_name=profile_name,
-            allowed_tools=COMMON_AGENT_TOOLS | _tools_with_prefix("erpnext.users.") | extra,
+            allowed_tools=COMMON_AGENT_TOOLS | _tools_with_prefix("erpnext.users.") | ITEM_MASTER_WRITE_TOOLS | extra,
             blocked_tools=blocked,
             allow_runtime_internal=allow_runtime_internal,
             allow_developer_tools=allow_developer_tools,
@@ -221,6 +223,7 @@ def make_tool_access_policy(
             | _tools_with_prefix("erpnext.buying.")
             | STOCK_READ_TOOLS
             | STOCK_MOVEMENT_TOOLS
+            | ITEM_MASTER_WRITE_TOOLS
             | extra,
             blocked_tools=blocked,
             allow_runtime_internal=allow_runtime_internal,
@@ -230,7 +233,9 @@ def make_tool_access_policy(
     if profile_key in {"stock", "warehouse", "仓库", "仓库员", "仓库主管"}:
         return ToolAccessPolicy(
             profile_name=profile_name,
-            allowed_tools=COMMON_AGENT_TOOLS | _tools_with_prefix("erpnext.stock.") | extra,
+            allowed_tools=COMMON_AGENT_TOOLS
+            | (_tools_with_prefix("erpnext.stock.") - ITEM_MASTER_WRITE_TOOLS)
+            | extra,
             blocked_tools=blocked,
             allow_runtime_internal=allow_runtime_internal,
             allow_developer_tools=allow_developer_tools,

@@ -471,13 +471,23 @@ class CapabilityCatalogRepository:
         return misses
 
     def export_markdown(self, path: Path) -> None:
-        guide_ids = ["module.buying", "cap.material_request", "op.material_request.create"]
+        guide_ids = [
+            "module.buying",
+            "cap.material_request",
+            "op.material_request.create",
+            "cap.material_creation",
+            "op.material.create_item",
+        ]
         guide_ids.extend(seed.capability_id for seed in PROCUREMENT_CHAIN)
         lines = ["# Capability 说明书目录", "", f"目录版本：`{self.current_revision()}`", ""]
         for guide_id in guide_ids:
             guide = self.load_guides([guide_id])[0]
             lines.extend([f"## {guide['label']}", "", guide["summary"], "", guide["guide"], ""])
-        operation_ids = ["op.material_request.create", *(seed.operation_id for seed in PROCUREMENT_CHAIN)]
+        operation_ids = [
+            "op.material_request.create",
+            *(seed.operation_id for seed in PROCUREMENT_CHAIN),
+            "op.material.create_item",
+        ]
         for operation_id in operation_ids:
             bundle = self.operation_bundle(operation_id)
             lines.extend([
@@ -790,44 +800,173 @@ class CapabilityCatalogRepository:
                 )
 
     def _seed_read_capabilities(self, conn: Any) -> None:
-        nodes = (
-            ("cap.material_lookup", "capability", "stock", "物料查询", "查询标准物料、SKU 详情和相关仓库库存。", "read", "Item", "lookup_material"),
-            ("op.material.search", "operation", "stock", "查询标准物料与库存", "按名称、别名、规格或编码查询候选，并返回相关仓库库存。", "read", "Item", "lookup_material"),
-            ("cap.material_classification", "capability", "stock", "新物料分类", "依据冻结的类目、物料族、标准名称和属性模板判断新物料。", "analyze", "Item", "classify_material"),
-            ("op.material.classify", "operation", "stock", "分析新物料分类", "识别现有标准类型、必填属性和重复 SKU，或进入新类型审核。", "analyze", "Item", "classify_material"),
-            ("cap.document_lookup", "capability", "generic", "业务单据查询", "查询当前员工可见的业务单据及状态。", "read", "Document", "lookup_document"),
-            ("op.document.search", "operation", "generic", "查询业务单据状态", "按单号、类型和项目查询当前员工可见单据。", "read", "Document", "lookup_document"),
+        item_create_slots = (
+            {
+                "slot_id": "slot.item_create.raw_text",
+                "label": "原始物料描述",
+                "description": "员工提供的客观名称、用途、结构和规格描述。",
+                "position": 1,
+                "target_path": "facts.raw_text",
+                "source": "user_input",
+                "control": "read_only",
+                "editable": True,
+                "source_path": "request.query",
+                "required": True,
+                "resolver": None,
+                "constraint": "不得补造员工未提供的品牌、型号或技术参数。",
+            },
+            {
+                "slot_id": "slot.item_create.attributes",
+                "label": "已确认规格属性",
+                "description": "从员工描述中抽取并经确认的结构化规格属性。",
+                "position": 2,
+                "target_path": "facts.attributes",
+                "source": "user_input",
+                "control": "read_only",
+                "editable": True,
+                "source_path": "request.attributes",
+                "required": True,
+                "resolver": None,
+                "constraint": "键必须来自标准类型属性模板；必填属性不能为空。",
+            },
+            {
+                "slot_id": "slot.item_create.type_id",
+                "label": "标准类型编号",
+                "description": "冻结物料名称字典返回的稳定 type_id。",
+                "position": 3,
+                "target_path": "classification.type_id",
+                "source": "resolver",
+                "control": "derived",
+                "editable": False,
+                "source_path": "classification.selected_type.type_id",
+                "required": True,
+                "resolver": "material.classify.v1",
+                "constraint": "分类状态必须为 new_sku；模型不得指定 type_id。",
+            },
+            {
+                "slot_id": "slot.item_create.item_code",
+                "label": "物料编码",
+                "description": "按标准类型既有编码前缀和当前最大序号生成的唯一编码。",
+                "position": 4,
+                "target_path": "arguments.item_code",
+                "source": "system_generated",
+                "control": "derived",
+                "editable": False,
+                "source_path": "coding.next_code",
+                "required": True,
+                "resolver": "material.code.v1",
+                "constraint": "必须同时避开发布目录和 ERPNext 已存在编码。",
+            },
+            {
+                "slot_id": "slot.item_create.item_name",
+                "label": "SKU 名称",
+                "description": "标准物料名称加影响 SKU 唯一性的关键属性。",
+                "position": 5,
+                "target_path": "arguments.item_name",
+                "source": "derived",
+                "control": "derived",
+                "editable": False,
+                "source_path": "classification.standard_name+identity_attributes",
+                "required": True,
+                "resolver": None,
+                "constraint": "不得把无关备注、价格或状态写入名称。",
+            },
+            {
+                "slot_id": "slot.item_create.item_group",
+                "label": "ERPNext 物料组",
+                "description": "同一冻结标准类型已有 SKU 的稳定 ERPNext Item Group。",
+                "position": 6,
+                "target_path": "arguments.item_group",
+                "source": "derived",
+                "control": "derived",
+                "editable": False,
+                "source_path": "catalog.release_rows.item_group",
+                "required": True,
+                "resolver": "item_group.exists.v1",
+                "constraint": "必须存在于 ERPNext Item Group，不允许模型临时改组。",
+            },
+            {
+                "slot_id": "slot.item_create.stock_uom",
+                "label": "库存单位",
+                "description": "员工明确单位或同一标准类型的稳定库存单位。",
+                "position": 7,
+                "target_path": "arguments.stock_uom",
+                "source": "derived",
+                "control": "derived",
+                "editable": False,
+                "source_path": "request.stock_uom|catalog.release_rows.stock_uom",
+                "required": True,
+                "resolver": "uom.exists.v1",
+                "constraint": "必须存在于 ERPNext UOM；与既有类型单位冲突时停止建档。",
+            },
         )
-        for node_id, node_type, module, label, summary, mode, business_object, intent in nodes:
+        nodes = (
+            ("cap.material_lookup", "capability", "stock", "物料查询", "查询标准物料、SKU 详情和相关仓库库存。", "read", "Item", "lookup_material", False),
+            ("op.material.search", "operation", "stock", "查询标准物料与库存", "按名称、别名、规格或编码查询候选，并返回相关仓库库存。", "read", "Item", "lookup_material", False),
+            ("cap.material_classification", "capability", "stock", "新物料分类", "依据冻结的类目、物料族、标准名称和属性模板判断新物料。", "analyze", "Item", "classify_material", False),
+            ("op.material.classify", "operation", "stock", "分析新物料分类", "识别现有标准类型、必填属性和重复 SKU，或进入新类型审核。", "analyze", "Item", "classify_material", False),
+            ("cap.material_creation", "capability", "stock", "标准物料建档", "把已分类且规格完整的新 SKU 建成 ERPNext Item。", "write", "Item", "create_material", True),
+            ("op.material.create_item", "operation", "stock", "创建标准物料", "重新分类、查重并冻结编码后创建一个 Item。", "write", "Item", "create_material", True),
+            ("cap.document_lookup", "capability", "generic", "业务单据查询", "查询当前员工可见的业务单据及状态。", "read", "Document", "lookup_document", False),
+            ("op.document.search", "operation", "generic", "查询业务单据状态", "按单号、类型和项目查询当前员工可见单据。", "read", "Document", "lookup_document", False),
+        )
+        for node_id, node_type, module, label, summary, mode, business_object, intent, is_write in nodes:
             conn.execute(
                 """INSERT INTO nexterp_manual.capability_node
                        (node_id, node_type, module, label, summary, guide, usage_conditions,
                         prohibitions, examples_json, implementation_key, is_write, sort_order,
                         operation_mode, business_object, intent_kind)
-                     VALUES (%s, %s, %s, %s, %s, %s, '', %s, '[]'::jsonb, %s, FALSE, 5, %s, %s, %s)
+                     VALUES (%s, %s, %s, %s, %s, %s, '', %s, '[]'::jsonb, %s, %s, 5, %s, %s, %s)
                      ON CONFLICT (node_id) DO UPDATE SET label = EXCLUDED.label,
                        summary = EXCLUDED.summary, guide = EXCLUDED.guide,
                        prohibitions = EXCLUDED.prohibitions,
                        operation_mode = EXCLUDED.operation_mode,
                        business_object = EXCLUDED.business_object,
-                       intent_kind = EXCLUDED.intent_kind, is_active = TRUE""",
+                       intent_kind = EXCLUDED.intent_kind, is_write = EXCLUDED.is_write,
+                       is_active = TRUE""",
                 (node_id, node_type, module, label, summary,
                  self._read_capability_guide(intent),
-                 self._read_capability_prohibition(intent), f"read.{intent}.v1",
+                 self._read_capability_prohibition(intent), f"catalog.{intent}.v1", is_write,
                  mode, business_object, intent),
             )
         for source, target in (("cap.material_lookup", "op.material.search"),
                                ("cap.material_classification", "op.material.classify"),
+                               ("cap.material_creation", "op.material.create_item"),
                                ("cap.document_lookup", "op.document.search")):
             conn.execute(
                 """INSERT INTO nexterp_manual.capability_edge(source_node_id, target_node_id, relation_type, position)
                      VALUES (%s, %s, 'contains', 1) ON CONFLICT DO NOTHING""", (source, target),
+            )
+        for slot in item_create_slots:
+            self._upsert_node(conn, (
+                slot["slot_id"],
+                "slot",
+                "stock",
+                slot["label"],
+                slot["description"],
+                slot["description"],
+                "",
+                "",
+                (),
+                None,
+                False,
+                300 + int(slot["position"]),
+            ))
+            conn.execute(
+                """INSERT INTO nexterp_manual.capability_edge
+                       (source_node_id, target_node_id, relation_type, position)
+                     VALUES ('op.material.create_item', %s, 'uses_slot', %s)
+                     ON CONFLICT (source_node_id, target_node_id, relation_type)
+                     DO UPDATE SET position = EXCLUDED.position""",
+                (slot["slot_id"], slot["position"]),
             )
         aliases = {
             "cap.material_lookup": ("查物料", "有没有物料", "物料表", "SKU查询", "查库存"),
             "op.material.search": ("物料查询", "规格查询", "候选物料", "库存查询", "有没有14的钻头"),
             "cap.material_classification": ("新物料分类", "物料怎么分类", "物料建档", "新增物料", "标准名称判断"),
             "op.material.classify": ("分析物料分类", "判断类目", "判断物料族", "匹配标准名称", "检查重复SKU"),
+            "cap.material_creation": ("创建物料", "物料建档", "新增SKU", "新增标准物料"),
+            "op.material.create_item": ("确认创建物料", "新建Item", "创建物料主数据"),
             "cap.document_lookup": ("查单据", "单据状态", "最近单据"),
             "op.document.search": ("查询材料申请", "查询采购订单", "单据进度"),
         }
@@ -839,9 +978,94 @@ class CapabilityCatalogRepository:
                          DO UPDATE SET alias_text = EXCLUDED.alias_text""",
                     (node_id, value, normalize_text(value)),
                 )
+        conn.execute(
+            """INSERT INTO nexterp_manual.operation_tool
+                   (operation_id, tool_name, compiler_key, resolver_key, preflight_key, verifier_key,
+                    risk_level, requires_confirmation)
+                 VALUES ('op.material.create_item', 'erpnext.stock.create_item',
+                         'material.create.v1', 'material.classify.v1',
+                         'material.duplicate_and_dependency_check.v1', 'material.readback.v1', 'L3', TRUE)
+                 ON CONFLICT (operation_id) DO UPDATE SET
+                   tool_name = EXCLUDED.tool_name, compiler_key = EXCLUDED.compiler_key,
+                   resolver_key = EXCLUDED.resolver_key, preflight_key = EXCLUDED.preflight_key,
+                   verifier_key = EXCLUDED.verifier_key, risk_level = EXCLUDED.risk_level,
+                   requires_confirmation = EXCLUDED.requires_confirmation"""
+        )
+        for slot in item_create_slots:
+            conn.execute(
+                """INSERT INTO nexterp_manual.operation_slot
+                       (operation_id, slot_id, position, scope, target_path, source_type, control_type,
+                        is_user_editable, source_path, is_required, resolver_key, constraint_text)
+                     VALUES ('op.material.create_item', %s, %s, 'document', %s, %s, %s,
+                             %s, %s, %s, %s, %s)
+                     ON CONFLICT (operation_id, slot_id) DO UPDATE SET
+                       position = EXCLUDED.position, scope = EXCLUDED.scope,
+                       target_path = EXCLUDED.target_path, source_type = EXCLUDED.source_type,
+                       control_type = EXCLUDED.control_type,
+                       is_user_editable = EXCLUDED.is_user_editable,
+                       source_path = EXCLUDED.source_path, is_required = EXCLUDED.is_required,
+                       resolver_key = EXCLUDED.resolver_key,
+                       constraint_text = EXCLUDED.constraint_text""",
+                (
+                    slot["slot_id"],
+                    slot["position"],
+                    slot["target_path"],
+                    slot["source"],
+                    slot["control"],
+                    slot["editable"],
+                    slot["source_path"],
+                    slot["required"],
+                    slot["resolver"],
+                    slot["constraint"],
+                ),
+            )
+        item_create_rules = (
+            (
+                "rule.item_create.classification",
+                "分类允许建档",
+                "classification.status == new_sku and ready_to_create",
+                "只有规格完整且不重复的新 SKU 才能进入建档。",
+            ),
+            (
+                "rule.item_create.dependencies",
+                "主数据依赖存在",
+                "item_group and stock_uom exist in ERPNext",
+                "标准物料组和库存单位必须已存在。",
+            ),
+            (
+                "rule.item_create.unique_code",
+                "物料编码唯一",
+                "item_code not in release catalog and ERPNext Item",
+                "物料编码必须由系统生成且不能重复。",
+            ),
+            (
+                "rule.item_create.confirmation",
+                "确认后执行并回读",
+                "frozen tool call confirmed and ERPNext Item readback matches",
+                "员工确认后才能创建，创建成功必须回读核对。",
+            ),
+        )
+        for position, (rule_id, label, expression, message) in enumerate(item_create_rules, start=1):
+            conn.execute(
+                """INSERT INTO nexterp_manual.operation_rule
+                       (rule_id, operation_id, label, implementation_key,
+                        expression_text, user_message, position)
+                     VALUES (%s, 'op.material.create_item', %s, %s, %s, %s, %s)
+                     ON CONFLICT (rule_id) DO UPDATE SET
+                       label = EXCLUDED.label, implementation_key = EXCLUDED.implementation_key,
+                       expression_text = EXCLUDED.expression_text,
+                       user_message = EXCLUDED.user_message, position = EXCLUDED.position""",
+                (rule_id, label, f"{rule_id}.v1", expression, message, position),
+            )
 
     @staticmethod
     def _read_capability_guide(intent: str) -> str:
+        if intent == "create_material":
+            return (
+                "这是写入型标准物料建档能力。必须先提供客观物料描述和已确认属性；Nexterp 会重新执行冻结字典分类、"
+                "必填属性检查和重复 SKU 检查。只有分类结果为 new_sku 时才会生成编码和确认卡。编码、标准名称、"
+                "物料组和单位由确定性程序生成；确认后以当前员工身份创建 ERPNext Item，并回读核对。"
+            )
         if intent == "classify_material":
             return (
                 "这是只分析、不写入的物料分类能力。先从员工原话提取客观事实：物料叫法、用途、结构、"
@@ -861,6 +1085,8 @@ class CapabilityCatalogRepository:
 
     @staticmethod
     def _read_capability_prohibition(intent: str) -> str:
+        if intent == "create_material":
+            return "不得自行填写物料编码，不得跳过分类或查重，不得修改冻结确认卡，也不得在用户确认前写 ERPNext。"
         if intent == "classify_material":
             return "不得猜测缺失属性，不得自行新增标准类型，不得创建 Item，也不得把分析升级成任何写操作。"
         return "不得把查询升级成申请或其他写操作。"

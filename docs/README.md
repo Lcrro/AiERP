@@ -88,6 +88,7 @@ experiments   冻结基线、对照实验和方案比较
 - [物料族候选词清单](reference/material-family-candidate-terms.md)
 - [物料三级名称治理规定 v0.1](reference/material-third-layer-governance-v0.1.md)
 - [新物料分类与建档判断标准 v0.6](reference/material-classification-standard-v0.6.md)
+- [标准物料建档 v0.7](reference/material-item-creation-v0.7.md)
 - [物料 SKU 治理提示词 v0.3](reference/material-sku-governance-prompt-v0.3.md)
 - 物料主数据浏览器当前支持四级查看：`一级类目 -> 物料族 -> 物料名称 -> SKU 明细`。三级名称人工预览由 `scripts/material_master/build_third_layer_mapping_preview.py` 生成；批量治理工作包由 `scripts/material_master/build_third_layer_work_batches.py` 生成，队列在 `data/material_master/governance_v0_2/third_layer_work_queue.tsv`。
 - [物料目录 PostgreSQL 层](reference/material-catalog-postgres.md)

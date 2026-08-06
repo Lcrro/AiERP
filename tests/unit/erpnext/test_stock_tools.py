@@ -572,6 +572,42 @@ def test_stock_item_group_and_uom_master_tools_return_v02_shape() -> None:
     ]
 
 
+def test_stock_create_item_uses_a_narrow_master_data_payload() -> None:
+    client = StockFakeClient()
+    adapter = ERPNextAdapter(client)  # type: ignore[arg-type]
+
+    result = adapter.execute(
+        {
+            "tool": "erpnext.stock.create_item",
+            "arguments": {
+                "item_code": "FAST-999901",
+                "item_name": "内六角螺丝 M9*47 碳钢",
+                "item_group": "紧固件与连接件/螺丝/螺栓",
+                "stock_uom": "个",
+                "description": "测试物料",
+                "is_stock_item": 1,
+            },
+        }
+    )
+
+    assert result.ok
+    assert result.data["doctype"] == "Item"
+    assert result.data["name"] == "FAST-999901"
+    assert client.calls[-1] == (
+        "create_document",
+        "Item",
+        {
+            "item_code": "FAST-999901",
+            "item_name": "内六角螺丝 M9*47 碳钢",
+            "item_group": "紧固件与连接件/螺丝/螺栓",
+            "stock_uom": "个",
+            "description": "测试物料",
+            "is_stock_item": 1,
+            "doctype": "Item",
+        },
+    )
+
+
 def test_stock_batch_and_serial_create_tools_return_v02_shape() -> None:
     client = StockFakeClient()
     adapter = ERPNextAdapter(client)  # type: ignore[arg-type]

@@ -178,6 +178,7 @@ class ERPNextAdapter(
             "erpnext.stock.update_warehouse": self._stock_update_warehouse,
             "erpnext.stock.list_item_groups": self._stock_list_item_groups,
             "erpnext.stock.create_item_group": self._stock_create_item_group,
+            "erpnext.stock.create_item": self._stock_create_item,
             "erpnext.stock.update_item_group": self._stock_update_item_group,
             "erpnext.stock.list_uoms": self._stock_list_uoms,
             "erpnext.stock.create_uom": self._stock_create_uom,

@@ -154,6 +154,7 @@ def infer_risk_level(tool: str) -> str:
         "erpnext.stock.create_warehouse",
         "erpnext.stock.update_warehouse",
         "erpnext.stock.create_item_group",
+        "erpnext.stock.create_item",
         "erpnext.stock.update_item_group",
         "erpnext.stock.create_uom",
         "erpnext.stock.update_uom",

@@ -245,6 +245,15 @@ class MaterialTypeClassifier:
             ready_to_create=True,
         )
 
+    def release_rows_for_type(self, type_id: str) -> list[dict[str, str]]:
+        """Return immutable-source release rows mapped to one frozen type."""
+
+        return [
+            dict(row)
+            for item_code, row in self.release_rows.items()
+            if self.sku_type_ids.get(item_code) == type_id
+        ]
+
     def _load_types(self) -> list[_TypeRow]:
         aliases: dict[str, list[str]] = {}
         for row in _read_tsv(self.governance_dir / "material_type_aliases.tsv"):

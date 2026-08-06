@@ -1369,6 +1369,44 @@ tools:
         constraints: ["至少一行。", "item_code 必须来自 Item Resolver。", "qty 必须大于 0。"]
         repair: ["resolve_entity", "present_candidates", "ask_clarification", "validate_before_execute"]
 
+  erpnext.stock.create_item:
+    purpose: "L3：从已冻结的标准物料建档草稿创建一个 Item；不移动库存。"
+    expose: agent_visible
+    allowed_roles: ["材料设备主管", "系统管理员"]
+    confirm: user_confirm
+    backend_mapping:
+      doctypes: ["Item"]
+    audit_fields: ["item_code", "item_name", "item_group", "stock_uom"]
+    repair: ["resolve_entity", "ask_clarification", "present_candidates", "validate_before_execute", "erpnext_validation_error", "permission_denied"]
+    business_contract:
+      - "只接受 Nexterp 物料建档能力生成并冻结的字段，不允许模型直接生成编码。"
+      - "item_group 和 stock_uom 必须已存在于 ERPNext。"
+      - "创建前必须完成标准名称分类、必填属性校验和重复 SKU 检查。"
+      - "写入后必须回读 Item 并核对编码、名称、分组和单位。"
+    parameters:
+      item_code:
+        required: yes
+        source: "Nexterp 编码引擎"
+        constraints: ["按同一标准类型既有编码前缀生成，不允许模型填写。"]
+        repair: ["validate_before_execute"]
+      item_name:
+        required: yes
+        source: "标准名称与唯一性属性编译器"
+        constraints: ["采用标准物料名称加关键规格，最长 140 字符。"]
+        repair: ["validate_before_execute"]
+      item_group:
+        required: yes
+        source: "冻结物料类型字典"
+        resolver: item_group
+        constraints: ["必须是 ERPNext 已存在的 Item Group.name。"]
+        repair: ["resolve_entity", "validate_before_execute"]
+      stock_uom:
+        required: yes
+        source: "同类标准 SKU 单位或用户明确输入"
+        resolver: uom
+        constraints: ["必须是 ERPNext 已存在的 UOM.name。"]
+        repair: ["resolve_entity", "ask_clarification", "validate_before_execute"]
+
   erpnext.stock.create_transfer_draft:
     purpose: "L3：把基地或中心仓物料调拨到项目仓，创建 Material Transfer Stock Entry 草稿；不立即移动库存。"
     expose: agent_visible

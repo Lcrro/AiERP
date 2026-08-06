@@ -466,6 +466,25 @@ STOCK_TOOL_SCHEMAS = [
         "parameters": _object_schema(["data"], {"data": {"type": "object"}}),
     },
     {
+        "name": "erpnext.stock.create_item",
+        "description": "Create one Item master record from a server-prepared standard material draft. L3 write.",
+        "parameters": _object_schema(
+            ["item_code", "item_name", "item_group", "stock_uom"],
+            {
+                "item_code": {"type": "string", "minLength": 1, "maxLength": 140},
+                "item_name": {"type": "string", "minLength": 1, "maxLength": 140},
+                "item_group": {"type": "string", "minLength": 1, "maxLength": 140},
+                "stock_uom": {"type": "string", "minLength": 1, "maxLength": 140},
+                "description": {"type": "string", "maxLength": 4000},
+                "disabled": {"type": "integer", "enum": [0, 1]},
+                "is_stock_item": {"type": "integer", "enum": [0, 1]},
+                "is_purchase_item": {"type": "integer", "enum": [0, 1]},
+                "is_sales_item": {"type": "integer", "enum": [0, 1]},
+                "include_item_in_manufacturing": {"type": "integer", "enum": [0, 1]},
+            },
+        ),
+    },
+    {
         "name": "erpnext.stock.update_item_group",
         "description": "Update an Item Group master record. L3 master-data write; does not create Items or move stock.",
         "parameters": _object_schema(["name", "data"], {"name": {"type": "string"}, "data": {"type": "object"}}),

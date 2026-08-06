@@ -821,6 +821,24 @@ class StockToolsMixin:
         result = self.client.create_document("Item Group", data)
         return _stock_master_result(result, doctype="Item Group", action="Created Item Group master record.")
 
+    def _stock_create_item(self, args: dict[str, Any]) -> ToolResult:
+        allowed_fields = {
+            "item_code",
+            "item_name",
+            "item_group",
+            "stock_uom",
+            "description",
+            "disabled",
+            "is_stock_item",
+            "is_purchase_item",
+            "is_sales_item",
+            "include_item_in_manufacturing",
+        }
+        data = {key: value for key, value in args.items() if key in allowed_fields}
+        data["doctype"] = "Item"
+        result = self.client.create_document("Item", data)
+        return _stock_master_result(result, doctype="Item", action="Created Item master record.")
+
     def _stock_update_item_group(self, args: dict[str, Any]) -> ToolResult:
         result = self.client.update_document("Item Group", args["name"], args["data"])
         return _stock_master_result(result, doctype="Item Group", action="Updated Item Group master record.")

@@ -15,6 +15,7 @@ description: Use Nexterp business capabilities through progressive guides and fr
 7. 最终回复中的单号、状态、数量和日期只能来自 Nexterp 的 ERPNext 回读结果。
 9. 被拒绝、过期或失败时不得自行绕过；说明原因和下一步。能力检索最多扩大一次，第二次仍未命中就停止。
 10. `op.material.search` 已同时查询候选与相关仓库库存。`inventory_status=available` 且候选库存为空或合计为 0 时，应明确回答当前库存为 0，不要再说“需要我继续查库存吗”。
+11. 新物料先使用 `op.material.classify`。只有结果为 `new_sku` 且员工明确要求建档时，才加载 `op.material.create_item`；建档操作会在服务端重新分类、查重和生成编码。`existing_sku` 必须复用现有物料，`needs_input` 和 `needs_choice` 必须继续追问，`new_type_review` 必须交物料管理员处理。
 
 ## 采购来源链
 

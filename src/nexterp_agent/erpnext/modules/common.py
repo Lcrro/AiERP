@@ -1307,7 +1307,7 @@ def _stock_master_result(result: ToolResult, *, doctype: str, action: str) -> To
     raw = result.data if isinstance(result.data, dict) else {}
     data = {
         "doctype": doctype,
-        "name": raw.get("name"),
+        "name": raw.get("name") or raw.get("item_code") or raw.get("item_group_name") or raw.get("uom_name"),
         "docstatus": raw.get("docstatus"),
         "status": raw.get("disabled", 0) and "Disabled" or "Active",
         "summary": action,

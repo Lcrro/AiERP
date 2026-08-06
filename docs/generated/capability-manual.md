@@ -1,6 +1,6 @@
 # Capability 说明书目录
 
-目录版本：`manual-efdb8130f9e448fa`
+目录版本：`manual-372000eaa74e2660`
 
 ## 采购
 
@@ -19,6 +19,18 @@
 解析真实项目、仓库和物料后创建采购类型材料申请草稿。
 
 提供项目、物料、数量和需求日期。公司、仓库、物料编码与单位由 Nexterp 解析；信息完整后 prepare 会返回不可修改的确认摘要。
+
+## 标准物料建档
+
+把已分类且规格完整的新 SKU 建成 ERPNext Item。
+
+这是写入型标准物料建档能力。必须先提供客观物料描述和已确认属性；Nexterp 会重新执行冻结字典分类、必填属性检查和重复 SKU 检查。只有分类结果为 new_sku 时才会生成编码和确认卡。编码、标准名称、物料组和单位由确定性程序生成；确认后以当前员工身份创建 ERPNext Item，并回读核对。
+
+## 创建标准物料
+
+重新分类、查重并冻结编码后创建一个 Item。
+
+这是写入型标准物料建档能力。必须先提供客观物料描述和已确认属性；Nexterp 会重新执行冻结字典分类、必填属性检查和重复 SKU 检查。只有分类结果为 new_sku 时才会生成编码和确认卡。编码、标准名称、物料组和单位由确定性程序生成；确认后以当前员工身份创建 ERPNext Item，并回读核对。
 
 ## 询价
 
@@ -154,3 +166,22 @@
 - **退货范围明确**：必须明确整单退货或部分退货明细。
 - **可退数量足够**：退货数量不得超过当前可退数量。
 - **退货来源保留**：退货单必须保留 return_against 和来源明细。
+
+## 创建标准物料字段槽位
+
+| 序号 | 字段 | 来源 | 控件 | 目标 |
+|---:|---|---|---|---|
+| 1 | 原始物料描述 | user_input | read_only | `facts.raw_text` |
+| 2 | 已确认规格属性 | user_input | read_only | `facts.attributes` |
+| 3 | 标准类型编号 | resolver | derived | `classification.type_id` |
+| 4 | 物料编码 | system_generated | derived | `arguments.item_code` |
+| 5 | SKU 名称 | derived | derived | `arguments.item_name` |
+| 6 | ERPNext 物料组 | derived | derived | `arguments.item_group` |
+| 7 | 库存单位 | derived | derived | `arguments.stock_uom` |
+
+### 业务规则
+
+- **分类允许建档**：只有规格完整且不重复的新 SKU 才能进入建档。
+- **主数据依赖存在**：标准物料组和库存单位必须已存在。
+- **物料编码唯一**：物料编码必须由系统生成且不能重复。
+- **确认后执行并回读**：员工确认后才能创建，创建成功必须回读核对。
