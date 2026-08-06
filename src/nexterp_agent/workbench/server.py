@@ -41,6 +41,7 @@ HTML_PATH = ROOT / "tools" / "agent_workbench.html"
 RUNTIME_EXPLORER_PATH = ROOT / "tools" / "agent_runtime_explorer.html"
 OPERATION_MODEL_PATH = ROOT / "tools" / "operation_model_explorer.html"
 RUNTIME_COMPARE_PATH = ROOT / "tools" / "agent_runtime_compare.html"
+MATERIAL_ITEM_LAB_PATH = ROOT / "tools" / "material_item_lab.html"
 ASSET_DIR = ROOT / "tools" / "workbench"
 ASSET_TYPES = {".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8"}
 DOCTYPE_ROUTES = {
@@ -2184,6 +2185,9 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
         if parsed.path in {"/agent-runtime-compare", "/agent-runtime-compare/"}:
             html_response(self, RUNTIME_COMPARE_PATH.read_text(encoding="utf-8"))
             return
+        if parsed.path in {"/material-item-lab", "/material-item-lab/"}:
+            html_response(self, MATERIAL_ITEM_LAB_PATH.read_text(encoding="utf-8"))
+            return
         if parsed.path == "/favicon.ico":
             self.send_response(HTTPStatus.NO_CONTENT)
             self.end_headers()
@@ -2481,6 +2485,8 @@ def main() -> int:
         raise FileNotFoundError(RUNTIME_EXPLORER_PATH)
     if not RUNTIME_COMPARE_PATH.exists():
         raise FileNotFoundError(RUNTIME_COMPARE_PATH)
+    if not MATERIAL_ITEM_LAB_PATH.exists():
+        raise FileNotFoundError(MATERIAL_ITEM_LAB_PATH)
     server = build_server(args.host, args.port, args.profile)
     print(f"Employee Agent workbench: http://{args.host}:{args.port}/", flush=True)
     try:

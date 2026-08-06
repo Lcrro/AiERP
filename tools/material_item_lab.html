@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>标准物料建档实验室</title>
+    <link rel="stylesheet" href="/workbench-assets/material-item-lab.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div><b>N</b><span><strong>标准物料建档实验室</strong><small>自然语言 → 分类与查重 → 确认卡 → ERPNext Item</small></span></div>
+      <nav><a href="/">员工工作台</a><a href="/agent-runtime">运行剖面</a><span id="health">正在连接</span></nav>
+    </header>
+
+    <main class="layout">
+      <aside class="setup">
+        <section>
+          <h2>测试身份</h2>
+          <label>项目<select id="project"></select></label>
+          <label>员工<select id="employee"></select></label>
+          <div id="identity" class="identity">正在读取身份...</div>
+        </section>
+        <section>
+          <h2>测试样例</h2>
+          <button class="example" data-example="请新增标准物料：内六角螺丝 M9×61，碳钢，8.8级，镀锌">完整的新 SKU</button>
+          <button class="example" data-example="新增一款 SDS-Plus 四坑冲击钻头，直径14mm，总长350mm，硬质合金">接口与规格识别</button>
+          <button class="example" data-example="新增一个 14mm 钻头">缺少关键规格</button>
+          <button class="example" data-example="新增标准物料：水泥 42.5 袋装50kg">疑似已有 SKU</button>
+        </section>
+        <section class="safety">
+          <h2>安全边界</h2>
+          <p>发送只做预览，不写 ERPNext。</p>
+          <p>只有出现冻结确认卡后，点击“确认创建”才会写入。</p>
+          <button id="reset" class="secondary">新测试</button>
+        </section>
+      </aside>
+
+      <section class="conversation">
+        <div class="section-head"><div><h1>和物料信息助理交流</h1><p>请像平时说话一样描述要新增的物料。</p></div><span id="mode">预览模式</span></div>
+        <div id="messages" class="messages">
+          <div class="welcome"><strong>先试一个具体物料</strong><p>例如：新增内六角螺丝 M8×45，碳钢，8.8级，镀锌。</p></div>
+        </div>
+        <div id="pending" class="pending" hidden>
+          <div><strong>等待你的确认</strong><span>确认后才会使用当前员工身份写入 ERPNext。</span></div>
+          <button id="cancel" class="secondary">取消</button><button id="confirm" class="danger">确认创建</button>
+        </div>
+        <div class="composer">
+          <textarea id="input" placeholder="描述要新增的标准物料，尽量写清规格、材质和影响采购选择的属性"></textarea>
+          <div><span id="actor">请选择身份</span><button id="send">发送</button></div>
+        </div>
+      </section>
+
+      <aside class="inspection">
+        <div class="section-head"><div><h2>处理过程</h2><p>仅展示可审计动作，不展示模型隐藏思维。</p></div></div>
+        <div id="stage" class="stage"><i></i><span>等待测试</span></div>
+        <div id="summary" class="summary"><p>发送一条物料建档请求后，这里会显示分类状态和确认字段。</p></div>
+        <details open><summary>Agent 步骤</summary><div id="steps" class="steps empty">暂无步骤</div></details>
+        <details><summary>完整结果 JSON</summary><pre id="json">{}</pre></details>
+      </aside>
+    </main>
+    <script src="/workbench-assets/material-item-lab.js" defer></script>
+  </body>
+</html>

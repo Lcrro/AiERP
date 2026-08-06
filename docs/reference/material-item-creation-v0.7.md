@@ -91,7 +91,7 @@ stock_uom
 - 示例“内六角螺丝 M9*47，碳钢，8.8 级，镀锌”生成 `FAST-000124` 确认卡。
 - 真实 ERPNext 已确认目标 Item Group 和 UOM 存在。
 - 预览停在 `needs_confirmation`，未创建 Item；临时待确认记录已清理。
-- Python 全量测试 `497 passed`，Tool Schema 与 Adapter handler 为 `161 / 161`。
+- Python 全量测试 `498 passed`，Tool Schema 与 Adapter handler 为 `161 / 161`。
 
 ## 工作台接入 v0.8
 
@@ -112,3 +112,11 @@ ERPNext 物料组
 真实无写入验收使用“内六角螺丝 M9×61，碳钢，8.8级，镀锌”，生成 `FAST-000124` 确认卡并停在确认阶段；临时待确认记录随后清理，ERPNext 中没有创建测试 Item。
 
 本阶段同时修复了隔离 OpenClaw Profile 的插件部署问题：安装脚本现在总是在 `npm pack` 前重新构建 TypeScript，防止旧 `dist` 的 Tool Schema 拒绝新增的 `attributes` 字段。
+
+独立测试入口：
+
+```text
+http://127.0.0.1:8788/material-item-lab
+```
+
+该页面默认使用材料设备主管测试身份，提供完整新 SKU、接口规格、缺失规格和疑似重复四类样例。发送只运行预览；只有冻结确认卡真正生成后才显示“确认创建”。右侧同时展示可审计步骤和完整结果 JSON，便于定位分类、说明书、参数修复或 ERPNext 回读问题。

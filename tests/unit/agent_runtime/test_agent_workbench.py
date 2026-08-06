@@ -54,6 +54,17 @@ def test_runtime_compare_page_is_preview_only_and_shows_both_runtimes() -> None:
     assert "progressPhases" in script
 
 
+def test_material_item_lab_exposes_safe_preview_flow() -> None:
+    html = MODULE.MATERIAL_ITEM_LAB_PATH.read_text(encoding="utf-8")
+    script = (MODULE.ASSET_DIR / "material-item-lab.js").read_text(encoding="utf-8")
+
+    assert "标准物料建档实验室" in html
+    assert "/api/agent/turn/start" in script
+    assert "/api/agent/confirm" in script
+    assert "needs_confirmation" in script
+    assert "确认创建" in html
+
+
 def test_runtime_compare_defaults_to_openclaw_without_calling_existing_runtime() -> None:
     existing_calls: list[dict] = []
     openclaw_calls: list[dict] = []

@@ -10,7 +10,7 @@
 - Tool schema 与 Adapter handler：`161 / 161`
 - 主数据来源：`data/master_data/` 与 `data/material_master/`
 - Agent 主入口：员工工作台使用 `OpenClawWorkbenchRunner`；旧 `DeepSeekAgentRuntime` 仅作为 A/B 回归基线
-- 测试：Python 全量 `497 passed`；OpenClaw Plugin `5 passed`；TypeScript 构建通过
+- 测试：Python 全量 `498 passed`；OpenClaw Plugin `5 passed`；TypeScript 构建通过
 
 ## 已具备
 
@@ -94,6 +94,7 @@
 - 标准物料建档已接入员工工作台：支持自然语言进入分类与建档说明书、展示不可修改的建档确认摘要，并可在业务单据抽屉直接读取 ERPNext `Item`；普通员工不需要看到底层 ToolCall。
 - 工作台真实 DeepSeek 无写入预览通过：示例“内六角螺丝 M9×61，碳钢，8.8级，镀锌”生成 `FAST-000124` 确认卡，项目、身份、类型、编码、名称、分组、单位和规格均由服务端确定；未执行创建，临时待确认记录已清理。
 - OpenClaw Plugin 部署链已修复：安装脚本每次打包前强制重新构建 TypeScript，防止源代码已支持新字段但隔离 Profile 仍加载旧 `dist` Schema。
+- 独立标准物料建档实验室已上线：`http://127.0.0.1:8788/material-item-lab`。页面只聚焦自然语言分类、查重、确认卡和 Item 回读，默认预览不写入；材料设备主管可在冻结确认卡生成后明确执行。
 
 ## 数据状态
 
@@ -105,7 +106,7 @@
 
 ## 下一步
 
-1. 由物料设备主管明确确认一次测试 Item 写入，核对工作台确认卡、ERPNext 回读和 Item 单据抽屉后删除测试物料。
+1. 在独立建档实验室由物料设备主管明确确认一次测试 Item 写入，核对确认卡、ERPNext 回读和 Item 结果后删除测试物料。
 2. 把物料建档后的审批/复核状态和物料字典增量更新纳入后续版本，避免 ERPNext 与发布目录产生长期分叉。
 3. 增加正式登录和员工身份绑定，替换本地身份切换。
 
