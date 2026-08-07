@@ -180,14 +180,31 @@ class MaterialTypeClassifier:
                 reason="物料族描述过宽或最高候选没有明显领先。",
             )
 
-        matching_skus = self._matching_skus(top.type_id, raw_text, normalized_attributes, limit=limit)
+        normalized_attributes = _align_extracted_attributes(normalized_attributes, top.attributes)
+        matching_skus = self._matching_skus(
+            top.type_id,
+            raw_text,
+            normalized_attributes,
+            attribute_templates=top.attributes,
+            limit=limit,
+        )
         exact_skus = [item for item in matching_skus if item.get("all_supplied_attributes_match")]
         selected_type = top
         missing = _missing_required_attributes(top.attributes, normalized_attributes, raw_text)
 
         direct = self.release_resolver.resolve(raw_text, specs=normalized_attributes, limit=limit)
         direct_code = str((direct.get("resolved") or {}).get("item_code") or "")
-        if direct_code and self.sku_type_ids.get(direct_code) == top.type_id:
+        direct_candidate = next(
+            (item for item in matching_skus if str(item.get("item_code") or "") == direct_code),
+            None,
+        )
+        if (
+            direct_code
+            and self.sku_type_ids.get(direct_code) == top.type_id
+            and direct_candidate
+            and direct_candidate.get("all_supplied_attributes_match")
+            and not missing
+        ):
             existing = direct["resolved"]
             return MaterialClassificationResult(
                 status="existing_sku",
@@ -312,7 +329,10 @@ class MaterialTypeClassifier:
             score += 205
             reasons.append("标准别名精确匹配")
         else:
-            best_alias = max((len(value) for value in aliases if value in query), default=0)
+            # Two-character partial aliases such as “焊枪” are too broad to
+            # distinguish “二保焊枪” from “塑料焊枪”. Exact alias matches above
+            # remain valid; partial evidence must be more specific.
+            best_alias = max((len(value) for value in aliases if len(value) >= 3 and value in query), default=0)
             if best_alias:
                 score += (165 if best_alias >= 4 else 115) + min(best_alias, 20)
                 reasons.append("描述命中标准别名")
@@ -353,6 +373,7 @@ class MaterialTypeClassifier:
         raw_text: str,
         attributes: dict[str, str],
         *,
+        attribute_templates: tuple[dict[str, Any], ...],
         limit: int,
     ) -> list[dict[str, Any]]:
         resolver_result = self.release_resolver.resolve(raw_text, specs=attributes, limit=max(limit * 3, 10))
@@ -365,7 +386,16 @@ class MaterialTypeClassifier:
             haystack = normalize_spec_text(
                 " ".join([row.get("sku_name", ""), row.get("required_specs", ""), row.get("optional_specs", "")])
             )
-            identity_values = [normalize_spec_text(value) for value in attributes.values() if value]
+            identity_keys = {
+                str(item.get("attribute_key") or "")
+                for item in attribute_templates
+                if item.get("affects_sku_identity")
+            }
+            identity_values = [
+                normalize_spec_text(value)
+                for key, value in attributes.items()
+                if value and key in identity_keys
+            ]
             payload = dict(candidate)
             payload["all_supplied_attributes_match"] = bool(identity_values) and all(
                 value in haystack for value in identity_values
@@ -405,6 +435,47 @@ def _normalize_attributes(attributes: dict[str, Any]) -> dict[str, str]:
         normalized_key = normalize_text(raw_key).replace("_", "").replace("-", "")
         canonical_key = aliases.get(normalized_key, raw_key)
         output[canonical_key] = raw_value
+    return output
+
+
+def _align_extracted_attributes(
+    attributes: dict[str, str],
+    templates: tuple[dict[str, Any], ...],
+) -> dict[str, str]:
+    """Align common extraction keys with the selected type's own schema.
+
+    The model extracts ordinary concepts such as ``size`` or ``diameter``. The
+    type dictionary may use a precise key such as ``gauge``, ``diameter_mm`` or
+    ``outer_diameter``. Once the type is known this translation is deterministic.
+    """
+    output = dict(attributes)
+    template_keys = {str(item.get("attribute_key") or "") for item in templates}
+    semantic_targets = {
+        "size": ("gauge", "nominal_size", "dimensions", "specification", "spec"),
+        "diameter": ("diameter_mm", "outer_diameter", "nominal_diameter"),
+        "model": ("grade",),
+    }
+    for source_key, targets in semantic_targets.items():
+        value = str(output.get(source_key) or "").strip()
+        if not value or source_key in template_keys:
+            continue
+        matching_targets = [target for target in targets if target in template_keys]
+        if len(matching_targets) == 1 and matching_targets[0] not in output:
+            output[matching_targets[0]] = value
+
+    generic = str(output.get("spec") or output.get("specification") or "").strip()
+    if not generic:
+        return output
+    if "spec" in template_keys or "specification" in template_keys:
+        return output
+    missing_required = [
+        str(item.get("attribute_key") or "")
+        for item in templates
+        if item.get("requirement") == "required"
+        and str(item.get("attribute_key") or "") not in output
+    ]
+    if len(missing_required) == 1:
+        output[missing_required[0]] = generic
     return output
 
 

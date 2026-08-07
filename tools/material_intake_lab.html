@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>采购清单物料准入实验室</title>
+    <link rel="stylesheet" href="/workbench-assets/material-intake-lab.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand"><b>N</b><span><strong>采购清单物料准入实验室</strong><small>批量清单 → DeepSeek 事实抽取 → 标准字典与 SKU 查重</small></span></div>
+      <nav><a href="/">员工工作台</a><a href="/material-item-lab">单项建档</a><span>只分析，不写 ERPNext</span></nav>
+    </header>
+    <main>
+      <section class="input-panel">
+        <div class="panel-title"><div><h1>粘贴采购清单</h1><p>每行依次填写：材料、规格、采购数量、单位。支持制表符分隔，也支持用竖线分隔。</p></div><button id="sample" class="secondary">载入测试样例</button></div>
+        <textarea id="source" spellcheck="false" placeholder="材料&#9;规格&#9;采购数量&#9;单位"></textarea>
+        <div class="actions"><span id="parse-status">等待输入</span><button id="analyze">开始智能分析</button></div>
+      </section>
+
+      <section class="result-panel">
+        <div class="summary-cards">
+          <button data-queue="all" class="active"><strong id="count-all">0</strong><span>全部行</span></button>
+          <button data-queue="existing_sku"><strong id="count-existing_sku">0</strong><span>已有 SKU</span></button>
+          <button data-queue="new_sku"><strong id="count-new_sku">0</strong><span>新增 SKU</span></button>
+          <button data-queue="new_type"><strong id="count-new_type">0</strong><span>新增标准类型</span></button>
+          <button data-queue="needs_input"><strong id="count-needs_input">0</strong><span>需补充/选择</span></button>
+        </div>
+        <div id="progress" class="progress" hidden><i></i><span>小助理正在读取整批清单并核对标准物料...</span></div>
+        <section class="pipeline" aria-label="物料准入处理过程">
+          <div class="pipeline-head"><div><strong>处理过程</strong><span id="pipeline-summary">等待开始</span></div><span id="pipeline-state" class="pipeline-state">未开始</span></div>
+          <div class="stage-track">
+            <div class="stage" data-stage="read"><b>1</b><div><strong>读取清单</strong><small>保留原始行、数量和单位</small></div></div>
+            <div class="stage" data-stage="extract"><b>2</b><div><strong>提取现场事实</strong><small>DeepSeek 识别名称和明确规格</small></div></div>
+            <div class="stage" data-stage="match"><b>3</b><div><strong>匹配标准目录</strong><small>分类、查重、候选 SKU</small></div></div>
+            <div class="stage" data-stage="complete"><b>4</b><div><strong>标准属性补齐</strong><small>采用企业标准默认值</small></div></div>
+            <div class="stage" data-stage="queue"><b>5</b><div><strong>生成准入队列</strong><small>复用、新增或追问</small></div></div>
+          </div>
+          <div class="pipeline-facts"><span id="trace-input">等待读取</span><span id="trace-extracted">未提取事实</span><span id="trace-matched">未匹配目录</span><span id="trace-completed">未补齐属性</span><span id="trace-queued">未生成结论</span></div>
+          <div id="trace-detail" class="trace-detail" hidden>
+            <div class="trace-detail-head"><strong>阶段明细</strong><span>展示真实统计和判断边界，不展示模型隐藏思维。</span></div>
+            <div id="batch-trace"></div>
+          </div>
+        </section>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>原始行</th><th>准入判断</th><th>标准物料</th><th>提取规格</th><th>处理依据 / 下一步</th></tr></thead>
+            <tbody id="results"><tr><td colspan="5" class="empty">载入样例或粘贴清单后开始分析</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <aside id="detail" class="drawer" hidden>
+        <header><div><strong id="detail-title">行详情</strong><span id="detail-subtitle"></span></div><button id="close" title="关闭">×</button></header>
+        <div id="detail-body"></div>
+      </aside>
+    </main>
+    <script src="/workbench-assets/material-intake-lab.js" defer></script>
+  </body>
+</html>

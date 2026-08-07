@@ -59,6 +59,7 @@ experiments   冻结基线、对照实验和方案比较
 - [本地 Sandbox 运行说明](operations/local-sandbox.md)
 - [员工 Agent CLI](operations/agent-cli.md)
 - [员工工作台](operations/agent-workbench.md)
+- [批量采购物料准入 Skill](reference/batch-material-intake-skill.md)
 - [Agent 写入能力验收](operations/agent-write-acceptance.md)
 - [Agent 失败回归库](operations/agent-failure-regressions.md)
 - [分层测试策略](operations/testing-strategy.md)

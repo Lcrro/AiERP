@@ -65,6 +65,16 @@ def test_material_item_lab_exposes_safe_preview_flow() -> None:
     assert "确认创建" in html
 
 
+def test_material_intake_lab_exposes_four_queue_batch_preview() -> None:
+    html = MODULE.MATERIAL_INTAKE_LAB_PATH.read_text(encoding="utf-8")
+    script = (MODULE.ASSET_DIR / "material-intake-lab.js").read_text(encoding="utf-8")
+
+    assert "采购清单物料准入实验室" in html
+    assert "只分析，不写 ERPNext" in html
+    assert "/api/material-intake/analyze" in script
+    assert all(queue in html + script for queue in ("existing_sku", "new_sku", "new_type", "needs_input"))
+
+
 def test_runtime_compare_defaults_to_openclaw_without_calling_existing_runtime() -> None:
     existing_calls: list[dict] = []
     openclaw_calls: list[dict] = []

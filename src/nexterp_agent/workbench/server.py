@@ -29,6 +29,7 @@ from nexterp_agent.capability_service.catalog import CapabilityCatalogRepository
 from nexterp_agent.erpnext.adapter import ERPNextAdapter
 from nexterp_agent.erpnext.client import ERPNextClient
 from nexterp_agent.master_data import MasterDataRelease
+from nexterp_agent.item_master import BatchMaterialIntakeAnalyzer, MaterialIntakeRow
 from nexterp_agent.workbench.openclaw_compare import OpenClawPreviewRunner, summarize_existing_result
 from nexterp_agent.workbench.openclaw_runtime import (
     OpenClawWorkbenchRunner,
@@ -42,6 +43,7 @@ RUNTIME_EXPLORER_PATH = ROOT / "tools" / "agent_runtime_explorer.html"
 OPERATION_MODEL_PATH = ROOT / "tools" / "operation_model_explorer.html"
 RUNTIME_COMPARE_PATH = ROOT / "tools" / "agent_runtime_compare.html"
 MATERIAL_ITEM_LAB_PATH = ROOT / "tools" / "material_item_lab.html"
+MATERIAL_INTAKE_LAB_PATH = ROOT / "tools" / "material_intake_lab.html"
 ASSET_DIR = ROOT / "tools" / "workbench"
 ASSET_TYPES = {".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8"}
 DOCTYPE_ROUTES = {
@@ -558,6 +560,7 @@ class AgentWorkbenchService:
         self.openclaw_preview = OpenClawPreviewRunner(ROOT)
         self.openclaw_runtime = OpenClawWorkbenchRunner(ROOT)
         self.capability_repository = CapabilityCatalogRepository(os.environ["MATERIAL_CATALOG_DATABASE_URL"])
+        self.material_intake = BatchMaterialIntakeAnalyzer()
         self._run_lock = threading.Lock()
         self._runs: dict[str, dict[str, Any]] = {}
 
@@ -596,6 +599,13 @@ class AgentWorkbenchService:
                 "agent_runtime": "openclaw_progressive_manual",
             },
         }
+
+    def analyze_material_intake(self, payload: dict[str, Any]) -> dict[str, Any]:
+        source_rows = payload.get("rows")
+        if not isinstance(source_rows, list):
+            raise ValueError("rows 必须是采购清单数组")
+        rows = [MaterialIntakeRow.model_validate(row) for row in source_rows]
+        return self.material_intake.analyze(rows).model_dump(mode="json")
 
     def session_history(
         self,
@@ -2188,6 +2198,9 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
         if parsed.path in {"/material-item-lab", "/material-item-lab/"}:
             html_response(self, MATERIAL_ITEM_LAB_PATH.read_text(encoding="utf-8"))
             return
+        if parsed.path in {"/material-intake-lab", "/material-intake-lab/"}:
+            html_response(self, MATERIAL_INTAKE_LAB_PATH.read_text(encoding="utf-8"))
+            return
         if parsed.path == "/favicon.ico":
             self.send_response(HTTPStatus.NO_CONTENT)
             self.end_headers()
@@ -2449,6 +2462,10 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
                 run = self.server.service.start_run(read_json(self))  # type: ignore[attr-defined]
                 json_response(self, {"ok": True, "run": run})
                 return
+            if self.path == "/api/material-intake/analyze":
+                payload = self.server.service.analyze_material_intake(read_json(self))  # type: ignore[attr-defined]
+                json_response(self, {"ok": True, "result": payload})
+                return
             if self.path not in {"/api/agent", "/api/agent/turn"}:
                 json_response(self, {"ok": False, "error": "not_found"}, 404)
                 return
@@ -2487,6 +2504,8 @@ def main() -> int:
         raise FileNotFoundError(RUNTIME_COMPARE_PATH)
     if not MATERIAL_ITEM_LAB_PATH.exists():
         raise FileNotFoundError(MATERIAL_ITEM_LAB_PATH)
+    if not MATERIAL_INTAKE_LAB_PATH.exists():
+        raise FileNotFoundError(MATERIAL_INTAKE_LAB_PATH)
     server = build_server(args.host, args.port, args.profile)
     print(f"Employee Agent workbench: http://{args.host}:{args.port}/", flush=True)
     try:

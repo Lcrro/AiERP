@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 import pytest
+import requests
 
 from nexterp_agent.agent_runtime.deepseek_material_request import (
     MATERIAL_REQUEST_TOOL,
@@ -154,3 +155,35 @@ def test_call_deepseek_json_uses_openai_compatible_endpoint(monkeypatch) -> None
     assert captured["headers"]["Authorization"] == "Bearer test-key"
     assert captured["json"]["model"] == "deepseek-v4-flash"
     assert captured["json"]["response_format"] == {"type": "json_object"}
+
+
+def test_call_deepseek_json_retries_transient_timeout(monkeypatch) -> None:
+    calls = 0
+
+    class FakeResponse:
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self):
+            return {"choices": [{"message": {"content": '{"ok": true}'}}]}
+
+    def fake_post(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise requests.Timeout("read timed out")
+        return FakeResponse()
+
+    monkeypatch.setattr("nexterp_agent.agent_runtime.deepseek_material_request.requests.post", fake_post)
+
+    result = call_deepseek_json(
+        [{"role": "user", "content": "hello"}],
+        settings=DeepSeekSettings(
+            api_key="test-key",
+            max_retries=1,
+            retry_backoff_seconds=0,
+        ),
+    )
+
+    assert result == {"ok": True}
+    assert calls == 2

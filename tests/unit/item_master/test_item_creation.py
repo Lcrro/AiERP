@@ -35,3 +35,47 @@ def test_existing_sku_cannot_be_compiled_as_a_new_item() -> None:
     )
 
     assert classification.status == "existing_sku"
+
+
+def test_different_drill_diameter_does_not_reuse_resolver_top_hit() -> None:
+    classification = ItemMasterCreationPlanner().classify(
+        "麻花钻头",
+        attributes={"diameter": "3.2mm", "uom": "盒"},
+        material_family_hint="钻头",
+    )
+
+    assert classification.status != "existing_sku"
+
+
+def test_generic_partial_alias_does_not_turn_mig_gun_into_plastic_welding_gun() -> None:
+    classification = ItemMasterCreationPlanner().classify(
+        "二保焊枪",
+        attributes={"model": "500A", "length": "6m"},
+    )
+
+    assert classification.status == "new_type_review"
+
+
+def test_common_size_is_aligned_to_type_specific_gauge() -> None:
+    classification = ItemMasterCreationPlanner().classify(
+        "铁丝",
+        attributes={"size": "14#"},
+    )
+
+    assert classification.normalized_attributes["gauge"] == "14#"
+    assert classification.status == "existing_sku"
+    assert classification.existing_sku["item_code"] == "METAL-000067"
+
+
+def test_common_diameter_is_aligned_to_cutting_disc_outer_diameter() -> None:
+    classification = ItemMasterCreationPlanner().classify(
+        "切割片",
+        attributes={"diameter": "100mm"},
+    )
+
+    assert classification.normalized_attributes["outer_diameter"] == "100mm"
+    assert {item["attribute_key"] for item in classification.missing_attributes} == {
+        "thickness",
+        "bore_diameter",
+        "abrasive_material",
+    }

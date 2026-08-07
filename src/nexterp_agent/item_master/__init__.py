@@ -1,6 +1,14 @@
 """Material master rules, coding, and search helpers."""
 
 from .coding import generate_next_item_code, next_sequence
+from .batch_intake import (
+    BatchFactExtraction,
+    BatchMaterialIntakeAnalyzer,
+    ExtractedMaterialFacts,
+    MaterialIntakeBatchResult,
+    MaterialIntakeDecision,
+    MaterialIntakeRow,
+)
 from .item_creation import ItemCreationDraft, ItemMasterCreationPlanner
 from .postgres_catalog import CatalogPaths, PostgresCatalogSearchClient, PostgresMaterialCatalog
 from .release_resolver import ReleaseMaterialCandidate, ReleaseMaterialResolver
@@ -14,11 +22,17 @@ from .type_classifier import (
 
 __all__ = [
     "CatalogPaths",
+    "BatchFactExtraction",
+    "BatchMaterialIntakeAnalyzer",
+    "ExtractedMaterialFacts",
     "ItemIntent",
     "MaterialRules",
     "MaterialSearch",
     "MaterialClassificationCandidate",
     "MaterialClassificationResult",
+    "MaterialIntakeBatchResult",
+    "MaterialIntakeDecision",
+    "MaterialIntakeRow",
     "MaterialTypeClassifier",
     "PostgresCatalogSearchClient",
     "PostgresMaterialCatalog",

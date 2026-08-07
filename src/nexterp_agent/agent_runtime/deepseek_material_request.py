@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any
@@ -23,7 +24,9 @@ class DeepSeekSettings:
     api_key: str
     base_url: str = DEFAULT_DEEPSEEK_BASE_URL
     model: str = DEFAULT_DEEPSEEK_MODEL
-    timeout_seconds: int = 60
+    timeout_seconds: int = 120
+    max_retries: int = 2
+    retry_backoff_seconds: float = 1.5
 
 
 def load_deepseek_settings() -> DeepSeekSettings:
@@ -36,7 +39,9 @@ def load_deepseek_settings() -> DeepSeekSettings:
         api_key=api_key,
         base_url=os.getenv("DEEPSEEK_BASE_URL") or DEFAULT_DEEPSEEK_BASE_URL,
         model=os.getenv("DEEPSEEK_MODEL") or DEFAULT_DEEPSEEK_MODEL,
-        timeout_seconds=int(os.getenv("DEEPSEEK_TIMEOUT_SECONDS") or "60"),
+        timeout_seconds=max(10, int(os.getenv("DEEPSEEK_TIMEOUT_SECONDS") or "120")),
+        max_retries=max(0, int(os.getenv("DEEPSEEK_MAX_RETRIES") or "2")),
+        retry_backoff_seconds=max(0.0, float(os.getenv("DEEPSEEK_RETRY_BACKOFF_SECONDS") or "1.5")),
     )
 
 
@@ -167,21 +172,39 @@ def call_deepseek_json(
 ) -> dict[str, Any]:
     resolved_settings = settings or load_deepseek_settings()
     endpoint = resolved_settings.base_url.rstrip("/") + "/chat/completions"
-    response = requests.post(
-        endpoint,
-        headers={
-            "Authorization": f"Bearer {resolved_settings.api_key}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": resolved_settings.model,
-            "messages": messages,
-            "response_format": {"type": "json_object"},
-            "temperature": 0.1,
-            "stream": False,
-        },
-        timeout=resolved_settings.timeout_seconds,
-    )
+    request_body = {
+        "model": resolved_settings.model,
+        "messages": messages,
+        "response_format": {"type": "json_object"},
+        "temperature": 0.1,
+        "stream": False,
+    }
+    last_error: requests.RequestException | None = None
+    for attempt in range(resolved_settings.max_retries + 1):
+        try:
+            response = requests.post(
+                endpoint,
+                headers={
+                    "Authorization": f"Bearer {resolved_settings.api_key}",
+                    "Content-Type": "application/json",
+                },
+                json=request_body,
+                timeout=resolved_settings.timeout_seconds,
+            )
+            break
+        except (requests.Timeout, requests.ConnectionError) as error:
+            last_error = error
+            if attempt >= resolved_settings.max_retries:
+                kind = "超时" if isinstance(error, requests.Timeout) else "网络连接失败"
+                raise RuntimeError(
+                    f"DeepSeek 请求{kind}：等待 {resolved_settings.timeout_seconds} 秒后仍未返回，"
+                    f"已重试 {resolved_settings.max_retries} 次，请稍后再试。"
+                ) from error
+            delay = resolved_settings.retry_backoff_seconds * (attempt + 1)
+            if delay:
+                time.sleep(delay)
+    else:  # pragma: no cover - loop either breaks or raises above
+        raise RuntimeError("DeepSeek 请求失败") from last_error
     response.raise_for_status()
     payload = response.json()
     content = payload["choices"][0]["message"]["content"]
