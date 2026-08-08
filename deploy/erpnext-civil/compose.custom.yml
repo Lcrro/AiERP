@@ -1,0 +1,17 @@
+services:
+  backend:
+    image: nexterp/erpnext-civil:v15.108.0
+  configurator:
+    image: nexterp/erpnext-civil:v15.108.0
+  create-site:
+    image: nexterp/erpnext-civil:v15.108.0
+  frontend:
+    image: nexterp/erpnext-civil:v15.108.0
+  queue-long:
+    image: nexterp/erpnext-civil:v15.108.0
+  queue-short:
+    image: nexterp/erpnext-civil:v15.108.0
+  scheduler:
+    image: nexterp/erpnext-civil:v15.108.0
+  websocket:
+    image: nexterp/erpnext-civil:v15.108.0

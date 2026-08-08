@@ -1,0 +1,6 @@
+app_name = "agent_bridge"
+app_title = "Agent Bridge"
+app_publisher = "Nexterp"
+app_description = "Stable Frappe methods for employee agent workflows."
+app_email = "dev@nexterp.local"
+app_license = "MIT"
