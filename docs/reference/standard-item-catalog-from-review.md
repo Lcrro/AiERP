@@ -1,6 +1,7 @@
 # Standard Item Catalog From Purchase Review
 
-This document describes the derived catalog exported from `purchase-material-standardization.md`.
+This document describes the derived catalog exported from the archived source record
+`../archive/2026/reference/purchase-material-standardization.md`.
 
 The source review is a row-by-row human/model standardization of the 2024 purchase list. The exported files are not raw purchase records; they are a first draft of material master data for search, deduplication, and later ERPNext import.
 

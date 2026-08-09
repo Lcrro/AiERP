@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nexterp Project Maintainer"
+  short_description: "Keep Nexterp context, docs, tests, and handoffs compact"
+  default_prompt: "Use $nexterp-project-maintainer to resume safely, work on only the requested module, and update a compact handoff after verification."

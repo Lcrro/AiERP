@@ -1,5 +1,5 @@
 param(
-    [string]$ReviewPath = "docs/reference/purchase-material-standardization.md",
+    [string]$ReviewPath = "docs/archive/2026/reference/purchase-material-standardization.md",
     [string]$OutputDir = "data/material_purchase_2024"
 )
 

@@ -1,0 +1,115 @@
+schema_version: 1
+current_milestone:
+  id: project-maintenance-skill-v0.1
+  label: 项目整理与上下文维护
+  status: in_progress
+  branch: codex/project-maintenance-skill-v0.1
+production_entrypoints:
+  workbench: http://127.0.0.1:8788/
+  material_intake_lab: http://127.0.0.1:8788/material-intake-lab
+  material_item_lab: http://127.0.0.1:8788/material-item-lab
+  capability_api: http://127.0.0.1:8790
+  erpnext_civil: http://localhost:8002
+local_services:
+  - id: employee_workbench
+    command: python scripts/dev/agent_workbench.py --port 8788 --profile civil
+    health: http://127.0.0.1:8788/
+  - id: capability_api
+    command: bash scripts/openclaw/start_capability_api.sh
+    health: http://127.0.0.1:8790
+  - id: erpnext_civil
+    command: .\scripts\start_wsl_sandbox.ps1
+    health: http://localhost:8002
+active_modules:
+  - id: workbench
+    label: 员工工作台
+  - id: agent_runtime
+    label: OpenClaw 渐进式说明书 Runtime
+  - id: item_master
+    label: 物料主数据与检索
+  - id: erpnext
+    label: ERPNext ToolCall 与 Adapter
+  - id: master_data
+    label: 公司项目员工仓库供应商主数据
+  - id: capability_service
+    label: Capability API 与确定性编译
+  - id: openclaw
+    label: OpenClaw Plugin 与隔离运行时
+module_paths:
+  workbench:
+    - src/nexterp_agent/workbench
+    - tools/workbench
+    - scripts/dev/agent_workbench.py
+  agent_runtime:
+    - src/nexterp_agent/agent_runtime
+    - docs/architecture/openclaw-progressive-manual-runtime.md
+  item_master:
+    - src/nexterp_agent/item_master
+    - data/material_master
+    - tools/material_master_browser.html
+  erpnext:
+    - src/nexterp_agent/erpnext
+    - frappe_apps/agent_bridge
+  master_data:
+    - data/master_data
+    - scripts/master_data
+  capability_service:
+    - src/nexterp_agent/capability_service
+    - scripts/openclaw
+  openclaw:
+    - scripts/openclaw
+    - frappe_apps/agent_bridge
+module_tests:
+  workbench:
+    - tests/unit/agent_runtime/test_agent_workbench.py
+    - tests/unit/agent_runtime/test_openclaw_workbench.py
+  agent_runtime:
+    - tests/unit/agent_runtime
+    - tests/unit/capability_service
+  item_master:
+    - tests/unit/item_master
+  erpnext:
+    - tests/unit/erpnext
+  master_data:
+    - tests/unit/master_data
+  capability_service:
+    - tests/unit/capability_service
+  openclaw:
+    - tests/unit/capability_service
+module_docs:
+  workbench:
+    - docs/operations/agent-workbench.md
+  agent_runtime:
+    - docs/architecture/openclaw-progressive-manual-runtime.md
+    - docs/architecture/current-system.md
+  item_master:
+    - docs/reference/material-master-standard.md
+    - docs/reference/material-high-recall-v0.6.md
+    - docs/reference/material-intake-draft-step-v0.7.md
+  erpnext:
+    - docs/reference/toolcall-current-inventory.md
+    - docs/reference/toolcall-data-dictionary.md
+  master_data:
+    - docs/reference/master-data-standard.md
+  capability_service:
+    - docs/reference/capability-skill-catalog.md
+  openclaw:
+    - docs/architecture/openclaw-progressive-manual-runtime.md
+recent_completed:
+  - 物料批量高召回检索 v0.6 已提交， focused tests 9 passed。
+  - 物料录入草稿 v0.7 已提交，分析阶段不写 ERPNext。
+  - OpenClaw 工作台主链已接入材料申请、采购闭环和身份情境层。
+next_steps:
+  - 完成维护 CLI、文档审计和项目 Skill 的冷启动验收。
+  - 归档已完成计划和旧 Runtime 对照文档，保留当前架构入口。
+  - 继续用每个里程碑一个任务的方式开发，阶段结束更新 checkpoint 和 handoff。
+known_issues:
+  - 本地 ERPNext 与 DeepSeek 服务需要单独启动，check 不自动写入业务数据。
+  - 运行日志和会话文件只保存在本地 runtime 目录，不应提交。
+  - 快速回归目前为 517 passed、2 个历史项目编码断言失败；全量套件包含长时外部测试，不作为每次整理的默认命令。
+verification_commands:
+  unit_item_master: python -m pytest tests/unit/item_master -q
+  fast_regression: python -m pytest -q -m "not integration and not llm and not erpnext_write and not slow"
+  full_python: python -m pytest -q
+  project_resume: python scripts/dev/project_context.py resume
+  project_check: python scripts/dev/project_context.py check

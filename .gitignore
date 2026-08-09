@@ -14,6 +14,7 @@ output/playwright/
 .runtime/
 node_modules/
 *.tgz
+nexterp-local-state*.zip
 dist/
 build/
 *.egg-info/
@@ -21,6 +22,7 @@ logs/
 outputs/
 data/runtime/logs/*
 data/runtime/sessions/*
+data/runtime/*.log
 data/runtime/*_report.json
 data/runtime/openclaw_*.json
 data/runtime/openclaw_*.log

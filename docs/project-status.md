@@ -1,120 +1,48 @@
 # 项目状态
 
-更新日期：`2026-08-06`
+当前里程碑：`project-maintenance-skill-v0.1`（in_progress）
+当前分支：`codex/project-maintenance-skill-v0.1`，HEAD：`73d385e`
 
-## 当前基线
+## 生产入口
 
-- 分支：`codex/item-master-workbench-v0.8`
-- ERPNext 开发账套：`http://localhost:8002`
-- 员工 Agent 工作台：`http://127.0.0.1:8788/`
-- Tool schema 与 Adapter handler：`161 / 161`
-- 主数据来源：`data/master_data/` 与 `data/material_master/`
-- Agent 主入口：员工工作台使用 `OpenClawWorkbenchRunner`；旧 `DeepSeekAgentRuntime` 仅作为 A/B 回归基线
-- 测试：Python 全量 `498 passed`；OpenClaw Plugin `5 passed`；TypeScript 构建通过
+- workbench: `http://127.0.0.1:8788/`
+- material_intake_lab: `http://127.0.0.1:8788/material-intake-lab`
+- material_item_lab: `http://127.0.0.1:8788/material-item-lab`
+- capability_api: `http://127.0.0.1:8790`
+- erpnext_civil: `http://localhost:8002`
 
-## 已具备
+## 活动模块
 
-- ERPNext/Frappe API 认证、通用文档操作和五大模块 ToolCall。
-- Tool Contract、按岗位工具暴露、员工身份 ToolGateway 和写操作确认。
-- 物料四级发布表、物料 Resolver 和 PostgreSQL 目录能力。
-- 公司、组织、员工、项目、仓库、供应商、价格等基础主数据发布包。
-- DeepSeek 自主规划循环、工具发现、契约查询、实体解析和多轮会话。
-- Capability Skill Runtime v0.3：20 项采购、库存、财务和项目能力统一进入按需 Registry；初始 Prompt 不再加载全部 goal 和 Schema，能力发现最多 5 项、Guide 每次最多 3 项。
-- Pydantic v2 强类型边界：Agent 动作和每项 Capability 使用独立契约，提供字段级错误修复；15 个能力化写工具禁止经通用 `execute_tool` 绕过。
-- Capability 编译入口已统一：DeepSeek 主链直接消费模块级 Pydantic 执行模型，不再经过旧 dataclass 二次解析；聚焦 Guide Schema 仍只披露当前能力所需字段。
-- Capability 异常边界已加固：项目任务更新、财务冲销和采购来源流转会在确认前拒绝跨项目或跨公司单据。
-- Agent 无进展检测：重复发现、Guide、Resolver 和只读动作会被识别并提前终止，保留 10 步总上限。
-- Capability Runtime 稳定性基准已升级到 v2 严格证据口径：能力发现不再算成功，读能力必须有真实查询证据，写能力必须产生预期待确认 ToolCall，并统计直接成功、修复后成功、失败类别和 P50/P95 延迟。
-- 严格 v2 首轮基线为 `16 / 20`，暴露出项目 UI 编码与 ERPNext Link 不一致，以及实时库存 Resolver 结果未被旧评测识别两类问题；项目别名现由 Runtime 确定性规范化，实时批量库存解析被纳入合法执行证据。
-- 修复后的严格 v2 真实 DeepSeek 基准 `20 / 20` 通过：`18` 次直接成功、`2` 次缺字段后自修复成功、重复动作 `0`、底层写入旁路 `0`；平均耗时 `20.15s`，P50 `18.95s`，P95 `37.17s`。
-- Capability 规划性能已进行两轮收敛：发现结果不再用零分能力凑数；唯一高置信命中时由 Runtime 自动加载对应 Guide，仍保留歧义场景的模型选择。发现动作可同时携带模型从原话提取的实体请求，Runtime 用 Resolver 验证真实主键；完整实体包可合并“发现 + 解析”，不完整包会明确要求一次补齐，禁止把半份上下文写入会话。
-- 单场景真实 DeepSeek 抽样中，材料申请由约 `11` 步先降至 `7` 步，合并元动作后进一步降至 `6` 步；本次耗时 `8.9s`，修复和重复均为 `0`。
-- 只读能力成功后协议会收窄为仅允许 `finish`，模型只能解释真实 ToolResult，不能重复解析或查询；库存抽样由 `13` 步、`32.9s`、一次重复恢复，降至 `9` 步、`15.2s`、零重复的干净完成。该抽样用于性能回归，不替代严格 `20 / 20` 稳定性基准。
-- Capability 多轮草稿：已确认字段按结构保存，后续只补缺失字段即可；切换项目/能力、只读成功或写入成功后自动清理，避免旧上下文污染。
-- 待确认操作不可跨会话转移：ToolCall 同时绑定员工、岗位、会话、conversation、项目和 30 分钟有效期；切换上下文、创建新会话或过期后禁止执行并清除旧动作。
-- 真实 DeepSeek 多轮材料申请验证通过：首轮只提供物料与日期时追问数量，次轮仅补“20包”即可生成完整确认 ToolCall，项目、仓库、日期、物料和单位均正确保留；未写入 ERPNext。
-- Agent 失败回归库已建立：首批 8 个历史错误覆盖动作格式、参数边界、跨轮字段保留、Capability 旁路和无进展循环；真实基准失败自动进入本地候选报告，审查后才能晋升为固定测试。
-- 测试已分层：日常使用 `unit` 或 Agent 模块测试，阶段边界运行全量；真实 DeepSeek 和 ERPNext 写入验收通过独立命令显式触发，避免每次修改都产生费用或测试单据。
-- 采购业务能力 Runtime：结构化业务意图、实时合法动作、确定性 ToolCall 编译、不可变确认和执行后回读。
-- 库存业务能力 Runtime：支持实时库存查询、仓库调拨、项目领料和盘点草稿；调拨与领料在确认前执行实时库存预检，写入后回读核验仓库或项目归属。
-- 财务业务能力 Runtime：支持应付查询、采购收货生成采购发票草稿、采购发票生成供应商付款草稿和财务单据取消冲销；付款账户由 ERPNext 生成，写操作确认后执行并回读核验来源关系或取消状态。
-- 真实 DeepSeek 财务无写入评测 `3 / 3` 通过，覆盖应付查询、缺收货单追问和缺付款单号追问。
-- 项目业务能力 Runtime：支持项目成本上下文、延期与进度异常、项目任务创建和受控更新；任务写入前确认，写入后回读核验项目归属与变更字段。
-- 真实 DeepSeek 项目无写入评测 `3 / 3` 通过；同一轮相同只读业务目标由 Runtime 确定性去重，禁止模型重复打 ERPNext。
-- 真实 DeepSeek 写入验收已贯通：项目任务、基地仓到项目仓调拨、项目领料、采购收货生成采购发票草稿、已提交采购发票生成付款草稿，均经过不可变确认、员工本人身份执行和 ERPNext 回读；库存动作额外核验正式提交后的两仓库存与项目台账。
-- 新增可重复写入验收驱动器：自动创建最小采购来源夹具、记录本次单据 manifest、逐项核验并逆序清理；日常清理只处理本次单据，完整重置继续使用黄金基线。
-- Capability 非法路径真实验收已通过：草稿材料申请、过期报价、跨项目任务和草稿财务单均在 ToolCall 生成前被拒绝；来源指纹与相关单据数量保持不变，四个真实夹具全部清理。
-- 真实 DeepSeek 材料申请冒烟已通过：预览、确认、员工身份写入和 ERPNext 回读均成功，测试草稿已清理。
-- 首批无写入自然语言评测 `3 / 3` 通过，覆盖明确物料、物料多候选和数量缺失。
-- 候选物料检索后，一次查询相关仓库实时库存并合并给 Agent 推荐。
-- 独立 ERPNext 开发账套的主数据 `plan/apply/verify` 导入流程。
-- 员工工作台 v0.2：持久化助理、ERPNext 审批待办、采购单据卡、直接工作流按钮和开发者模式。
-- Agent 运行剖面：通过工作台入口打开八层架构地图，可读取当前“员工 + 项目 + 会话”的真实审计轨迹；自动统计模型决策、确定性程序和 ERPNext 调用，并诊断重复动作、过多规划、碎片化追问与失败修复。页面不展示模型隐藏思维。
-- 工作台业务错误卡：将未解决的缺资料、来源状态、权限、身份、查无记录、外部服务和业务校验问题转换成“原因 + 下一步”，技术原文继续保留在开发者执行轨迹中。
-- 材料申请三级审批：材料员、材料设备主管、项目经理。
-- 材料申请收尾验收：参考价格、预计金额、驳回原因、重提和审批历史已在 `MAT-MR-2026-00016` 验证。
-- 待采购工作台：按本人权限汇总已批准材料申请剩余量，支持项目/紧急度/物料族/供应商筛选、相关仓库库存、逐行/合并视图和询价/直接采购准备清单。
-- 询价与报价闭环：从待采购需求创建询价，录入多供应商正式报价，比较金额、交期和商务条款，并保留材料申请、询价与报价的来源关系。
-- 采购订单闭环：人工选定已提交供应商报价后创建订单草稿，完整保留报价、询价和材料申请引用，提交后准确扣减待采购数量并阻止重复下单。
-- 采购收货闭环：从已提交采购订单办理部分或全部收货，保留订单行引用；收货提交后真实增加目标仓库存并更新订单收货比例。
-- 到货差异与退货闭环：差异写入 ERPNext 评论和 ToDo；退货草稿提交后真实回减库存，并恢复采购订单待交付数量。
-- 角色工作台：按岗位提供默认工作入口和推荐面板；真实验证材料员、材料设备主管、项目经理三级待办隔离、越权拒绝和最终审批清零。
-- Workflow 防旁路：工作台与 `agent_bridge` 均禁止对启用审批流程的单据直接提交，必须执行当前账号可用的工作流动作。
-- 采购闭环 A-I 已完成：自然语言申请、三级审批、询价、供应商报价、采购订单、收货、差异退货、角色工作台和可重复验收均已贯通。
-- 可重复验收脚本支持准备、运行、验证和清理，自动核对源单关系、审批、库存变化与退货回零。
-- 库存调拨闭环：可预检源仓与目标仓库存、创建 Material Transfer 草稿、提交并核对两端库存台账。
-- 项目领料闭环：可从项目仓创建 Material Issue，提交后核对库存台账、项目和成本中心归集。
-- 库存闭环真实验收已完成：基地入库、调拨至项目仓、项目领料、影响核验和取消回零全部通过。
-- Civil 测试账套已建立黄金基线：保留项目、员工、仓库、物料、供应商和价格主数据，业务单据为零；支持约 34 秒一键还原并同步清空工作台会话。
-- OpenClaw 渐进式说明书 Runtime v0.5 样板已完成：隔离 Profile 和 Gateway、PostgreSQL 说明书关系图、Capability API、四个元工具、可信身份绑定、冻结确认动作与 ERPNext 回读均已接通。
-- Agent 身份与工作情境层 v0.6：9 名员工、8 类岗位可生成可信上下文；同一员工可随项目切换项目岗位和仓库；岗位职责通过 PostgreSQL 按需加载，不参与权限放大。
-- 新增物料与库存、候选详情、可见单据状态只读入口；查询模式不会发现写能力，第二次仍无匹配时明确停止。
-- 工作台会话身份由服务端根据受信任 session key 反查，解决常驻 OpenClaw Gateway 使用旧开发身份的问题。
-- Runtime 查看页新增身份与工作情境层，可查看本轮查询/分析/写入类型、活动能力、已加载情境和未解决信息。
-- 岗位情境对照验收已固化：零 Token 确定性矩阵和显式 `--live` 真实 DeepSeek 模式均可重复运行；总经理、财务、项目经理和材料员同问题真实对照 `4 / 4` 通过，写能力、确认卡和执行工具调用均为 `0`。
-- 材料申请说明书已迁入 PostgreSQL，OpenClaw 只按需搜索能力和加载当前节点 Guide，不直接看到或拼接底层 ERPNext ToolCall。
-- 新增 A/B 对比页 `http://127.0.0.1:8788/agent-runtime-compare`；默认只运行 OpenClaw 新版，旧版按需开启，关闭时后端不调用旧模型；等待期间显示“小助理正在……”处理阶段。两侧预览均禁止执行写操作。
-- OpenClaw 材料申请真实 DeepSeek 基准 `20 / 20` 通过，覆盖明确编码、相对日期、名称空格、多物料、多候选、缺数量、非法数量、未知物料和错误单位；执行调用 `0`，中位耗时 `19.58s`。
-- OpenClaw 材料申请真实写入验收通过：Control UI 显示冻结业务摘要并要求“允许一次”，批准后以材料员本人权限创建、回读 `MAT-MR-2026-00004`；项目、仓库、物料、数量、单位和需求日期全部一致，验收草稿随后已清理。
-- OpenClaw 审批边界验证通过：仅在聊天里说“确认”不会放行 Plugin 写工具，三次无审批界面的执行均超时并保持零写入。
-- OpenClaw 采购主链说明书迁移完成：询价、供应商报价、采购订单、采购收货和采购退货均已进入 PostgreSQL 能力关系图，并由来源单据 Resolver、确定性编译器、冻结确认和执行后回读共同约束。
-- 新增能力不会把五份完整说明书一次塞给模型；真实 DeepSeek 已通过四个元工具按需搜索和逐层加载采购链，Capability API 询价真实预览保留材料申请父子来源且零写入。
-- 隔离 OpenClaw Runtime 重启已加固：清除专用端口残留进程并等待服务就绪，避免 PID 文件失效后继续运行旧代码。
-- 员工工作台已正式接入 OpenClaw 渐进式说明书 Runtime：员工、项目和 conversation 使用独立持久会话，员工身份以不可逆外部标识动态绑定，旧 Runtime 会话不会混入新版对话。
-- 工作台会话不向模型暴露执行工具；写操作由 Agent 准备冻结的 `pending_id`，用户确认后由工作台直接调用 Capability API 执行同一动作并回读 ERPNext，不重新规划、不允许改参。
-- 工作台自然语言请求改为异步运行：`/api/agent/turn/start` 立即返回运行编号，`/api/agent/run` 按员工、项目和会话隔离提供阶段状态；页面显示“小助理正在……”和当前处理阶段，完成后再渲染真实结果。
-- 正式 `/api/agent/turn` 已完成真实 DeepSeek 冒烟：只按需调用能力搜索和 Guide 加载，返回 `openclaw_manual` 运行标识且未产生 ERPNext 写入。
-- 物料标准名称字典 v0.5 已完成最终收敛，覆盖正式发布表全部 `147` 个物料族和 `1,979` 个 SKU：`1,979` 个 SKU 均已通过生成、独立复核和程序校验形成冻结映射，开放问题、未解释 SKU 和无归属 SKU 均为 `0`。常规详细映射阈值保持 `0.75`；最终收敛仅在独立复核通过时允许最低 `0.65` 的中性兜底映射。治理结果只进入 PostgreSQL 与 Git 快照，尚未改写正式物料表或 ERPNext。
-- v0.5 支持按来源哈希增量治理、按批次复用模型响应、延期详细映射和零 Token 快照导出；DeepSeek 余额中断不会丢失已完成结果，也不会把待复核项伪装成已放行。
-- 新物料分类能力 v0.6 已接入 OpenClaw 渐进式说明书：Agent 只提取原始事实，确定性分类器依据 `20` 个一级类目、`147` 个物料族、`766` 个标准名称和 `1,979` 个 SKU 判断 `existing_sku / needs_choice / needs_input / new_sku / new_type_review`。分类阶段不写正式物料表和 ERPNext。
-- 新物料分类会检查标准类型边界、字段同义名、必填属性和重复 SKU；已补充 `SDS-Plus -> 二坑二槽钻头`、`SDS-Max -> 五坑钻头` 等兼容接口别名，避免把关键接口误当成普通“冲击钻头”。
-- 标准物料建档 v0.7 已贯通：只有 `new_sku` 且规格完整时才能准备建档；服务端重新分类和查重，确定性生成编码、SKU 名称、物料组和单位，再经不可修改确认、员工本人权限执行和 Item 回读。模型不能直接决定底层字段。
-- 建档说明书已把 7 个字段来源和 4 条跨字段规则写入 PostgreSQL；专用 `erpnext.stock.create_item` 仅暴露给物料设备管理和系统管理策略，仓库和项目岗位不可调用。
-- 真实 Capability API 无写入预览通过：生成 `FAST-000124` 确认卡并验证 ERPNext Item Group/UOM，未执行创建，临时待确认记录已清理。
-- 标准物料建档已接入员工工作台：支持自然语言进入分类与建档说明书、展示不可修改的建档确认摘要，并可在业务单据抽屉直接读取 ERPNext `Item`；普通员工不需要看到底层 ToolCall。
-- 工作台真实 DeepSeek 无写入预览通过：示例“内六角螺丝 M9×61，碳钢，8.8级，镀锌”生成 `FAST-000124` 确认卡，项目、身份、类型、编码、名称、分组、单位和规格均由服务端确定；未执行创建，临时待确认记录已清理。
-- OpenClaw Plugin 部署链已修复：安装脚本每次打包前强制重新构建 TypeScript，防止源代码已支持新字段但隔离 Profile 仍加载旧 `dist` Schema。
-- 独立标准物料建档实验室已上线：`http://127.0.0.1:8788/material-item-lab`。页面只聚焦自然语言分类、查重、确认卡和 Item 回读，默认预览不写入；材料设备主管可在冻结确认卡生成后明确执行。
-- 批量采购物料准入 Skill 原型已上线：`http://127.0.0.1:8788/material-intake-lab`。DeepSeek 按小批次提取脏清单事实，确定性分类器将每行分为“已有 SKU、现有类型新增 SKU、新增标准类型、需要补充”四个队列；数量和原单位始终以输入表为准，当前不写 ERPNext。
+- **员工工作台** (`workbench`)：代码 `src/nexterp_agent/workbench, tools/workbench, scripts/dev/agent_workbench.py`；测试 `tests/unit/agent_runtime/test_agent_workbench.py, tests/unit/agent_runtime/test_openclaw_workbench.py`
+- **OpenClaw 渐进式说明书 Runtime** (`agent_runtime`)：代码 `src/nexterp_agent/agent_runtime, docs/architecture/openclaw-progressive-manual-runtime.md`；测试 `tests/unit/agent_runtime, tests/unit/capability_service`
+- **物料主数据与检索** (`item_master`)：代码 `src/nexterp_agent/item_master, data/material_master, tools/material_master_browser.html`；测试 `tests/unit/item_master`
+- **ERPNext ToolCall 与 Adapter** (`erpnext`)：代码 `src/nexterp_agent/erpnext, frappe_apps/agent_bridge`；测试 `tests/unit/erpnext`
+- **公司项目员工仓库供应商主数据** (`master_data`)：代码 `data/master_data, scripts/master_data`；测试 `tests/unit/master_data`
+- **Capability API 与确定性编译** (`capability_service`)：代码 `src/nexterp_agent/capability_service, scripts/openclaw`；测试 `tests/unit/capability_service`
+- **OpenClaw Plugin 与隔离运行时** (`openclaw`)：代码 `scripts/openclaw, frappe_apps/agent_bridge`；测试 `tests/unit/capability_service`
 
-## 数据状态
+## 最近完成
 
-- 当前 UP 事业部项目、员工、仓库和物料主数据保留。
-- 历史业务模拟的脚本、报告、网页、会话和 ERPNext 交易记录已清理。
-- ERPNext 中对应旧仓库、项目、供应商、账号、库存台账和删除审计记录均为零。
-- Runtime 会话目录已重置，员工下次操作会建立新会话。
-- 黄金基线保存在本机 `.secrets/civil-baselines/golden/`，包含校验和与主数据数量指纹，不进入 Git。
+- 物料批量高召回检索 v0.6 已提交， focused tests 9 passed。
+- 物料录入草稿 v0.7 已提交，分析阶段不写 ERPNext。
+- OpenClaw 工作台主链已接入材料申请、采购闭环和身份情境层。
 
 ## 下一步
 
-1. 在独立建档实验室由物料设备主管明确确认一次测试 Item 写入，核对确认卡、ERPNext 回读和 Item 结果后删除测试物料。
-2. 把物料建档后的审批/复核状态和物料字典增量更新纳入后续版本，避免 ERPNext 与发布目录产生长期分叉。
-3. 增加正式登录和员工身份绑定，替换本地身份切换。
+1. 完成维护 CLI、文档审计和项目 Skill 的冷启动验收。
+2. 归档已完成计划和旧 Runtime 对照文档，保留当前架构入口。
+3. 继续用每个里程碑一个任务的方式开发，阶段结束更新 checkpoint 和 handoff。
 
-## 维护规则
+## 验证命令
 
-- 权威主数据只从发布目录导入，不从 Runtime 会话反向生成。
-- 集成测试产生的交易单据必须可识别、可清理。
-- Link 字段必须由 Resolver 或 ERPNext 真实结果提供。
-- 所有写操作使用员工本人凭据并先确认。
-- 临时报告和会话只能放在 `data/runtime/`，不提交业务测试记录。
+- `unit_item_master`: `python -m pytest tests/unit/item_master -q`
+- `fast_regression`: `python -m pytest -q -m "not integration and not llm and not erpnext_write and not slow"`
+- `full_python`: `python -m pytest -q`
+- `project_resume`: `python scripts/dev/project_context.py resume`
+- `project_check`: `python scripts/dev/project_context.py check`
+
+## 维护边界
+
+- Git 和测试结果是项目事实来源，聊天记录不是事实来源。
+- 不提交 `.env`、`.secrets`、`data/runtime/` 日志、真实 ERPNext 凭据或业务运行数据。
+- 阶段结束、提交前或交接时更新状态，不要求每次提交都改状态。
