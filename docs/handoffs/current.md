@@ -3,8 +3,8 @@
 新任务先运行 `python scripts/dev/project_context.py resume`，再按本次请求选择模块。
 
 - 分支：`codex/project-maintenance-skill-v0.1`
-- HEAD：`73d385e69069651908b253f69271b5b6fc273efe`
-- 工作区业务变化：`54` 个；运行时文件不纳入上下文。
+- HEAD：`64c3a5079c883785fa3cb94442d22355d4160e64`
+- 工作区业务变化：`1` 个；运行时文件不纳入上下文。
 - 当前里程碑：`project-maintenance-skill-v0.1`
 
 ## 入口
