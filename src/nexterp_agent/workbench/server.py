@@ -28,8 +28,15 @@ from nexterp_agent.agent_runtime.session import RuntimeSessionStore
 from nexterp_agent.capability_service.catalog import CapabilityCatalogRepository
 from nexterp_agent.erpnext.adapter import ERPNextAdapter
 from nexterp_agent.erpnext.client import ERPNextClient
+from nexterp_agent.agent_runtime.tool_access import make_tool_access_policy
+from nexterp_agent.agent_runtime.tool_gateway import ToolGateway, ToolSession
 from nexterp_agent.master_data import MasterDataRelease
-from nexterp_agent.item_master import BatchMaterialIntakeAnalyzer, MaterialIntakeRow
+from nexterp_agent.item_master import (
+    HighRecallBatchMaterialIntakeAnalyzer,
+    MaterialDraftBatch,
+    MaterialIntakeRow,
+    build_material_drafts,
+)
 from nexterp_agent.workbench.openclaw_compare import OpenClawPreviewRunner, summarize_existing_result
 from nexterp_agent.workbench.openclaw_runtime import (
     OpenClawWorkbenchRunner,
@@ -560,9 +567,13 @@ class AgentWorkbenchService:
         self.openclaw_preview = OpenClawPreviewRunner(ROOT)
         self.openclaw_runtime = OpenClawWorkbenchRunner(ROOT)
         self.capability_repository = CapabilityCatalogRepository(os.environ["MATERIAL_CATALOG_DATABASE_URL"])
-        self.material_intake = BatchMaterialIntakeAnalyzer()
+        # v0.6 keeps the full candidate pool in the analysis result and uses
+        # DeepSeek once for batch comparison.  It never writes ERPNext.
+        self.material_intake = HighRecallBatchMaterialIntakeAnalyzer()
         self._run_lock = threading.Lock()
         self._runs: dict[str, dict[str, Any]] = {}
+        self._material_intake_runs: dict[str, dict[str, Any]] = {}
+        self._material_draft_batches: dict[str, MaterialDraftBatch] = {}
 
     def scoped_session_store(self, user: str, project: str = "", conversation_id: str = "default") -> RuntimeSessionStore:
         if not project and conversation_id == "default":
@@ -605,7 +616,178 @@ class AgentWorkbenchService:
         if not isinstance(source_rows, list):
             raise ValueError("rows 必须是采购清单数组")
         rows = [MaterialIntakeRow.model_validate(row) for row in source_rows]
-        return self.material_intake.analyze(rows).model_dump(mode="json")
+        result = self.material_intake.analyze(rows)
+        analysis_id = uuid4().hex
+        with self._run_lock:
+            self._material_intake_runs[analysis_id] = {
+                "result": result,
+                "created_at": time.time(),
+            }
+        return {"analysis_id": analysis_id, **result.model_dump(mode="json")}
+
+    def prepare_material_intake_drafts(self, payload: dict[str, Any]) -> dict[str, Any]:
+        """Compile the latest analysis into server-owned, non-executable drafts."""
+        analysis_id = str(payload.get("analysis_id") or "").strip()
+        if not analysis_id:
+            raise ValueError("analysis_id 必填，请先完成采购清单分析")
+        with self._run_lock:
+            run = self._material_intake_runs.get(analysis_id)
+        if not run:
+            raise ValueError("分析结果已过期，请重新分析采购清单")
+
+        existing_codes: list[str] = []
+        lookup_status = "release_catalog_only"
+        user = str(payload.get("user") or "").strip()
+        if user:
+            try:
+                existing = self.client(user).search_documents(
+                    "Item",
+                    fields=["item_code"],
+                    limit=5000,
+                    order_by="item_code asc",
+                )
+                if existing.ok and isinstance(existing.data, list):
+                    existing_codes = [
+                        str(row.get("item_code") or "")
+                        for row in existing.data
+                        if isinstance(row, dict) and row.get("item_code")
+                    ]
+                    lookup_status = "erpnext_checked"
+                else:
+                    lookup_status = "erpnext_unavailable"
+            except Exception:
+                lookup_status = "erpnext_unavailable"
+
+        batch = build_material_drafts(
+            analysis_id,
+            run["result"],
+            self.material_intake.retriever.classifier,
+            existing_item_codes=existing_codes,
+        )
+        batch.processing_step["details"].append(f"编码检查：{lookup_status}。")
+        with self._run_lock:
+            self._material_draft_batches[analysis_id] = batch
+        return batch.model_dump(mode="json")
+
+    def confirm_material_intake_drafts(self, payload: dict[str, Any]) -> dict[str, Any]:
+        """Execute the exact server-held drafts after explicit user confirmation."""
+        analysis_id = str(payload.get("analysis_id") or "").strip()
+        user = str(payload.get("user") or "").strip()
+        if not analysis_id or not user:
+            raise ValueError("analysis_id 和 user 必填")
+        with self._run_lock:
+            batch = self._material_draft_batches.get(analysis_id)
+        if batch is None:
+            raise ValueError("物料录入草稿不存在或已过期，请重新生成")
+
+        requested_ids = {str(value).strip() for value in (payload.get("draft_ids") or []) if str(value).strip()}
+        drafts = [draft for draft in batch.drafts if not requested_ids or draft.draft_id in requested_ids]
+        if not drafts:
+            return {
+                "status": "completed",
+                "analysis_id": analysis_id,
+                "created": [],
+                "skipped": [],
+                "failed": [],
+                "writes_erpnext": False,
+            }
+
+        client = self.client(user)
+        logged_user = client.get_logged_user()
+        if not logged_user.ok:
+            raise PermissionError(logged_user.user_message or "无法核对 ERPNext 登录身份")
+        actual_user = logged_user.data
+        if isinstance(actual_user, dict):
+            actual_user = actual_user.get("message") or actual_user.get("user") or actual_user.get("name")
+        if str(actual_user or "").strip() != user:
+            raise PermissionError("ERPNext 登录身份与确认员工不一致")
+
+        gateway = ToolGateway(
+            ERPNextAdapter(client),
+            ToolSession(
+                user=user,
+                policy=make_tool_access_policy(str(payload.get("profile") or "procurement")),
+                verify_erpnext_identity=True,
+            ),
+        )
+        created: list[dict[str, Any]] = []
+        skipped: list[dict[str, Any]] = []
+        failed: list[dict[str, Any]] = []
+        for draft in drafts:
+            exists = client.document_exists("Item", draft.item_code)
+            if not exists.ok:
+                failed.append({
+                    "draft_id": draft.draft_id,
+                    "item_code": draft.item_code,
+                    "error_type": exists.error_type,
+                    "error": exists.error,
+                    "user_message": exists.user_message or "无法确认物料编码是否已存在，为避免重复录入，本条未执行。",
+                })
+                continue
+            if bool((exists.data or {}).get("exists")):
+                draft.status = "skipped_existing"
+                skipped.append({"draft_id": draft.draft_id, "item_code": draft.item_code, "reason": "ERPNext 中已存在此物料编码"})
+                continue
+            call = {
+                "tool": "erpnext.stock.create_item",
+                "reason": "用户确认物料录入草稿",
+                "risk_level": "L2",
+                "user_context": {
+                    "confirmed_by": user,
+                    "source": "material_intake_lab",
+                    "analysis_id": analysis_id,
+                },
+                "arguments": dict(draft.item_doc),
+            }
+            result = gateway.execute(call, origin="agent")
+            if result.ok:
+                draft.status = "created"
+                created.append({
+                    "draft_id": draft.draft_id,
+                    "item_code": draft.item_code,
+                    "item_name": draft.item_name,
+                    "result": result.to_dict(),
+                })
+            else:
+                failed.append({
+                    "draft_id": draft.draft_id,
+                    "item_code": draft.item_code,
+                    "error_type": result.error_type,
+                    "error": result.error,
+                    "user_message": result.user_message,
+                })
+
+        return {
+            "status": "partial" if failed else "completed",
+            "analysis_id": analysis_id,
+            "created": created,
+            "skipped": skipped,
+            "failed": failed,
+            "writes_erpnext": bool(created),
+        }
+
+    def confirm_material_alias(self, payload: dict[str, Any]) -> dict[str, Any]:
+        alias = str(payload.get("alias") or "").strip()
+        target_kind = str(payload.get("target_kind") or "").strip()
+        target_id = str(payload.get("target_id") or "").strip()
+        user = str(payload.get("user") or "").strip()
+        if not user:
+            raise ValueError("user 必填")
+        retriever = self.material_intake.retriever
+        valid_ids = (
+            {item.type_id for item in retriever.classifier.types}
+            if target_kind == "type"
+            else {str(row.get("item_code") or "") for row in retriever.resolver.rows}
+        )
+        if target_kind not in {"type", "sku"} or target_id not in valid_ids:
+            raise ValueError("别名目标不是当前标准目录中的真实类型或 SKU")
+        return retriever.alias_store.confirm(
+            alias=alias,
+            target_kind=target_kind,
+            target_id=target_id,
+            user=user,
+            source_row=str(payload.get("source_row") or ""),
+        )
 
     def session_history(
         self,
@@ -2465,6 +2647,18 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
             if self.path == "/api/material-intake/analyze":
                 payload = self.server.service.analyze_material_intake(read_json(self))  # type: ignore[attr-defined]
                 json_response(self, {"ok": True, "result": payload})
+                return
+            if self.path == "/api/material-intake/drafts":
+                payload = self.server.service.prepare_material_intake_drafts(read_json(self))  # type: ignore[attr-defined]
+                json_response(self, {"ok": True, "drafts": payload})
+                return
+            if self.path == "/api/material-intake/drafts/confirm":
+                payload = self.server.service.confirm_material_intake_drafts(read_json(self))  # type: ignore[attr-defined]
+                json_response(self, {"ok": not payload.get("failed"), "execution": payload})
+                return
+            if self.path == "/api/material-intake/confirm-alias":
+                payload = self.server.service.confirm_material_alias(read_json(self))  # type: ignore[attr-defined]
+                json_response(self, {"ok": True, "alias": payload})
                 return
             if self.path not in {"/api/agent", "/api/agent/turn"}:
                 json_response(self, {"ok": False, "error": "not_found"}, 404)

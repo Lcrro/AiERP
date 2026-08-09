@@ -59,7 +59,10 @@ experiments   冻结基线、对照实验和方案比较
 - [本地 Sandbox 运行说明](operations/local-sandbox.md)
 - [员工 Agent CLI](operations/agent-cli.md)
 - [员工工作台](operations/agent-workbench.md)
+- [开发上下文恢复快照（2026-08-09）](operations/thread-context-recovery-2026-08-09.md)：记录 Remote 会话缺失后的 Git 基线、未提交功能和继续开发检查表。
 - [批量采购物料准入 Skill](reference/batch-material-intake-skill.md)
+- [物料批量高召回检索与 DeepSeek 判定 v0.6](reference/material-high-recall-v0.6.md)
+- [物料接入第八步：物料录入草稿](reference/material-intake-draft-step-v0.7.md)
 - [Agent 写入能力验收](operations/agent-write-acceptance.md)
 - [Agent 失败回归库](operations/agent-failure-regressions.md)
 - [分层测试策略](operations/testing-strategy.md)

@@ -56,10 +56,16 @@ class MaterialIntakeDecision(_StrictModel):
     questions: list[str] = Field(default_factory=list)
     reason: str
     ambiguity_note: str = ""
+    retrieval_threshold: int = 0
+    candidate_count: int = 0
+    candidate_groups: list[dict[str, Any]] = Field(default_factory=list)
+    deepseek_judgement: dict[str, Any] = Field(default_factory=dict)
+    program_validation: dict[str, Any] = Field(default_factory=dict)
+    alias_learning: dict[str, Any] = Field(default_factory=dict)
 
 
 class MaterialIntakeTraceStep(_StrictModel):
-    stage: Literal["read", "extract", "match", "complete", "queue"]
+    stage: Literal["read", "extract", "match", "retrieve", "compress", "judge", "validate", "complete", "queue"]
     title: str
     status: Literal["completed", "partial", "failed"]
     input_rows: int = 0

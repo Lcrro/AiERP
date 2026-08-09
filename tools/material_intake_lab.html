@@ -30,21 +30,36 @@
         <section class="pipeline" aria-label="物料准入处理过程">
           <div class="pipeline-head"><div><strong>处理过程</strong><span id="pipeline-summary">等待开始</span></div><span id="pipeline-state" class="pipeline-state">未开始</span></div>
           <div class="stage-track">
-            <div class="stage" data-stage="read"><b>1</b><div><strong>读取清单</strong><small>保留原始行、数量和单位</small></div></div>
-            <div class="stage" data-stage="extract"><b>2</b><div><strong>提取现场事实</strong><small>DeepSeek 识别名称和明确规格</small></div></div>
-            <div class="stage" data-stage="match"><b>3</b><div><strong>匹配标准目录</strong><small>分类、查重、候选 SKU</small></div></div>
-            <div class="stage" data-stage="complete"><b>4</b><div><strong>标准属性补齐</strong><small>采用企业标准默认值</small></div></div>
-            <div class="stage" data-stage="queue"><b>5</b><div><strong>生成准入队列</strong><small>复用、新增或追问</small></div></div>
+            <div class="stage" data-stage="read"><b>1</b><div><strong>读取清单</strong><small>保留原始名称、数量和单位</small></div></div>
+            <div class="stage" data-stage="extract"><b>2</b><div><strong>提取现场事实</strong><small>DeepSeek 一次提取整批明确规格</small></div></div>
+            <div class="stage" data-stage="retrieve"><b>3</b><div><strong>高召回检索</strong><small>类型和 SKU 同时召回</small></div></div>
+            <div class="stage" data-stage="compress"><b>4</b><div><strong>候选压缩</strong><small>过多时按物料类型分组</small></div></div>
+            <div class="stage" data-stage="judge"><b>5</b><div><strong>DeepSeek 判定</strong><small>只比较真实候选，不编编码</small></div></div>
+            <div class="stage" data-stage="validate"><b>6</b><div><strong>程序复核</strong><small>检查规格冲突和候选来源</small></div></div>
+            <div class="stage" data-stage="queue"><b>7</b><div><strong>生成处理结论</strong><small>复用、新增或追问</small></div></div>
+            <div class="stage" data-stage="draft"><b>8</b><div><strong>生成物料录入草稿</strong><small>确认后一次性录入 ERPNext</small></div></div>
           </div>
-          <div class="pipeline-facts"><span id="trace-input">等待读取</span><span id="trace-extracted">未提取事实</span><span id="trace-matched">未匹配目录</span><span id="trace-completed">未补齐属性</span><span id="trace-queued">未生成结论</span></div>
+          <div class="pipeline-facts"><span id="trace-input">等待读取</span><span id="trace-extracted">未提取事实</span><span id="trace-matched">未召回候选</span><span id="trace-completed">未完成复核</span><span id="trace-queued">未生成结论</span></div>
           <div id="trace-detail" class="trace-detail" hidden>
             <div class="trace-detail-head"><strong>阶段明细</strong><span>展示真实统计和判断边界，不展示模型隐藏思维。</span></div>
             <div id="batch-trace"></div>
           </div>
         </section>
+        <section id="draft-panel" class="draft-panel" hidden>
+          <div class="draft-head">
+            <div><h2>物料录入草稿</h2><p id="draft-summary">分析完成后生成，尚未写入 ERPNext。</p></div>
+            <div class="draft-actions">
+              <label>录入账号 <input id="operator" value="mao.xiaoquan@stec-up.local" autocomplete="off" /></label>
+              <button id="prepare-drafts" class="secondary">生成录入草稿</button>
+              <button id="confirm-drafts" class="primary" disabled>确认并一键录入</button>
+            </div>
+          </div>
+          <div id="draft-list" class="draft-list"><div class="empty">先完成上方分析。</div></div>
+          <div id="execution-result" class="execution-result" hidden></div>
+        </section>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>原始行</th><th>准入判断</th><th>标准物料</th><th>提取规格</th><th>处理依据 / 下一步</th></tr></thead>
+            <thead><tr><th>原始行</th><th>准入判断</th><th>标准物料</th><th>提取规格</th><th>召回 / 判定 / 下一步</th></tr></thead>
             <tbody id="results"><tr><td colspan="5" class="empty">载入样例或粘贴清单后开始分析</td></tr></tbody>
           </table>
         </div>
