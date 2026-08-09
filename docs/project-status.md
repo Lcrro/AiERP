@@ -1,7 +1,7 @@
 # 项目状态
 
-当前里程碑：`project-maintenance-skill-v0.1`（in_progress）
-当前分支：`codex/project-maintenance-skill-v0.1`，HEAD：`64c3a50`
+当前里程碑：`project-maintenance-skill-v0.1`（completed）
+当前分支：`codex/project-maintenance-skill-v0.1`，HEAD：`c950723`
 
 ## 生产入口
 
@@ -26,12 +26,14 @@
 - 物料批量高召回检索 v0.6 已提交， focused tests 9 passed。
 - 物料录入草稿 v0.7 已提交，分析阶段不写 ERPNext。
 - OpenClaw 工作台主链已接入材料申请、采购闭环和身份情境层。
+- 项目维护 CLI、文档审计、状态快照和交接文档已完成并通过 `check`。
+- 历史计划、旧 Runtime 对照实验和旧机器说明已归档；项目 Skill 已安装并通过校验。
 
 ## 下一步
 
-1. 完成维护 CLI、文档审计和项目 Skill 的冷启动验收。
-2. 归档已完成计划和旧 Runtime 对照文档，保留当前架构入口。
-3. 继续用每个里程碑一个任务的方式开发，阶段结束更新 checkpoint 和 handoff。
+1. 新 Codex 任务先运行 `resume`，再只读取本次涉及模块的代码、测试和文档。
+2. 下一业务里程碑完成后运行快速回归、`check`、`checkpoint --write` 和 `handoff --write`。
+3. 只有在里程碑边界显式运行长时 LLM/ERPNext 验收，不把外部测试放进日常循环。
 
 ## 验证命令
 
