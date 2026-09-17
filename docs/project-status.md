@@ -1,7 +1,7 @@
 # 项目状态
 
 当前里程碑：`linux-handoff-v0.1`（active）
-当前分支：`codex/linux-handoff-v0.1`，文档生成基线 HEAD：`f8efdc7`
+当前分支：`codex/linux-handoff-v0.1`，文档生成基线 HEAD：`2a25d58`
 
 ## 生产入口
 

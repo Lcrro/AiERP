@@ -12,6 +12,15 @@ def test_to_wsl_path_preserves_spaces_without_shell_quoting() -> None:
     assert to_wsl_path(path) == "/mnt/c/Users/Administrator/Documents/nexterp agent 2/scripts/openclaw/runner.sh"
 
 
+def test_to_wsl_path_rejects_a_path_without_a_windows_drive() -> None:
+    try:
+        to_wsl_path(Path("relative/path"))
+    except ValueError as exc:
+        assert "absolute Windows path" in str(exc)
+    else:  # pragma: no cover - defensive failure branch
+        raise AssertionError("relative paths must not be converted to WSL paths")
+
+
 def test_existing_result_is_reduced_to_auditable_summary() -> None:
     summary = summarize_existing_result({
         "status": "needs_confirmation",
