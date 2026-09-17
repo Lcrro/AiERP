@@ -1,0 +1,84 @@
+# AiERP Compact Dev Stack — 4 containers, 2 isolated Sites on one bench.
+# ERPNext image tag must remain frappe/erpnext:v15.118.2 (no upgrade).
+name: nexterp-compact
+
+x-app-image: &app_image
+  image: nexterp/erpnext-compact:v15.118.2
+  build:
+    context: .
+    dockerfile: Dockerfile.app
+  pull_policy: ${PULL_POLICY:-missing}
+  restart: ${RESTART_POLICY:-unless-stopped}
+
+services:
+  mariadb:
+    image: mariadb:11.8
+    restart: ${RESTART_POLICY:-unless-stopped}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env / stack.env}
+      MARIADB_AUTO_UPGRADE: "1"
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  redis-cache:
+    image: redis:8.6-alpine
+    restart: ${RESTART_POLICY:-unless-stopped}
+
+  redis-queue:
+    image: redis:8.6-alpine
+    restart: ${RESTART_POLICY:-unless-stopped}
+    volumes:
+      - redis-queue-data:/data
+
+  nexterp-app:
+    <<: *app_image
+    platform: linux/amd64
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis-cache:
+        condition: service_started
+      redis-queue:
+        condition: service_started
+    environment:
+      BACKEND: 127.0.0.1:8000
+      SOCKETIO: 127.0.0.1:9000
+      # Host header selects Site (material-test.localhost / material-classification-v4.localhost)
+      FRAPPE_SITE_NAME_HEADER: $$host
+      UPSTREAM_REAL_IP_ADDRESS: 127.0.0.1
+      UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
+      UPSTREAM_REAL_IP_RECURSIVE: "off"
+      PROXY_READ_TIMEOUT: "120"
+      CLIENT_MAX_BODY_SIZE: 50m
+      GUNICORN_THREADS: ${GUNICORN_THREADS:-4}
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-2}
+      GUNICORN_TIMEOUT: ${GUNICORN_TIMEOUT:-120}
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+    ports:
+      - "${HTTP_PORT_TEST:-8003}:8080"
+      - "${HTTP_PORT_V4:-8004}:8080"
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/compact-healthcheck.sh"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+volumes:
+  db-data:
+    name: nexterp-compact_db-data
+  sites:
+    name: nexterp-compact_sites
+  redis-queue-data:
+    name: nexterp-compact_redis-queue-data
