@@ -101,6 +101,8 @@ def bootstrap(*, workbook: Path | None, confirmation: str) -> None:
     python = ensure_python_environment()
     site_manager = ROOT / "scripts" / "test_env" / "material_sites.py"
     run([site_manager, "--site", "material-test", "--action", "bootstrap"], python=python)
+    # Linux: workers started during compose up may miss the newly created Site.
+    run([site_manager, "--site", "material-test", "--action", "start"], python=python)
     catalog_db = ROOT / ".runtime" / "material-master" / "reference-catalog.sqlite3"
     gpc_manifest = ROOT / ".runtime" / "gpc-reference" / "2026-05" / "manifest.json"
     if gpc_manifest.is_file():
@@ -133,6 +135,7 @@ def bootstrap(*, workbook: Path | None, confirmation: str) -> None:
     run([business, "verify"], python=python)
 
     run([site_manager, "--site", "classification-v4", "--action", "bootstrap"], python=python)
+    run([site_manager, "--site", "classification-v4", "--action", "start"], python=python)
     importer = ROOT / "scripts/erpnext/import_classification_v4_workbook.py"
     v4_plan = run_json([importer, "plan", "--input", source], python=python)
     run([
