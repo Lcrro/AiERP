@@ -21,6 +21,15 @@ def test_project_context_config_and_resume_are_compact() -> None:
     assert "api_secret" not in summary.lower()
 
 
+def test_generated_docs_label_head_as_a_snapshot_baseline() -> None:
+    config = project_context.load_config()
+    status = project_context.status_markdown(config)
+    handoff = project_context.handoff_markdown(config)
+    assert "文档生成基线 HEAD" in status
+    assert "文档生成基线 HEAD" in handoff
+    assert "以 Git 当前 HEAD 为准" in handoff
+
+
 def test_config_validation_rejects_missing_module_path() -> None:
     config = copy.deepcopy(project_context.load_config())
     config["module_paths"]["item_master"] = ["does/not/exist"]

@@ -137,8 +137,8 @@ GET /api/material-marketplace/catalog?q=...&segment=...&standard_type=...&stock_
 先加载 `.env` 并确保 ERPNext 开发账套运行，再执行：
 
 ```powershell
-python scripts\acceptance\procurement_closed_loop.py prepare
-python scripts\acceptance\procurement_closed_loop.py all
+python scripts\acceptance\material_business_portal_e2e.py prepare
+python scripts\acceptance\material_business_portal_e2e.py all
 ```
 
-也可以分别运行 `run`、`verify` 和 `cleanup`。`all` 会依次准备、创建采购闭环、验证来源关系和库存回零，并清理测试交易。ERPNext 因总账或库存账审计关系不允许删除的交易会保留为已取消单据，这是正常的审计行为。
+也可以分别运行 `run`、`verify` 和 `cleanup`。`all` 会依次准备、创建采购闭环并验证来源关系和库存回读；它会保留一套带 run_id 的完整验收链供页面审阅。需要清理时再显式执行 `cleanup --run-id ...`，ERPNext 因总账或库存账审计关系不允许删除的交易会保留为已取消单据，这是正常的审计行为。

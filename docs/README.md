@@ -11,6 +11,7 @@
 - [本地 Sandbox 运行说明](operations/local-sandbox.md)
 - [员工工作台](operations/agent-workbench.md)
 - [分层测试策略](operations/testing-strategy.md)
+- [团队交接与环境恢复](operations/team-handoff.md)
 
 ## 当前架构
 
@@ -43,6 +44,7 @@
 - [施工采购模板与稀疏 SKU 框架 v0.1](reference/procurement-template-framework-v0.1.md)
 - [龙华实际采购清单批处理试验 v0.1](reference/procurement-batch-pilot-v0.1.md)
 - [GPC 2026-05 参考目录整合 v0.1](reference/gpc-reference-catalog-v0.1.md)
+- [团队交接准备 v0.1](reference/team-handoff-readiness-v0.1.md)
 
 ## 文档分类
 

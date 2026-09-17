@@ -1,7 +1,7 @@
 # 项目状态
 
-当前里程碑：`procurement-frequency-discovery-v0.6`（completed）
-当前分支：`codex/material-intake-publish-v0.8`，HEAD：`5a07a15`
+当前里程碑：`team-handoff-readiness-v0.1`（completed）
+当前分支：`codex/material-intake-publish-v0.8`，文档生成基线 HEAD：`8431c4a`
 
 ## 生产入口
 
@@ -16,6 +16,7 @@
 - capability_api: `http://127.0.0.1:8790`
 - erpnext_civil: `http://localhost:8002`
 - erpnext_material_test: `http://localhost:8003`
+- erpnext_classification_v4: `http://localhost:8004`
 
 ## 活动模块
 
@@ -29,6 +30,7 @@
 
 ## 最近完成
 
+- 团队交接准备 v0.1 已完成：GitHub CI、CODEOWNERS、Pull Request 模板、一键沙盘引导、非敏感交接包与 SHA-256 清单已建立；GPC 259/259 与 ChatGPT V4 917/917 物料回读无缺失或字段不一致。真实测试链 E2E验收-20260917-143707-40c3db56 通过 26 次预览/确认幂等命令，贯通材料申请、驳回重提、三级审批、双供应商询报价、采购订单、部分收货、差异退货、剩余收货及项目领退料，库存与 Stock Ledger 回读一致；非集成回归 721 passed、8 deselected。
 - GPC 物料目录统一六层结构 v0.5 已完成：标准类型统一采用 Segment→Family→Class→Brick→物料族→标准类型；63 个原五层类型迁至第六层，新增 43 个业务物料族和 1 个灭火器附属设备本地 Brick 等价层。当前 49 个物料族、85 个标准类型节点中分别有 48/83 个挂载 259 项实际物料；重复 ID、错误父级、遗留 NXT 引用均为 0，重复干跑新增/重编号/重挂载均为 0。SQLite r10，215 个物料模块测试和 60 个工作台测试通过；ERPNext 写入 0。
 - 物料采购目录离线降级已完成：目录接口不再沿用 90 秒业务写入超时，ERPNext 不可用时回退到最近同步的 259 项目录并缓存结果；页面明确显示离线状态、禁用加入申请和创建草稿，另有 12 秒浏览器超时兜底。88 个聚焦测试和浏览器回读通过；未写入 ERPNext。
 - 螺栓标准类型与规格聚合 v0.1 已完成：逐条复核 27 个原分类边界项，以头型、结构和用途证据重分为六角、双头、头型待识别、绞制孔、预埋、环向/纵向连接、带孔和全螺纹杆；104 个 SKU 在采购页聚合为 8 张类型卡片，并用规格、材质/表面处理、性能等级和供货范围唯一解析现有 SKU。SQLite r9，33 个聚焦测试、浏览器唯一匹配和项目检查通过；未重编号 ERPNext Item，ERPNext 写入 0。
@@ -93,7 +95,7 @@
 13. Review v1.1 audit flags, resolve missing attributes and ambiguous aliases, then explicitly promote the candidate release if business-approved.
 14. 新 Codex 任务先运行 `resume`，再只读取本次涉及模块的代码、测试和文档。
 15. 物料准入下一轮真实写入验收必须在员工明确确认测试 Item 后执行，并验证 ERPNext 与运行期目录回读一致。
-16. 下一业务里程碑优先推进材料申请完整闭环，不横向扩展无关 ToolCall。
+16. 下一业务里程碑只处理业务已确认的物料审核或门户改进；采购闭环已在 material-test.localhost 验收通过，不横向扩展无关 ToolCall。
 17. 只有在里程碑边界显式运行长时 LLM/ERPNext 验收，不把外部测试放进日常循环。
 
 ## 验证命令
@@ -103,6 +105,8 @@
 - `full_python`: `python -m pytest -q`
 - `project_resume`: `python scripts/dev/project_context.py resume`
 - `project_check`: `python scripts/dev/project_context.py check`
+- `handoff_doctor`: `powershell -ExecutionPolicy Bypass -File scripts/dev/team_handoff_bootstrap.ps1 -Action doctor`
+- `material_business_e2e`: `python scripts/acceptance/material_business_portal_e2e.py all`
 
 ## 维护边界
 
