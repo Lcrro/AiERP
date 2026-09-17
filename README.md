@@ -15,11 +15,21 @@ Nexterp is an employee-facing assistant layer above ERPNext. The current path is
 
 ## Quick Start
 
-安装 Python 包并运行单元测试：
+Linux 安装 Python 包并运行单元测试：
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[dev]"
+python -m pytest tests/unit/item_master -q
+```
+
+Windows PowerShell 使用对应的激活命令，后续命令保持一致：
 
 ```powershell
-python -m venv .venv
-.\\.venv\\Scripts\\python -m pip install -e ".[dev]"
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e ".[dev]"
 python -m pytest tests/unit/item_master -q
 ```
 
