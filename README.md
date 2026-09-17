@@ -42,6 +42,7 @@ python scripts/dev/project_context.py check
 - [本地 Sandbox 运行说明](docs/operations/local-sandbox.md)
 - [员工工作台](docs/operations/agent-workbench.md)
 - [团队交接与环境恢复](docs/operations/team-handoff.md)
+- [Linux 开发机交接与恢复](docs/operations/linux-handoff.md)
 - [物料主数据标准](docs/reference/material-master-standard.md)
 - [Capability Skill 清单](docs/reference/capability-skill-catalog.md)
 

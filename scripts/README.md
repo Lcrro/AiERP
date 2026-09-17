@@ -14,6 +14,17 @@ python scripts/smoke_erpnext.py --profile local --check auth
 | `dev/` | 本地开发、sandbox 启动、agent_bridge 同步、smoke 检查 |
 | `erpnext/` | ERPNext 初始化、清理、导入、导入验证 |
 | `material_master/` | 物料采购清单处理、标准物料候选、治理、检索评估 |
+| `test_env/` | 跨平台 ERPNext 测试 Site 生命周期和 Windows 兼容脚本 |
+
+跨平台新电脑诊断与初始化统一使用：
+
+```bash
+python scripts/dev/team_handoff_bootstrap.py doctor
+python scripts/dev/team_handoff_bootstrap.py bootstrap --v4-workbook /secure/classification-v4-source.xlsx --confirm BOOTSTRAP-NEXTERP-TEST-SANDBOX
+python scripts/dev/team_handoff_bootstrap.py verify --v4-workbook /secure/classification-v4-source.xlsx
+```
+
+两个物料测试 Site 的跨平台入口是 `scripts/test_env/material_sites.py`。既有 `.ps1` 文件保留用于 Windows 兼容，不再作为 Linux 交接入口。
 
 物料脚本较多，具体分组见：
 

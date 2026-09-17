@@ -11,6 +11,17 @@
 
 ## 新机器最短路径
 
+跨平台标准入口（Windows、Linux 均可用）：
+
+```bash
+git clone https://github.com/Lcrro/AiERP.git
+cd AiERP
+python scripts/dev/team_handoff_bootstrap.py doctor \
+  --v4-workbook /secure-transfer/classification-v4-source.xlsx
+```
+
+Linux 完整步骤见 [Linux 开发机交接与恢复](linux-handoff.md)。以下 PowerShell 命令作为现有 Windows 开发机的兼容入口保留。
+
 ```powershell
 git clone https://github.com/Lcrro/AiERP.git
 cd AiERP
@@ -19,6 +30,12 @@ powershell -ExecutionPolicy Bypass -File scripts\dev\team_handoff_bootstrap.ps1 
 ```
 
 确认 Docker Desktop 已启动后，用固定确认文本建立两个隔离测试账套：
+
+```bash
+python scripts/dev/team_handoff_bootstrap.py bootstrap \
+  --v4-workbook /secure-transfer/classification-v4-source.xlsx \
+  --confirm BOOTSTRAP-NEXTERP-TEST-SANDBOX
+```
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\dev\team_handoff_bootstrap.ps1 -Action bootstrap `
@@ -72,6 +89,11 @@ python scripts\dev\project_context.py check
 ```
 
 两个物料账套回读：
+
+```bash
+python scripts/dev/team_handoff_bootstrap.py verify \
+  --v4-workbook /secure-transfer/classification-v4-source.xlsx
+```
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\dev\team_handoff_bootstrap.ps1 -Action verify `

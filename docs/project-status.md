@@ -1,7 +1,7 @@
 # 项目状态
 
-当前里程碑：`team-handoff-readiness-v0.1`（completed）
-当前分支：`codex/material-intake-publish-v0.8`，文档生成基线 HEAD：`d04006d`
+当前里程碑：`linux-handoff-v0.1`（active）
+当前分支：`codex/linux-handoff-v0.1`，文档生成基线 HEAD：`2a25d58`
 
 ## 生产入口
 
@@ -23,7 +23,7 @@
 - **员工工作台** (`workbench`)：代码 `src/nexterp_agent/workbench, tools/workbench, scripts/dev/agent_workbench.py`；测试 `tests/unit/agent_runtime/test_agent_workbench.py, tests/unit/agent_runtime/test_openclaw_workbench.py`
 - **OpenClaw 渐进式说明书 Runtime** (`agent_runtime`)：代码 `src/nexterp_agent/agent_runtime, docs/architecture/openclaw-progressive-manual-runtime.md`；测试 `tests/unit/agent_runtime, tests/unit/capability_service`
 - **物料主数据与检索** (`item_master`)：代码 `src/nexterp_agent/item_master, data/material_master, tools/material_master_browser.html, src/nexterp_agent/item_master/tariff_extraction.py, src/nexterp_agent/item_master/tariff_family_review.py, src/nexterp_agent/item_master/tariff_attribute_review.py, src/nexterp_agent/item_master/tariff_taxonomy.py, src/nexterp_agent/item_master/tariff_declaration.py, src/nexterp_agent/item_master/reference_catalog.py, src/nexterp_agent/item_master/reference_catalog_database.py, src/nexterp_agent/item_master/procurement_templates.py, src/nexterp_agent/item_master/procurement_batch_pilot.py, src/nexterp_agent/item_master/procurement_batch_review.py, src/nexterp_agent/item_master/material_catalog_normalization.py, src/nexterp_agent/item_master/erpnext_material_release.py, scripts/material_master/build_tariff_family_review.py, scripts/material_master/build_tariff_family_review_slice.py, scripts/material_master/build_tariff_attribute_review.py, scripts/material_master/freeze_tariff_attribute_review.py, scripts/material_master/extract_tariff_declaration_catalog.py, scripts/material_master/audit_tariff_declaration_coverage.py, scripts/material_master/import_gpc_reference.py, scripts/material_master/translate_gpc_profile_terms.py, scripts/material_master/translate_gpc_profile_texts.py, scripts/material_master/run_procurement_batch_pilot.py, scripts/material_master/publish_historical_fastener_rebar_variants.py, scripts/material_master/normalize_gpc_material_workbench.py, scripts/material_master/sync_reference_catalog_database.py, scripts/erpnext/sync_gpc_materials_to_test_site.py, tools/tariff_extraction_lab.html, tools/tariff_declaration_lab.html, tools/tariff_taxonomy_browser.html, tools/procurement_batch_pilot.html`；测试 `tests/unit/item_master`
-- **ERPNext ToolCall 与 Adapter** (`erpnext`)：代码 `src/nexterp_agent/erpnext, frappe_apps/agent_bridge, scripts/test_env/material_test_site.ps1, scripts/erpnext/sync_gpc_materials_to_test_site.py`；测试 `tests/unit/erpnext`
+- **ERPNext ToolCall 与 Adapter** (`erpnext`)：代码 `src/nexterp_agent/erpnext, frappe_apps/agent_bridge, scripts/test_env/material_test_site.ps1, scripts/test_env/material_sites.py, scripts/dev/team_handoff_bootstrap.py, scripts/erpnext/sync_gpc_materials_to_test_site.py`；测试 `tests/unit/erpnext`
 - **公司项目员工仓库供应商主数据** (`master_data`)：代码 `data/master_data, scripts/master_data`；测试 `tests/unit/master_data`
 - **Capability API 与确定性编译** (`capability_service`)：代码 `src/nexterp_agent/capability_service, scripts/openclaw`；测试 `tests/unit/capability_service`
 - **OpenClaw Plugin 与隔离运行时** (`openclaw`)：代码 `scripts/openclaw, frappe_apps/agent_bridge`；测试 `tests/unit/capability_service`
@@ -105,7 +105,7 @@
 - `full_python`: `python -m pytest -q`
 - `project_resume`: `python scripts/dev/project_context.py resume`
 - `project_check`: `python scripts/dev/project_context.py check`
-- `handoff_doctor`: `powershell -ExecutionPolicy Bypass -File scripts/dev/team_handoff_bootstrap.ps1 -Action doctor`
+- `handoff_doctor`: `python scripts/dev/team_handoff_bootstrap.py doctor`
 - `material_business_e2e`: `python scripts/acceptance/material_business_portal_e2e.py all`
 
 ## 维护边界

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 import subprocess
 import time
 from typing import Any, Callable
@@ -12,10 +12,18 @@ ROOT = Path(__file__).resolve().parents[3]
 
 
 def to_wsl_path(path: Path) -> str:
-    resolved = path.resolve()
-    drive = resolved.drive.rstrip(":").lower()
-    suffix = resolved.as_posix().split(":", 1)[-1]
-    return f"/mnt/{drive}{suffix}"
+    # Parse Windows syntax explicitly.  On a POSIX CI host ``Path`` treats
+    # backslashes as ordinary characters and exposes no drive, even when the
+    # input is an absolute Windows path.
+    windows_path = PureWindowsPath(str(path))
+    drive = windows_path.drive.rstrip(":").lower()
+    if drive:
+        suffix = windows_path.as_posix().split(":", 1)[-1]
+        return f"/mnt/{drive}{suffix}"
+    if path.is_absolute():
+        # Tests and native Linux execution already use a Linux-visible path.
+        return path.as_posix()
+    raise ValueError(f"WSL conversion requires an absolute path: {path}")
 
 
 def summarize_existing_result(result: dict[str, Any], *, duration_ms: int) -> dict[str, Any]:

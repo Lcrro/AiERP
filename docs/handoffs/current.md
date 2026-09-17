@@ -2,10 +2,10 @@
 
 新任务先运行 `python scripts/dev/project_context.py resume`，再按本次请求选择模块。
 
-- 分支：`codex/material-intake-publish-v0.8`
-- 文档生成基线 HEAD：`d04006def819adbc25e7887564ef383a338d340b`（提交本文件后以 Git 当前 HEAD 为准）
-- 文档生成时工作区业务变化：`4` 个；运行时文件不纳入上下文。
-- 当前里程碑：`team-handoff-readiness-v0.1`
+- 分支：`codex/linux-handoff-v0.1`
+- 文档生成基线 HEAD：`2a25d580bdd6bcc0d4e56e57cb281673d260de97`（提交本文件后以 Git 当前 HEAD 为准）
+- 文档生成时工作区业务变化：`3` 个；运行时文件不纳入上下文。
+- 当前里程碑：`linux-handoff-v0.1`
 
 ## 入口
 

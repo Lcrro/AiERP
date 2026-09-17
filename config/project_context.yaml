@@ -1,9 +1,9 @@
 schema_version: 1
 current_milestone:
-  id: team-handoff-readiness-v0.1
-  label: Team handoff, reproducible sandboxes, CI and procurement E2E
-  status: completed
-  branch: codex/material-intake-publish-v0.8
+  id: linux-handoff-v0.1
+  label: Cross-platform Linux handoff and dual-platform CI
+  status: active
+  branch: codex/linux-handoff-v0.1
 production_entrypoints:
   workbench: http://127.0.0.1:8788/
   material_intake_lab: http://127.0.0.1:8788/material-intake-lab
@@ -28,10 +28,10 @@ local_services:
     command: .\scripts\start_wsl_sandbox.ps1
     health: http://localhost:8002
   - id: erpnext_material_test
-    command: .\scripts\test_env\material_test_site.ps1 -Action start
+    command: python scripts/test_env/material_sites.py --site material-test --action start
     health: http://localhost:8003
   - id: erpnext_classification_v4
-    command: .\scripts\test_env\material_classification_v4_site.ps1 -Action start
+    command: python scripts/test_env/material_sites.py --site classification-v4 --action start
     health: http://localhost:8004
 active_modules:
   - id: workbench
@@ -94,6 +94,8 @@ module_paths:
     - src/nexterp_agent/erpnext
     - frappe_apps/agent_bridge
     - scripts/test_env/material_test_site.ps1
+    - scripts/test_env/material_sites.py
+    - scripts/dev/team_handoff_bootstrap.py
     - scripts/erpnext/sync_gpc_materials_to_test_site.py
   master_data:
     - data/master_data
@@ -224,7 +226,8 @@ next_steps:
   - 下一业务里程碑只处理业务已确认的物料审核或门户改进；采购闭环已在 material-test.localhost 验收通过，不横向扩展无关 ToolCall。
   - 只有在里程碑边界显式运行长时 LLM/ERPNext 验收，不把外部测试放进日常循环。
 known_issues:
-  - 本地 Docker、ERPNext 与可选的 DeepSeek 服务仍属于外部依赖；使用 scripts/dev/team_handoff_bootstrap.ps1 诊断、重建和验证固定测试 Site。
+  - 本地 Docker、ERPNext 与可选的 DeepSeek 服务仍属于外部依赖；使用 scripts/dev/team_handoff_bootstrap.py 诊断、重建和验证固定测试 Site。
+  - 跨平台入口已建立并在 Windows 回归；真实 Linux 新电脑仍需完成 Docker 账套初始化、259/917 回读和完整采购闭环验收。
   - 运行日志和会话文件只保存在本地 runtime 目录，不应提交。
   - 实际 `.env`、ERPNext 管理员/API 凭据只能通过接收团队批准的密码管理器或加密通道交付，GitHub 与非敏感交接压缩包均不包含这些内容。
 verification_commands:
@@ -233,5 +236,5 @@ verification_commands:
   full_python: python -m pytest -q
   project_resume: python scripts/dev/project_context.py resume
   project_check: python scripts/dev/project_context.py check
-  handoff_doctor: powershell -ExecutionPolicy Bypass -File scripts/dev/team_handoff_bootstrap.ps1 -Action doctor
+  handoff_doctor: python scripts/dev/team_handoff_bootstrap.py doctor
   material_business_e2e: python scripts/acceptance/material_business_portal_e2e.py all

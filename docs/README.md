@@ -12,6 +12,7 @@
 - [员工工作台](operations/agent-workbench.md)
 - [分层测试策略](operations/testing-strategy.md)
 - [团队交接与环境恢复](operations/team-handoff.md)
+- [Linux 开发机交接与恢复](operations/linux-handoff.md)
 
 ## 当前架构
 
