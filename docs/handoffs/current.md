@@ -3,8 +3,8 @@
 新任务先运行 `python scripts/dev/project_context.py resume`，再按本次请求选择模块。
 
 - 分支：`codex/material-intake-publish-v0.8`
-- HEAD：`71afee090cf068a853ba5ec566aa4196762f2c04`
-- 工作区业务变化：`227` 个；运行时文件不纳入上下文。
+- HEAD：`5a07a151e5ea570c0211e63de90c06232ebb20e5`
+- 工作区业务变化：`1` 个；运行时文件不纳入上下文。
 - 当前里程碑：`procurement-frequency-discovery-v0.6`
 
 ## 入口

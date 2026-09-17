@@ -1,7 +1,7 @@
 # 项目状态
 
 当前里程碑：`procurement-frequency-discovery-v0.6`（completed）
-当前分支：`codex/material-intake-publish-v0.8`，HEAD：`71afee0`
+当前分支：`codex/material-intake-publish-v0.8`，HEAD：`5a07a15`
 
 ## 生产入口
 
