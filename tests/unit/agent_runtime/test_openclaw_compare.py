@@ -16,7 +16,7 @@ def test_to_wsl_path_rejects_a_path_without_a_windows_drive() -> None:
     try:
         to_wsl_path(Path("relative/path"))
     except ValueError as exc:
-        assert "absolute Windows path" in str(exc)
+        assert "absolute path" in str(exc)
     else:  # pragma: no cover - defensive failure branch
         raise AssertionError("relative paths must not be converted to WSL paths")
 

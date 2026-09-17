@@ -17,10 +17,13 @@ def to_wsl_path(path: Path) -> str:
     # input is an absolute Windows path.
     windows_path = PureWindowsPath(str(path))
     drive = windows_path.drive.rstrip(":").lower()
-    if not drive:
-        raise ValueError(f"WSL conversion requires an absolute Windows path: {path}")
-    suffix = windows_path.as_posix().split(":", 1)[-1]
-    return f"/mnt/{drive}{suffix}"
+    if drive:
+        suffix = windows_path.as_posix().split(":", 1)[-1]
+        return f"/mnt/{drive}{suffix}"
+    if path.is_absolute():
+        # Tests and native Linux execution already use a Linux-visible path.
+        return path.as_posix()
+    raise ValueError(f"WSL conversion requires an absolute path: {path}")
 
 
 def summarize_existing_result(result: dict[str, Any], *, duration_ms: int) -> dict[str, Any]:
