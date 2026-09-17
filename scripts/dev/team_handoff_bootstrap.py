@@ -101,7 +101,20 @@ def bootstrap(*, workbook: Path | None, confirmation: str) -> None:
     python = ensure_python_environment()
     site_manager = ROOT / "scripts" / "test_env" / "material_sites.py"
     run([site_manager, "--site", "material-test", "--action", "bootstrap"], python=python)
-    run([ROOT / "scripts/material_master/sync_reference_catalog_database.py", "--version", "2026-05"], python=python)
+    catalog_db = ROOT / ".runtime" / "material-master" / "reference-catalog.sqlite3"
+    gpc_manifest = ROOT / ".runtime" / "gpc-reference" / "2026-05" / "manifest.json"
+    if gpc_manifest.is_file():
+        run([ROOT / "scripts/material_master/sync_reference_catalog_database.py", "--version", "2026-05"], python=python)
+    elif catalog_db.is_file():
+        print(
+            "Using existing reference-catalog.sqlite3; "
+            "skipping sync_reference_catalog_database because gpc-reference is absent."
+        )
+    else:
+        raise RuntimeError(
+            "reference catalog missing: provide .runtime/material-master/reference-catalog.sqlite3 "
+            "or import GPC via scripts/material_master/import_gpc_reference.py --version 2026-05"
+        )
     gpc = ROOT / "scripts/erpnext/sync_gpc_materials_to_test_site.py"
     run([gpc, "initialize"], python=python)
     gpc_plan = run_json([gpc, "plan"], python=python)
