@@ -2,6 +2,10 @@
 
 这个目录保存物料主数据的来源、治理中间表、浏览数据和发布版。
 
+`procurement_template_catalog_v0_1.json` 是批量物料整理使用的施工采购行为模板目录：固定 10 份主模板、5 份叠加约束，并强制只为实际发生的属性组合形成稀疏 SKU 候选。它不包含按 GPC Brick 手工穷举的类型模板。
+
+GPC 官方包、内部扩展和已整理实际物料通过 `scripts/material_master/sync_reference_catalog_database.py` 汇总到本机 `.runtime/material-master/reference-catalog.sqlite3`。该 SQLite 文件是参考目录工作台的运行时主源且不提交 Git；本目录中的版本化 JSON 仍是可审计配置，`.runtime` JSONL 仍是批量发布兼容导出。页面没有任意 SQL 写入口，数据库变化只通过只读 API 展示。
+
 当前业务开发优先使用发布版 v0.3：
 
 ```text
@@ -369,3 +373,29 @@ python scripts\material_master\run_type_dictionary_governance.py --repair-open-i
 对于初始物料表允许采用“宽泛但真实、使用时补充”的口径时，可在三轮后执行一次 `--final-convergence`。最终收敛不会猜测缺失规格，而是建立中性兜底类型并把未知属性设为选填；仍需通过独立复核和完整 SKU 覆盖校验。
 
 浏览页默认选择“标准名称字典 v0.5”，可查看旧名称、标准类型 ID、名称决定、双 AI 复核、程序校验和问题项。治理阶段只写治理数据库和预览文件，不修改正式发布表，也不写 ERPNext。
+
+## 物料主数据全量重建 v1.1
+
+v1.1 以发布目录 v1.0 的 1979 条 SKU 为唯一输入，按四层分类和严格属性规则重新生成独立候选目录，不覆盖 v1.0：
+
+```text
+data/material_master/release_v1_1/material_master_release_v1_1.tsv
+data/material_master/release_v1_1/material_type_dictionary.tsv
+data/material_master/release_v1_1/material_attribute_templates.tsv
+data/material_master/release_v1_1/sku_type_mapping.tsv
+data/material_master/release_v1_1/audit_report.tsv
+data/material_master/release_v1_1/material_master_release_v1_1_summary.json
+data/material_master/release_v1_1/material_master_release_v1_1_browser_data.json
+```
+
+使用 `scripts/material_master/rebuild_material_master_v1_1.py` 和 `scripts/material_master/build_material_master_release_v1_1_browser_data.py` 可重复生成。浏览页 `tools/material_master_browser.html` 的默认数据源已加入 v1.1 候选版。脚本只做确定性字段归一化和来源证据迁移，不连接 ERPNext；缺失必填属性、候选分类、别名冲突和高风险物料均保留在审计结果中，未通过人工确认前不作为运行时权威目录。
+
+## 龙华采购清单批处理试验 v0.1
+
+`data/material_master/procurement_template_catalog_v0_1.json` 固定定义 10 份主模板和 5 份叠加约束；`data/material_master/deepseek_pricing_v0_1.json` 记录批处理成本估算使用的 DeepSeek 官方价格版本。批处理程序为：
+
+```powershell
+python scripts\material_master\run_procurement_batch_pilot.py --source <xlsx> --limit 100
+```
+
+源文件、模型缓存和结果只写入 `.runtime/material-master/batch-pilot/`，不进入发布目录，也不写 ERPNext。详见 `docs/reference/procurement-batch-pilot-v0.1.md`。

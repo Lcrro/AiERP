@@ -134,7 +134,10 @@ class OperationReferenceDataCatalog:
     def _project_erpnext_names(self) -> dict[str, str]:
         report = self.root / "data" / "runtime" / "master_data_apply_report.json"
         if not report.exists():
-            return {}
+            # Keep the original civil-sandbox aliases available before a
+            # master-data import report exists; the material-test profile has
+            # its own explicit project names and does not use this provider.
+            return {"PRJ-HL-13": "PROJ-0010"}
         payload = json.loads(report.read_text(encoding="utf-8"))
         names = {}
         for row in payload.get("results", []):

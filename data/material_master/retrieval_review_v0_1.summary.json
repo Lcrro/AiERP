@@ -1,0 +1,26 @@
+{
+  "schema_version": "retrieval-review-v0.1",
+  "positive_candidate_count": 300,
+  "negative_candidate_count": 100,
+  "label_status": "pending_review",
+  "confirmed_positive_count": 0,
+  "confirmed_negative_count": 0,
+  "source": "current numeric catalog + current linked silver cases + deterministic hard negatives",
+  "writes_erpnext": false,
+  "coverage_tag_counts": {
+    "alias": 31,
+    "brand": 10,
+    "canonical": 259,
+    "cross_type": 50,
+    "hard_negative": 50,
+    "high_frequency": 31,
+    "nonexistent": 50,
+    "spec_variant": 223,
+    "typo": 10
+  },
+  "notes": [
+    "这些是人工复核候选，不是已确认金标准。",
+    "只有 review_decision=approved 且 reviewer/reviewed_at 完整的正样本才可进入 approved_material_aliases。",
+    "负样本不得作为候选别名或自动选择依据。"
+  ]
+}

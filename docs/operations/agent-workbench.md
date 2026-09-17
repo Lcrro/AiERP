@@ -57,6 +57,68 @@ POST /api/session/reset
 
 旧 `/api/agent` 在迁移期继续兼容。
 
+物料准入实验室 `/material-intake-lab` 另提供：
+
+```text
+POST /api/material-intake/analyze
+POST /api/material-intake/drafts
+POST /api/material-intake/drafts/revise
+POST /api/material-intake/drafts/confirm
+```
+
+草稿修订只重新编译并刷新冻结预览，不写 ERPNext。确认发布必须携带稳定 `request_id` 和页面已展示的 `frozen_hash`；服务端以当前员工身份创建 Item，随后独立回读验证。详细口径见 [物料准入闭环 v0.8](../reference/material-intake-publish-v0.8.md)。
+
+税则完整结构浏览器位于 `http://127.0.0.1:8788/tariff-taxonomy-browser`。页面按需加载五层目录，避免一次渲染 15,929 个节点；所有接口只读：
+
+```text
+GET /api/tariff-taxonomy/summary
+GET /api/tariff-taxonomy/children?parent_code=S15
+GET /api/tariff-taxonomy/search?q=73181510&kind=sku&limit=100
+```
+
+搜索结果携带从“类”到命中节点的完整路径，页面可以逐层展开并定位。数据源必须来自 `.runtime/tariff-extraction/` 内已通过 `hierarchy_complete` 校验、且被当前审阅包引用的 JSONL；接口不接受任意文件路径，也不写入 ERPNext。
+
+同一页面的 GPC 模式以本机 SQLite 目录库作为运行时主源：
+
+```powershell
+python scripts\material_master\sync_reference_catalog_database.py --version 2026-05
+python scripts\material_master\sync_reference_catalog_database.py --status
+```
+
+数据库固定在 `.runtime/material-master/reference-catalog.sqlite3`，不提交 Git。首次同步会先完整校验 GPC 文件包、内部扩展、实际物料和类型档案，再用单个事务写入并回读；原始 JSON/JSONL 继续作为可再生来源和兼容导出。目录业务表发生 SQL 增删改时，触发器自动推进 revision；页面每 2.5 秒读取一次下列只读接口，revision 变化时保留当前来源、搜索词、展开路径和选中项并局部重载：
+
+```text
+GET /api/reference-catalog/revision?catalog=gpc
+GET /api/reference-catalog/summary?catalog=gpc
+GET /api/reference-catalog/children?catalog=gpc&parent_code=...
+GET /api/reference-catalog/search?catalog=gpc&q=...
+GET /api/reference-catalog/profile?catalog=gpc&code=...
+```
+
+批量物料发布仍先生成兼容 JSONL 并做完整候选回读，随后在同一发布流程内同步 SQLite 的实际物料和采购类型档案；两者均只影响内部分类工作台，不创建 ERPNext Item。数据库表结构、直接数据维护边界和恢复方法见 [参考目录 SQLite 运行库 v0.1](../reference/reference-catalog-database-v0.1.md)。
+
+龙华采购清单批处理试验台位于 `http://127.0.0.1:8788/procurement-batch-pilot`。当前固定只读实际采购清单前 100 行，历史参考表不参与；任务结果和模型调用审计保存在本地 `.runtime`，接口不会写入 ERPNext：
+
+```text
+POST /api/procurement-batch-pilot/jobs
+POST /api/procurement-batch-pilot/jobs/cancel
+GET  /api/procurement-batch-pilot/latest
+GET  /api/procurement-batch-pilot/job?job_id=...
+GET  /api/procurement-batch-pilot/result?job_id=...
+```
+
+详细边界和验收数据见 [龙华实际采购清单批处理试验 v0.1](../reference/procurement-batch-pilot-v0.1.md)。
+
+物料商城位于 `http://127.0.0.1:8788/material-marketplace`，把已审核 GPC 实际物料组织成内部采购目录。页面支持分类、标准类型、库存单位、关键词和排序筛选，并把选中物料组成采购申请清单：
+
+```text
+GET /api/material-marketplace/catalog?q=...&segment=...&standard_type=...&stock_uom=...&sort=name&page=1&page_size=24
+```
+
+目录接口只读取已审核物料，不伪造 ERPNext 价格或库存。页面显示“参考价格尚未维护”和“项目库存申请时查询”；清单转入员工工作台后只会预填自然语言申请内容，仍须由 Nexterp 解析、生成冻结预览并等待员工明确确认，才允许写入 ERPNext。
+
+商城左侧分类筛选会返回完整的 GPC 路径树（类目到内部标准类型末级）。展开节点只改变浏览状态；选择任意节点后，服务端按该节点及全部后代物料过滤，不写入目录或 ERPNext。
+
 ## 当前采购流程
 
 第一版覆盖材料申请、审批、询价、采购订单、采购收货和采购退货的读取及单据卡。材料申请审批为：

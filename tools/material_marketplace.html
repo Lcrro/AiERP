@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>物料商城 | Nexterp</title>
+    <link rel="stylesheet" href="/workbench-assets/material-marketplace.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="utility-bar">
+        <div class="context-copy">
+          <span class="eyebrow">内部采购目录</span>
+          <span id="catalogStatus">正在读取物料目录</span>
+          <span id="accountLabel" class="account-label">正在读取测试账套</span>
+        </div>
+        <a class="wordmark" href="/" aria-label="返回 Nexterp 业务门户">
+          <span class="wordmark-mark">N</span>
+          <span>Nexterp</span>
+        </a>
+        <nav class="utility-links" aria-label="主要导航">
+          <a id="classificationWorkbenchLink" href="/tariff-taxonomy-browser?catalog=gpc&classification_source=original">物料分类工作台</a>
+          <a href="/">工作助理</a>
+          <button id="cartToggle" type="button">申请清单 <span id="cartCount">0</span></button>
+        </nav>
+      </div>
+      <nav class="function-nav" aria-label="业务功能导航">
+        <a href="/?view=home">工作概览</a>
+        <a class="active" href="/material-marketplace" aria-current="page">物料采购申请</a>
+        <a data-module="requests" href="/?view=requests">我的申请</a>
+        <a data-module="approvals" href="/?view=approvals">审批中心</a>
+        <a data-module="buying" href="/?view=buying">采购中心</a>
+        <a data-module="receiving" href="/?view=receiving">收货中心</a>
+        <a data-module="inventory" href="/?view=inventory">库存中心</a>
+        <a data-module="project" href="/?view=project">项目用料</a>
+        <a href="/?view=documents">单据中心</a>
+      </nav>
+      <div class="catalog-nav">
+        <a class="active" href="/material-marketplace">全部物料</a>
+        <div id="categoryNav" class="category-nav" aria-label="常用分类"></div>
+        <label class="classification-select"><span>分类版本</span><select id="classificationSource" aria-label="选择物料分类版本"><option value="original">原分类（GPC）</option><option value="chatgpt_v4">ChatGPT 分类（龙华 V4）</option></select></label>
+        <label class="search-box">
+          <span>搜索</span>
+          <input id="searchInput" type="search" placeholder="物料名称、规格或编码" autocomplete="off" />
+        </label>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro">
+        <p class="eyebrow">MATERIAL REQUEST · CATALOGUE</p>
+        <div class="intro-copy">
+          <h1>物料采购申请</h1>
+          <p>请选择你要申请采购的物料</p>
+        </div>
+        <div class="project-context">
+          <label>
+            <span>申请项目</span>
+            <select id="projectSelect"></select>
+          </label>
+          <label>
+            <span>申请人</span>
+            <select id="employeeSelect"></select>
+          </label>
+        </div>
+      </section>
+
+      <section class="catalog-shell" aria-label="物料目录">
+        <div class="catalog-toolbar">
+          <div class="catalog-result-meta">
+            <span id="resultCount">0 项物料</span>
+            <label>
+              <span>排序</span>
+              <select id="sortSelect">
+                <option value="name">按物料名称</option>
+                <option value="type">按标准类型</option>
+                <option value="code">按物料编码</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="catalog-layout">
+          <aside id="filterPanel" class="filter-panel">
+            <div class="filter-title">
+              <strong>筛选</strong>
+              <button id="resetFilters" type="button">全部清除</button>
+            </div>
+            <details open>
+              <summary>物料分类</summary>
+              <div id="segmentFilters" class="filter-options"></div>
+            </details>
+            <details>
+              <summary>标准类型</summary>
+              <div id="typeFilters" class="filter-options filter-scroll"></div>
+            </details>
+            <details>
+              <summary>库存单位</summary>
+              <div id="uomFilters" class="filter-options"></div>
+            </details>
+            <div class="filter-note">
+          <span>目录说明</span>
+          <p id="catalogDescription">当前目录来自 GPC 分类下的 Nexterp 物料目录。没有维护的价格和库存不会用估算值代替。</p>
+            </div>
+          </aside>
+
+          <section class="product-region">
+            <div id="activeFilters" class="active-filters" aria-live="polite"></div>
+            <div id="loadingState" class="loading-state">正在整理目录…</div>
+            <div id="emptyState" class="empty-state" hidden>
+              <h3>没有找到匹配物料</h3>
+              <p>可以清除部分筛选，或到物料分类工作台核对是否已经完成准入。</p>
+            </div>
+            <div id="productGrid" class="product-grid"></div>
+            <nav id="pagination" class="pagination" aria-label="目录分页"></nav>
+          </section>
+
+          <aside id="requestPanel" class="request-panel" aria-label="采购申请清单">
+            <div class="request-head">
+              <div>
+                <p class="eyebrow">REQUEST LIST</p>
+                <h2>采购申请清单</h2>
+              </div>
+              <button id="cartClose" type="button" aria-label="关闭申请清单">关闭</button>
+            </div>
+            <div id="cartEmpty" class="cart-empty">
+              <strong>清单还是空的</strong>
+              <p>从目录中加入最接近现场需求的标准物料。</p>
+            </div>
+            <div id="cartItems" class="cart-items"></div>
+            <div id="requestForm" class="request-form" hidden>
+              <label>
+                <span>要求到货日期</span>
+                <input id="scheduleDate" type="date" />
+              </label>
+              <label>
+                <span>用途说明</span>
+                <textarea id="requestPurpose" rows="3" placeholder="例如：现场排水系统安装"></textarea>
+              </label>
+              <div class="request-summary">
+                <span>共 <strong id="cartLineCount">0</strong> 种物料</span>
+                <span>数量与单位按行复核</span>
+              </div>
+              <button id="createDraft" class="primary-action" type="button">预览并创建申请草稿</button>
+              <p class="request-safety">未确认前不会直接写入 ERPNext，也不会自动提交；确认后才创建草稿，完成后立即回读。</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <div id="drawerShade" class="drawer-shade"></div>
+    <dialog id="materialDialog" class="material-dialog">
+      <button id="dialogClose" class="dialog-close" type="button" aria-label="关闭物料详情">关闭</button>
+      <div id="dialogBody"></div>
+    </dialog>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="/workbench-assets/material-marketplace.js" defer></script>
+  </body>
+</html>

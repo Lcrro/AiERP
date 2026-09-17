@@ -212,6 +212,7 @@ class BuyingToolsMixin:
                 "material_request_type": args.get("material_request_type", "Purchase"),
                 "schedule_date": args.get("schedule_date"),
                 "company": args.get("company"),
+                "currency": args.get("currency"),
                 "items": items,
                 "docstatus": 0,
             }
@@ -225,7 +226,7 @@ class BuyingToolsMixin:
         )
 
     def _buying_create_request_for_quotation_draft(self, args: dict[str, Any]) -> ToolResult:
-        items = [self._normalize_buying_item_row(item) for item in args["items"]]
+        items = [self._normalize_buying_item_row(item, include_stock_uom=True) for item in args["items"]]
         if any(not item.get("item_code") for item in items):
             return _item_resolution_error("询价单草稿中存在无法解析 item_code 的行。")
         data = _without_empty(
@@ -249,7 +250,7 @@ class BuyingToolsMixin:
         )
 
     def _buying_create_supplier_quotation_draft(self, args: dict[str, Any]) -> ToolResult:
-        items = [self._normalize_buying_item_row(item) for item in args["items"]]
+        items = [self._normalize_buying_item_row(item, include_stock_uom=True) for item in args["items"]]
         if any(not item.get("item_code") for item in items):
             return _item_resolution_error("供应商报价草稿中存在无法解析 item_code 的行。")
         data = _without_empty(
@@ -561,6 +562,7 @@ class BuyingToolsMixin:
                 "supplier": args["supplier"],
                 "posting_date": args.get("posting_date"),
                 "company": args.get("company"),
+                "currency": args.get("currency"),
                 "items": items,
                 "docstatus": 0,
             }
@@ -610,6 +612,7 @@ class BuyingToolsMixin:
                 "supplier": doc.get("supplier"),
                 "posting_date": args.get("posting_date"),
                 "company": args.get("company") or doc.get("company"),
+                "currency": doc.get("currency") if str(doc.get("currency") or "") == "CNY" else None,
                 "items": items,
             }
         )
@@ -971,7 +974,7 @@ class BuyingToolsMixin:
             requires_confirmation_for_submit=True,
         )
 
-    def _normalize_buying_item_row(self, item: dict[str, Any]) -> dict[str, Any]:
+    def _normalize_buying_item_row(self, item: dict[str, Any], *, include_stock_uom: bool = False) -> dict[str, Any]:
         row = dict(item)
         if row.get("selected_item_code") and not row.get("selection_confirmed"):
             row.pop("item_code", None)
@@ -984,6 +987,7 @@ class BuyingToolsMixin:
                 row.pop("item_code", None)
                 return row
             row["uom"] = row.get("uom") or item_doc.data.get("stock_uom")
+            stock_uom = row.get("stock_uom") or item_doc.data.get("stock_uom")
             row["item_name"] = item_doc.data.get("item_name")
             if not row.get("conversion_factor") and row.get("uom") == item_doc.data.get("stock_uom"):
                 row["conversion_factor"] = 1
@@ -1009,7 +1013,10 @@ class BuyingToolsMixin:
             "purchase_order",
             "purchase_order_item",
         }
-        return _without_empty({field: row.get(field) for field in allowed_fields})
+        normalized = _without_empty({field: row.get(field) for field in allowed_fields})
+        if include_stock_uom:
+            normalized["stock_uom"] = stock_uom if "stock_uom" in locals() else row.get("stock_uom")
+        return _without_empty(normalized)
 
 
 def _source_document_error(doctype: str, name: str, status: str, user_message: str) -> ToolResult:

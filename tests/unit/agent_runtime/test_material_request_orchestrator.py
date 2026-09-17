@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from nexterp_agent.agent_runtime.material_request_orchestrator import compose_material_request_tool_call
 from nexterp_agent.agent_runtime.deepseek_material_request import MATERIAL_REQUEST_TOOL
+from nexterp_agent.item_master.release_resolver import ReleaseMaterialResolver
 
 
 BASE_CONTEXT = {
@@ -12,13 +13,20 @@ BASE_CONTEXT = {
 }
 
 
-def test_ready_intent_composes_material_request_tool_call() -> None:
+def test_ready_intent_composes_material_request_tool_call(tmp_path) -> None:
+    catalog = tmp_path / "catalog.tsv"
+    catalog.write_text(
+        "item_code\titem_name\tsku_name\trequired_specs\tstock_uom\tstatus\tagent_use_policy\tapproved_aliases\n"
+        "100031850101041\t六角螺栓\t六角螺栓 M12×40\t规格=M12×40；性能/质量等级=6.8级\t个\tactive\tauto_select_allowed\t6.8级螺栓 M12*40\n",
+        encoding="utf-8",
+    )
+    resolver = ReleaseMaterialResolver(catalog)
     intent = {
         "intent": "create_material_request",
         "items": [{"raw_item_text": "6.8级螺栓 M12*40", "qty": 10, "uom": "个"}],
     }
 
-    result = compose_material_request_tool_call(intent, context=BASE_CONTEXT)
+    result = compose_material_request_tool_call(intent, context=BASE_CONTEXT, resolver=resolver)
 
     assert result["status"] == "ready"
     assert result["tool_call"]["tool"] == MATERIAL_REQUEST_TOOL
@@ -27,7 +35,7 @@ def test_ready_intent_composes_material_request_tool_call() -> None:
     assert arguments["schedule_date"] == "2026-06-18"
     assert arguments["items"] == [
         {
-            "item_code": "SPARE-000071-68",
+            "item_code": "100031850101041",
             "qty": 10,
             "uom": "个",
             "warehouse": "合流1.3标仓库 - SD",

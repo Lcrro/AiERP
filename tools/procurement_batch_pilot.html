@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nexterp · 物料批处理审阅台</title>
+  <link rel="stylesheet" href="/workbench-assets/procurement-batch-pilot.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">N</span><span><strong>Nexterp</strong><small>物料分类工作台</small></span></a>
+    <nav><a href="/tariff-taxonomy-browser?catalog=gpc">GPC 参考目录</a><a class="active" href="/procurement-batch-pilot">批处理审阅</a></nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow">LONGHUA · FIRST 100 · LOCAL REVIEW</p>
+        <h1>把边界项逐条审清，<br>把判断沉淀成规则</h1>
+        <p class="lead">本页只审阅“实际采购清单”首批 100 条业务记录形成的边界项。逐项结论与原候选哈希绑定，全部完成后才能冻结；不会处理第 101–300 条，也不会写入 ERPNext。</p>
+      </div>
+      <aside class="hero-status"><span class="status-dot"></span><strong>审阅边界已锁定</strong><small>源表第 2–101 行 · 后续行未处理 · ERPNext 零写入</small></aside>
+    </section>
+
+    <section class="control-card">
+      <div>
+        <p class="label">来源</p>
+        <strong>龙华项目物料待导入清单.xlsx / 实际采购清单</strong>
+        <small>固定读取前 100 条有效业务记录；历史表不参与；禁止笛卡尔积；无 ERPNext 写入。</small>
+      </div>
+      <label class="mode"><input id="use-deepseek" type="checkbox" checked><span><strong>启用受限 DeepSeek</strong><small>只用于新试运行；当前审阅基于已完成任务。</small></span></label>
+      <div class="actions"><button id="start-button" type="button">重新试运行前 100 条</button><button id="cancel-button" class="secondary" type="button" disabled>停止</button></div>
+    </section>
+
+    <section class="progress-card" id="progress-card">
+      <div class="progress-head"><div><p class="label">PROCESSING TRACE</p><h2 id="progress-message">正在读取最近一次任务…</h2></div><code id="job-id">—</code></div>
+      <div class="progress-row"><div class="ring" id="progress-ring"><strong id="progress-percent">0%</strong><small id="progress-stage">等待</small></div><div class="progress-body"><div class="bar"><i id="progress-bar"></i></div><div class="stages" id="stage-list"></div><p id="error-message" class="error" hidden></p></div></div>
+    </section>
+
+    <section class="metrics" id="metrics">
+      <article><span>业务原行</span><strong id="metric-rows">—</strong><small>完整保留</small></article>
+      <article><span>精确不同项</span><strong id="metric-unique">—</strong><small>去除重复采购</small></article>
+      <article><span>分析簇</span><strong id="metric-clusters">—</strong><small>近似规格只分析一次</small></article>
+      <article><span>模型调用</span><strong id="metric-calls">—</strong><small id="metric-tokens">真实 usage</small></article>
+      <article><span>估算成本</span><strong id="metric-cost">—</strong><small>按固定价格版本</small></article>
+    </section>
+
+    <section class="review-overview" id="review-overview" hidden>
+      <div><p class="label">BOUNDARY REVIEW</p><h2><span id="reviewed-count">0</span> / <span id="review-total">0</span> 个边界项已审</h2><p id="review-scope">只包含源表第 2–101 行。</p></div>
+      <div class="review-progress"><div class="bar"><i id="review-bar"></i></div><strong id="review-state">待审阅</strong></div>
+      <button id="freeze-review" type="button" disabled>冻结本轮审阅与规则</button>
+    </section>
+
+    <section class="rules-card" id="rules-card" hidden>
+      <details><summary><strong id="rule-count">0</strong> 条可复用规则 · 点击查看规则原则</summary><div id="rule-principles" class="rule-principles"></div></details>
+    </section>
+
+    <section class="results-card">
+      <div class="results-head"><div><p class="label">REVIEW QUEUES</p><h2>批量候选复核</h2></div><div id="filters" class="filters"></div></div>
+      <div id="result-summary" class="result-summary">尚无完成结果。</div>
+      <div id="decision-list" class="decision-list"></div>
+    </section>
+  </main>
+  <footer>本地候选处理 · GPC 2026-05 · 规则 v0.1 · ERPNext 未写入</footer>
+  <script src="/workbench-assets/procurement-batch-pilot.js" defer></script>
+</body>
+</html>

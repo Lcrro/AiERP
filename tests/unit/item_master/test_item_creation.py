@@ -26,7 +26,7 @@ def test_new_sku_is_compiled_from_frozen_type_and_existing_codes() -> None:
     assert draft.item_doc["item_name"] == draft.sku_name
 
 
-def test_existing_sku_cannot_be_compiled_as_a_new_item() -> None:
+def test_legacy_unreviewed_sku_requires_review_before_compilation() -> None:
     planner = ItemMasterCreationPlanner()
     classification = planner.classify(
         "SDS-Plus四坑冲击钻头 12mm 350mm",
@@ -34,7 +34,8 @@ def test_existing_sku_cannot_be_compiled_as_a_new_item() -> None:
         material_family_hint="钻头",
     )
 
-    assert classification.status == "existing_sku"
+    assert classification.status == "new_sku"
+    assert classification.existing_sku is None
 
 
 def test_different_drill_diameter_does_not_reuse_resolver_top_hit() -> None:

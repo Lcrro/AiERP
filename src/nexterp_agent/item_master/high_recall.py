@@ -20,6 +20,7 @@ from .batch_intake import (
 from .release_resolver import (
     DEFAULT_RELEASE_CATALOG_PATH,
     ReleaseMaterialResolver,
+    VECTOR_RECALL_MIN_SCORE,
     normalize_spec_text,
     normalize_text,
     score_release_row,
@@ -39,6 +40,8 @@ class HighRecallCandidate(BaseModel):
     item_name: str = ""
     sku_name: str = ""
     score: int = Field(ge=0, le=100)
+    vector_score: float = Field(default=0.0, ge=-1.0, le=1.0)
+    retrieval_sources: list[str] = Field(default_factory=list)
     score_breakdown: dict[str, int] = Field(default_factory=dict)
     matched_aliases: list[str] = Field(default_factory=list)
     matched_attributes: list[str] = Field(default_factory=list)
@@ -46,6 +49,15 @@ class HighRecallCandidate(BaseModel):
     match_reasons: list[str] = Field(default_factory=list)
     required_specs: str = ""
     stock_uom: str = ""
+    match_tier: int = 0
+    # These flags are populated for the current strict catalog projection so
+    # the batch judge cannot turn a lexical/vector candidate into an implicit
+    # ERPNext SKU selection.
+    strict_matching: bool = False
+    exact_code_match: bool = False
+    approved_alias_match: bool = False
+    required_specs_match: bool = False
+    auto_selectable: bool = False
 
 
 class CandidateGroup(BaseModel):
@@ -135,7 +147,7 @@ class HighRecallMaterialRetriever:
         sku_candidates = self._retrieve_skus(query, attributes, runtime_aliases)
         all_candidates = sorted(
             [*type_candidates, *sku_candidates],
-            key=lambda candidate: (-candidate.score, candidate.candidate_kind, candidate.standard_name or candidate.sku_name),
+            key=lambda candidate: (-candidate.match_tier, -candidate.score, candidate.candidate_kind, candidate.standard_name or candidate.sku_name),
         )
         selected = [candidate for candidate in all_candidates if candidate.score >= threshold]
         reference_only = False
@@ -203,6 +215,7 @@ class HighRecallMaterialRetriever:
                     for attr in item.attributes
                     if attr.get("requirement") == "required"
                 ),
+                match_tier=4 if alias_hits else (3 if normalize_text(query) == normalize_text(item.standard_name) else 0),
             ))
         return output
 
@@ -213,15 +226,39 @@ class HighRecallMaterialRetriever:
         runtime_aliases: list[dict[str, Any]],
     ) -> list[HighRecallCandidate]:
         output: list[HighRecallCandidate] = []
+        vector_scores = self.resolver.vector_scores(query, attributes)
         for row in self.resolver.rows:
             scored = score_release_row(row, query, attributes)
+            vector_score = vector_scores.get(str(row.get("item_code") or ""), 0.0)
+            # Keep the production candidate set identical to lexical mode;
+            # vector-only matches are counted offline, not surfaced yet.
             if scored.score <= 0:
                 continue
             code = str(row.get("item_code") or "")
             type_id = self.classifier.sku_type_ids.get(code, "")
-            aliases = split_terms(row.get("aliases", ""))
-            alias_hits = [alias for alias in aliases if self._text_matches(query, alias)]
+            strict_matching = "approved_aliases" in row or row.get("matching_policy") == "strict"
+            if "approved_aliases" in row:
+                approved_aliases = split_terms(row.get("approved_aliases", ""))
+            else:
+                approved_aliases = []
+                code_norm = normalize_text(code)
+                canonical_norms = {
+                    code_norm,
+                    normalize_text(row.get("item_name", "")),
+                    normalize_text(row.get("standard_name", "")),
+                }
+                aliases = [
+                    alias for alias in split_terms(row.get("aliases", ""))
+                    if normalize_text(alias) not in canonical_norms
+                ]
+            approved_alias_hits = [alias for alias in approved_aliases if self._text_matches(query, alias)]
+            alias_hits = [alias for alias in approved_alias_hits]
             alias_hits.extend(self._alias_hits(query, "sku", code, runtime_aliases))
+            # Compatibility releases may still expose their historical alias
+            # column for review-only callers, but only the explicit current
+            # projection can satisfy the production auto-select gate.
+            if not strict_matching:
+                alias_hits.extend(alias for alias in aliases if self._text_matches(query, alias))
             haystack = normalize_spec_text(
                 " ".join(row.get(key, "") for key in ("sku_name", "required_specs", "optional_specs", "model", "brand"))
             )
@@ -236,7 +273,15 @@ class HighRecallMaterialRetriever:
             ]
             # ReleaseMaterialCandidate is frozen; keep its source score intact
             # and derive the runtime-alias score separately.
+            # Vector retrieval remains an offline/shadow signal in this
+            # round.  Do not let it change the governed lexical score or
+            # promote a candidate into an automatic selection.
             adjusted_score = scored.score + (45 * len(alias_hits))
+            match_reasons = list(scored.match_reasons)
+            retrieval_sources = ["关键词/属性规则"] if scored.score > 0 else []
+            if vector_score >= VECTOR_RECALL_MIN_SCORE:
+                match_reasons.append("向量相似召回（仅作候选补充）")
+                retrieval_sources.append("local_char_ngram_vector")
             # SKU scoring has a smaller base scale than type scoring. An exact
             # item name is intentionally strong enough to clear the 50-point
             # low-recall floor, while code/exact multi-attribute matches still
@@ -250,13 +295,28 @@ class HighRecallMaterialRetriever:
                 item_name=row.get("item_name", ""),
                 sku_name=row.get("sku_name", ""),
                 score=normalized_score,
-                score_breakdown=self._breakdown(scored.match_reasons, normalized_score, alias_hits, matched_attributes),
+                vector_score=vector_score,
+                retrieval_sources=retrieval_sources,
+                score_breakdown=self._breakdown(match_reasons, normalized_score, alias_hits, matched_attributes),
                 matched_aliases=list(dict.fromkeys(alias_hits)),
                 matched_attributes=matched_attributes,
                 conflicts=conflicts,
-                match_reasons=list(scored.match_reasons),
+                match_reasons=match_reasons,
                 required_specs=row.get("required_specs", ""),
                 stock_uom=row.get("stock_uom", ""),
+                match_tier=max(
+                    5 if scored.exact_code_match else 0,
+                    4 if alias_hits else 0,
+                    scored.match_tier,
+                ),
+                strict_matching=strict_matching,
+                exact_code_match=scored.exact_code_match,
+                approved_alias_match=bool(approved_alias_hits),
+                required_specs_match=scored.required_specs_match,
+                auto_selectable=(
+                    (scored.exact_code_match and code.isdigit())
+                    or (strict_matching and bool(approved_alias_hits) and scored.required_specs_match)
+                ),
             ))
         return output
 
@@ -491,6 +551,7 @@ class HighRecallBatchMaterialIntakeAnalyzer:
             row_id=row.row_id, raw_name=row.raw_name, raw_spec=row.raw_spec, qty=row.qty, uom=row.uom,
             queue=queue, queue_label={"existing_sku": "已有 SKU", "new_sku": "现有类型新增 SKU", "new_type": "需要新增标准类型", "needs_input": "需要补充或选择"}[queue],
             standard_name=(type_candidate.standard_name if type_candidate else ""), type_id=(type_candidate.type_id if type_candidate else ""),
+            top_group_hint=facts.top_group_hint, material_family_hint=facts.material_family_hint,
             item_code=(sku_candidate.item_code if sku_candidate else ""), sku_name=(sku_candidate.sku_name if sku_candidate else ""),
             normalized_attributes={**attrs, **(judgement.confirmed_attributes if judgement else {})},
             attribute_sources={key: "现场输入" for key in attrs} | ({key: "DeepSeek判定" for key in (judgement.confirmed_attributes if judgement else {})}),
@@ -514,6 +575,13 @@ class HighRecallBatchMaterialIntakeAnalyzer:
                 return {"valid": False, "queue": "needs_input", "reason": "模型选择的 SKU 不在本行真实候选中。", "errors": ["unknown_item_code"]}
             if candidate.conflicts:
                 return {"valid": False, "queue": "needs_input", "reason": "候选 SKU 与现场关键规格冲突，不能直接复用。", "errors": candidate.conflicts}
+            if candidate.strict_matching and not candidate.auto_selectable:
+                return {
+                    "valid": False,
+                    "queue": "needs_input",
+                    "reason": "当前目录只允许数字编码精确命中或已审核别名加完整必选属性，不能直接复用该候选。",
+                    "errors": ["strict_auto_select_gate"],
+                }
             return {"valid": True, "queue": "existing_sku", "reason": judgement.reason, "errors": []}
         if judgement.decision == "new_sku":
             if not judgement.selected_type_id or judgement.selected_type_id not in type_ids:

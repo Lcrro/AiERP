@@ -40,8 +40,8 @@ def test_batch_intake_preserves_rows_and_builds_business_queues() -> None:
     result = BatchMaterialIntakeAnalyzer(fact_extractor=extract).analyze(rows)
 
     assert result.total_rows == 3
-    assert result.queue_counts == {"existing_sku": 1, "new_sku": 1, "new_type": 1, "needs_input": 0}
-    assert result.decisions[0].item_code == "TOOL-000328"
+    assert result.queue_counts == {"existing_sku": 0, "new_sku": 2, "new_type": 1, "needs_input": 0}
+    assert result.decisions[0].queue == "new_sku"
     assert result.decisions[1].standard_name == "内六角螺丝"
     assert result.decisions[2].ambiguity_note == "名称不能确定具体产品。"
     assert result.writes_erpnext is False
@@ -50,7 +50,8 @@ def test_batch_intake_preserves_rows_and_builds_business_queues() -> None:
     ]
     assert result.processing_trace[0].input_rows == 3
     assert result.processing_trace[1].output_rows == 3
-    assert any("已有 SKU 1 行" in item for item in result.processing_trace[-1].details)
+    assert any("已有 SKU 0 行" in item for item in result.processing_trace[-1].details)
+    assert any("现有类型新增 SKU 2 行" in item for item in result.processing_trace[-1].details)
 
 
 def test_batch_intake_rejects_incomplete_deepseek_rows() -> None:
@@ -91,10 +92,11 @@ def test_missing_system_attributes_are_completed_from_standard_sku() -> None:
 
     decision = BatchMaterialIntakeAnalyzer(fact_extractor=extract).analyze(rows).decisions[0]
 
-    assert decision.queue == "existing_sku"
-    assert decision.item_code == "TOOL-000032"
-    assert decision.normalized_attributes["thickness"] == "1mm"
-    assert decision.attribute_sources["thickness"] == "标准物料默认"
+    assert decision.queue == "needs_input"
+    assert decision.item_code == ""
+    assert {item["attribute_key"] for item in decision.missing_attributes} == {
+        "thickness", "bore_diameter", "abrasive_material"
+    }
 
 
 def test_new_sku_inherits_common_defaults_from_standard_type() -> None:
@@ -126,8 +128,8 @@ def test_field_wording_is_preserved_to_select_standard_welding_rod() -> None:
 
     decision = BatchMaterialIntakeAnalyzer(fact_extractor=extract).analyze(rows).decisions[0]
 
-    assert decision.queue == "existing_sku"
-    assert decision.item_code == "WELD-000051"
+    assert decision.queue == "new_sku"
+    assert decision.item_code == ""
 
 
 def test_deepseek_copied_source_columns_are_ignored_at_contract_boundary() -> None:

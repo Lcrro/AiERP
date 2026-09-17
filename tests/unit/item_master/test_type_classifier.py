@@ -3,7 +3,7 @@ from __future__ import annotations
 from nexterp_agent.item_master import MaterialTypeClassifier
 
 
-def test_classifier_resolves_compatibility_alias_to_existing_sku() -> None:
+def test_classifier_does_not_auto_select_unapproved_compatibility_alias() -> None:
     result = MaterialTypeClassifier().classify(
         "SDS-Plus四坑冲击钻头 12x350mm",
         attributes={
@@ -15,11 +15,14 @@ def test_classifier_resolves_compatibility_alias_to_existing_sku() -> None:
         material_family_hint="钻头",
     )
 
-    assert result.status == "existing_sku"
+    # A type-level compatibility alias is useful for classification, but it
+    # is not a SKU alias.  Without an explicitly reviewed SKU alias (or a
+    # numeric item code), the resolver must leave the result for review.
+    assert result.status == "new_sku"
     assert result.selected_type is not None
     assert result.selected_type.standard_name == "二坑二槽钻头"
-    assert result.existing_sku is not None
-    assert result.existing_sku["item_code"] == "TOOL-000328"
+    assert result.existing_sku is None
+    assert result.sku_candidates[0]["item_code"] == "TOOL-000328"
     assert result.normalized_attributes["length"] == "350mm"
     diameter = next(row for row in result.selected_type.attributes if row["attribute_key"] == "diameter")
     assert diameter["description"] == "成品、接口或加工直径，使用明确数值和单位。"

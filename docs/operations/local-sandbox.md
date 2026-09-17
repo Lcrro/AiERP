@@ -2,6 +2,9 @@
 
 This document records how to run and verify the local WSL ERPNext/Nexterp sandbox.
 
+The GPC material projection now uses a separate Docker Site on port `8003`.
+See [GPC 到 ERPNext 物料测试账套同步 v0.1](../reference/gpc-erpnext-material-test-sync-v0.1.md).
+
 ## Current Environment
 
 WSL bench path:

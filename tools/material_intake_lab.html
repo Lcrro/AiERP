@@ -9,7 +9,7 @@
   <body>
     <header class="topbar">
       <div class="brand"><b>N</b><span><strong>采购清单物料准入实验室</strong><small>批量清单 → DeepSeek 事实抽取 → 标准字典与 SKU 查重</small></span></div>
-      <nav><a href="/">员工工作台</a><a href="/material-item-lab">单项建档</a><span>只分析，不写 ERPNext</span></nav>
+      <nav><a href="/">员工工作台</a><a href="/material-item-lab">单项建档</a><span>分析不写入，确认后发布并回读</span></nav>
     </header>
     <main>
       <section class="input-panel">
@@ -37,7 +37,7 @@
             <div class="stage" data-stage="judge"><b>5</b><div><strong>DeepSeek 判定</strong><small>只比较真实候选，不编编码</small></div></div>
             <div class="stage" data-stage="validate"><b>6</b><div><strong>程序复核</strong><small>检查规格冲突和候选来源</small></div></div>
             <div class="stage" data-stage="queue"><b>7</b><div><strong>生成处理结论</strong><small>复用、新增或追问</small></div></div>
-            <div class="stage" data-stage="draft"><b>8</b><div><strong>生成物料录入草稿</strong><small>确认后一次性录入 ERPNext</small></div></div>
+            <div class="stage" data-stage="draft"><b>8</b><div><strong>确认并发布物料</strong><small>创建标准类型/SKU、同步并回读 ERPNext</small></div></div>
           </div>
           <div class="pipeline-facts"><span id="trace-input">等待读取</span><span id="trace-extracted">未提取事实</span><span id="trace-matched">未召回候选</span><span id="trace-completed">未完成复核</span><span id="trace-queued">未生成结论</span></div>
           <div id="trace-detail" class="trace-detail" hidden>
@@ -47,11 +47,12 @@
         </section>
         <section id="draft-panel" class="draft-panel" hidden>
           <div class="draft-head">
-            <div><h2>物料录入草稿</h2><p id="draft-summary">分析完成后生成，尚未写入 ERPNext。</p></div>
+            <div><h2>物料录入与发布草稿</h2><p id="draft-summary">分析完成后生成，可修改业务字段；确认前不会写入 ERPNext。</p></div>
             <div class="draft-actions">
               <label>录入账号 <input id="operator" value="mao.xiaoquan@stec-up.local" autocomplete="off" /></label>
               <button id="prepare-drafts" class="secondary">生成录入草稿</button>
-              <button id="confirm-drafts" class="primary" disabled>确认并一键录入</button>
+              <button id="revise-drafts" class="secondary" disabled>应用修改并刷新预览</button>
+              <button id="confirm-drafts" class="primary" disabled>确认并一键发布</button>
             </div>
           </div>
           <div id="draft-list" class="draft-list"><div class="empty">先完成上方分析。</div></div>

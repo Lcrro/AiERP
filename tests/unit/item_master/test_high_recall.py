@@ -10,8 +10,10 @@ from nexterp_agent.item_master.batch_intake import (
 from nexterp_agent.item_master.high_recall import (
     BatchMaterialJudgement,
     HighRecallBatchMaterialIntakeAnalyzer,
+    HighRecallCandidate,
     HighRecallMaterialRetriever,
     MaterialBatchJudgement,
+    RetrievalResult,
 )
 from nexterp_agent.item_master.runtime_aliases import RuntimeAliasStore
 
@@ -117,3 +119,28 @@ def test_confirmed_alias_is_persisted_separately_from_analysis(tmp_path: Path) -
     assert row["target_kind"] == "type"
     assert row["target_id"] == "MT-TEST"
     assert store.active()[0]["alias"] == "二保焊枪"
+
+
+def test_strict_current_candidate_cannot_be_selected_by_batch_judge() -> None:
+    candidate = HighRecallCandidate(
+        candidate_kind="sku",
+        item_code="1001",
+        standard_name="六角螺栓",
+        sku_name="六角螺栓 M12×40",
+        score=95,
+        strict_matching=True,
+        exact_code_match=False,
+        approved_alias_match=False,
+        required_specs_match=False,
+        auto_selectable=False,
+    )
+    retrieval = RetrievalResult(threshold=50, candidates=[candidate], all_candidate_count=1)
+    judgement = MaterialBatchJudgement(
+        row_id="1",
+        decision="existing_sku",
+        selected_item_code="1001",
+        reason="模型选择",
+    )
+    validation = HighRecallBatchMaterialIntakeAnalyzer._validate(judgement, retrieval)
+    assert validation["queue"] == "needs_input"
+    assert validation["errors"] == ["strict_auto_select_gate"]

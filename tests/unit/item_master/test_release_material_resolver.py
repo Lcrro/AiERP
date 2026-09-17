@@ -25,24 +25,24 @@ def test_canvas_glove_returns_candidates_instead_of_guessing() -> None:
     assert result["questions"]
 
 
-def test_68_bolt_with_size_resolves_high_confidence() -> None:
+def test_68_bolt_with_size_requires_explicit_confirmation() -> None:
     resolver = ReleaseMaterialResolver()
 
     result = resolver.resolve("6.8级螺栓 M12*40")
 
-    assert result["status"] == "ready"
-    assert result["resolved"]["item_code"] == "SPARE-000071-68"
-    assert result["resolved"]["sku_name"] == "6.8级螺栓 M12×40"
+    assert result["status"] == "needs_confirmation"
+    assert result["resolved"] is None
+    assert result["candidates"][0]["item_code"] == "SPARE-000071-68"
 
 
-def test_88_bolt_with_size_resolves_high_confidence() -> None:
+def test_88_bolt_with_size_requires_explicit_confirmation() -> None:
     resolver = ReleaseMaterialResolver()
 
     result = resolver.resolve("8.8级螺栓 M12*40")
 
-    assert result["status"] == "ready"
-    assert result["resolved"]["item_code"] == "SPARE-000071"
-    assert result["resolved"]["sku_name"] == "8.8级螺栓 M12×40"
+    assert result["status"] == "needs_confirmation"
+    assert result["resolved"] is None
+    assert result["candidates"][0]["item_code"] == "SPARE-000071"
 
 
 def test_generic_bolt_does_not_auto_select() -> None:

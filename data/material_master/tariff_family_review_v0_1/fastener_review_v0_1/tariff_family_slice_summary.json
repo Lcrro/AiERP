@@ -1,0 +1,20 @@
+{
+  "release": "tariff-family-review-v0.1-slice",
+  "source_candidate_path": "C:\\Users\\SGJ\\Documents\\nexterp agent 2\\data\\material_master\\tariff_family_review_v0_1\\tariff_family_candidates.tsv",
+  "source_candidate_sha256": "2bd9fea7dbf94234bb1c2a2406050b1a77554c006bed13cb306cdde2f00091fb",
+  "slice_candidate_sha256": "7c6bb75a02c34d7d42e2dae82e891e4b00a6e6a3386401ff790e1daff6f419a0",
+  "code_prefixes": [
+    "7317",
+    "7318",
+    "7415"
+  ],
+  "row_count": 20,
+  "status_counts": {
+    "candidate": 16,
+    "unmapped": 4
+  },
+  "decision_template": "C:\\Users\\SGJ\\Documents\\nexterp agent 2\\data\\material_master\\tariff_family_review_v0_1\\fastener_review_v0_1\\tariff_family_decisions.tsv",
+  "decision_template_sha256": "7c6bb75a02c34d7d42e2dae82e891e4b00a6e6a3386401ff790e1daff6f419a0",
+  "erpnext_written": false,
+  "review_required": true
+}

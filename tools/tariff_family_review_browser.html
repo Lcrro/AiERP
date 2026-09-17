@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>税则物料族映射审阅包 | Nexterp</title>
+  <style>
+    :root { color-scheme: light; --ink:#15303a; --muted:#61747b; --line:#d9e5e4; --accent:#087f78; --soft:#f4f9f8; --warn:#a96d0b; }
+    * { box-sizing:border-box; } body { margin:0; background:#eef4f3; color:var(--ink); font:14px/1.5 system-ui,"Microsoft YaHei",sans-serif; }
+    header { display:flex; justify-content:space-between; align-items:center; padding:18px 5vw; background:white; border-bottom:1px solid var(--line); }
+    header a { color:var(--accent); text-decoration:none; } main { max-width:1500px; margin:28px auto; padding:0 24px; }
+    .hero,.toolbar,.card { background:white; border:1px solid var(--line); border-radius:18px; box-shadow:0 8px 24px #244a4510; }
+    .hero { padding:28px; display:flex; justify-content:space-between; gap:24px; } h1 { margin:0 0 8px; font-size:28px; } p { margin:6px 0; color:var(--muted); }
+    .guard { min-width:260px; padding:16px; border-radius:12px; background:#edf8f5; color:var(--accent); } .guard strong { display:block; font-size:18px; }
+    .metrics { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin:18px 0; } .metric { padding:18px; } .metric span { color:var(--muted); } .metric strong { display:block; margin-top:4px; font-size:26px; }
+    .toolbar { padding:16px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; } input,select,button { border:1px solid var(--line); border-radius:9px; padding:9px 12px; background:white; color:var(--ink); } input { min-width:300px; } button { cursor:pointer; } button.primary { background:var(--accent); color:white; border-color:var(--accent); } button:disabled { cursor:not-allowed; opacity:.5; }
+    .table-card { margin-top:18px; overflow:hidden; } .table-wrap { overflow:auto; max-height:68vh; } table { width:100%; border-collapse:collapse; min-width:1150px; } th,td { padding:11px 12px; border-bottom:1px solid #edf2f1; text-align:left; vertical-align:top; } th { position:sticky; top:0; background:#f7fbfa; color:var(--muted); } td small { display:block; color:var(--muted); }
+    .status { display:inline-block; padding:3px 8px; border-radius:999px; font-size:12px; } .candidate { background:#e3f6ed; color:#23734d; } .ambiguous { background:#fff0d4; color:var(--warn); } .unmapped { background:#edf0f1; color:#63727a; } .review_required { background:#fff0d4; color:var(--warn); } .attribute-cell { min-width:250px; }
+    .pager { display:flex; justify-content:space-between; align-items:center; padding:14px 16px; color:var(--muted); } .empty { padding:30px; text-align:center; color:var(--muted); } .decision-cell { min-width:220px; } .decision-cell select { width:100%; margin-bottom:6px; } .decision-cell input { width:100%; min-width:0; margin-top:4px; padding:6px 8px; font-size:12px; } .attribute-review-controls { margin-top:8px; padding-top:8px; border-top:1px dashed var(--line); } .attribute-review-controls select,.attribute-review-controls input { width:100%; min-width:0; margin-top:4px; padding:6px 8px; font-size:12px; } .reviewer { min-width:180px; }
+    @media (max-width:760px) { .hero { display:block; } .guard { margin-top:16px; } .metrics { grid-template-columns:repeat(2,1fr); } input { min-width:0; width:100%; } }
+  </style>
+</head>
+<body>
+  <header><strong>Nexterp · 物料分类工作台</strong><nav><a href="/tariff-taxonomy-browser">完整结构</a> · <a href="/tariff-extraction-lab">返回提取任务</a></nav></header>
+  <main>
+    <section class="hero"><div><h1>税则 → 内部物料族映射审阅</h1><p>这是候选审阅包，不是已发布分类。HS 编码保留为来源与检索键；只有业务批准后才允许冻结内部分类。</p></div><div class="guard"><strong>只读审阅</strong><span>不会创建标准类型，不会写入 ERPNext</span></div></section>
+    <section class="metrics"><article class="metric card"><span>候选总行数</span><strong id="total">-</strong></article><article class="metric card"><span>可解释候选</span><strong id="candidate">-</strong></article><article class="metric card"><span>歧义</span><strong id="ambiguous">-</strong></article><article class="metric card"><span>未映射</span><strong id="unmapped">-</strong></article><article class="metric card"><span>属性待审</span><strong id="attribute-review">-</strong></article></section>
+    <section class="toolbar"><input id="query" placeholder="搜索税号、名称、父级、物料族或属性" /><select id="status"><option value="">全部状态</option><option value="candidate">可解释候选</option><option value="ambiguous">歧义</option><option value="unmapped">未映射</option></select><select id="attribute-status"><option value="">全部属性状态</option><option value="review_required">属性待审</option><option value="candidate">属性候选</option><option value="unmapped">无属性证据</option></select><input class="reviewer" id="reviewer" placeholder="审阅人（导出时使用）" /><button class="primary" id="refresh">刷新</button><button id="download" disabled>下载物料族决定 TSV</button><button id="download-attributes" disabled>下载属性决定 TSV</button><span id="decision-count">物料族决定 0 · 属性决定 0</span><span id="hint"></span></section>
+    <div class="toolbar"><button id="fastener">紧固件 7317/7318/7415</button><span>先审阅螺钉、螺栓、螺母、垫圈等 20 行，并查看来源属性证据</span></div>
+    <p>网页只在浏览器内暂存决策；物料族决定下载后覆盖本地 <code>tariff_family_decisions.tsv</code>，属性决定另存为 <code>tariff_attribute_decisions.tsv</code>。两者都不会直接写入 ERPNext。</p>
+    <section class="table-card card"><div class="table-wrap"><table><thead><tr><th>状态</th><th>税号</th><th>税则名称</th><th>父级上下文</th><th>HS 章</th><th>建议内部物料族</th><th>规则 / 置信度</th><th>来源属性证据</th><th>人工决策</th></tr></thead><tbody id="rows"><tr><td colspan="9" class="empty">正在读取审阅包…</td></tr></tbody></table></div><div class="pager"><span id="page-info"></span><div><button id="prev">上一页</button> <button id="next">下一页</button></div></div></section>
+  </main>
+  <script>
+    // Review controls are intentionally browser-local: the server remains a
+    // read-only source and the downloaded TSV is the auditable hand-off.
+    (() => {
+      const get = id => document.getElementById(id);
+      const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const numberText = value => Number(value || 0).toLocaleString('zh-CN');
+      const reviewState = { offset:0, limit:100, total:0, rows:new Map(), decisions:new Map(), attributeDecisions:new Map() };
+      const decisionCount = () => { get('decision-count').textContent = `物料族决定 ${reviewState.decisions.size} · 属性决定 ${reviewState.attributeDecisions.size}`; get('download').disabled = !reviewState.decisions.size; get('download-attributes').disabled = !reviewState.attributeDecisions.size; };
+      const updateDecision = (code, field, value) => {
+        const source = reviewState.rows.get(code) || {};
+        const decision = reviewState.decisions.get(code) || {code, decision:'', top_group:source.suggested_top_group || '', material_family:source.suggested_material_family || '', comment:''};
+        decision[field] = value;
+        if (field === 'decision' && !value) reviewState.decisions.delete(code); else reviewState.decisions.set(code, decision);
+        decisionCount();
+      };
+      const updateAttributeDecision = (code, field, value) => {
+        const decision = reviewState.attributeDecisions.get(code) || {code, decision:'', override_attributes:'', comment:''};
+        decision[field] = value;
+        if (field === 'decision' && !value) reviewState.attributeDecisions.delete(code); else reviewState.attributeDecisions.set(code, decision);
+        decisionCount();
+      };
+      const actionCell = row => {
+        const decision = reviewState.decisions.get(row.code) || {decision:'', top_group:row.suggested_top_group || '', material_family:row.suggested_material_family || '', comment:''};
+        return `<td class="decision-cell"><select data-review-code="${escapeHtml(row.code)}" data-review-field="decision"><option value="">不决定</option><option value="approve" ${decision.decision === 'approve' ? 'selected' : ''}>approve</option><option value="reject" ${decision.decision === 'reject' ? 'selected' : ''}>reject</option><option value="revise" ${decision.decision === 'revise' ? 'selected' : ''}>revise</option></select><input data-review-code="${escapeHtml(row.code)}" data-review-field="top_group" value="${escapeHtml(decision.top_group)}" placeholder="一级类目" /><input data-review-code="${escapeHtml(row.code)}" data-review-field="material_family" value="${escapeHtml(decision.material_family)}" placeholder="物料族" /><input data-review-code="${escapeHtml(row.code)}" data-review-field="comment" value="${escapeHtml(decision.comment)}" placeholder="备注" /></td>`;
+      };
+      const attributeCell = row => {
+        const entries = Object.entries(row.attributes || {}).map(([key, item]) => `${key}: ${item.value || ''} (${item.confidence || '-'})`);
+        const status = row.attribute_status || 'unmapped';
+        const label = row.attribute_status || '无属性证据';
+        const decision = reviewState.attributeDecisions.get(row.code) || {decision:'', override_attributes:'', comment:''};
+        return `<td class="attribute-cell"><span class="status ${escapeHtml(status)}">${escapeHtml(label)}</span><small>${escapeHtml(entries.join(' · ') || '暂无来源属性证据')}</small><div class="attribute-review-controls"><select data-attribute-code="${escapeHtml(row.code)}" data-attribute-field="decision"><option value="">不决定属性</option><option value="approve" ${decision.decision === 'approve' ? 'selected' : ''}>approve</option><option value="reject" ${decision.decision === 'reject' ? 'selected' : ''}>reject</option><option value="revise" ${decision.decision === 'revise' ? 'selected' : ''}>revise</option></select><input data-attribute-code="${escapeHtml(row.code)}" data-attribute-field="override_attributes" value="${escapeHtml(decision.override_attributes)}" placeholder="确认/修改属性" /><input data-attribute-code="${escapeHtml(row.code)}" data-attribute-field="comment" value="${escapeHtml(decision.comment)}" placeholder="属性备注" /></div></td>`;
+      };
+      const renderRows = rows => {
+        get('rows').innerHTML = rows.length ? rows.map(row => `<tr><td><span class="status ${escapeHtml(row.review_status)}">${escapeHtml(row.review_status)}</span></td><td><strong>${escapeHtml(row.code)}</strong><small>第 ${escapeHtml(row.page)} 页</small></td><td>${escapeHtml(row.normalized_name)}<small>原文：${escapeHtml(row.source_name)}</small></td><td>${escapeHtml(row.parent_code || '-')}<small>${escapeHtml(row.parent_name || '')}</small></td><td>${escapeHtml(row.chapter_context)}</td><td>${escapeHtml(row.suggested_top_group && row.suggested_material_family ? `${row.suggested_top_group} / ${row.suggested_material_family}` : '-')}<small>${escapeHtml(row.candidate_families || '')}</small></td><td>${escapeHtml(row.matching_rule)}<small>${row.confidence ? Number(row.confidence).toFixed(2) : '-'}</small></td>${attributeCell(row)}${actionCell(row)}</tr>`).join('') : '<tr><td colspan="9" class="empty">没有符合条件的行</td></tr>';
+        get('rows').querySelectorAll('[data-review-code]').forEach(node => { node.onchange = () => updateDecision(node.dataset.reviewCode, node.dataset.reviewField, node.value); node.oninput = () => updateDecision(node.dataset.reviewCode, node.dataset.reviewField, node.value); });
+        get('rows').querySelectorAll('[data-attribute-code]').forEach(node => { node.onchange = () => updateAttributeDecision(node.dataset.attributeCode, node.dataset.attributeField, node.value); node.oninput = () => updateAttributeDecision(node.dataset.attributeCode, node.dataset.attributeField, node.value); });
+      };
+      window.loadRows = async () => {
+        const params = new URLSearchParams({offset:reviewState.offset, limit:reviewState.limit, status:get('status').value, attribute_status:get('attribute-status').value, q:get('query').value});
+        const response = await fetch('/api/tariff-family-review/rows?' + params, {cache:'no-store'}); const body = await response.json(); if (!body.ok) throw Error(body.error);
+        reviewState.total = body.total; body.rows.forEach(row => reviewState.rows.set(row.code, row)); renderRows(body.rows); get('page-info').textContent = `${reviewState.total ? reviewState.offset + 1 : 0}-${Math.min(reviewState.offset + reviewState.limit, reviewState.total)} / ${numberText(reviewState.total)}`; get('prev').disabled = reviewState.offset === 0; get('next').disabled = reviewState.offset + reviewState.limit >= reviewState.total; decisionCount();
+      };
+      const refreshReview = async () => {
+          try { const response = await fetch('/api/tariff-family-review/summary', {cache:'no-store'}); const body = await response.json(); if (!body.ok) throw Error(body.error); const counts = body.summary.status_counts || {}; const attributeCounts = (body.summary.attribute_summary || {}).attribute_status_counts || {}; get('total').textContent=numberText(body.summary.row_count); get('candidate').textContent=numberText(counts.candidate); get('ambiguous').textContent=numberText(counts.ambiguous); get('unmapped').textContent=numberText(counts.unmapped); get('attribute-review').textContent=numberText(attributeCounts.review_required); await window.loadRows(); get('hint').textContent='网页决策仅保存在当前浏览器，下载后再交给冻结脚本'; } catch (error) { get('hint').textContent=error.message; }
+      };
+      const csvCell = value => { const text=String(value ?? ''); return /[\t\n"]/.test(text) ? `"${text.replace(/"/g,'""')}"` : text; };
+      get('download').onclick = () => { const reviewer=get('reviewer').value.trim(); if (!reviewer) { get('hint').textContent='请先填写审阅人'; return; } const columns=['code','decision','top_group','material_family','reviewer','comment','source_name','suggested_top_group','suggested_material_family','review_status','confidence','chapter_context','parent_code','attribute_status','attributes']; const lines=[columns.join('\t')]; reviewState.decisions.forEach((decision, code) => { const row=reviewState.rows.get(code)||{}; lines.push([code,decision.decision,decision.top_group,decision.material_family,reviewer,decision.comment,row.source_name,row.suggested_top_group,row.suggested_material_family,row.review_status,row.confidence,row.chapter_context,row.parent_code,row.attribute_status,JSON.stringify(row.attributes || {}, null, 0)].map(csvCell).join('\t')); }); const blob=new Blob(['\ufeff' + lines.join('\n') + '\n'], {type:'text/tab-separated-values;charset=utf-8'}); const link=document.createElement('a'); link.href=URL.createObjectURL(blob); link.download='tariff_family_decisions.tsv'; link.click(); URL.revokeObjectURL(link.href); get('hint').textContent='已下载已决策行；请覆盖本地决策表并保留 .meta.json'; };
+      get('download-attributes').onclick = () => { const reviewer=get('reviewer').value.trim(); if (!reviewer) { get('hint').textContent='请先填写审阅人'; return; } const columns=['code','attribute_decision','reviewer','override_attributes','comment','source_name','parent_name','attribute_status','attributes']; const lines=[columns.join('\t')]; reviewState.attributeDecisions.forEach((decision, code) => { const row=reviewState.rows.get(code)||{}; lines.push([code,decision.decision,reviewer,decision.override_attributes,decision.comment,row.source_name,row.parent_name,row.attribute_status,JSON.stringify(row.attributes || {}, null, 0)].map(csvCell).join('\t')); }); const blob=new Blob(['\ufeff' + lines.join('\n') + '\n'], {type:'text/tab-separated-values;charset=utf-8'}); const link=document.createElement('a'); link.href=URL.createObjectURL(blob); link.download='tariff_attribute_decisions.tsv'; link.click(); URL.revokeObjectURL(link.href); get('hint').textContent='已下载属性决定行；它仍需人工校验后才能进入标准类型/SKU编译'; };
+      get('refresh').onclick = () => { reviewState.offset=0; refreshReview(); }; get('status').onchange = () => { reviewState.offset=0; refreshReview(); }; get('attribute-status').onchange = () => { reviewState.offset=0; refreshReview(); }; get('query').onkeydown = event => { if (event.key === 'Enter') { reviewState.offset=0; refreshReview(); } }; get('prev').onclick = () => { reviewState.offset=Math.max(0,reviewState.offset-reviewState.limit); window.loadRows(); }; get('next').onclick = () => { reviewState.offset+=reviewState.limit; window.loadRows(); }; refreshReview();
+      get('fastener').onclick = () => { get('query').value='7317|7318|7415'; get('status').value=''; get('attribute-status').value=''; reviewState.offset=0; refreshReview(); };
+    })();
+  </script>
+</body>
+</html>

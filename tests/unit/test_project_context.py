@@ -14,7 +14,8 @@ from scripts.dev import project_context
 def test_project_context_config_and_resume_are_compact() -> None:
     config = project_context.load_config()
     summary = project_context.resume_text(config)
-    assert config["current_milestone"]["id"] == "project-maintenance-skill-v0.1"
+    assert config["current_milestone"]["id"]
+    assert config["current_milestone"]["id"] in summary
     assert len(summary.encode("utf-8")) <= 8192
     assert ".env" not in summary
     assert "api_secret" not in summary.lower()

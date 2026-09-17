@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
-  <title>物料主数据浏览器</title>
+  <title>物料分类工作台</title>
   <style>
     :root {
       color-scheme: light;
@@ -437,7 +437,7 @@
     <header>
       <div class="title-row">
         <div>
-          <h1>物料主数据浏览器</h1>
+          <h1>物料分类工作台</h1>
           <div class="subtitle">按类目、物料族、物料名称和 SKU 四级查看；当前页面只读，不写 ERPNext。</div>
         </div>
         <div class="source" id="sourceInfo">加载中...</div>
@@ -461,9 +461,11 @@
       </label>
       <label class="control">
         <select id="categoryMode" title="分类视图">
+          <option value="release_v1_1">物料主数据 v1.1（全量重建候选）</option>
           <option value="type_dictionary_v0_5">标准名称字典 v0.5</option>
           <option value="price_ready_v0_1">价格就绪版 v0.1</option>
           <option value="release_v0_3">发布版 v0.3</option>
+          <option value="chatgpt_v4">ChatGPT 分类（龙华 V4）</option>
           <option value="family_cohort_001">第一批多族治理预览</option>
           <option value="drill_family_governed">钻头族治理预览</option>
           <option value="third_layer">三级名称人工预览</option>
@@ -531,23 +533,27 @@
 
   <script>
     const DATA_URLS = {
-      type_dictionary_v0_5: "../data/material_master/governance_v0_5/material_master_type_governed_browser_data.json",
-      price_ready_v0_1: "../data/material_master/price_ready_release_v0_1/material_master_price_ready_browser_data.json",
-      release_v0_3: "../data/material_master/release_v0_3/material_master_release_v0_3_browser_data.json",
-      family_cohort_001: "../data/material_master/governance_v0_4/cohort_001_browser_data.json",
-      drill_family_governed: "../data/material_master/governance_v0_4/工具耗材_钻头/material_master_family_governed_browser_data.json",
-      original: "../data/material_master/material_master_browser_data.json",
-      reclassified: "../data/material_master/reclassification/material_master_browser_data_reclassified.json",
-      screw_governed: "../data/material_master/governance_v0_2/screw/material_master_screw_governed_preview.json",
-      manual_family: "../data/material_master/governance_v0_2/manual_family_mapping/material_master_manual_family_preview.json",
-      third_layer: "../data/material_master/governance_v0_2/manual_third_layer_mapping/material_master_third_layer_preview.json",
-      screw_bolt_third: "../data/material_master/governance_v0_2/manual_third_layer_mapping/material_master_screw_bolt_third_layer_preview.json",
+      release_v1_1: "/api/material-classification/browser-data?source=release_v1_1",
+      type_dictionary_v0_5: "/api/material-classification/browser-data?source=type_dictionary_v0_5",
+      price_ready_v0_1: "/api/material-classification/browser-data?source=price_ready_v0_1",
+      release_v0_3: "/api/material-classification/browser-data?source=release_v0_3",
+      chatgpt_v4: "/api/material-classification/browser-data?source=chatgpt_v4",
+      family_cohort_001: "/api/material-classification/browser-data?source=family_cohort_001",
+      drill_family_governed: "/api/material-classification/browser-data?source=drill_family_governed",
+      original: "/api/material-classification/browser-data?source=original",
+      reclassified: "/api/material-classification/browser-data?source=reclassified",
+      screw_governed: "/api/material-classification/browser-data?source=screw_governed",
+      manual_family: "/api/material-classification/browser-data?source=manual_family",
+      third_layer: "/api/material-classification/browser-data?source=third_layer",
+      screw_bolt_third: "/api/material-classification/browser-data?source=screw_bolt_third",
     };
 
     const VIEW_LABELS = {
+      release_v1_1: "物料主数据 v1.1（全量重建候选）",
       type_dictionary_v0_5: "标准名称字典 v0.5",
       price_ready_v0_1: "价格就绪版 v0.1",
       release_v0_3: "发布版 v0.3",
+      chatgpt_v4: "ChatGPT 分类（龙华 V4）",
       family_cohort_001: "第一批多族治理预览",
       drill_family_governed: "钻头族治理预览",
       original: "旧分类",
@@ -562,7 +568,10 @@
       dataSets: {},
       data: null,
       view: "materials",
-      mode: "type_dictionary_v0_5",
+      mode: (() => {
+        const requested = new URLSearchParams(location.search).get("source");
+        return requested && DATA_URLS[requested] ? requested : "release_v1_1";
+      })(),
       query: "",
       status: "",
       quality: "",
@@ -597,6 +606,17 @@
     };
 
     const fieldLabels = {
+      classification_key: "分类键",
+      standard_name: "标准物料名称",
+      required_attribute_keys: "必填属性键",
+      missing_required_specs: "缺失必填规格",
+      classification_status: "分类状态",
+      source_item_name: "来源物料名称",
+      source_sku_name: "来源 SKU 名称",
+      source_required_specs: "来源必填规格",
+      source_item_group: "来源标准分组",
+      source_material_family: "来源物料族",
+      rule_version: "录入规则版本",
       item_code: "物料编码",
       sku_name: "SKU名称",
       material_family: "物料族",
@@ -1167,6 +1187,7 @@
 
     function detailRows(row) {
       const ordered = [
+        "classification_key", "standard_name", "required_attribute_keys", "missing_required_specs", "classification_status",
         "item_code", "sku_name", "material_family", "item_name", "required_specs", "optional_specs", "item_group",
         "top_group", "sub_group", "stock_uom", "purchase_uom", "conversion_factor",
         "estimated_rate", "currency", "price_basis", "default_fill_basis",
@@ -1178,6 +1199,7 @@
         "family_connection", "family_surface", "family_attributes", "family_split_candidates",
         "family_attribute_terms", "drill_use_type", "drill_material", "drill_shank",
         "source_refs", "source_item_codes", "merged_count", "governance_note", "updated_at", "search_keywords",
+        "source_item_name", "source_sku_name", "source_required_specs", "source_item_group", "source_material_family", "rule_version",
       ];
       return ordered.map(key => [fieldLabels[key] || key, row[key] || ""]);
     }
@@ -1223,6 +1245,7 @@
           state.mode = firstMode;
           els.categoryMode.value = firstMode;
         }
+        els.categoryMode.value = state.mode;
         state.data = state.dataSets[state.mode];
         Array.from(els.categoryMode.options).forEach(option => {
           option.disabled = !state.dataSets[option.value];
@@ -1246,6 +1269,7 @@
         });
         els.categoryMode.addEventListener("change", event => {
           state.mode = event.target.value;
+          history.replaceState({}, "", `/material-master-browser?source=${encodeURIComponent(state.mode)}`);
           state.data = state.dataSets[state.mode];
           state.topGroup = "";
           state.ruleKey = "";

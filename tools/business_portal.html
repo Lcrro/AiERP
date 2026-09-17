@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nexterp · 物资业务门户</title>
+    <link rel="stylesheet" href="/workbench-assets/business-portal.css" />
+  </head>
+  <body>
+    <header class="portal-header">
+      <div class="brand"><span class="brand-mark">N</span><span><strong>Nexterp</strong><small>物资业务门户</small></span></div>
+      <div class="context"><span id="identityLabel">正在读取身份…</span><span class="dot">·</span><span id="projectLabel">正在读取项目…</span><span class="dot">·</span><span id="accountLabel">正在读取测试账套…</span><label class="classification-control">分类版本 <select id="classificationSource" aria-label="选择物料分类版本"><option value="original">原分类（GPC）</option><option value="chatgpt_v4">ChatGPT 分类（龙华 V4）</option></select></label><label id="devContextControls" class="dev-context" hidden>沙盘身份（仅测试环境） <select id="businessUser" aria-label="测试员工"></select><select id="businessProject" aria-label="测试项目"></select></label></div>
+      <span class="readonly-badge">ERPNext 业务数据</span>
+    </header>
+    <nav class="portal-nav function-nav" aria-label="业务功能导航">
+      <a class="nav-link active" data-view="home" href="/?view=home">工作概览</a>
+      <a class="nav-link" href="/material-marketplace">物料采购申请</a>
+      <a class="nav-link" data-view="requests" data-module="requests" href="/?view=requests">我的申请</a>
+      <a class="nav-link" data-view="approvals" data-module="approvals" href="/?view=approvals">审批中心</a>
+      <a class="nav-link" data-view="buying" data-module="buying" href="/?view=buying">采购中心</a>
+      <a class="nav-link" data-view="receiving" data-module="receiving" href="/?view=receiving">收货中心</a>
+      <a class="nav-link" data-view="inventory" data-module="inventory" href="/?view=inventory">库存中心</a>
+      <a class="nav-link" data-view="project" data-module="project" href="/?view=project">项目用料</a>
+      <a class="nav-link" data-view="documents" href="/?view=documents">单据中心</a>
+      <a id="classificationWorkbenchLink" class="nav-link" href="/tariff-taxonomy-browser?catalog=gpc&classification_source=original">物料分类工作台</a>
+      <a class="nav-link" href="/tariff-taxonomy-browser?catalog=gpc">参考目录</a>
+    </nav>
+
+    <main class="portal-main">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">物资业务门户 · 内部使用</p>
+          <h1 id="pageTitle">物资业务概览</h1>
+          <p id="pageDescription">从物料申请到收货和项目用料，所有状态都以 ERPNext 回读为准。</p>
+        </div>
+        <a id="catalogActionLink" class="hero-action" href="/material-marketplace">选择物料并发起申请 <span>→</span></a>
+      </section>
+
+      <section id="metricGrid" class="metric-grid" aria-label="业务摘要">
+        <article class="metric-card"><span>待审批</span><strong id="metricApprovals">—</strong><small>需要当前身份处理</small></article>
+        <article class="metric-card"><span>待采购行</span><strong id="metricPending">—</strong><small>当前项目未完成采购</small></article>
+        <article class="metric-card"><span>待收货单</span><strong id="metricReceiving">—</strong><small>采购订单的未收数量</small></article>
+        <article class="metric-card accent"><span>物料目录</span><strong id="metricCatalog">—</strong><small id="metricCatalogNote">已发布且可申请</small></article>
+      </section>
+
+      <section class="content-grid">
+        <div class="panel panel-main">
+          <div class="panel-heading"><div><p class="eyebrow">当前工作</p><h2 id="sectionTitle">待处理事项</h2></div><div class="panel-tools"><div id="contentFilters" class="content-filters" hidden><input id="filterQuery" type="search" placeholder="搜索单号、物料或供应商" aria-label="搜索单据" /><select id="filterStatusScope" aria-label="单据状态"><option value="active">有效单据</option><option value="cancelled">已取消</option></select><input id="filterDateFrom" type="date" aria-label="开始日期" /><input id="filterDateTo" type="date" aria-label="结束日期" /><button id="applyFilters" class="quiet-button" type="button">筛选</button></div><div id="inventoryFilters" class="content-filters" hidden><input id="filterInventoryItem" type="search" placeholder="物料编码" aria-label="库存物料编码" /><input id="filterInventoryWarehouse" type="search" placeholder="仓库" aria-label="库存仓库" /><button id="applyInventoryFilters" class="quiet-button" type="button">筛选库存</button></div><button id="refreshButton" class="quiet-button" type="button">刷新</button></div></div>
+          <div id="contentState" class="loading" role="status" aria-live="polite"><span id="contentStateText">正在读取 ERPNext 业务状态…</span><button id="retryButton" class="quiet-button" type="button" hidden>重试</button></div>
+          <div id="contentList" class="content-list"></div>
+        </div>
+        <aside class="panel side-panel">
+          <p class="eyebrow">快速入口</p>
+          <h2>从一个物料开始</h2>
+          <p>目录页只展示已经整理完整并同步到 ERPNext 的标准物料。选择规格和数量后，先生成申请草稿，再由流程节点确认。</p>
+          <a id="catalogSideLink" class="outline-action" href="/material-marketplace">打开物料目录</a>
+          <div class="safety-note"><strong>写入保护</strong><span>每次写入都要预览、明确确认、使用唯一 request_id，并在完成后回读。</span></div>
+        </aside>
+      </section>
+    </main>
+    <aside id="detailDrawer" class="detail-drawer" hidden role="dialog" aria-modal="true" aria-labelledby="detailTitle" aria-live="polite">
+      <div class="detail-drawer-head"><div><p class="eyebrow">ERPNext 回读</p><h2 id="detailTitle">详情</h2></div><button id="detailClose" class="quiet-button" type="button">关闭</button></div>
+      <div id="detailState" class="loading">正在读取详情…</div>
+      <div id="detailBody" class="detail-body"></div>
+    </aside>
+    <div id="detailShade" class="detail-shade" hidden></div>
+    <footer class="portal-footer"><span>内部业务页面 · 不直接展示 AI 入口</span><span id="footerStatus">正在连接</span></footer>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="/workbench-assets/business-portal.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,352 @@
+[
+  {
+    "rule_id": "hs731816-nut",
+    "top_group": "紧固件与连接件",
+    "material_family": "螺母",
+    "keywords": [],
+    "code_prefixes": [
+      "731816"
+    ],
+    "priority": 120,
+    "confidence": 0.99
+  },
+  {
+    "rule_id": "hs731821-washer",
+    "top_group": "紧固件与连接件",
+    "material_family": "垫圈/垫片",
+    "keywords": [],
+    "code_prefixes": [
+      "731821",
+      "731822"
+    ],
+    "priority": 120,
+    "confidence": 0.99
+  },
+  {
+    "rule_id": "hs731823-rivet",
+    "top_group": "紧固件与连接件",
+    "material_family": "扣件/连接件",
+    "keywords": [],
+    "code_prefixes": [
+      "731823"
+    ],
+    "priority": 120,
+    "confidence": 0.88
+  },
+  {
+    "rule_id": "hs731824-pin",
+    "top_group": "紧固件与连接件",
+    "material_family": "销/卡簧",
+    "keywords": [],
+    "code_prefixes": [
+      "731824"
+    ],
+    "priority": 120,
+    "confidence": 0.96
+  },
+  {
+    "rule_id": "hs7318-fastener",
+    "top_group": "紧固件与连接件",
+    "material_family": "螺丝/螺栓",
+    "keywords": [],
+    "code_prefixes": [
+      "731811",
+      "731812",
+      "731813",
+      "731814",
+      "731815",
+      "731829"
+    ],
+    "priority": 120,
+    "confidence": 0.96
+  },
+  {
+    "rule_id": "hs7317-nail",
+    "top_group": "紧固件与连接件",
+    "material_family": "钉类",
+    "keywords": [],
+    "code_prefixes": [
+      "7317"
+    ],
+    "priority": 120,
+    "confidence": 0.95
+  },
+  {
+    "rule_id": "hs741510-nail",
+    "top_group": "紧固件与连接件",
+    "material_family": "钉类",
+    "keywords": [],
+    "code_prefixes": [
+      "741510"
+    ],
+    "priority": 120,
+    "confidence": 0.92
+  },
+  {
+    "rule_id": "hs741521-washer",
+    "top_group": "紧固件与连接件",
+    "material_family": "垫圈/垫片",
+    "keywords": [],
+    "code_prefixes": [
+      "741521"
+    ],
+    "priority": 120,
+    "confidence": 0.94
+  },
+  {
+    "rule_id": "hs74153310-screw",
+    "top_group": "紧固件与连接件",
+    "material_family": "螺丝/螺栓",
+    "keywords": [],
+    "code_prefixes": [
+      "74153310"
+    ],
+    "priority": 120,
+    "confidence": 0.9
+  },
+  {
+    "rule_id": "fastener-nut",
+    "top_group": "紧固件与连接件",
+    "material_family": "螺母",
+    "keywords": [
+      "螺母",
+      "螺帽"
+    ],
+    "code_prefixes": [],
+    "priority": 80,
+    "confidence": 0.95
+  },
+  {
+    "rule_id": "fastener-washer",
+    "top_group": "紧固件与连接件",
+    "material_family": "垫圈/垫片",
+    "keywords": [
+      "垫圈",
+      "垫片",
+      "弹簧垫"
+    ],
+    "code_prefixes": [],
+    "priority": 80,
+    "confidence": 0.95
+  },
+  {
+    "rule_id": "fastener-pin",
+    "top_group": "紧固件与连接件",
+    "material_family": "销/卡簧",
+    "keywords": [
+      "开尾销",
+      "销",
+      "卡簧"
+    ],
+    "code_prefixes": [],
+    "priority": 78,
+    "confidence": 0.88
+  },
+  {
+    "rule_id": "fastener-rivet",
+    "top_group": "紧固件与连接件",
+    "material_family": "扣件/连接件",
+    "keywords": [
+      "铆钉"
+    ],
+    "code_prefixes": [],
+    "priority": 80,
+    "confidence": 0.88
+  },
+  {
+    "rule_id": "fastener-rod",
+    "top_group": "紧固件与连接件",
+    "material_family": "螺杆/丝杆",
+    "keywords": [
+      "螺杆",
+      "丝杆",
+      "丝杠"
+    ],
+    "code_prefixes": [],
+    "priority": 80,
+    "confidence": 0.94
+  },
+  {
+    "rule_id": "fastener-screw",
+    "top_group": "紧固件与连接件",
+    "material_family": "螺丝/螺栓",
+    "keywords": [
+      "螺钉",
+      "螺栓",
+      "螺丝"
+    ],
+    "code_prefixes": [],
+    "priority": 76,
+    "confidence": 0.9
+  },
+  {
+    "rule_id": "pipe-valve",
+    "top_group": "管材管件阀门",
+    "material_family": "阀门",
+    "keywords": [
+      "阀"
+    ],
+    "code_prefixes": [],
+    "priority": 70,
+    "confidence": 0.82
+  },
+  {
+    "rule_id": "pipe-flange",
+    "top_group": "管材管件阀门",
+    "material_family": "法兰",
+    "keywords": [
+      "法兰"
+    ],
+    "code_prefixes": [],
+    "priority": 72,
+    "confidence": 0.9
+  },
+  {
+    "rule_id": "pipe-fitting",
+    "top_group": "管材管件阀门",
+    "material_family": "直接/接头",
+    "keywords": [
+      "接头",
+      "管件",
+      "弯头",
+      "三通"
+    ],
+    "code_prefixes": [],
+    "priority": 60,
+    "confidence": 0.72
+  },
+  {
+    "rule_id": "pipe-material",
+    "top_group": "管材管件阀门",
+    "material_family": "管材",
+    "keywords": [
+      "管材",
+      "钢管",
+      "塑料管",
+      "无缝管",
+      "焊管",
+      "铜管",
+      "铝管"
+    ],
+    "code_prefixes": [],
+    "priority": 55,
+    "confidence": 0.72
+  },
+  {
+    "rule_id": "electrical-cable",
+    "top_group": "电气电料",
+    "material_family": "电线电缆",
+    "keywords": [
+      "电线",
+      "电缆"
+    ],
+    "code_prefixes": [],
+    "priority": 70,
+    "confidence": 0.92
+  },
+  {
+    "rule_id": "electrical-switch",
+    "top_group": "电气电料",
+    "material_family": "低压电器",
+    "keywords": [
+      "断路器",
+      "开关",
+      "继电器"
+    ],
+    "code_prefixes": [],
+    "priority": 68,
+    "confidence": 0.84
+  },
+  {
+    "rule_id": "electrical-terminal",
+    "top_group": "电气电料",
+    "material_family": "接线端子/线鼻子",
+    "keywords": [
+      "端子",
+      "线鼻子"
+    ],
+    "code_prefixes": [],
+    "priority": 68,
+    "confidence": 0.88
+  },
+  {
+    "rule_id": "metal-steel-pipe",
+    "top_group": "金属材料",
+    "material_family": "钢管",
+    "keywords": [
+      "钢管"
+    ],
+    "code_prefixes": [],
+    "priority": 72,
+    "confidence": 0.92
+  },
+  {
+    "rule_id": "metal-steel-plate",
+    "top_group": "金属材料",
+    "material_family": "钢板/板材",
+    "keywords": [
+      "钢板",
+      "板材"
+    ],
+    "code_prefixes": [],
+    "priority": 72,
+    "confidence": 0.92
+  },
+  {
+    "rule_id": "metal-section",
+    "top_group": "金属材料",
+    "material_family": "型钢",
+    "keywords": [
+      "型钢"
+    ],
+    "code_prefixes": [],
+    "priority": 72,
+    "confidence": 0.92
+  },
+  {
+    "rule_id": "metal-rebar",
+    "top_group": "金属材料",
+    "material_family": "钢筋/线材",
+    "keywords": [
+      "钢筋",
+      "线材"
+    ],
+    "code_prefixes": [],
+    "priority": 70,
+    "confidence": 0.88
+  },
+  {
+    "rule_id": "tool-drill",
+    "top_group": "工具耗材",
+    "material_family": "钻头",
+    "keywords": [
+      "钻头",
+      "钻具"
+    ],
+    "code_prefixes": [],
+    "priority": 68,
+    "confidence": 0.9
+  },
+  {
+    "rule_id": "equipment-bearing",
+    "top_group": "设备备件",
+    "material_family": "传动件",
+    "keywords": [
+      "轴承"
+    ],
+    "code_prefixes": [],
+    "priority": 65,
+    "confidence": 0.86
+  },
+  {
+    "rule_id": "chemical-rubber",
+    "top_group": "化工胶粘涂料",
+    "material_family": "橡胶材料",
+    "keywords": [
+      "橡胶"
+    ],
+    "code_prefixes": [],
+    "priority": 60,
+    "confidence": 0.75
+  }
+]

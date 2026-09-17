@@ -1,0 +1,26 @@
+{
+  "schema_version": "retrieval-review-assisted-resolution-v0.1",
+  "input": "C:\\Users\\SGJ\\Documents\\nexterp agent 2\\data\\material_master\\retrieval_review_v0_1.model_pre_review.jsonl",
+  "output": "C:\\Users\\SGJ\\Documents\\nexterp agent 2\\data\\material_master\\retrieval_review_v0_1.assisted_resolution.jsonl",
+  "assisted_reviewer": "codex-assisted-material-review-v0.1",
+  "assisted_reviewed_at": "2026-09-01T08:47:20+08:00",
+  "row_count": 19,
+  "decision_counts": {
+    "evaluation_only": 10,
+    "accepted_with_required_attribute_guard": 9
+  },
+  "evaluation_positive_count": 19,
+  "complete_source_identity_count": 9,
+  "synthetic_typo_count": 10,
+  "production_effect": {
+    "writes_erpnext": false,
+    "fills_human_gold_labels": false,
+    "promotes_aliases": false,
+    "enables_vector_retrieval": false
+  },
+  "notes": [
+    "10条错别字样本只确认评测关系，不进入生产别名。",
+    "9条真实采购简称接受为候选召回关系，但查询缺少必选属性时仍不得自动选料。",
+    "这是模型辅助复核结论，不冒充真人金标准。"
+  ]
+}

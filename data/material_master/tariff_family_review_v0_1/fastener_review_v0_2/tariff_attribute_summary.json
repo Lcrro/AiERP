@@ -1,0 +1,17 @@
+{
+  "release": "tariff-attribute-review-v0.1",
+  "input_path": "C:\\Users\\SGJ\\Documents\\nexterp agent 2\\data\\material_master\\tariff_family_review_v0_1\\fastener_review_v0_2\\tariff_family_candidates.tsv",
+  "row_count": 20,
+  "attribute_status_counts": {
+    "review_required": 20
+  },
+  "attribute_key_counts": {
+    "head_type": 4,
+    "fastener_kind": 14,
+    "material": 20,
+    "thread_form": 6,
+    "tensile_strength": 1
+  },
+  "erpnext_written": false,
+  "review_required": true
+}

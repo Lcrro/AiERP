@@ -1,0 +1,8 @@
+{
+  "decision_version": "tariff-family-decision-v0.1",
+  "candidate_path": "C:\\Users\\SGJ\\Documents\\nexterp agent 2\\data\\material_master\\tariff_family_review_v0_1\\tariff_family_candidates.tsv",
+  "candidate_sha256": "2bd9fea7dbf94234bb1c2a2406050b1a77554c006bed13cb306cdde2f00091fb",
+  "row_count": 8972,
+  "decision_required": true,
+  "erpnext_written": false
+}

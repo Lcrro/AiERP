@@ -3,6 +3,7 @@
         preview: null, documents: null, stockDocuments: null, inbox: null, procurement: null, procurementPreparation: null, lastText: "", executeId: null,
         panel: "inbox", technicalView: "toolcall", documentDetail: null, quotationContext: null, historyToken: 0,
         conversationId: "default", developerMode: false, activeRunId: null, pollToken: 0,
+        marketplaceHandoff: null,
         procurementFilters: {scope:"project", urgency:"", family:"", supplier:"", before:"", view:"rows"},
         procurementSelected: new Set(),
       };
@@ -85,9 +86,18 @@
           $("healthText").classList.add("ok");
           $("healthText").textContent = `OpenClaw 助理与 ERPNext 已连接 · ${health.profile}`;
           state.projects = catalog.projects || [];
+          try {
+            state.marketplaceHandoff = JSON.parse(sessionStorage.getItem("nexterp.material-marketplace.handoff") || "null");
+          } catch (_error) {
+            state.marketplaceHandoff = null;
+          }
           $("projectSelect").innerHTML = state.projects.map(project => `<option value="${esc(project.project_code)}">${esc(project.project_short_name)} · ${esc(project.operating_status)}</option>`).join("");
           $("projectSelect").onchange = () => selectProject(state.projects.find(project => project.project_code === $("projectSelect").value));
-          selectProject(state.projects.find(project => project.project_code === "PRJ-HL-13") || state.projects[0]);
+          selectProject(
+            state.projects.find(project => project.project_code === state.marketplaceHandoff?.project_code)
+            || state.projects.find(project => project.project_code === "PRJ-HL-13")
+            || state.projects[0]
+          );
         } catch (error) {
           $("healthText").textContent = error.message;
           addMessage("error", `工作台初始化失败：${error.message}`);
@@ -106,7 +116,12 @@
         $("projectSelect").value = project.project_code;
         $("projectMeta").textContent = `${project.project_name}\n默认仓库：${project.warehouse_code || "未配置"}`;
         renderEmployees();
-        selectEmployee(state.employees.find(employee => employee.employee_name === "毛晓泉") || state.employees[0] || null);
+        selectEmployee(
+          state.employees.find(employee => employee.user_email === state.marketplaceHandoff?.user_email)
+          || state.employees.find(employee => employee.employee_name === "毛晓泉")
+          || state.employees[0]
+          || null
+        );
       }
 
       function renderEmployees() {
@@ -135,6 +150,16 @@
         loadHistory(historyToken);
         loadInbox();
         loadDocuments();
+        if (
+          state.marketplaceHandoff?.prompt
+          && state.marketplaceHandoff.project_code === state.project?.project_code
+          && state.marketplaceHandoff.user_email === employee?.user_email
+        ) {
+          $("input").value = state.marketplaceHandoff.prompt;
+          $("input").focus();
+          sessionStorage.removeItem("nexterp.material-marketplace.handoff");
+          state.marketplaceHandoff = null;
+        }
       }
 
       async function loadPendingProcurement({preserve = false} = {}) {

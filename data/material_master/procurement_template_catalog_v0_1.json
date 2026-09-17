@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "catalog_version": "v0.1",
+  "sku_generation_policy": "actual_combinations_only",
+  "offer_fields": ["supplier", "brand", "supplier_model", "price", "purchase_package", "minimum_order_quantity", "lead_time"],
+  "main_templates": [
+    {
+      "template_id": "standard_component",
+      "name": "标准规格件",
+      "description": "按装配、互换和库存所需的少量规格识别离散件。",
+      "stock_behavior": "discrete",
+      "record_policy": "actual_sku_only",
+      "naming_pattern": "{standard_type}｜{identity_attributes}",
+      "max_identity_attributes": 6,
+      "identity_principles": ["只保留影响互换、装配或独立库存的规格", "禁止预生成属性组合"],
+      "transaction_principles": ["用途和一般质量要求留在采购配置", "包装和报价留在供应商层"],
+      "examples": ["螺钉", "膨胀管", "插座", "灯管", "管件"],
+      "negative_examples": ["散装砂石", "按尺寸定制卷帘"]
+    },
+    {
+      "template_id": "linear_cut_material",
+      "name": "线性/定尺材料",
+      "description": "按截面与等级识别，以长度、支数或重量采购和换算。",
+      "stock_behavior": "linear",
+      "record_policy": "actual_sku_only",
+      "naming_pattern": "{standard_type}｜{section_or_size}｜{grade}",
+      "max_identity_attributes": 6,
+      "identity_principles": ["截面、直径、等级和材质可决定互换性", "采购长度不当然产生永久SKU"],
+      "transaction_principles": ["定尺、切割和项目长度保存在采购行", "保留库存与采购单位换算"],
+      "examples": ["钢筋", "钢管", "型钢", "电缆", "软管"],
+      "negative_examples": ["钢板", "散装水泥"]
+    },
+    {
+      "template_id": "sheet_roll_material",
+      "name": "板片/卷材",
+      "description": "按材质、厚度和幅面识别板材、片材与卷材。",
+      "stock_behavior": "sheet_roll",
+      "record_policy": "actual_sku_only",
+      "naming_pattern": "{standard_type}｜{material}｜{thickness}｜{width}",
+      "max_identity_attributes": 6,
+      "identity_principles": ["材质、厚度和标准幅宽通常决定身份", "整卷长度与切割尺寸分开管理"],
+      "transaction_principles": ["项目下料尺寸保存在采购配置", "面积和重量换算必须可追溯"],
+      "examples": ["钢板", "网片", "防水卷材", "玻璃"],
+      "negative_examples": ["钢筋", "砂石"]
+    },
+    {
+      "template_id": "bulk_measured_material",
+      "name": "散装计量材料",
+      "description": "按品种和等级识别，以重量或体积计量的散装材料。",
+      "stock_behavior": "bulk",
+      "record_policy": "actual_sku_only",
+      "naming_pattern": "{standard_type}｜{grade_or_source}",
+      "max_identity_attributes": 4,
+      "identity_principles": ["品种、等级和关键来源特征决定身份", "车辆和到货批次不产生SKU"],
+      "transaction_principles": ["含水率、运输和到货数量属于交易记录", "重量体积换算不得由模型猜测"],
+      "examples": ["砂", "石", "土", "散装水泥"],
+      "negative_examples": ["袋装砂浆", "钢板"]
+    },
+    {
+      "template_id": "packaged_consumable",
+      "name": "包装消耗材料",
+      "description": "按配方、等级或用途识别，包装作为采购与换算信息。",
+      "stock_behavior": "packaged",
+      "record_policy": "actual_sku_only",
+      "naming_pattern": "{standard_type}｜{grade_or_formula}",
+      "max_identity_attributes": 6,
+      "identity_principles": ["配方、等级、用途和关键性能可决定身份", "包装大小默认不改变基础物料身份"],
+      "transaction_principles": ["包装、批次和单价留在供应或交易层", "保质期按批次记录"],
+      "examples": ["袋装水泥", "砂浆", "涂料", "胶", "焊条"],
+      "negative_examples": ["散装砂", "水泵"]
+    },
+    {
+      "template_id": "equipment_tool",
+      "name": "设备与工具",
+      "description": "按能力、接口和关键额定参数识别可重复使用的设备或工具。",
+      "stock_behavior": "equipment",
+      "record_policy": "actual_sku_only",
+      "naming_pattern": "{standard_type}｜{capacity_or_rating}",
+      "max_identity_attributes": 7,
+      "identity_principles": ["能力、容量、接口和关键额定参数决定互换性", "型号只能作为事实证据或明确锁定条件"],
+      "transaction_principles": ["附件、保修和交付条件进入报价层", "非关键颜色和外观不进入身份"],
+      "examples": ["水泵", "电钻", "测量仪器", "手动工具"],
+      "negative_examples": ["设备专用滤芯", "定制门窗"]
+    },
+    {
+      "template_id": "model_specific_spare",
+      "name": "型号适配备件",
+      "description": "按适配设备、接口、图号或关键尺寸识别设备零部件。",
+      "stock_behavior": "compatibility",
+      "record_policy": "actual_sku_only",
+      "naming_pattern": "{standard_type}｜{compatible_equipment_or_interface}",
+      "max_identity_attributes": 7,
+      "identity_principles": ["适配设备、接口、图号和关键尺寸优先", "不能因名称相似跨设备合并"],
+      "transaction_principles": ["供应商替代关系必须有明确证据", "维修位置属于交易信息"],
+      "examples": ["轴承", "滤芯", "模块", "设备零件"],
+      "negative_examples": ["通用螺钉", "完整水泵"]
+    },
+    {
+      "template_id": "custom_fabricated",
+      "name": "定制加工品",
+      "description": "将项目尺寸和配置保存在采购记录，默认不永久扩张库存SKU。",
+      "stock_behavior": "configuration",
+      "record_policy": "project_configuration_first",
+      "naming_pattern": "{standard_type}｜项目配置",
+      "max_identity_attributes": 0,
+      "identity_principles": ["默认不以每组项目尺寸创建库存SKU", "重复采购且需独立库存时再提升为SKU"],
+      "transaction_principles": ["尺寸、做法和安装位置完整保存在项目配置", "报价按面积、长度或加工复杂度记录"],
+      "examples": ["卷帘", "门窗", "加工钢构", "标牌"],
+      "negative_examples": ["标准插座", "标准螺钉"]
+    },
+    {
+      "template_id": "kit_assembly",
+      "name": "成套/组合物料",
+      "description": "以明确套件边界和必需组成管理成套供应物料。",
+      "stock_behavior": "kit",
+      "record_policy": "actual_sku_only",
+      "naming_pattern": "{standard_type}｜{configuration}｜成套",
+      "max_identity_attributes": 6,
+      "identity_principles": ["套件边界、适配对象和必需组成决定身份", "不得把裸件与成套件合并"],
+      "transaction_principles": ["可选附件和赠品留在报价层", "组成变更必须触发复核"],
+      "examples": ["灯管支架套装", "维修包", "五金套装"],
+      "negative_examples": ["单独灯管", "散装材料"]
+    },
+    {
+      "template_id": "general_finished_good",
+      "name": "通用成品",
+      "description": "对低风险通用成品只保留功能、关键尺寸和明显质量等级。",
+      "stock_behavior": "general",
+      "record_policy": "actual_sku_only",
+      "naming_pattern": "{standard_type}｜{key_function_or_size}",
+      "max_identity_attributes": 4,
+      "identity_principles": ["功能、明显尺寸和不可互换结构才进入身份", "避免记录制造商规格书式细节"],
+      "transaction_principles": ["一般质量要求作为采购要求", "品牌和报价不进入基础身份"],
+      "examples": ["拖把", "垃圾桶", "办公用品", "生活用品"],
+      "negative_examples": ["压力阀门", "设备专用备件"]
+    }
+  ],
+  "constraints": [
+    {
+      "constraint_id": "electrical",
+      "name": "电气约束",
+      "description": "复核电压、功率、极数、接口及必要防护等级。",
+      "required_checks": ["额定参数与现场制式相容", "灯管、支架和完整灯具边界明确"],
+      "force_review": false
+    },
+    {
+      "constraint_id": "pressure_fluid",
+      "name": "压力/流体约束",
+      "description": "复核压力、介质、密封和连接方式。",
+      "required_checks": ["公称压力和介质明确", "连接与密封形式相容"],
+      "force_review": true
+    },
+    {
+      "constraint_id": "safety_regulatory",
+      "name": "安全/法规约束",
+      "description": "消防、吊装、劳保等物料必须保留认证和人工确认。",
+      "required_checks": ["适用标准或认证明确", "不得自动替换关键安全等级"],
+      "force_review": true
+    },
+    {
+      "constraint_id": "chemical_shelf_life",
+      "name": "化学/保质期约束",
+      "description": "复核成分、用途、危险性、批次和有效期。",
+      "required_checks": ["危险性和使用范围明确", "批次及有效期在收货层记录"],
+      "force_review": true
+    },
+    {
+      "constraint_id": "project_custom_nonstock",
+      "name": "项目定制/非库存约束",
+      "description": "项目尺寸和配置优先留在采购行，不默认形成永久库存SKU。",
+      "required_checks": ["项目配置完整可报价", "只有重复采购并需独立库存时才能提升为SKU"],
+      "force_review": false
+    }
+  ]
+}

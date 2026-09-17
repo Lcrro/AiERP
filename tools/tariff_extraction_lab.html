@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>2026 税则目录提取台 | Nexterp</title>
+    <link rel="stylesheet" href="/workbench-assets/tariff-extraction-lab.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/"><span class="brand-mark">N</span><span><b>Nexterp</b><small>物料分类工作台</small></span></a>
+      <nav><a href="/">员工工作台</a><a href="/material-item-lab">物料浏览</a><a href="/tariff-taxonomy-browser">完整结构</a><span class="status-dot">本地候选处理</span></nav>
+    </header>
+
+    <main class="page-shell">
+      <section class="intro">
+        <div>
+          <p class="eyebrow">TAXONOMY IMPORT · v0.1</p>
+          <h1>2026 税则多层目录提取台</h1>
+          <p class="lede">把公开 PDF 转成可审计的章节、品目、子目和 8 位税号候选表。先观察处理过程，再决定是否进入物料分类发布。</p>
+        </div>
+        <div class="guardrail"><span>只读候选</span><b>不会写入 ERPNext</b><small>解析、校验、发布准备彼此分离</small></div>
+      </section>
+
+      <section class="control-card card">
+        <div class="card-heading"><div><span class="section-kicker">01 / SOURCE</span><h2>任务设置</h2></div><span id="source-status" class="pill neutral">等待开始</span></div>
+        <div class="source-grid">
+          <label class="field wide"><span>公开源文件</span><input id="source-url" value="https://gss.mof.gov.cn/gzdt/zhengcefabu/202512/P020251231607833453633.pdf" readonly /></label>
+          <label class="field"><span>资料版本</span><input value="中华人民共和国进出口税则（2026）" readonly /></label>
+          <label class="field"><span>处理模式</span><select id="mode"><option value="demo">演示模式 · 约 2 秒</option><option value="full">全量模式 · 下载并解析 1492 页</option></select></label>
+        </div>
+        <label class="confirm-line"><input id="confirm-full" type="checkbox" /><span>我确认在页面验证通过后，才开始下载并处理 1492 页全量 PDF</span></label>
+        <div class="action-row"><button id="start" class="primary">启动演示任务</button><button id="cancel" class="secondary" disabled>停止任务</button><span id="action-message" class="action-message">演示模式不会访问网络</span></div>
+      </section>
+
+      <section class="hero-grid">
+        <section class="card progress-card">
+          <div class="card-heading"><div><span class="section-kicker">02 / PROGRESS</span><h2>处理进度</h2></div><span id="job-id" class="job-id">未创建任务</span></div>
+          <div class="progress-main">
+            <div id="progress-ring" class="progress-ring" style="--progress: 0deg"><div><strong id="progress-value">0%</strong><span id="progress-stage">等待启动</span></div></div>
+            <div class="progress-copy"><strong id="progress-message">准备好后启动一个演示任务</strong><p>后台任务每 700ms 回读一次。页面关闭不会触发 ERPNext 写入。</p><div class="bar"><i id="progress-bar"></i></div><div class="time-line"><span>已用 <b id="elapsed">0s</b></span><span>预计剩余 <b id="eta">—</b></span><span>速度 <b id="speed">—</b></span></div></div>
+          </div>
+          <div class="stage-list" id="stages" aria-label="提取阶段"></div>
+        </section>
+        <section class="card chart-card">
+          <div class="card-heading"><div><span class="section-kicker">03 / THROUGHPUT</span><h2>处理吞吐</h2></div><span class="chart-label">页 / 秒</span></div>
+          <canvas id="throughput" width="560" height="190" aria-label="处理吞吐折线图"></canvas>
+          <div class="chart-footer"><span>最近一段时间</span><b id="chart-last">等待数据</b></div>
+        </section>
+      </section>
+
+      <section class="metric-grid" id="metrics">
+        <article class="metric card"><span>已下载</span><strong id="downloaded">0 MB</strong><small id="download-total">总量待确认</small></article>
+        <article class="metric card"><span>已处理页</span><strong id="pages">0 / 1492</strong><small>文本层逐页扫描</small></article>
+        <article class="metric card"><span>候选节点</span><strong id="nodes">0</strong><small>章节至税号</small></article>
+        <article class="metric card"><span>8 位税号</span><strong id="leaf-codes">0</strong><small>可进入物料分类映射</small></article>
+        <article class="metric card"><span>待复核</span><strong id="issues">0</strong><small>重复、缺失或层级异常</small></article>
+      </section>
+
+      <section class="detail-grid">
+        <section class="card table-card"><div class="card-heading"><div><span class="section-kicker">04 / LIVE NODES</span><h2>最近识别的目录节点</h2></div><span class="muted">只展示最近 8 条</span></div><div class="table-wrap"><table><thead><tr><th>税则号</th><th>货品名称</th><th>层级</th><th>页码</th><th>类型</th></tr></thead><tbody id="recent-nodes"><tr><td colspan="5" class="empty">演示任务启动后显示</td></tr></tbody></table></div></section>
+        <section class="card log-card"><div class="card-heading"><div><span class="section-kicker">05 / AUDIT LOG</span><h2>运行记录</h2></div><span class="muted">任务级日志</span></div><ol id="logs" class="logs"><li>等待任务创建</li></ol><div class="output-box"><span>输出边界</span><b id="output-status">尚未生成候选包</b><small>候选发布包保存在本地 runtime 目录，不自动同步 ERPNext。</small></div></section>
+      </section>
+
+      <footer class="footer-note"><span>安全边界</span><p>这一步只负责下载、提取、规范化和校验。后续若要把候选目录转成 Nexterp 内部分类，仍需人工审核、版本冻结和单独发布确认。</p></footer>
+    </main>
+    <script src="/workbench-assets/tariff-extraction-lab.js" defer></script>
+  </body>
+</html>

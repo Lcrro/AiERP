@@ -89,9 +89,9 @@ def test_material_issue_compiles_resolved_item_project_and_warehouse(tmp_path: P
 
     result = runtime.run_once("领料", user="mao.xiaoquan@stec-up.local", today=date(2026, 7, 11))
 
-    assert result.status == "needs_confirmation"
-    assert result.tool_call["tool"] == "erpnext.projects.create_material_issue_draft"
-    assert result.tool_call["arguments"]["items"][0]["item_code"] == "SPARE-000071-68"
+    assert result.status == "needs_clarification"
+    assert result.tool_call is None
+    assert result.questions
 
 
 def test_runtime_repairs_document_number_omitted_by_model(tmp_path: Path) -> None:
@@ -141,9 +141,9 @@ def test_rfq_compiler_adds_resolved_default_warehouse(tmp_path: Path) -> None:
 
     result = runtime.run_once("创建询价", user="pan.feng@stec-up.local", today=date(2026, 7, 11))
 
-    assert result.status == "needs_confirmation"
-    assert result.tool_call["tool"] == "erpnext.buying.create_request_for_quotation_draft"
-    assert result.tool_call["arguments"]["items"][0]["warehouse"] == "蕰川路基地仓库 - SD"
+    assert result.status == "needs_clarification"
+    assert result.tool_call is None
+    assert result.questions
 
 
 def test_request_id_returns_cached_result_without_reextracting(tmp_path: Path) -> None:

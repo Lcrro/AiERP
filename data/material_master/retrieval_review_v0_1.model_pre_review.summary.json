@@ -1,0 +1,35 @@
+{
+  "schema_version": "retrieval-review-model-pre-review-v0.1",
+  "input": "C:\\Users\\SGJ\\Documents\\nexterp agent 2\\data\\material_master\\retrieval_review_v0_1.jsonl",
+  "output": "C:\\Users\\SGJ\\Documents\\nexterp agent 2\\data\\material_master\\retrieval_review_v0_1.model_pre_review.jsonl",
+  "reviewed_at": "2026-09-01T08:47:20+08:00",
+  "reviewer": "codex-model-assisted-v0.1",
+  "row_count": 400,
+  "role_counts": {
+    "positive_candidate": 300,
+    "hard_negative_candidate": 50,
+    "nonexistent_candidate": 50
+  },
+  "verdict_counts": {
+    "likely_match": 281,
+    "needs_human": 19,
+    "likely_non_match": 100
+  },
+  "source_audit_counts": {
+    "catalog_exact": 259,
+    "not_provided": 110,
+    "complete": 31
+  },
+  "human_review_required_count": 400,
+  "production_effect": {
+    "writes_erpnext": false,
+    "fills_human_review_decision": false,
+    "promotes_aliases": false,
+    "enables_vector_retrieval": false
+  },
+  "notes": [
+    "模型预审仅提供建议，不是人工确认金标准。",
+    "原始审核队列仍保持 pending_review，需人工填写 review_decision、reviewer 和 reviewed_at。",
+    "本轮银标记录来源身份均含 source_row_hash。"
+  ]
+}

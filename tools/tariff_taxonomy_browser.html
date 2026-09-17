@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>物料分类工作台 | Nexterp</title>
+  <link rel="stylesheet" href="/workbench-assets/tariff-taxonomy-browser.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">
+      <span class="brand-mark">N</span>
+      <span><strong>Nexterp</strong><small>物料分类工作台</small></span>
+    </a>
+    <nav aria-label="工作台导航">
+      <a href="/tariff-extraction-lab">提取任务</a>
+      <a href="/tariff-family-review">物料族审阅</a>
+      <a class="active" href="/tariff-taxonomy-browser?catalog=gpc">物料分类工作台</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow" id="catalog-eyebrow">物料分类工作台 · 只读参考</p>
+        <h1 id="catalog-title">从“类”一路看到八位税号</h1>
+        <p class="hero-text" id="catalog-description">内部只读参考目录。默认显示《中华人民共和国进出口税则（2026）》的完整五层结构，也可切换 GPC 2026-05 的四层目录。</p>
+      </div>
+      <div class="source-status" id="source-status">
+        <span class="pulse"></span>
+        <div><strong>正在读取参考目录</strong><small>内部只读参考目录</small></div>
+      </div>
+    </section>
+
+    <section class="catalog-switcher" aria-label="参考目录来源">
+      <span class="switcher-label">参考来源</span>
+      <div class="switcher-buttons" role="tablist">
+        <button class="catalog-button active" data-catalog="hs" role="tab" type="button">HS 税则 2026</button>
+        <button class="catalog-button" data-catalog="gpc" role="tab" type="button">GPC 2026-05</button>
+      </div>
+      <label class="classification-source-picker">物料分类
+        <select id="classification-source" aria-label="选择物料分类版本">
+          <option value="original">原 GPC 分类</option>
+          <option value="chatgpt_v4">ChatGPT 分类（龙华 V4）</option>
+        </select>
+      </label>
+      <span class="catalog-availability" id="catalog-availability"></span>
+      <label class="material-filter" id="material-filter-control" hidden>
+        <input id="materialized-only" type="checkbox" />
+        <span>隐藏无实际物料目录</span>
+        <small id="material-count-summary"></small>
+      </label>
+    </section>
+
+    <section class="structure-strip" id="structure-strip" aria-label="参考目录层级">
+    </section>
+    <span class="sr-only" aria-hidden="true">四位品目 六位子目 八位税号</span>
+
+    <section class="toolbar" aria-label="目录工具栏">
+      <label class="search-box" for="taxonomy-search">
+        <span class="search-icon" aria-hidden="true"></span>
+        <input id="taxonomy-search" type="search" autocomplete="off" placeholder="搜索编码、名称或定义，例如 73181510、螺栓、钢铁制品" />
+        <kbd>Enter</kbd>
+      </label>
+      <label class="level-filter">层级
+        <select id="kind-filter"><option value="">全部层级</option></select>
+      </label>
+      <button id="expand-chapters" class="button secondary" type="button">展开到章</button>
+      <button id="collapse-all" class="button ghost" type="button">全部折叠</button>
+      <button id="clear-search" class="button ghost" type="button" hidden>清除搜索</button>
+    </section>
+
+    <section class="browser-shell">
+      <aside class="section-rail" aria-label="参考目录根层">
+        <div class="panel-heading"><div><span id="rail-eyebrow">ROOT INDEX</span><h2 id="rail-title">21 类</h2></div><small id="section-loaded">读取中</small></div>
+        <div class="section-list" id="section-list"></div>
+      </aside>
+
+      <section class="tree-panel" aria-labelledby="tree-title">
+        <div class="panel-heading tree-heading">
+          <div><span>HIERARCHY TREE</span><h2 id="tree-title">完整目录树</h2></div>
+          <div class="tree-stats"><strong id="visible-count">0</strong><small>当前已载入节点</small></div>
+        </div>
+        <div class="tree-breadcrumb" id="tree-breadcrumb"><span>完整目录</span></div>
+        <div class="tree-scroll" id="tree-scroll">
+          <div class="loading-state" id="tree-loading"><span class="spinner"></span>正在读取参考目录…</div>
+          <ul class="taxonomy-tree" id="taxonomy-tree" role="tree" aria-label="参考目录完整结构"></ul>
+        </div>
+      </section>
+
+      <aside class="inspector" aria-live="polite">
+        <div id="inspector-empty" class="inspector-empty">
+          <span class="inspector-symbol">⌁</span>
+          <h2>逐层浏览</h2>
+          <p>点击行首箭头展开下一层；点击节点名称可查看完整路径和来源信息。</p>
+          <div class="legend">
+            <span><i class="dot section-dot"></i>层级节点</span>
+            <span><i class="dot sku-dot"></i>末级详情</span>
+          </div>
+        </div>
+        <div id="search-panel" hidden>
+          <div class="panel-heading"><div><span>SEARCH RESULTS</span><h2>全库搜索</h2></div><strong id="search-total">0</strong></div>
+          <p class="result-note" id="search-note"></p>
+          <div class="search-results" id="search-results"></div>
+        </div>
+        <div id="detail-panel" hidden>
+          <div class="detail-kind" id="detail-kind"></div>
+          <code id="detail-code"></code>
+          <h2 id="detail-name"></h2>
+          <p id="detail-official-name" class="detail-official-name"></p>
+          <dl>
+            <div><dt>直接子级</dt><dd id="detail-children"></dd></div>
+            <div><dt>来源页</dt><dd id="detail-page"></dd></div>
+          </dl>
+          <p class="detail-label">完整路径</p>
+          <div class="detail-path" id="detail-path"></div>
+          <section class="actual-materials" id="actual-materials-section" hidden>
+            <div class="actual-materials-heading">
+              <span class="detail-label">已整理实际物料</span>
+              <strong id="actual-materials-count">0 项</strong>
+            </div>
+            <p id="actual-materials-message" class="actual-materials-message"></p>
+            <div id="actual-materials-list" class="actual-materials-list"></div>
+          </section>
+          <section class="attribute-evidence" aria-label="申报属性证据">
+            <div class="attribute-heading"><span id="detail-evidence-label" class="detail-label">申报属性证据</span><span id="detail-attribute-status" class="attribute-status pending">选择八位税号后读取</span></div>
+            <p id="detail-attribute-message" class="attribute-message">选择末级节点后读取该参考目录的详情。</p>
+            <div id="detail-attribute-body" hidden>
+              <div id="detail-gpc-definition" class="gpc-profile-fields" hidden>
+                <div class="attribute-group">
+                  <strong>定义 / 包含范围</strong>
+                  <p id="detail-gpc-includes"></p>
+                  <details id="detail-gpc-includes-official" class="official-text"><summary>查看官方英文</summary><p></p></details>
+                </div>
+                <div class="attribute-group">
+                  <strong>排除范围</strong>
+                  <p id="detail-gpc-excludes"></p>
+                  <details id="detail-gpc-excludes-official" class="official-text"><summary>查看官方英文</summary><p></p></details>
+                </div>
+                <div class="attribute-group"><strong id="detail-gpc-attributes-label">GPC 分类属性与可选值</strong><div id="detail-gpc-attributes" class="attribute-list"></div></div>
+              </div>
+              <div class="attribute-group"><strong>可用于分类的属性</strong><div id="detail-classification-attributes" class="attribute-list"></div></div>
+              <div class="attribute-group"><strong>完整申报要素</strong><div id="detail-declaration-attributes" class="attribute-list"></div></div>
+              <div class="source-evidence"><span>来源</span><strong id="detail-source-page"></strong><pre id="detail-source-text"></pre></div>
+            </div>
+          </section>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <dialog id="material-variant-dialog" class="material-variant-dialog" aria-labelledby="material-variant-title">
+    <button id="material-variant-close" class="material-variant-close" type="button" aria-label="关闭规格选择">×</button>
+    <div id="material-variant-body"></div>
+  </dialog>
+
+  <footer><span>物料分类参考 · 只读</span><span id="footer-meta">Nexterp Taxonomy Browser</span></footer>
+  <script src="/workbench-assets/tariff-taxonomy-browser.js" defer></script>
+</body>
+</html>

@@ -217,12 +217,32 @@ class ERPNextClient:
         return self.request("POST", f"/api/method/{method}", json=args or {})
 
     def submit_document(self, doctype: str, name: str) -> ToolResult:
+        # The isolated material-test Site intentionally only installs the
+        # standard Frappe/ERPNext apps.  Keep the legacy bridge as a fallback,
+        # but use the supported Frappe endpoint first so a portal write does
+        # not depend on an optional app being installed.
+        document = self.get_document(doctype, name)
+        if not document.ok or not isinstance(document.data, dict):
+            return document
+        result = self.call_method("frappe.client.submit", {"doc": document.data})
+        if result.ok:
+            return result
+        if "agent_bridge" not in (result.error or "") and "agent_bridge" not in (result.user_message or ""):
+            return result
         return self.call_method(
             "agent_bridge.api.submit_document",
             {"doctype": doctype, "name": name},
         )
 
     def cancel_document(self, doctype: str, name: str) -> ToolResult:
+        document = self.get_document(doctype, name)
+        if not document.ok or not isinstance(document.data, dict):
+            return document
+        result = self.call_method("frappe.client.cancel", {"doctype": doctype, "name": name})
+        if result.ok:
+            return result
+        if "agent_bridge" not in (result.error or "") and "agent_bridge" not in (result.user_message or ""):
+            return result
         return self.call_method(
             "agent_bridge.api.cancel_document",
             {"doctype": doctype, "name": name},

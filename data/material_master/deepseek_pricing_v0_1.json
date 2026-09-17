@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "pricing_version": "2026-08-13",
+  "currency": "CNY",
+  "unit": "per_million_tokens",
+  "source_url": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+  "models": {
+    "deepseek-v4-flash": {
+      "cache_hit_input": 0.02,
+      "cache_miss_input": 1.0,
+      "output": 2.0
+    },
+    "deepseek-v4-pro": {
+      "cache_hit_input": 0.025,
+      "cache_miss_input": 3.0,
+      "output": 6.0
+    }
+  },
+  "notes": [
+    "仅用于本地批处理成本估算，实际扣费以 DeepSeek 账单为准。",
+    "DeepSeek 已提示价格可能调整；里程碑运行前应复核官方价格页。"
+  ]
+}

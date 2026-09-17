@@ -37,6 +37,12 @@
 - [批量采购物料准入 Skill](reference/batch-material-intake-skill.md)
 - [物料批量高召回检索 v0.6](reference/material-high-recall-v0.6.md)
 - [物料接入第八步：录入草稿 v0.7](reference/material-intake-draft-step-v0.7.md)
+- [物料准入闭环 v0.8：确认、发布与 ERPNext 回读](reference/material-intake-publish-v0.8.md)
+- [GPC 物料目录统一六层结构 v0.5](reference/gpc-uniform-six-level-hierarchy-v0.5.md)
+- [物料分类与录入规则 v1.1：1979 条 SKU 全量重建](reference/material-entry-rules-v1.1.md)
+- [施工采购模板与稀疏 SKU 框架 v0.1](reference/procurement-template-framework-v0.1.md)
+- [龙华实际采购清单批处理试验 v0.1](reference/procurement-batch-pilot-v0.1.md)
+- [GPC 2026-05 参考目录整合 v0.1](reference/gpc-reference-catalog-v0.1.md)
 
 ## 文档分类
 

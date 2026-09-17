@@ -4,11 +4,12 @@ import csv
 from dataclasses import dataclass
 from pathlib import Path
 import re
-from typing import Any, Literal
+from typing import Any, Iterable, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from .release_resolver import DEFAULT_RELEASE_CATALOG_PATH, ReleaseMaterialResolver, normalize_spec_text, normalize_text
+from .runtime_publications import MaterialPublication
 
 
 DEFAULT_GOVERNANCE_DIR = (
@@ -112,6 +113,7 @@ class MaterialTypeClassifier:
         self,
         governance_dir: str | Path = DEFAULT_GOVERNANCE_DIR,
         release_catalog_path: str | Path = DEFAULT_RELEASE_CATALOG_PATH,
+        runtime_publications: Iterable[MaterialPublication | dict[str, Any]] = (),
     ) -> None:
         self.governance_dir = Path(governance_dir)
         self.release_catalog_path = Path(release_catalog_path)
@@ -123,6 +125,61 @@ class MaterialTypeClassifier:
             if row.get("mapping_status") == "frozen"
         }
         self.types = self._load_types()
+        for publication in runtime_publications:
+            self.register_publication(publication)
+
+    def register_publication(self, publication: MaterialPublication | dict[str, Any]) -> None:
+        """Merge one ERPNext-verified runtime publication into retrieval."""
+
+        row = (
+            publication
+            if isinstance(publication, MaterialPublication)
+            else MaterialPublication.model_validate(publication)
+        )
+        published_type = row.material_type
+        type_row = _TypeRow(
+            type_id=published_type.type_id,
+            top_group=published_type.top_group,
+            material_family=published_type.material_family,
+            standard_name=published_type.standard_name,
+            definition=published_type.definition,
+            includes=published_type.includes,
+            excludes=published_type.excludes,
+            aliases=tuple(published_type.aliases),
+            attributes=tuple(dict(value) for value in published_type.attributes),
+        )
+        self.types = [value for value in self.types if value.type_id != type_row.type_id]
+        self.types.append(type_row)
+
+        published_sku = row.sku
+        release_row = {
+            "item_code": published_sku.item_code,
+            "item_name": published_sku.item_name,
+            "sku_name": published_sku.sku_name,
+            "standard_name": published_sku.standard_name,
+            "top_group": published_type.top_group,
+            "material_family": published_type.material_family,
+            "item_group": published_sku.item_group,
+            "stock_uom": published_sku.stock_uom,
+            "required_specs": published_sku.required_specs,
+            "optional_specs": published_sku.optional_specs,
+            # Type aliases help retrieve the standard type, but they are not
+            # SKU-level approvals.  Keep the release row's alias channel
+            # empty so a type-level hit can never auto-select one concrete
+            # ERPNext Item without an exact code or an audited SKU alias.
+            "aliases": "",
+            "approved_aliases": "",
+            "disabled": str(published_sku.erpnext_readback.get("disabled", 0)),
+        }
+        self.release_rows[published_sku.item_code] = release_row
+        self.sku_type_ids[published_sku.item_code] = published_type.type_id
+        self.release_resolver.rows = [
+            value
+            for value in self.release_resolver.rows
+            if value.get("item_code") != published_sku.item_code
+        ]
+        self.release_resolver.rows.append(release_row)
+        self.release_resolver._rebuild_vector_index()
 
     def classify(
         self,
@@ -188,7 +245,13 @@ class MaterialTypeClassifier:
             attribute_templates=top.attributes,
             limit=limit,
         )
-        exact_skus = [item for item in matching_skus if item.get("all_supplied_attributes_match")]
+        # A complete lexical/spec match is still a review candidate.  Existing
+        # SKU auto-selection is restricted to an explicit numeric code or an
+        # approved alias whose required attributes all match.
+        exact_skus = [
+            item for item in matching_skus
+            if item.get("all_supplied_attributes_match") and item.get("auto_selectable")
+        ]
         selected_type = top
         missing = _missing_required_attributes(top.attributes, normalized_attributes, raw_text)
 

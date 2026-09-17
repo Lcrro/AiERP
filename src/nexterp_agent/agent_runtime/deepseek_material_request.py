@@ -29,6 +29,21 @@ class DeepSeekSettings:
     retry_backoff_seconds: float = 1.5
 
 
+@dataclass(frozen=True)
+class DeepSeekJsonResponse:
+    """Parsed JSON together with provider-side usage metadata.
+
+    Existing callers continue to use :func:`call_deepseek_json`.  Batch
+    material governance uses this richer result so every paid request is
+    auditable without exposing the API key.
+    """
+
+    data: dict[str, Any] | list[Any]
+    model: str
+    usage: dict[str, int]
+    request_id: str = ""
+
+
 def load_deepseek_settings() -> DeepSeekSettings:
     load_dotenv()
     api_key = os.getenv("DEEPSEEK_API_KEY")
@@ -169,7 +184,33 @@ def call_deepseek_json(
     messages: list[dict[str, str]],
     *,
     settings: DeepSeekSettings | None = None,
+    max_tokens: int | None = None,
+    thinking: dict[str, str] | None = None,
+    timeout_seconds: int | None = None,
+    max_retries: int | None = None,
+    allow_json_array: bool = False,
 ) -> dict[str, Any]:
+    return call_deepseek_json_with_usage(
+        messages,
+        settings=settings,
+        max_tokens=max_tokens,
+        thinking=thinking,
+        timeout_seconds=timeout_seconds,
+        max_retries=max_retries,
+        allow_json_array=allow_json_array,
+    ).data
+
+
+def call_deepseek_json_with_usage(
+    messages: list[dict[str, str]],
+    *,
+    settings: DeepSeekSettings | None = None,
+    max_tokens: int | None = None,
+    thinking: dict[str, str] | None = None,
+    timeout_seconds: int | None = None,
+    max_retries: int | None = None,
+    allow_json_array: bool = False,
+) -> DeepSeekJsonResponse:
     resolved_settings = settings or load_deepseek_settings()
     endpoint = resolved_settings.base_url.rstrip("/") + "/chat/completions"
     request_body = {
@@ -179,8 +220,14 @@ def call_deepseek_json(
         "temperature": 0.1,
         "stream": False,
     }
+    if max_tokens is not None:
+        request_body["max_tokens"] = max_tokens
+    if thinking is not None:
+        request_body["thinking"] = thinking
     last_error: requests.RequestException | None = None
-    for attempt in range(resolved_settings.max_retries + 1):
+    resolved_timeout = timeout_seconds if timeout_seconds is not None else resolved_settings.timeout_seconds
+    resolved_retries = max_retries if max_retries is not None else resolved_settings.max_retries
+    for attempt in range(resolved_retries + 1):
         try:
             response = requests.post(
                 endpoint,
@@ -189,16 +236,16 @@ def call_deepseek_json(
                     "Content-Type": "application/json",
                 },
                 json=request_body,
-                timeout=resolved_settings.timeout_seconds,
+                timeout=resolved_timeout,
             )
             break
         except (requests.Timeout, requests.ConnectionError) as error:
             last_error = error
-            if attempt >= resolved_settings.max_retries:
+            if attempt >= resolved_retries:
                 kind = "超时" if isinstance(error, requests.Timeout) else "网络连接失败"
                 raise RuntimeError(
-                    f"DeepSeek 请求{kind}：等待 {resolved_settings.timeout_seconds} 秒后仍未返回，"
-                    f"已重试 {resolved_settings.max_retries} 次，请稍后再试。"
+                    f"DeepSeek 请求{kind}：等待 {resolved_timeout} 秒后仍未返回，"
+                    f"已重试 {resolved_retries} 次，请稍后再试。"
                 ) from error
             delay = resolved_settings.retry_backoff_seconds * (attempt + 1)
             if delay:
@@ -208,7 +255,18 @@ def call_deepseek_json(
     response.raise_for_status()
     payload = response.json()
     content = payload["choices"][0]["message"]["content"]
-    return parse_json_object(content)
+    raw_usage = payload.get("usage") if isinstance(payload, dict) else {}
+    usage = {
+        str(key): int(value)
+        for key, value in (raw_usage or {}).items()
+        if isinstance(value, (int, float)) and not isinstance(value, bool)
+    }
+    return DeepSeekJsonResponse(
+        data=parse_json_object(content, allow_array=allow_json_array),
+        model=str(payload.get("model") or resolved_settings.model),
+        usage=usage,
+        request_id=str(getattr(response, "headers", {}).get("x-request-id") or payload.get("id") or ""),
+    )
 
 
 def plan_material_request_with_deepseek(
@@ -234,13 +292,55 @@ def extract_material_request_intent_with_deepseek(
     return validate_material_request_intent(intent)
 
 
-def parse_json_object(content: str) -> dict[str, Any]:
+def parse_json_object(content: str, *, allow_array: bool = False) -> dict[str, Any] | list[Any]:
     cleaned = content.strip()
     fence_match = re.fullmatch(r"```(?:json)?\s*(.*?)\s*```", cleaned, flags=re.DOTALL)
     if fence_match:
         cleaned = fence_match.group(1).strip()
-    data = json.loads(cleaned)
-    if not isinstance(data, dict):
+    try:
+        data = json.loads(cleaned)
+    except json.JSONDecodeError as error:
+        if not allow_array or "Extra data" not in str(error):
+            raise
+        # Some long JSON responses contain adjacent objects.  Decode every
+        # complete value and merge object envelopes so a recoverable response
+        # is not discarded wholesale.
+        decoder = json.JSONDecoder()
+        values: list[Any] = []
+        cursor = 0
+        while cursor < len(cleaned):
+            while cursor < len(cleaned) and cleaned[cursor].isspace():
+                cursor += 1
+            if cursor >= len(cleaned):
+                break
+            try:
+                value, end = decoder.raw_decode(cleaned, cursor)
+            except json.JSONDecodeError:
+                break
+            values.append(value)
+            cursor = end
+        if not values:
+            raise
+        if all(isinstance(value, dict) for value in values):
+            merged: dict[str, Any] = {}
+            for value in values:
+                for key, item in value.items():
+                    if isinstance(merged.get(key), dict) and isinstance(item, dict):
+                        merged[key].update(item)
+                    else:
+                        merged[key] = item
+            data = merged
+        else:
+            data = values
+    # Large JSON-output requests may be returned as a JSON-encoded string
+    # containing the real object/array.  The translation caller explicitly
+    # opts into array support, so unwrap one additional layer there only.
+    if allow_array and isinstance(data, str):
+        try:
+            data = json.loads(data)
+        except json.JSONDecodeError:
+            pass
+    if not isinstance(data, dict) and not (allow_array and isinstance(data, list)):
         raise ValueError("DeepSeek response must be a JSON object")
     return data
 

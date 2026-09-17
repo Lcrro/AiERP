@@ -1,0 +1,36 @@
+{
+  "release": "material_master_release_v1_1",
+  "rule_version": "material-entry-rules-v1.1",
+  "authoritative": false,
+  "input_release": "material_master_release_v1_0",
+  "input_path": "data/material_master/release_v1_0/material_master_release_v1_0.tsv",
+  "output_path": "data/material_master/release_v1_1/material_master_release_v1_1.tsv",
+  "row_count": 1979,
+  "unique_item_codes": 1979,
+  "type_count": 785,
+  "mapped_sku_count": 1979,
+  "quality_counts": {
+    "standard": 634,
+    "needs_review": 1345
+  },
+  "policy_counts": {
+    "auto_select_allowed": 634,
+    "clarify_specs_before_use": 906,
+    "confirm_before_use": 439
+  },
+  "classification_status_counts": {
+    "ready": 634,
+    "needs_input": 906,
+    "needs_review": 439
+  },
+  "issue_counts": {
+    "missing_required_specs": 906,
+    "human_confirmation_required": 498,
+    "candidate_family": 79,
+    "standard_name_normalized": 42,
+    "ambiguous_alias": 14
+  },
+  "ambiguous_alias_count": 14,
+  "generated_by": "rebuild_material_master_v1_1.py",
+  "no_erpnext_write": true
+}

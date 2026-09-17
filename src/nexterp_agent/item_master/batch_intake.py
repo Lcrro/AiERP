@@ -46,6 +46,8 @@ class MaterialIntakeDecision(_StrictModel):
     queue_label: str
     standard_name: str = ""
     type_id: str = ""
+    top_group_hint: str = ""
+    material_family_hint: str = ""
     item_code: str = ""
     sku_name: str = ""
     normalized_attributes: dict[str, str] = Field(default_factory=dict)

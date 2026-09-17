@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>2026 涉税规范申报目录提取台 | Nexterp</title>
+    <link rel="stylesheet" href="/workbench-assets/tariff-declaration-lab.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/"><span class="brand-mark">N</span><span><b>Nexterp</b><small>物料分类工作台</small></span></a>
+      <nav><a href="/">员工工作台</a><a href="/material-item-lab">物料浏览</a><a href="/tariff-taxonomy-browser">完整结构</a><span class="status-dot">本地证据处理</span></nav>
+    </header>
+
+    <main class="page-shell">
+      <section class="intro">
+        <div>
+          <p class="eyebrow">DECLARATION CATALOG · v0.1</p>
+          <h1>2026 涉税规范申报目录提取台</h1>
+          <p class="lede">把公开目录 PDF 转成按 8 位税号关联的归类要素、申报要素和页码证据。它是税则结构的补充证据源，不改变税则父子关系。</p>
+        </div>
+        <div class="guardrail"><span>只读候选</span><b>不会写入 ERPNext</b><small>解析、校验、发布准备彼此分离</small></div>
+      </section>
+
+      <section class="control-card card">
+        <div class="card-heading"><div><span class="section-kicker">01 / SOURCE</span><h2>任务设置</h2></div><span id="source-status" class="pill neutral">等待开始</span></div>
+        <div class="source-grid">
+          <label class="field wide"><span>目录源文件</span><input id="source-url" value="https://www.shuzih.com/pub/d935f7769d411942e69e4393ff1cccd4/862de1ed96a64830adfd3067d751dcb9.pdf" readonly /></label>
+          <label class="field"><span>资料版本</span><input value="中华人民共和国海关进出口商品涉税规范申报目录（2026年版）" readonly /></label>
+          <label class="field"><span>处理模式</span><select id="mode"><option value="demo">演示模式 · 约 2 秒</option><option value="slice">局部模式 · 第25/73/84/85章</option><option value="full">全量模式 · 642 页</option></select></label>
+          <label class="field wide"><span>局部章节（逗号分隔）</span><input id="chapters" value="25,73,84,85" inputmode="numeric" /></label>
+        </div>
+        <label class="confirm-line"><input id="confirm-full" type="checkbox" /><span>我确认已准备好本地 PDF，并同意按页读取后生成只读属性证据包（不会写入 ERPNext）</span></label>
+        <div class="action-row"><button id="start" class="primary">启动演示任务</button><button id="cancel" class="secondary" disabled>停止任务</button><span id="action-message" class="action-message">演示模式不会读取 PDF</span></div>
+      </section>
+
+      <section class="hero-grid">
+        <section class="card progress-card">
+          <div class="card-heading"><div><span class="section-kicker">02 / PROGRESS</span><h2>处理进度</h2></div><span id="job-id" class="job-id">未创建任务</span></div>
+          <div class="progress-main">
+            <div id="progress-ring" class="progress-ring" style="--progress: 0deg"><div><strong id="progress-value">0%</strong><span id="progress-stage">等待启动</span></div></div>
+            <div class="progress-copy"><strong id="progress-message">准备好后启动一个演示任务</strong><p>后台任务每 700ms 回读一次；全量模式使用工作区已暂存 PDF，页面关闭不会触发 ERPNext 写入。</p><div class="bar"><i id="progress-bar"></i></div><div class="time-line"><span>已用 <b id="elapsed">0s</b></span><span>预计剩余 <b id="eta">—</b></span><span>速度 <b id="speed">—</b></span></div></div>
+          </div>
+          <div class="stage-list" id="stages" aria-label="提取阶段"></div>
+        </section>
+        <section class="card chart-card">
+          <div class="card-heading"><div><span class="section-kicker">03 / THROUGHPUT</span><h2>处理吞吐</h2></div><span class="chart-label">页 / 秒</span></div>
+          <canvas id="throughput" width="560" height="190" aria-label="处理吞吐折线图"></canvas>
+          <div class="chart-footer"><span>最近一段时间</span><b id="chart-last">等待数据</b></div>
+        </section>
+      </section>
+
+      <section class="metric-grid" id="metrics">
+        <article class="metric card"><span>源文件大小</span><strong id="downloaded">0 MB</strong><small id="download-total">本地文件</small></article>
+        <article class="metric card"><span>已处理页</span><strong id="pages">0 / 642</strong><small>文本层逐页扫描</small></article>
+        <article class="metric card"><span>申报属性记录</span><strong id="nodes">0</strong><small>按八位税号归一化</small></article>
+        <article class="metric card"><span>覆盖税号</span><strong id="leaf-codes">0</strong><small>可与税则结构关联</small></article>
+        <article class="metric card"><span>待复核</span><strong id="issues">0</strong><small>重复、缺失或层级异常</small></article>
+      </section>
+
+      <section class="detail-grid">
+        <section class="card table-card"><div class="card-heading"><div><span class="section-kicker">04 / LIVE PROFILES</span><h2>最近识别的申报记录</h2></div><span class="muted">只展示最近 8 条</span></div><div class="table-wrap"><table><thead><tr><th>税则号</th><th>目录名称</th><th>父级品目</th><th>页码</th><th>分类要素</th></tr></thead><tbody id="recent-nodes"><tr><td colspan="5" class="empty">演示任务启动后显示</td></tr></tbody></table></div></section>
+        <section class="card log-card"><div class="card-heading"><div><span class="section-kicker">05 / AUDIT LOG</span><h2>运行记录</h2></div><span class="muted">任务级日志</span></div><ol id="logs" class="logs"><li>等待任务创建</li></ol><div class="output-box"><span>输出边界</span><b id="output-status">尚未生成候选包</b><small>候选发布包保存在本地 runtime 目录，不自动同步 ERPNext。</small></div></section>
+      </section>
+
+      <footer class="footer-note"><span>安全边界</span><p>原始申报要素完整保留，分类要素只是保守派生字段。后续若要转成 Nexterp 内部分类，仍需人工审核、版本冻结和单独发布确认。</p></footer>
+    </main>
+    <script src="/workbench-assets/tariff-declaration-lab.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "rules_version": "v0.1",
+  "scope": "construction_procurement_material_normalization",
+  "principles": [
+    "GPC 只作为外部参考目录，标准物料类型和 SKU 身份仍由 Nexterp 采购语义决定",
+    "只创建实际发生的规格组合，不展开属性笛卡尔积",
+    "品牌、供应商、价格和临时包装默认属于报价层，不进入基础 SKU 身份",
+    "安全、压力、介质、电气额定参数或设备适配关系缺失时，允许确认类型但不得猜测关键 SKU 参数",
+    "一批、杂项、金额行必须拆分到单一可复用物料，无法拆分时不得进入物料主数据"
+  ],
+  "rules": [
+    {
+      "rule_id": "R-BUNDLE-SPLIT",
+      "title": "笼统批次不得建物料",
+      "keywords": ["一批", "杂项", "配件一批", "金额"],
+      "excludes": [],
+      "decision": "exclude_or_split",
+      "guidance": "没有逐项名称、规格和数量时保留采购凭证，不创建物料类型或 SKU。"
+    },
+    {
+      "rule_id": "R-PIPE-CONNECTOR",
+      "title": "管路连接件归入 Connectors",
+      "keywords": ["大小头", "异径", "弯头", "三通", "直接", "活接", "快速接头", "管接头"],
+      "excludes": ["截止阀", "闸阀", "球阀", "管材", "水管"],
+      "decision": "map",
+      "gpc_brick_code": "10008009",
+      "standard_type_hint": "管路连接件",
+      "guidance": "10004024 的定义是调节流量的阀门/配件，不用于普通弯头、三通、直接、异径接头。"
+    },
+    {
+      "rule_id": "R-WATER-GAS-VALVE",
+      "title": "水气阀门单独归类",
+      "keywords": ["截止阀", "闸阀", "球阀", "止回阀"],
+      "excludes": [],
+      "decision": "map",
+      "gpc_brick_code": "10004024",
+      "standard_type_hint": "阀门",
+      "guidance": "阀体类型、口径、连接方式、公称压力和介质影响互换或价格；普通 PPR 水路可使用明确的施工默认值。"
+    },
+    {
+      "rule_id": "R-WATER-GAS-PIPE",
+      "title": "水气管材与接头分离",
+      "keywords": ["PPR管", "PPR水管", "焊管", "镀锌管", "钢管"],
+      "excludes": ["弯头", "三通", "直接", "活接", "阀"],
+      "decision": "map",
+      "gpc_brick_code": "10004054",
+      "standard_type_hint": "管材",
+      "guidance": "材质、外径/公称直径、壁厚或压力等级进入 SKU；采购定尺和品牌留在交易或报价层。"
+    },
+    {
+      "rule_id": "R-PIPE-FLANGE",
+      "title": "法兰按法兰 Brick 归类",
+      "keywords": ["法兰", "转换法兰", "异径法兰", "转接法兰"],
+      "excludes": [],
+      "decision": "map",
+      "gpc_brick_code": "10005867",
+      "standard_type_hint": "管道法兰",
+      "guidance": "口径、压力等级、密封面、连接标准和材质是关键身份；仅写‘法兰接’时只能确认类型，不能猜 SKU。"
+    },
+    {
+      "rule_id": "R-GENERAL-TRANSFER-HOSE",
+      "title": "施工输水软管不得误归消防水带",
+      "keywords": ["水带", "透明钢丝软管", "输水软管", "耐磨水带"],
+      "excludes": ["消防", "消火栓"],
+      "decision": "map",
+      "gpc_brick_code": "10003254",
+      "standard_type_hint": "输水软管",
+      "guidance": "只有明确消防用途才使用 Fire Hoses；施工排水、抽排和一般输送使用 Hoses。"
+    },
+    {
+      "rule_id": "R-OIL-PUMP-NEGATIVE",
+      "title": "油泵不得归水气泵",
+      "keywords": ["抽油机", "抽油泵", "油泵", "燃油泵"],
+      "excludes": [],
+      "decision": "defer",
+      "forbidden_gpc_codes": ["10004055"],
+      "guidance": "10004055 明确排除燃油/油类泵；必须先确认介质、泵型、流量、扬程/压力和驱动方式。"
+    },
+    {
+      "rule_id": "R-VFD-INVERTER",
+      "title": "变频调速器归入 Inverters",
+      "keywords": ["变频调速", "变频器", "调速控制器"],
+      "excludes": [],
+      "decision": "map_then_hold",
+      "gpc_brick_code": "10008390",
+      "standard_type_hint": "变频调速器",
+      "guidance": "可确认类型和 GPC，但电压、相数、额定功率/电流及控制方式缺失时不得形成可采购 SKU。"
+    },
+    {
+      "rule_id": "R-FIRE-EXTINGUISHER",
+      "title": "灭火器与消防箱分离",
+      "keywords": ["灭火器"],
+      "excludes": ["灭火器箱", "消防箱"],
+      "decision": "map",
+      "gpc_brick_code": "10005408",
+      "standard_type_hint": "手提式灭火器",
+      "guidance": "灭火剂类型、充装量和适用火灾类别影响采购与安全验收。"
+    },
+    {
+      "rule_id": "R-FIRE-EQUIPMENT-CABINET",
+      "title": "灭火器箱使用内部末级类目",
+      "keywords": ["灭火器箱", "消防箱", "消防器材箱"],
+      "excludes": [],
+      "decision": "internal_extension",
+      "gpc_brick_code": "9103030001",
+      "forbidden_gpc_codes": ["10008382", "10005410", "10005408"],
+      "standard_type_hint": "灭火器箱",
+      "guidance": "挂在官方 GPC Class 91030300 下的 Nexterp 内部末级（非 GPC）；箱体与灭火器本体分开建物料，唯一分类属性为适配灭火器配置。"
+    },
+    {
+      "rule_id": "R-PROTECTIVE-BODY-WEAR",
+      "title": "施工防寒防雨服按全身防护用品归类",
+      "keywords": ["棉大衣", "雨衣", "防寒服", "工作服"],
+      "excludes": [],
+      "decision": "map",
+      "gpc_brick_code": "10001394",
+      "standard_type_hint": "施工防护服",
+      "guidance": "防护用途、季节/防水性能和尺码影响采购；颜色和品牌通常属于报价偏好。"
+    },
+    {
+      "rule_id": "R-PROTECTIVE-HANDWEAR",
+      "title": "劳保手套按手部防护归类",
+      "keywords": ["牛筋手套", "劳保手套", "防护手套"],
+      "excludes": [],
+      "decision": "map",
+      "gpc_brick_code": "10001395",
+      "standard_type_hint": "劳保防护手套",
+      "guidance": "材质、关键防护性能和尺码影响采购；‘加厚’是质量/价格驱动，不单独制造全部属性组合。"
+    },
+    {
+      "rule_id": "R-MANUAL-TORQUE-WRENCH",
+      "title": "数显力矩工具按非动力扳手归类",
+      "keywords": ["力矩扳手", "扭矩扳手", "套筒扳手"],
+      "excludes": ["电动", "气动", "液压"],
+      "decision": "map_then_hold",
+      "gpc_brick_code": "10003508",
+      "standard_type_hint": "数显扭矩扳手",
+      "guidance": "量程、方榫接口、精度和适用套筒是关键参数；品牌不是基础 SKU 身份。"
+    },
+    {
+      "rule_id": "R-STEEL-FORMWORK-BROAD",
+      "title": "钢模采用宽口径 GPC 并保留内部细类",
+      "keywords": ["钢模", "钢模板"],
+      "excludes": [],
+      "decision": "broad_fallback",
+      "gpc_brick_code": "10008163",
+      "standard_type_hint": "组合钢模板",
+      "guidance": "GPC 没有足够精确的施工钢模板 Brick；保留‘宽口径映射’标记，尺寸、板厚和连接体系决定内部 SKU。"
+    },
+    {
+      "rule_id": "R-CONCRETE-CUBE-MOULD-BROAD",
+      "title": "试块模具采用混凝土工具宽口径映射",
+      "keywords": ["150×150×150", "150x150x150", "试块模", "塑料模"],
+      "excludes": ["塑料膜", "薄膜"],
+      "decision": "broad_fallback",
+      "gpc_brick_code": "10003904",
+      "standard_type_hint": "混凝土抗压试块模具",
+      "guidance": "结合立方尺寸和施工语境识别‘模具’而非塑料薄膜；必须保留 GPC 宽口径映射标记。"
+    },
+    {
+      "rule_id": "R-PLASTER-FLOAT",
+      "title": "泥工搓板按抹平工具归类",
+      "keywords": ["搓板", "抹子", "泥板", "抹平板"],
+      "excludes": ["洗衣"],
+      "decision": "map",
+      "gpc_brick_code": "10003547",
+      "standard_type_hint": "泥工抹平板",
+      "guidance": "施工语境中的搓板是用于砂浆/混凝土表面抹平的手工具。"
+    },
+    {
+      "rule_id": "R-PACKAGED-CEMENT",
+      "title": "袋装水泥的强度等级进入身份",
+      "keywords": ["水泥", "42.5", "32.5"],
+      "excludes": ["水泥砂浆", "水泥砖"],
+      "decision": "map",
+      "gpc_brick_code": "10002526",
+      "standard_type_hint": "通用硅酸盐水泥",
+      "guidance": "品种与强度等级决定 SKU；品牌和袋重通常分别保存在报价层和包装换算。"
+    },
+    {
+      "rule_id": "R-GAS-CUTTING-TORCH",
+      "title": "完整气割枪按非动力气炬归类",
+      "keywords": ["割枪", "气割枪", "割炬"],
+      "excludes": ["割嘴", "割咀"],
+      "decision": "map",
+      "gpc_brick_code": "10006783",
+      "standard_type_hint": "气割枪",
+      "guidance": "完整氧燃气割枪属于非动力气炬；型号/长度和适用气体影响采购。"
+    },
+    {
+      "rule_id": "R-CUTTING-NOZZLE-DEFER",
+      "title": "割嘴不得当成完整割枪",
+      "keywords": ["割嘴", "割咀", "割组"],
+      "excludes": [],
+      "decision": "defer",
+      "forbidden_gpc_codes": ["10003744", "10006783"],
+      "guidance": "GPC 当前包没有足够精确的气割嘴 Brick；保留内部标准类型并等待确认适配割枪型号、孔号和气体。"
+    }
+  ]
+}
