@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
+
+import pytest
 
 from scripts.material_master.evaluate_vector_shadow import load_current_linked_cases, review_gate_status
 from scripts.material_master.build_retrieval_review_set import build_review_set
@@ -15,6 +18,14 @@ from nexterp_agent.item_master.release_resolver import (
 from nexterp_agent.item_master.reference_catalog import GpcReferenceIndex
 from nexterp_agent.item_master.vector_retrieval import HashingTextVectorizer, TextVectorIndex
 from nexterp_agent.item_master.source_identity import make_source_record, source_row_hash, source_record_matches
+
+
+ROOT = Path(__file__).resolve().parents[3]
+CURRENT_CATALOG_AVAILABLE = (
+    ROOT / ".runtime" / "material-master" / "gpc-material-placements.jsonl"
+).is_file() and (
+    ROOT / ".runtime" / "erpnext-material-test" / "material-item-code-map.json"
+).is_file()
 
 
 def test_hashing_vectorizer_is_stable_and_normalized() -> None:
@@ -364,6 +375,10 @@ def test_vector_maintenance_gate_stays_blocked_until_review_labels_exist(tmp_pat
     assert gate["gates"]["minimum_confirmed_positive"] == 300
 
 
+@pytest.mark.skipif(
+    not CURRENT_CATALOG_AVAILABLE,
+    reason="requires the local published catalog and ERPNext item-code readback map",
+)
 def test_review_set_has_required_pending_coverage(tmp_path) -> None:
     result = build_review_set(tmp_path / "review.jsonl", tmp_path / "summary.json")
 

@@ -1,7 +1,7 @@
 # 项目状态
 
 当前里程碑：`team-handoff-readiness-v0.1`（completed）
-当前分支：`codex/material-intake-publish-v0.8`，文档生成基线 HEAD：`8431c4a`
+当前分支：`codex/material-intake-publish-v0.8`，文档生成基线 HEAD：`d04006d`
 
 ## 生产入口
 

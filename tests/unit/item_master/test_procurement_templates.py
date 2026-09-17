@@ -15,6 +15,7 @@ from nexterp_agent.item_master.procurement_templates import (
 ROOT = Path(__file__).resolve().parents[3]
 PROFILE_PATH = ROOT / ".runtime" / "material-master" / "gpc-procurement-type-profiles.jsonl"
 MATERIAL_PATH = ROOT / ".runtime" / "material-master" / "gpc-material-placements.jsonl"
+RUNTIME_CATALOG_AVAILABLE = PROFILE_PATH.is_file() and MATERIAL_PATH.is_file()
 
 
 def _load_jsonl(path: Path) -> list[dict]:
@@ -36,6 +37,10 @@ def test_procurement_catalog_has_exactly_ten_main_templates_and_five_constraints
     assert force_review == {"pressure_fluid", "safety_regulatory", "chemical_shelf_life"}
 
 
+@pytest.mark.skipif(
+    not RUNTIME_CATALOG_AVAILABLE,
+    reason="requires the local governed material runtime catalog",
+)
 def test_current_workbench_materials_are_profiled_without_cartesian_generation() -> None:
     registry = ProcurementTemplateRegistry.from_files(DEFAULT_TEMPLATE_CATALOG_PATH, PROFILE_PATH)
     materials = _load_jsonl(MATERIAL_PATH)
@@ -62,6 +67,10 @@ def test_current_workbench_materials_are_profiled_without_cartesian_generation()
     assert roller["record_kind"] == "project_configuration"
 
 
+@pytest.mark.skipif(
+    not RUNTIME_CATALOG_AVAILABLE,
+    reason="requires the local governed material runtime catalog",
+)
 def test_offer_fields_do_not_duplicate_sku_but_identity_fields_do() -> None:
     registry = ProcurementTemplateRegistry.from_files(DEFAULT_TEMPLATE_CATALOG_PATH, PROFILE_PATH)
     source = next(item for item in _load_jsonl(MATERIAL_PATH) if item["material_id"] == "LH-GPC-C005")
@@ -79,6 +88,10 @@ def test_offer_fields_do_not_duplicate_sku_but_identity_fields_do() -> None:
     assert different_identity["sku_identity_fingerprint"] != baseline["sku_identity_fingerprint"]
 
 
+@pytest.mark.skipif(
+    not RUNTIME_CATALOG_AVAILABLE,
+    reason="requires the local governed material runtime catalog",
+)
 def test_template_registry_rejects_unassigned_or_missing_attribute_roles() -> None:
     registry = ProcurementTemplateRegistry.from_files(DEFAULT_TEMPLATE_CATALOG_PATH, PROFILE_PATH)
     source = next(item for item in _load_jsonl(MATERIAL_PATH) if item["material_id"] == "LH-GPC-C001")
