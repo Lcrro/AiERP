@@ -66,6 +66,7 @@ from nexterp_agent.item_master.reference_catalog_database import (
     ReferenceCatalogDatabase,
 )
 from nexterp_agent.workbench.business_portal import BUSINESS_ACTIONS, BusinessCommandStore
+from nexterp_agent.workbench.material_test_sync import MaterialTestSyncGate
 from nexterp_agent.workbench.openclaw_compare import OpenClawPreviewRunner, summarize_existing_result
 from nexterp_agent.workbench.openclaw_runtime import (
     OpenClawWorkbenchRunner,
@@ -1045,6 +1046,24 @@ class AgentWorkbenchService:
         self.tariff_declaration = TariffDeclarationJobManager(TARIFF_DECLARATION_RUNTIME_ROOT)
         self.procurement_batch_pilot = ProcurementBatchPilotJobManager(PROCUREMENT_BATCH_PILOT_RUNTIME_ROOT)
         self.business_commands = BusinessCommandStore()
+        self.material_test_sync = MaterialTestSyncGate()
+
+    def material_test_sync_plan(self) -> dict[str, Any]:
+        if self.profile != "material_test":
+            raise PermissionError("该控制仅可用于 material_test 测试账套")
+        return self.material_test_sync.plan()
+
+    def material_test_sync_apply(self, payload: dict[str, Any]) -> dict[str, Any]:
+        if self.profile != "material_test":
+            raise PermissionError("该控制仅可用于 material_test 测试账套")
+        unexpected = set(payload) - {"release_hash", "request_id"}
+        if unexpected:
+            raise ValueError("同步确认只接受 release_hash 和 request_id")
+        release_hash = str(payload.get("release_hash") or "").strip()
+        request_id = str(payload.get("request_id") or "").strip()
+        if not release_hash or not request_id:
+            raise ValueError("release_hash 和 request_id 必填")
+        return self.material_test_sync.apply(request_id=request_id, release_hash=release_hash)
 
     def scoped_session_store(self, user: str, project: str = "", conversation_id: str = "default") -> RuntimeSessionStore:
         if not project and conversation_id == "default":
@@ -5563,6 +5582,17 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
             if self.path == "/api/business/commands/preview":
                 payload = self.server.service.business_preview(self.headers.get("Cookie", ""), read_json(self))  # type: ignore[attr-defined]
                 json_response(self, {"ok": True, "command": payload})
+                return
+            if self.path == "/api/material-test-sync/plan":
+                request = read_json(self)
+                if request:
+                    raise ValueError("同步计划不接受客户端参数")
+                payload = self.server.service.material_test_sync_plan()  # type: ignore[attr-defined]
+                json_response(self, {"ok": True, "plan": payload})
+                return
+            if self.path == "/api/material-test-sync/apply":
+                payload = self.server.service.material_test_sync_apply(read_json(self))  # type: ignore[attr-defined]
+                json_response(self, {"ok": True, "result": payload})
                 return
             if self.path.startswith("/api/business/commands/") and self.path.endswith("/confirm"):
                 command_id = self.path[len("/api/business/commands/") : -len("/confirm")].strip("/")

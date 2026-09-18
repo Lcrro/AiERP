@@ -534,14 +534,18 @@ def apply_release(
     return result
 
 
-def _release(args: argparse.Namespace) -> tuple[dict[str, Any], Path]:
-    release = build_material_release(Path(args.database), code_map_path=Path(args.code_map))
-    release_dir = write_material_release(
+def _release(args: argparse.Namespace) -> dict[str, Any]:
+    """Build a release using read-only catalog access."""
+
+    return build_material_release(Path(args.database), code_map_path=Path(args.code_map))
+
+
+def _freeze_release(args: argparse.Namespace, release: Mapping[str, Any]) -> Path:
+    return write_material_release(
         release,
         release_root=Path(args.release_root),
         code_map_path=Path(args.code_map),
     )
-    return release, release_dir
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -566,15 +570,21 @@ def main() -> int:
             print(json.dumps({"site": SITE_HOST, "initialized": initialized}, ensure_ascii=False, indent=2))
             return 0
 
-        release, release_dir = _release(args)
+        release = _release(args)
         if args.action == "plan":
+            request_id = str(args.request_id or uuid.uuid4())
+            try:
+                uuid.UUID(request_id)
+            except ValueError as exc:
+                raise SyncError("request_id must be a UUID") from exc
             plan = target_plan(client, release)
             print(
                 json.dumps(
                     {
                         "site": SITE_HOST,
-                        "release_dir": str(release_dir),
+                        "request_id": request_id,
                         "release_hash": release["release_hash"],
+                        "catalog_revision": release["catalog_revision"],
                         "counts": release["counts"],
                         "plan": plan,
                     },
@@ -601,6 +611,7 @@ def main() -> int:
             raise SyncError(
                 "apply requires --confirm-release-hash matching the frozen release; run plan first"
             )
+        _freeze_release(args, release)
         initialize_target(client)
         result = apply_release(
             client,

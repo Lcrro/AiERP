@@ -1,7 +1,7 @@
 # 项目状态
 
 当前里程碑：`linux-handoff-v0.1`（active）
-当前分支：`codex/readme-cross-platform-quickstart`，文档生成基线 HEAD：`998e3f9`
+当前分支：`ai/codex/workbench-sync-erpnext-test-v0.1`，文档生成基线 HEAD：`6ad4edc`
 
 ## 生产入口
 
