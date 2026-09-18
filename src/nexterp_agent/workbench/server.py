@@ -1048,12 +1048,33 @@ class AgentWorkbenchService:
         self.business_commands = BusinessCommandStore()
         self.material_test_sync = MaterialTestSyncGate()
 
-    def material_test_sync_plan(self) -> dict[str, Any]:
+    @staticmethod
+    def _material_test_sync_employee(cookie_header: str) -> dict[str, str]:
+        cookie = SimpleCookie()
+        if cookie_header:
+            cookie.load(cookie_header)
+        selected = cookie.get("nexterp_business_user")
+        if selected is None or not selected.value.strip():
+            raise PermissionError("请先登录员工账号后再同步 ERPNext 测试账套")
+        user = unquote(selected.value).strip()
+        employee = next(
+            (row for row in business_employee_catalog() if row.get("user_email") == user),
+            None,
+        )
+        if employee is None:
+            raise PermissionError("当前登录会话没有有效的员工身份")
+        return {
+            key: str(employee.get(key) or "").strip()
+            for key in ("employee_code", "employee_name", "user_email")
+        }
+
+    def material_test_sync_plan(self, cookie_header: str) -> dict[str, Any]:
         if self.profile != "material_test":
             raise PermissionError("该控制仅可用于 material_test 测试账套")
-        return self.material_test_sync.plan()
+        employee = self._material_test_sync_employee(cookie_header)
+        return self.material_test_sync.plan(employee=employee)
 
-    def material_test_sync_apply(self, payload: dict[str, Any]) -> dict[str, Any]:
+    def material_test_sync_apply(self, cookie_header: str, payload: dict[str, Any]) -> dict[str, Any]:
         if self.profile != "material_test":
             raise PermissionError("该控制仅可用于 material_test 测试账套")
         unexpected = set(payload) - {"release_hash", "request_id"}
@@ -1063,7 +1084,12 @@ class AgentWorkbenchService:
         request_id = str(payload.get("request_id") or "").strip()
         if not release_hash or not request_id:
             raise ValueError("release_hash 和 request_id 必填")
-        return self.material_test_sync.apply(request_id=request_id, release_hash=release_hash)
+        employee = self._material_test_sync_employee(cookie_header)
+        return self.material_test_sync.apply(
+            request_id=request_id,
+            release_hash=release_hash,
+            employee=employee,
+        )
 
     def scoped_session_store(self, user: str, project: str = "", conversation_id: str = "default") -> RuntimeSessionStore:
         if not project and conversation_id == "default":
@@ -5587,11 +5613,13 @@ class AgentWorkbenchHandler(BaseHTTPRequestHandler):
                 request = read_json(self)
                 if request:
                     raise ValueError("同步计划不接受客户端参数")
-                payload = self.server.service.material_test_sync_plan()  # type: ignore[attr-defined]
+                payload = self.server.service.material_test_sync_plan(self.headers.get("Cookie", ""))  # type: ignore[attr-defined]
                 json_response(self, {"ok": True, "plan": payload})
                 return
             if self.path == "/api/material-test-sync/apply":
-                payload = self.server.service.material_test_sync_apply(read_json(self))  # type: ignore[attr-defined]
+                payload = self.server.service.material_test_sync_apply(  # type: ignore[attr-defined]
+                    self.headers.get("Cookie", ""), read_json(self)
+                )
                 json_response(self, {"ok": True, "result": payload})
                 return
             if self.path.startswith("/api/business/commands/") and self.path.endswith("/confirm"):

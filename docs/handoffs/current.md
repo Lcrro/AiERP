@@ -3,8 +3,8 @@
 新任务先运行 `python scripts/dev/project_context.py resume`，再按本次请求选择模块。
 
 - 分支：`ai/codex/workbench-sync-erpnext-test-v0.1`
-- 文档生成基线 HEAD：`4197be762bb39c14bdfbd99fec5006f2f0a45641`（提交本文件后以 Git 当前 HEAD 为准）
-- 文档生成时工作区业务变化：`1` 个；运行时文件不纳入上下文。
+- 文档生成基线 HEAD：`d9e887c0387b59b68812ef0fd7f8fdd9d0d045fe`（提交本文件后以 Git 当前 HEAD 为准）
+- 文档生成时工作区业务变化：`6` 个；运行时文件不纳入上下文。
 - 当前里程碑：`linux-handoff-v0.1`
 
 ## 入口
