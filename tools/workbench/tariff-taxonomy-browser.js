@@ -26,6 +26,8 @@
     searchToken: 0,
     revisionTimer: null,
     refreshingRevision: false,
+    materialTestSyncAvailable: false,
+    materialSyncPlan: null,
     sourceSwitchQueue: Promise.resolve(),
     revisions: {hs: null, gpc: null},
     materialVariantProfile: null,
@@ -241,6 +243,78 @@
     const body = await response.json();
     if (!response.ok || !body.ok) throw new Error(body.error || `请求失败 (${response.status})`);
     return body;
+  }
+
+  async function postJson(url, payload = {}) {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(payload),
+    });
+    const body = await response.json();
+    if (!response.ok || !body.ok) throw new Error(body.error || `请求失败 (${response.status})`);
+    return body;
+  }
+
+  function updateMaterialSyncControl() {
+    get("material-test-sync").hidden = !(
+      state.materialTestSyncAvailable && state.catalog === "gpc" && state.classificationSource === "original"
+    );
+  }
+
+  async function openMaterialSyncPlan() {
+    const dialog = get("material-sync-dialog");
+    state.materialSyncPlan = null;
+    get("material-sync-plan").hidden = true;
+    get("material-sync-status").classList.remove("error");
+    get("material-sync-status").textContent = "正在读取 ERPNext 并生成只读差异计划…";
+    get("material-test-sync").disabled = true;
+    dialog.showModal();
+    try {
+      const body = await postJson("/api/material-test-sync/plan");
+      const plan = body.plan;
+      state.materialSyncPlan = plan;
+      ["create", "update", "unchanged", "conflict", "extra"].forEach(key => {
+        get(`sync-${key}`).textContent = numberText(plan.summary?.[key]);
+      });
+      get("sync-release-hash").textContent = plan.release_hash;
+      get("sync-request-id").textContent = plan.request_id;
+      get("material-sync-confirm").checked = false;
+      get("material-sync-confirm").disabled = false;
+      get("material-sync-apply").disabled = true;
+      get("material-sync-plan").hidden = false;
+      get("material-sync-status").textContent = Number(plan.summary?.conflict || 0)
+        ? "计划包含冲突；请先解决冲突，不会执行写入。"
+        : "只读计划已生成。核对差异和确认令牌后才能执行。";
+    } catch (error) {
+      get("material-sync-status").classList.add("error");
+      get("material-sync-status").textContent = error.message || "同步计划生成失败";
+    } finally {
+      get("material-test-sync").disabled = false;
+    }
+  }
+
+  async function applyMaterialSyncPlan() {
+    const plan = state.materialSyncPlan;
+    if (!plan || !get("material-sync-confirm").checked) return;
+    const button = get("material-sync-apply");
+    button.disabled = true;
+    get("material-sync-status").classList.remove("error");
+    get("material-sync-status").textContent = "正在写入固定测试账套并执行回读校验…";
+    try {
+      const body = await postJson("/api/material-test-sync/apply", {
+        release_hash: plan.release_hash,
+        request_id: plan.request_id,
+      });
+      const items = body.result?.items || {};
+      get("material-sync-status").textContent = `同步完成并已回读：新增 ${numberText(items.created)}，更新 ${numberText(items.updated)}，不变 ${numberText(items.unchanged)}。`;
+      state.materialSyncPlan = null;
+      get("material-sync-confirm").disabled = true;
+    } catch (error) {
+      get("material-sync-status").classList.add("error");
+      get("material-sync-status").textContent = error.message || "同步执行失败";
+      button.disabled = false;
+    }
   }
 
   function levelMeta(kind) {
@@ -1096,6 +1170,7 @@
     get("tree-loading").firstChild.className = "spinner";
     try {
       await initializeCatalog(catalog);
+      updateMaterialSyncControl();
       history.replaceState(null, "", pageUrl(current().selectedCode));
       get("catalog-availability").textContent = "";
     } catch (error) {
@@ -1111,6 +1186,7 @@
       if (state.catalog !== "gpc" || next === state.classificationSource) return;
       saveCatalogView();
       state.classificationSource = next;
+      updateMaterialSyncControl();
       state.revisions.gpc = null;
       const catalogState = current();
       catalogState.summary = null;
@@ -1189,6 +1265,13 @@
     const sourceSelect = get("classification-source");
     if (sourceSelect) sourceSelect.addEventListener("change", event => switchClassificationSource(event.target.value));
     try {
+      const health = await requestJson("/api/health");
+      state.materialTestSyncAvailable = health.profile === "material_test";
+      updateMaterialSyncControl();
+    } catch (_error) {
+      state.materialTestSyncAvailable = false;
+    }
+    try {
       await initializeCatalog(state.catalog);
       // Probe GPC availability without replacing the HS default view.
       if (state.catalog === "hs") {
@@ -1250,5 +1333,11 @@
       get("tree-loading").textContent = error.message || "实际物料目录筛选失败";
     }
   });
+  get("material-test-sync").addEventListener("click", openMaterialSyncPlan);
+  get("material-sync-confirm").addEventListener("change", event => {
+    get("material-sync-apply").disabled = !event.target.checked || !state.materialSyncPlan
+      || Number(state.materialSyncPlan.summary?.conflict || 0) > 0;
+  });
+  get("material-sync-apply").addEventListener("click", applyMaterialSyncPlan);
   initialize();
 })();

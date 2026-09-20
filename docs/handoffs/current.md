@@ -2,9 +2,9 @@
 
 新任务先运行 `python scripts/dev/project_context.py resume`，再按本次请求选择模块。
 
-- 分支：`codex/readme-cross-platform-quickstart`
-- 文档生成基线 HEAD：`998e3f98cceedf98690d256bd396cacaaf448b25`（提交本文件后以 Git 当前 HEAD 为准）
-- 文档生成时工作区业务变化：`2` 个；运行时文件不纳入上下文。
+- 分支：`ai/codex/workbench-sync-erpnext-test-v0.1`
+- 文档生成基线 HEAD：`d9e887c0387b59b68812ef0fd7f8fdd9d0d045fe`（提交本文件后以 Git 当前 HEAD 为准）
+- 文档生成时工作区业务变化：`6` 个；运行时文件不纳入上下文。
 - 当前里程碑：`linux-handoff-v0.1`
 
 ## 入口

@@ -45,6 +45,7 @@
         </select>
       </label>
       <span class="catalog-availability" id="catalog-availability"></span>
+      <button id="material-test-sync" class="button sync-button" type="button" hidden>同步 ERPNext 测试账套</button>
       <label class="material-filter" id="material-filter-control" hidden>
         <input id="materialized-only" type="checkbox" />
         <span>隐藏无实际物料目录</span>
@@ -148,6 +149,27 @@
       </aside>
     </section>
   </main>
+
+  <dialog id="material-sync-dialog" class="material-sync-dialog" aria-labelledby="material-sync-title">
+    <form method="dialog" class="material-sync-card">
+      <div class="material-sync-heading">
+        <div><span>ERPNext TEST SYNC</span><h2 id="material-sync-title">同步 ERPNext 测试账套</h2></div>
+        <button id="material-sync-close" class="material-variant-close" type="submit" aria-label="关闭">×</button>
+      </div>
+      <p id="material-sync-status" class="material-sync-status">正在生成只读差异计划…</p>
+      <div id="material-sync-plan" hidden>
+        <dl class="material-sync-summary">
+          <div><dt>新增</dt><dd id="sync-create">0</dd></div><div><dt>更新</dt><dd id="sync-update">0</dd></div>
+          <div><dt>不变</dt><dd id="sync-unchanged">0</dd></div><div><dt>冲突</dt><dd id="sync-conflict">0</dd></div>
+          <div><dt>账套额外项</dt><dd id="sync-extra">0</dd></div>
+        </dl>
+        <div class="material-sync-token"><span>release_hash</span><code id="sync-release-hash"></code></div>
+        <div class="material-sync-token"><span>request_id</span><code id="sync-request-id"></code></div>
+        <label class="material-sync-confirm"><input id="material-sync-confirm" type="checkbox" /> 我确认按以上同一 release_hash 和 request_id 写入固定 material-test 账套</label>
+        <button id="material-sync-apply" class="button secondary" type="button" disabled>确认并执行同步</button>
+      </div>
+    </form>
+  </dialog>
 
   <dialog id="material-variant-dialog" class="material-variant-dialog" aria-labelledby="material-variant-title">
     <button id="material-variant-close" class="material-variant-close" type="button" aria-label="关闭规格选择">×</button>

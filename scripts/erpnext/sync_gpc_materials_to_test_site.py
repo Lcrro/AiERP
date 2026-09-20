@@ -473,7 +473,14 @@ def apply_release(
     *,
     request_id: str,
     journal_path: Path,
+    employee: Mapping[str, str],
 ) -> dict[str, Any]:
+    employee = {
+        key: str(employee.get(key) or "").strip()
+        for key in ("employee_code", "employee_name", "user_email")
+    }
+    if not all(employee.values()):
+        raise SyncError("apply requires an authenticated employee identity")
     try:
         uuid.UUID(request_id)
     except ValueError as exc:
@@ -484,6 +491,8 @@ def apply_release(
     if previous:
         if previous.get("release_hash") != release["release_hash"]:
             raise SyncError("request_id was already used for a different release")
+        if previous.get("employee") != dict(employee):
+            raise SyncError("request_id was already used by a different employee")
         if previous.get("status") == "verified":
             return dict(previous["result"])
 
@@ -495,6 +504,7 @@ def apply_release(
         "request_id": request_id,
         "release_hash": release["release_hash"],
         "catalog_revision": release["catalog_revision"],
+        "employee": dict(employee),
         "item_groups": {"created": 0, "existing": 0},
         "uoms": {"created": 0, "existing": 0},
         "items": {"created": 0, "updated": 0, "unchanged": 0},
@@ -527,6 +537,7 @@ def apply_release(
     result["post_apply"] = verification
     journal["requests"][request_id] = {
         "release_hash": release["release_hash"],
+        "employee": dict(employee),
         "status": "verified",
         "result": result,
     }
@@ -534,14 +545,18 @@ def apply_release(
     return result
 
 
-def _release(args: argparse.Namespace) -> tuple[dict[str, Any], Path]:
-    release = build_material_release(Path(args.database), code_map_path=Path(args.code_map))
-    release_dir = write_material_release(
+def _release(args: argparse.Namespace) -> dict[str, Any]:
+    """Build a release using read-only catalog access."""
+
+    return build_material_release(Path(args.database), code_map_path=Path(args.code_map))
+
+
+def _freeze_release(args: argparse.Namespace, release: Mapping[str, Any]) -> Path:
+    return write_material_release(
         release,
         release_root=Path(args.release_root),
         code_map_path=Path(args.code_map),
     )
-    return release, release_dir
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -554,28 +569,50 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--journal", type=Path, default=DEFAULT_JOURNAL_PATH)
     parser.add_argument("--request-id")
     parser.add_argument("--confirm-release-hash")
+    parser.add_argument("--employee-code")
+    parser.add_argument("--employee-name")
+    parser.add_argument("--employee-user")
     return parser
+
+
+def _employee_from_args(args: argparse.Namespace) -> dict[str, str]:
+    employee = {
+        "employee_code": str(args.employee_code or "").strip(),
+        "employee_name": str(args.employee_name or "").strip(),
+        "user_email": str(args.employee_user or "").strip(),
+    }
+    if not all(employee.values()):
+        raise SyncError("plan/apply requires an authenticated employee identity")
+    return employee
 
 
 def main() -> int:
     args = build_parser().parse_args()
     try:
+        employee = _employee_from_args(args) if args.action in {"plan", "apply"} else {}
         client = _load_client(Path(args.secret_file))
         if args.action == "initialize":
             initialized = initialize_target(client)
             print(json.dumps({"site": SITE_HOST, "initialized": initialized}, ensure_ascii=False, indent=2))
             return 0
 
-        release, release_dir = _release(args)
+        release = _release(args)
         if args.action == "plan":
+            request_id = str(args.request_id or uuid.uuid4())
+            try:
+                uuid.UUID(request_id)
+            except ValueError as exc:
+                raise SyncError("request_id must be a UUID") from exc
             plan = target_plan(client, release)
             print(
                 json.dumps(
                     {
                         "site": SITE_HOST,
-                        "release_dir": str(release_dir),
+                        "request_id": request_id,
                         "release_hash": release["release_hash"],
+                        "catalog_revision": release["catalog_revision"],
                         "counts": release["counts"],
+                        "employee": employee,
                         "plan": plan,
                     },
                     ensure_ascii=False,
@@ -601,12 +638,14 @@ def main() -> int:
             raise SyncError(
                 "apply requires --confirm-release-hash matching the frozen release; run plan first"
             )
+        _freeze_release(args, release)
         initialize_target(client)
         result = apply_release(
             client,
             release,
             request_id=args.request_id,
             journal_path=Path(args.journal),
+            employee=employee,
         )
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
